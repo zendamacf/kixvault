@@ -15,6 +15,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@hono/zod-validator": "^0.7.0",
+        "@kicksdb/sdk": "^1.0.13",
         "@kixvault/db": "workspace:*",
         "@kixvault/shared": "workspace:*",
         "@lucia-auth/adapter-drizzle": "^1.1.0",
@@ -242,6 +243,8 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
+
+    "@kicksdb/sdk": ["@kicksdb/sdk@1.0.13", "", {}, "sha512-+yKwz3+aRC8FxR2jcCimt8ESRnIb0nnSajz81QqgVllY5Eesm+3RDPVM9r5ZIyM/mhH6eDzY74T9dQqQpD6Igw=="],
 
     "@kixvault/api": ["@kixvault/api@workspace:apps/api"],
 
