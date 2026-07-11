@@ -4,7 +4,6 @@
  - CI/CD unit/integration tests.
  - CI/CD deployment smoke tests of apps running.
  - CI/CD build & deploy
- - tsvector (or similar) search for full text.
  - Value snapshots
  - OAuth?
  - File storage for API images?

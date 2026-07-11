@@ -1,5 +1,6 @@
-import type { sneakers as sneakersTable } from "@kixvault/db";
+import { sneakers as sneakersTable } from "@kixvault/db";
 import type { UpdateSneakerInput } from "@kixvault/shared";
+import { or, type SQL, sql } from "drizzle-orm";
 
 type SneakerRow = typeof sneakersTable.$inferSelect;
 
@@ -89,6 +90,19 @@ export function buildSneakerUpdate(
       : {}),
     ...(!isCatalogLinked && input.catalogId !== undefined ? { catalogId: input.catalogId } : {}),
   };
+}
+
+export function buildSneakerSearchCondition(search: string): SQL | undefined {
+  const trimmed = search.trim();
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  return or(
+    sql`${sneakersTable.searchVector} @@ websearch_to_tsquery('english', ${trimmed})`,
+    sql`position(lower(${trimmed}) in lower(coalesce(${sneakersTable.sku}, ''))) > 0`,
+  );
 }
 
 export function parseSneakerId(id: string): string | null {

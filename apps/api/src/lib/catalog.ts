@@ -1,7 +1,7 @@
 import {
+  type GoatProduct,
   getGoatProducts,
   getStockxProducts,
-  type GoatProduct,
   type StockXProduct,
 } from "@kicksdb/sdk";
 import type { CatalogMarketplace, CatalogSearchResult } from "@kixvault/shared";

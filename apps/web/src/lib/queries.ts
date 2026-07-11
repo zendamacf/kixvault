@@ -52,7 +52,7 @@ export const statsQueryOptions = queryOptions({
 });
 
 export function sneakersQueryOptions(filters: {
-  brand?: string;
+  search?: string;
   condition?: string;
   sort?: string;
   order?: string;
@@ -62,7 +62,7 @@ export function sneakersQueryOptions(filters: {
     queryFn: async () => {
       const response = await api.api.sneakers.$get({
         query: {
-          brand: filters.brand || undefined,
+          search: filters.search || undefined,
           condition: filters.condition as
             | "deadstock"
             | "lightly_worn"

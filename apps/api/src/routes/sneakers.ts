@@ -5,10 +5,11 @@ import {
   listSneakersQuerySchema,
   updateSneakerSchema,
 } from "@kixvault/shared";
-import { and, asc, desc, eq, ilike } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../lib/db.js";
 import {
+  buildSneakerSearchCondition,
   buildSneakerUpdate,
   formatSneaker,
   getCatalogLinkedModelFieldViolations,
@@ -27,8 +28,10 @@ export const sneakerRoutes = new Hono<ApiEnv>()
 
     const filters = [eq(sneakers.userId, user?.id ?? "")];
 
-    if (query.brand) {
-      filters.push(ilike(sneakers.brand, `%${query.brand}%`));
+    const searchCondition = query.search ? buildSneakerSearchCondition(query.search) : undefined;
+
+    if (searchCondition) {
+      filters.push(searchCondition);
     }
 
     if (query.condition) {

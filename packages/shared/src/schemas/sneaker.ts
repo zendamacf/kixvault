@@ -31,7 +31,7 @@ export const createSneakerSchema = z.object({
 export const updateSneakerSchema = createSneakerSchema.partial();
 
 export const listSneakersQuerySchema = z.object({
-  brand: z.string().trim().optional(),
+  search: z.string().trim().min(1).max(100).optional(),
   condition: z.enum(sneakerConditions).optional(),
   sort: z.enum(["created_at", "purchase_date", "purchase_price", "brand"]).default("created_at"),
   order: z.enum(["asc", "desc"]).default("desc"),

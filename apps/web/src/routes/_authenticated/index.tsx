@@ -21,24 +21,24 @@ export const Route = createFileRoute("/_authenticated/")({
 });
 
 function CollectionPage() {
-  const [brand, setBrand] = useState("");
+  const [search, setSearch] = useState("");
   const [condition, setCondition] = useState("");
   const [sort, setSort] = useState("created_at");
   const [order, setOrder] = useState("desc");
 
-  const debouncedBrand = useDebouncedValue(brand.trim(), DEBOUNCE_DELAY);
+  const debouncedSearch = useDebouncedValue(search.trim(), DEBOUNCE_DELAY);
 
   const filters = useMemo(
     () => ({
-      brand: debouncedBrand || undefined,
+      search: debouncedSearch || undefined,
       condition: condition || undefined,
       sort,
       order,
     }),
-    [debouncedBrand, condition, sort, order],
+    [debouncedSearch, condition, sort, order],
   );
 
-  const hasActiveFilters = Boolean(debouncedBrand || condition);
+  const hasActiveFilters = Boolean(debouncedSearch || condition);
 
   const {
     data: sneakersData,
@@ -52,7 +52,7 @@ function CollectionPage() {
   const totalCount = statsData?.stats.count ?? 0;
 
   function clearFilters() {
-    setBrand("");
+    setSearch("");
     setCondition("");
     setSort("created_at");
     setOrder("desc");
@@ -95,12 +95,12 @@ function CollectionPage() {
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="space-y-2">
-              <Label htmlFor="brand-filter">Brand</Label>
+              <Label htmlFor="search-filter">Search</Label>
               <Input
-                id="brand-filter"
-                placeholder="Nike"
-                value={brand}
-                onChange={(event) => setBrand(event.target.value)}
+                id="search-filter"
+                placeholder="Search brand, model, colorway, SKU, or notes"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
               />
             </div>
             <div className="space-y-2">
