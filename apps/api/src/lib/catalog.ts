@@ -17,6 +17,10 @@ type CacheEntry = {
 
 const cache = new Map<string, CacheEntry>();
 
+export function resetCatalogCacheForTests(): void {
+  cache.clear();
+}
+
 export class CatalogSearchError extends Error {
   constructor(
     message: string,

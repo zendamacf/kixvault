@@ -1,0 +1,77 @@
+import { describe, expect, mock, test } from 'bun:test';
+import { CatalogSearchError } from '../lib/catalog';
+
+const mockSearchCatalog = mock(async () => [
+  {
+    catalogSource: 'kicksdb:stockx' as const,
+    catalogId: 'air-jordan-1',
+    title: 'Air Jordan 1',
+    brand: 'Jordan',
+    model: 'Air Jordan 1',
+    colorway: 'Chicago',
+    sku: 'DZ5485-612',
+    imageUrl: null,
+  },
+]);
+
+mock.module('../lib/catalog', () => ({
+  searchCatalog: mockSearchCatalog,
+  CatalogSearchError,
+}));
+
+mock.module('../lib/env', () => ({
+  env: {
+    kicksdbApiKey: 'KICKS-test-key',
+    databaseUrl: 'postgresql://example.com/db',
+    port: 3000,
+    isProduction: false,
+  },
+}));
+
+mock.module('../middleware/session', () => ({
+  sessionMiddleware: async (
+    c: { set: (key: 'user' | 'session', value: unknown) => void },
+    next: () => Promise<void>,
+  ) => {
+    c.set('user', { id: 'user-1', email: 'user@example.com' });
+    c.set('session', { id: 'session-1', fresh: false });
+    await next();
+  },
+  requireAuth: async (_c: unknown, next: () => Promise<void>) => next(),
+}));
+
+const { catalogRoutes } = await import('./catalog');
+
+describe('catalog routes', () => {
+  test('returns search results when KicksDB is configured', async () => {
+    const response = await catalogRoutes.request('/search?q=jordan&limit=10&marketplace=stockx');
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      results: [
+        {
+          catalogSource: 'kicksdb:stockx',
+          catalogId: 'air-jordan-1',
+          title: 'Air Jordan 1',
+          brand: 'Jordan',
+          model: 'Air Jordan 1',
+          colorway: 'Chicago',
+          sku: 'DZ5485-612',
+          imageUrl: null,
+        },
+      ],
+    });
+    expect(mockSearchCatalog).toHaveBeenCalledWith('jordan', 10, 'stockx');
+  });
+
+  test('maps catalog search failures to API errors', async () => {
+    mockSearchCatalog.mockImplementationOnce(async () => {
+      throw new CatalogSearchError('KicksDB request failed', 502);
+    });
+
+    const response = await catalogRoutes.request('/search?q=jordan&limit=10&marketplace=stockx');
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toEqual({ error: 'Catalog search failed' });
+  });
+});
