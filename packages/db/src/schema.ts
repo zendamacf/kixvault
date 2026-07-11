@@ -34,6 +34,10 @@ export const sneakers = pgTable("sneakers", {
   purchasePrice: numeric("purchase_price", { precision: 10, scale: 2 }),
   purchaseDate: date("purchase_date", { mode: "date" }),
   notes: text("notes"),
+  sku: text("sku"),
+  imageUrl: text("image_url"),
+  catalogSource: text("catalog_source"),
+  catalogId: text("catalog_id"),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
     .notNull()

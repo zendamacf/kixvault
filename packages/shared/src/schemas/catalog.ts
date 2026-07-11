@@ -1,12 +1,14 @@
 import { z } from "zod";
 
+export const catalogSources = ["kicksdb:stockx"] as const;
+
 export const catalogSearchQuerySchema = z.object({
   q: z.string().trim().min(2).max(100),
   limit: z.coerce.number().int().min(1).max(20).default(10),
 });
 
 export const catalogSearchResultSchema = z.object({
-  catalogSource: z.literal("kicksdb:stockx"),
+  catalogSource: z.literal(catalogSources[0]),
   catalogId: z.string(),
   title: z.string(),
   brand: z.string(),
@@ -18,3 +20,4 @@ export const catalogSearchResultSchema = z.object({
 
 export type CatalogSearchQuery = z.infer<typeof catalogSearchQuerySchema>;
 export type CatalogSearchResult = z.infer<typeof catalogSearchResultSchema>;
+export type CatalogSource = (typeof catalogSources)[number];

@@ -1,5 +1,13 @@
 import { z } from "zod";
 import { sneakerConditions } from "../types.js";
+import { catalogSources } from "./catalog.js";
+
+const sneakerCatalogFields = {
+  sku: z.string().trim().max(50).optional().nullable(),
+  imageUrl: z.string().trim().url().max(2000).optional().nullable(),
+  catalogSource: z.enum(catalogSources).optional().nullable(),
+  catalogId: z.string().trim().max(200).optional().nullable(),
+} as const;
 
 export const createSneakerSchema = z.object({
   brand: z.string().trim().min(1).max(100),
@@ -14,6 +22,7 @@ export const createSneakerSchema = z.object({
     .optional()
     .nullable(),
   notes: z.string().trim().max(2000).optional().nullable(),
+  ...sneakerCatalogFields,
 });
 
 export const updateSneakerSchema = createSneakerSchema.partial();

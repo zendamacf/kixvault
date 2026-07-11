@@ -12,6 +12,10 @@ export type Sneaker = {
   purchasePrice: number | null;
   purchaseDate: string | null;
   notes: string | null;
+  sku: string | null;
+  imageUrl: string | null;
+  catalogSource: string | null;
+  catalogId: string | null;
   createdAt: string;
   updatedAt: string;
 };

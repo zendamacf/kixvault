@@ -81,6 +81,10 @@ export const sneakerRoutes = new Hono<ApiEnv>()
         purchasePrice: input.purchasePrice?.toString() ?? null,
         purchaseDate: parsePurchaseDate(input.purchaseDate),
         notes: input.notes ?? null,
+        sku: input.sku ?? null,
+        imageUrl: input.imageUrl ?? null,
+        catalogSource: input.catalogSource ?? null,
+        catalogId: input.catalogId ?? null,
       })
       .returning();
 
@@ -119,6 +123,10 @@ export const sneakerRoutes = new Hono<ApiEnv>()
           ? { purchaseDate: parsePurchaseDate(input.purchaseDate) }
           : {}),
         ...(input.notes !== undefined ? { notes: input.notes } : {}),
+        ...(input.sku !== undefined ? { sku: input.sku } : {}),
+        ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
+        ...(input.catalogSource !== undefined ? { catalogSource: input.catalogSource } : {}),
+        ...(input.catalogId !== undefined ? { catalogId: input.catalogId } : {}),
       })
       .where(eq(sneakers.id, id))
       .returning();

@@ -35,6 +35,10 @@ export function formatSneaker(row: SneakerRow) {
     purchasePrice: row.purchasePrice ? Number(row.purchasePrice) : null,
     purchaseDate: formatPurchaseDate(row.purchaseDate),
     notes: row.notes,
+    sku: row.sku,
+    imageUrl: row.imageUrl,
+    catalogSource: row.catalogSource,
+    catalogId: row.catalogId,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
