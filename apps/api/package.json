@@ -7,7 +7,7 @@
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
     "build": "tsc --build",
-    "typecheck": "tsc --build"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@kixvault/db": "workspace:*",
