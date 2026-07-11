@@ -5,10 +5,17 @@ import {
   listSneakersQuerySchema,
   updateSneakerSchema,
 } from "@kixvault/shared";
-import { and, asc, desc, eq, ilike } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../lib/db.js";
-import { formatSneaker, parsePurchaseDate, parseSneakerId } from "../lib/sneakers.js";
+import {
+  buildSneakerSearchCondition,
+  buildSneakerUpdate,
+  formatSneaker,
+  getCatalogLinkedModelFieldViolations,
+  parsePurchaseDate,
+  parseSneakerId,
+} from "../lib/sneakers.js";
 import { requireAuth, sessionMiddleware } from "../middleware/session.js";
 import type { ApiEnv } from "../types.js";
 
@@ -21,8 +28,10 @@ export const sneakerRoutes = new Hono<ApiEnv>()
 
     const filters = [eq(sneakers.userId, user?.id ?? "")];
 
-    if (query.brand) {
-      filters.push(ilike(sneakers.brand, `%${query.brand}%`));
+    const searchCondition = query.search ? buildSneakerSearchCondition(query.search) : undefined;
+
+    if (searchCondition) {
+      filters.push(searchCondition);
     }
 
     if (query.condition) {
@@ -81,6 +90,10 @@ export const sneakerRoutes = new Hono<ApiEnv>()
         purchasePrice: input.purchasePrice?.toString() ?? null,
         purchaseDate: parsePurchaseDate(input.purchaseDate),
         notes: input.notes ?? null,
+        sku: input.sku ?? null,
+        imageUrl: input.imageUrl ?? null,
+        catalogSource: input.catalogSource ?? null,
+        catalogId: input.catalogId ?? null,
       })
       .returning();
 
@@ -96,7 +109,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
     }
 
     const [existing] = await db
-      .select({ id: sneakers.id })
+      .select()
       .from(sneakers)
       .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? "")));
 
@@ -104,24 +117,24 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       return c.json({ error: "Sneaker not found" }, 404);
     }
 
-    const [row] = await db
-      .update(sneakers)
-      .set({
-        ...(input.brand !== undefined ? { brand: input.brand } : {}),
-        ...(input.model !== undefined ? { model: input.model } : {}),
-        ...(input.colorway !== undefined ? { colorway: input.colorway } : {}),
-        ...(input.size !== undefined ? { size: input.size.toString() } : {}),
-        ...(input.condition !== undefined ? { condition: input.condition } : {}),
-        ...(input.purchasePrice !== undefined
-          ? { purchasePrice: input.purchasePrice?.toString() ?? null }
-          : {}),
-        ...(input.purchaseDate !== undefined
-          ? { purchaseDate: parsePurchaseDate(input.purchaseDate) }
-          : {}),
-        ...(input.notes !== undefined ? { notes: input.notes } : {}),
-      })
-      .where(eq(sneakers.id, id))
-      .returning();
+    const violations = getCatalogLinkedModelFieldViolations(existing, input);
+
+    if (violations.length > 0) {
+      return c.json(
+        {
+          error: `Cannot update ${violations.join(", ")} for catalog-linked sneakers`,
+        },
+        400,
+      );
+    }
+
+    const updates = buildSneakerUpdate(existing, input);
+
+    if (Object.keys(updates).length === 0) {
+      return c.json({ sneaker: formatSneaker(existing) });
+    }
+
+    const [row] = await db.update(sneakers).set(updates).where(eq(sneakers.id, id)).returning();
 
     return c.json({ sneaker: formatSneaker(row) });
   })

@@ -83,6 +83,10 @@ function EditSneakerPage() {
               purchasePrice: sneaker.purchasePrice,
               purchaseDate: sneaker.purchaseDate ?? "",
               notes: sneaker.notes,
+              sku: sneaker.sku,
+              imageUrl: sneaker.imageUrl,
+              catalogSource: sneaker.catalogSource as CreateSneakerInput["catalogSource"],
+              catalogId: sneaker.catalogId,
             }}
             onSubmit={async (values) => {
               await updateMutation.mutateAsync(values);

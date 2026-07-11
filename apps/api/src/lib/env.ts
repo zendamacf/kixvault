@@ -6,6 +6,7 @@ if (!databaseUrl) {
 
 export const env = {
   databaseUrl,
+  kicksdbApiKey: process.env.KICKSDB_API_KEY,
   port: Number(process.env.PORT) || 3000,
   isProduction: process.env.NODE_ENV === "production",
 } as const;
