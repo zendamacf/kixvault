@@ -1,15 +1,15 @@
-import { sneakers } from "@kixvault/db";
-import { eq, sql } from "drizzle-orm";
-import { Hono } from "hono";
-import { db } from "../lib/db.js";
-import { requireAuth, sessionMiddleware } from "../middleware/session.js";
-import type { ApiEnv } from "../types.js";
+import { sneakers } from '@kixvault/db';
+import { eq, sql } from 'drizzle-orm';
+import { Hono } from 'hono';
+import { db } from '../lib/db';
+import { requireAuth, sessionMiddleware } from '../middleware/session';
+import type { ApiEnv } from '../types';
 
 export const statsRoutes = new Hono<ApiEnv>()
   .use(sessionMiddleware)
   .use(requireAuth)
-  .get("/", async (c) => {
-    const user = c.get("user");
+  .get('/', async (c) => {
+    const user = c.get('user');
 
     const [result] = await db
       .select({
@@ -17,7 +17,7 @@ export const statsRoutes = new Hono<ApiEnv>()
         totalSpend: sql<string | null>`sum(${sneakers.purchasePrice})`,
       })
       .from(sneakers)
-      .where(eq(sneakers.userId, user?.id ?? ""));
+      .where(eq(sneakers.userId, user?.id ?? ''));
 
     const count = result?.count ?? 0;
     const totalSpend = result?.totalSpend ? Number(result.totalSpend) : 0;

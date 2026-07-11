@@ -1,19 +1,19 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   type CatalogSearchResult,
   type CreateSneakerInput,
   createSneakerSchema,
   sneakerConditions,
-} from "@kixvault/shared";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { CatalogSearchPicker } from "@/components/sneakers/catalog-search-picker";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { formatCondition } from "@/lib/utils";
+} from '@kixvault/shared';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { formatCondition } from '@/lib/utils';
 
 type SneakerFormProps = {
   defaultValues?: Partial<CreateSneakerInput>;
@@ -45,14 +45,14 @@ export function SneakerForm({
   } = useForm<CreateSneakerInput>({
     resolver: zodResolver(createSneakerSchema),
     defaultValues: {
-      brand: "",
-      model: "",
-      colorway: "",
+      brand: '',
+      model: '',
+      colorway: '',
       size: undefined,
-      condition: "deadstock",
+      condition: 'deadstock',
       purchasePrice: undefined,
-      purchaseDate: "",
-      notes: "",
+      purchaseDate: '',
+      notes: '',
       sku: null,
       imageUrl: null,
       catalogSource: null,
@@ -68,7 +68,7 @@ export function SneakerForm({
       ...getValues(),
       brand: result.brand,
       model: result.model,
-      colorway: result.colorway ?? "",
+      colorway: result.colorway ?? '',
       sku: result.sku,
       imageUrl: result.imageUrl,
       catalogSource: result.catalogSource,
@@ -140,8 +140,8 @@ export function SneakerForm({
                 id="brand"
                 placeholder="Nike"
                 readOnly={lockModelDetails}
-                className={lockModelDetails ? "cursor-default bg-muted" : undefined}
-                {...register("brand")}
+                className={lockModelDetails ? 'cursor-default bg-muted' : undefined}
+                {...register('brand')}
               />
               {errors.brand ? (
                 <p className="text-sm text-destructive">{errors.brand.message}</p>
@@ -154,8 +154,8 @@ export function SneakerForm({
                 id="model"
                 placeholder="Air Jordan 1"
                 readOnly={lockModelDetails}
-                className={lockModelDetails ? "cursor-default bg-muted" : undefined}
-                {...register("model")}
+                className={lockModelDetails ? 'cursor-default bg-muted' : undefined}
+                {...register('model')}
               />
               {errors.model ? (
                 <p className="text-sm text-destructive">{errors.model.message}</p>
@@ -168,14 +168,14 @@ export function SneakerForm({
                 id="colorway"
                 placeholder="Chicago"
                 readOnly={lockModelDetails}
-                className={lockModelDetails ? "cursor-default bg-muted" : undefined}
-                {...register("colorway")}
+                className={lockModelDetails ? 'cursor-default bg-muted' : undefined}
+                {...register('colorway')}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="size">Size</Label>
-              <Input id="size" type="number" step="0.5" placeholder="10" {...register("size")} />
+              <Input id="size" type="number" step="0.5" placeholder="10" {...register('size')} />
               {errors.size ? (
                 <p className="text-sm text-destructive">{errors.size.message}</p>
               ) : null}
@@ -183,7 +183,7 @@ export function SneakerForm({
 
             <div className="space-y-2">
               <Label htmlFor="condition">Condition</Label>
-              <Select id="condition" {...register("condition")}>
+              <Select id="condition" {...register('condition')}>
                 {sneakerConditions.map((condition) => (
                   <option key={condition} value={condition}>
                     {formatCondition(condition)}
@@ -199,13 +199,13 @@ export function SneakerForm({
                 type="number"
                 step="1"
                 placeholder="180"
-                {...register("purchasePrice")}
+                {...register('purchasePrice')}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="purchaseDate">Purchase date (optional)</Label>
-              <Input id="purchaseDate" type="date" {...register("purchaseDate")} />
+              <Input id="purchaseDate" type="date" {...register('purchaseDate')} />
               {errors.purchaseDate ? (
                 <p className="text-sm text-destructive">{errors.purchaseDate.message}</p>
               ) : null}
@@ -217,12 +217,12 @@ export function SneakerForm({
             <Textarea
               id="notes"
               placeholder="Where you bought them, lace swap, etc."
-              {...register("notes")}
+              {...register('notes')}
             />
           </div>
 
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : submitLabel}
+            {isSubmitting ? 'Saving...' : submitLabel}
           </Button>
         </>
       ) : null}

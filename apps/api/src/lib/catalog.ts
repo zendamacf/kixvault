@@ -3,12 +3,12 @@ import {
   getGoatProducts,
   getStockxProducts,
   type StockXProduct,
-} from "@kicksdb/sdk";
-import type { CatalogMarketplace, CatalogSearchResult } from "@kixvault/shared";
-import { ensureKicksdbClient } from "./kicksdb.js";
+} from '@kicksdb/sdk';
+import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
+import { ensureKicksdbClient } from './kicksdb';
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-const MARKET = "US"; // Other markets require paid plan
+const MARKET = 'US'; // Other markets require paid plan
 
 type CacheEntry = {
   results: CatalogSearchResult[];
@@ -23,13 +23,13 @@ export class CatalogSearchError extends Error {
     readonly status: number,
   ) {
     super(message);
-    this.name = "CatalogSearchError";
+    this.name = 'CatalogSearchError';
   }
 }
 
 export function normalizeStockxProduct(product: StockXProduct): CatalogSearchResult {
   return {
-    catalogSource: "kicksdb:stockx",
+    catalogSource: 'kicksdb:stockx',
     catalogId: product.slug,
     title: product.title,
     brand: product.brand,
@@ -42,7 +42,7 @@ export function normalizeStockxProduct(product: StockXProduct): CatalogSearchRes
 
 export function normalizeGoatProduct(product: GoatProduct): CatalogSearchResult {
   return {
-    catalogSource: "kicksdb:goat",
+    catalogSource: 'kicksdb:goat',
     catalogId: product.slug,
     title: product.name,
     brand: product.brand,
@@ -56,7 +56,7 @@ export function normalizeGoatProduct(product: GoatProduct): CatalogSearchResult 
 export async function searchCatalog(
   searchQuery: string,
   limit: number,
-  marketplace: CatalogMarketplace = "stockx",
+  marketplace: CatalogMarketplace = 'stockx',
 ): Promise<CatalogSearchResult[]> {
   const query = searchQuery.trim();
   const cacheKey = `${marketplace}:${query.toLowerCase()}:${limit}`;
@@ -69,7 +69,7 @@ export async function searchCatalog(
   ensureKicksdbClient();
 
   const results =
-    marketplace === "goat"
+    marketplace === 'goat'
       ? await searchGoatCatalog(query, limit)
       : await searchStockxCatalog(query, limit);
 
@@ -85,14 +85,14 @@ async function searchStockxCatalog(query: string, limit: number): Promise<Catalo
   const { data, error, response } = await getStockxProducts({
     query: {
       query,
-      filters: "product_type=sneakers",
+      filters: 'product_type=sneakers',
       limit: BigInt(limit),
       market: MARKET,
     },
   });
 
   if (error) {
-    throw new CatalogSearchError("KicksDB request failed", response.status);
+    throw new CatalogSearchError('KicksDB request failed', response.status);
   }
 
   return (data?.data ?? []).map(normalizeStockxProduct);
@@ -102,14 +102,14 @@ async function searchGoatCatalog(query: string, limit: number): Promise<CatalogS
   const { data, error, response } = await getGoatProducts({
     query: {
       query,
-      filters: "product_type=sneakers",
+      filters: 'product_type=sneakers',
       limit: BigInt(limit),
       market: MARKET,
     },
   });
 
   if (error) {
-    throw new CatalogSearchError("KicksDB request failed", response.status);
+    throw new CatalogSearchError('KicksDB request failed', response.status);
   }
 
   return (data?.data ?? []).map(normalizeGoatProduct);

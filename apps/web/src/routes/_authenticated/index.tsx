@@ -1,30 +1,30 @@
-import { sneakerConditions } from "@kixvault/shared";
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { EmptyState } from "@/components/collection/empty-state";
-import { SneakerGridSkeleton } from "@/components/collection/sneaker-grid-skeleton";
-import { StatsCards } from "@/components/collection/stats-cards";
-import { SneakerCard } from "@/components/sneakers/sneaker-card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { useDebouncedValue } from "@/lib/hooks";
-import { type Sneaker, sneakersQueryOptions, statsQueryOptions } from "@/lib/queries";
-import { formatCondition } from "@/lib/utils";
+import { sneakerConditions } from '@kixvault/shared';
+import { useQuery } from '@tanstack/react-query';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { useMemo, useState } from 'react';
+import { EmptyState } from '@/components/collection/empty-state';
+import { SneakerGridSkeleton } from '@/components/collection/sneaker-grid-skeleton';
+import { StatsCards } from '@/components/collection/stats-cards';
+import { SneakerCard } from '@/components/sneakers/sneaker-card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
+import { useDebouncedValue } from '@/lib/hooks';
+import { type Sneaker, sneakersQueryOptions, statsQueryOptions } from '@/lib/queries';
+import { formatCondition } from '@/lib/utils';
 
 const DEBOUNCE_DELAY = 300;
 
-export const Route = createFileRoute("/_authenticated/")({
+export const Route = createFileRoute('/_authenticated/')({
   component: CollectionPage,
 });
 
 function CollectionPage() {
-  const [search, setSearch] = useState("");
-  const [condition, setCondition] = useState("");
-  const [sort, setSort] = useState("created_at");
-  const [order, setOrder] = useState("desc");
+  const [search, setSearch] = useState('');
+  const [condition, setCondition] = useState('');
+  const [sort, setSort] = useState('created_at');
+  const [order, setOrder] = useState('desc');
 
   const debouncedSearch = useDebouncedValue(search.trim(), DEBOUNCE_DELAY);
 
@@ -52,10 +52,10 @@ function CollectionPage() {
   const totalCount = statsData?.stats.count ?? 0;
 
   function clearFilters() {
-    setSearch("");
-    setCondition("");
-    setSort("created_at");
-    setOrder("desc");
+    setSearch('');
+    setCondition('');
+    setSort('created_at');
+    setOrder('desc');
   }
 
   return (
@@ -148,8 +148,8 @@ function CollectionPage() {
         <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>
             {isLoading || isFetching
-              ? "Updating results..."
-              : `${sneakers.length} ${sneakers.length === 1 ? "pair" : "pairs"} shown`}
+              ? 'Updating results...'
+              : `${sneakers.length} ${sneakers.length === 1 ? 'pair' : 'pairs'} shown`}
           </p>
         </div>
 

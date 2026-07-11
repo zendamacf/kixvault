@@ -1,4 +1,4 @@
-import type { Session, User } from "lucia";
+import type { Session, User } from 'lucia';
 
 export type ApiEnv = {
   Variables: {

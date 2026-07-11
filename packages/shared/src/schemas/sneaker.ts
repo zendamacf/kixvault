@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { sneakerConditions } from "../types.js";
-import { catalogSources } from "./catalog.js";
+import { z } from 'zod';
+import { sneakerConditions } from '../types';
+import { catalogSources } from './catalog';
 
 const sneakerCatalogFields = {
   sku: z.string().trim().max(50).optional().nullable(),
@@ -22,7 +22,7 @@ export const createSneakerSchema = z.object({
     .optional()
     .nullable()
     .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), {
-      message: "Expected YYYY-MM-DD",
+      message: 'Expected YYYY-MM-DD',
     }),
   notes: z.string().trim().max(2000).optional().nullable(),
   ...sneakerCatalogFields,
@@ -33,8 +33,8 @@ export const updateSneakerSchema = createSneakerSchema.partial();
 export const listSneakersQuerySchema = z.object({
   search: z.string().trim().min(1).max(100).optional(),
   condition: z.enum(sneakerConditions).optional(),
-  sort: z.enum(["created_at", "purchase_date", "purchase_price", "brand"]).default("created_at"),
-  order: z.enum(["asc", "desc"]).default("desc"),
+  sort: z.enum(['created_at', 'purchase_date', 'purchase_price', 'brand']).default('created_at'),
+  order: z.enum(['asc', 'desc']).default('desc'),
 });
 
 export type CreateSneakerInput = z.infer<typeof createSneakerSchema>;

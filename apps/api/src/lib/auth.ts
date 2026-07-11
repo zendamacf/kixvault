@@ -1,17 +1,17 @@
-import { sessions, users } from "@kixvault/db";
-import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
-import { Lucia, TimeSpan } from "lucia";
-import { db } from "./db.js";
-import { env } from "./env.js";
+import { sessions, users } from '@kixvault/db';
+import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
+import { Lucia, TimeSpan } from 'lucia';
+import { db } from './db';
+import { env } from './env';
 
 const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users);
 
 export const lucia = new Lucia(adapter, {
-  sessionExpiresIn: new TimeSpan(30, "d"),
+  sessionExpiresIn: new TimeSpan(30, 'd'),
   sessionCookie: {
     attributes: {
       secure: env.isProduction,
-      sameSite: "lax",
+      sameSite: 'lax',
     },
   },
   getUserAttributes: (attributes) => ({
@@ -19,7 +19,7 @@ export const lucia = new Lucia(adapter, {
   }),
 });
 
-declare module "lucia" {
+declare module 'lucia' {
   interface Register {
     Lucia: typeof lucia;
     DatabaseUserAttributes: {

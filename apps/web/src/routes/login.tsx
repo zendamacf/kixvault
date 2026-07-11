@@ -1,23 +1,23 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, loginSearchSchema } from "@kixvault/shared";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { api, parseApiError } from "@/lib/api";
-import { sessionQueryOptions } from "@/lib/queries";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, loginSearchSchema } from '@kixvault/shared';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { api, parseApiError } from '@/lib/api';
+import { sessionQueryOptions } from '@/lib/queries';
 
-export const Route = createFileRoute("/login")({
+export const Route = createFileRoute('/login')({
   validateSearch: loginSearchSchema,
   beforeLoad: async ({ context, search }) => {
     const session = await context.queryClient.ensureQueryData(sessionQueryOptions);
 
     if (session.user) {
-      throw redirect({ to: search.redirect || "/" });
+      throw redirect({ to: search.redirect || '/' });
     }
   },
   component: LoginPage,
@@ -42,14 +42,14 @@ function LoginPage() {
       const response = await api.api.auth.login.$post({ json: values });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, "Failed to log in"));
+        throw new Error(await parseApiError(response, 'Failed to log in'));
       }
 
       return response.json();
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["auth"] });
-      await navigate({ to: redirectTo || "/" });
+      await queryClient.invalidateQueries({ queryKey: ['auth'] });
+      await navigate({ to: redirectTo || '/' });
     },
     onError: (error) => {
       setFormError(error.message);
@@ -73,7 +73,7 @@ function LoginPage() {
           >
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" autoComplete="email" {...register("email")} />
+              <Input id="email" type="email" autoComplete="email" {...register('email')} />
               {errors.email ? (
                 <p className="text-sm text-destructive">{errors.email.message}</p>
               ) : null}
@@ -85,7 +85,7 @@ function LoginPage() {
                 id="password"
                 type="password"
                 autoComplete="current-password"
-                {...register("password")}
+                {...register('password')}
               />
               {errors.password ? (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
@@ -95,12 +95,12 @@ function LoginPage() {
             {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
 
             <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
-              {loginMutation.isPending ? "Signing in..." : "Sign in"}
+              {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            New here?{" "}
+            New here?{' '}
             <Link to="/register" className="font-medium text-primary hover:underline">
               Create an account
             </Link>

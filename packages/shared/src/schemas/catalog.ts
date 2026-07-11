@@ -1,12 +1,12 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const catalogMarketplaces = ["stockx", "goat"] as const;
-export const catalogSources = ["kicksdb:stockx", "kicksdb:goat"] as const;
+export const catalogMarketplaces = ['stockx', 'goat'] as const;
+export const catalogSources = ['kicksdb:stockx', 'kicksdb:goat'] as const;
 
 export const catalogSearchQuerySchema = z.object({
   q: z.string().trim().min(2).max(100),
   limit: z.coerce.number().int().min(1).max(20).default(10),
-  marketplace: z.enum(catalogMarketplaces).default("stockx"),
+  marketplace: z.enum(catalogMarketplaces).default('stockx'),
 });
 
 export const catalogSearchResultSchema = z.object({

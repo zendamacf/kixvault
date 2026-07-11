@@ -8,7 +8,6 @@
  - OAuth?
  - File storage for API images?
  - Update Biome rules:
-    - Single quotes
     - Extensionless imports
  - Colour palette.
  - Light/dark theme switcher.

@@ -1,12 +1,12 @@
-import type { CreateSneakerInput } from "@kixvault/shared";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { SneakerForm } from "@/components/sneakers/sneaker-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, parseApiError } from "@/lib/api";
+import type { CreateSneakerInput } from '@kixvault/shared';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+import { SneakerForm } from '@/components/sneakers/sneaker-form';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { api, parseApiError } from '@/lib/api';
 
-export const Route = createFileRoute("/_authenticated/sneakers/new")({
+export const Route = createFileRoute('/_authenticated/sneakers/new')({
   component: NewSneakerPage,
 });
 
@@ -20,15 +20,15 @@ function NewSneakerPage() {
       const response = await api.api.sneakers.$post({ json: values });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, "Failed to create sneaker"));
+        throw new Error(await parseApiError(response, 'Failed to create sneaker'));
       }
 
       return response.json();
     },
     onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: ["sneakers"] });
-      await queryClient.invalidateQueries({ queryKey: ["stats"] });
-      await navigate({ to: "/sneakers/$sneakerId", params: { sneakerId: data.sneaker.id } });
+      await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
+      await queryClient.invalidateQueries({ queryKey: ['stats'] });
+      await navigate({ to: '/sneakers/$sneakerId', params: { sneakerId: data.sneaker.id } });
     },
     onError: (error) => {
       setFormError(error.message);

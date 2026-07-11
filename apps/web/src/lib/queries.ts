@@ -1,5 +1,5 @@
-import { queryOptions } from "@tanstack/react-query";
-import { api } from "./api";
+import { queryOptions } from '@tanstack/react-query';
+import { api } from './api';
 
 export type Sneaker = {
   id: string;
@@ -26,12 +26,12 @@ export type AuthUser = {
 };
 
 export const sessionQueryOptions = queryOptions({
-  queryKey: ["auth", "me"],
+  queryKey: ['auth', 'me'],
   queryFn: async () => {
     const response = await api.api.auth.me.$get();
 
     if (!response.ok) {
-      throw new Error("Failed to load session");
+      throw new Error('Failed to load session');
     }
 
     return response.json();
@@ -39,12 +39,12 @@ export const sessionQueryOptions = queryOptions({
 });
 
 export const statsQueryOptions = queryOptions({
-  queryKey: ["stats"],
+  queryKey: ['stats'],
   queryFn: async () => {
     const response = await api.api.stats.$get();
 
     if (!response.ok) {
-      throw new Error("Failed to load stats");
+      throw new Error('Failed to load stats');
     }
 
     return response.json();
@@ -58,26 +58,26 @@ export function sneakersQueryOptions(filters: {
   order?: string;
 }) {
   return queryOptions({
-    queryKey: ["sneakers", filters],
+    queryKey: ['sneakers', filters],
     queryFn: async () => {
       const response = await api.api.sneakers.$get({
         query: {
           search: filters.search || undefined,
           condition: filters.condition as
-            | "deadstock"
-            | "lightly_worn"
-            | "worn"
-            | "beat"
+            | 'deadstock'
+            | 'lightly_worn'
+            | 'worn'
+            | 'beat'
             | undefined,
           sort:
-            (filters.sort as "created_at" | "purchase_date" | "purchase_price" | "brand") ??
-            "created_at",
-          order: (filters.order as "asc" | "desc") ?? "desc",
+            (filters.sort as 'created_at' | 'purchase_date' | 'purchase_price' | 'brand') ??
+            'created_at',
+          order: (filters.order as 'asc' | 'desc') ?? 'desc',
         },
       });
 
       if (!response.ok) {
-        throw new Error("Failed to load sneakers");
+        throw new Error('Failed to load sneakers');
       }
 
       return response.json();
@@ -87,14 +87,14 @@ export function sneakersQueryOptions(filters: {
 
 export function sneakerQueryOptions(id: string) {
   return queryOptions({
-    queryKey: ["sneakers", id],
+    queryKey: ['sneakers', id],
     queryFn: async () => {
-      const response = await api.api.sneakers[":id"].$get({
+      const response = await api.api.sneakers[':id'].$get({
         param: { id },
       });
 
       if (!response.ok) {
-        throw new Error("Failed to load sneaker");
+        throw new Error('Failed to load sneaker');
       }
 
       return response.json();

@@ -1,16 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { SneakerThumbnail } from "@/components/sneakers/sneaker-thumbnail";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { api, parseApiError } from "@/lib/api";
-import { sneakerQueryOptions } from "@/lib/queries";
-import { formatCondition, formatCurrency, formatDate } from "@/lib/utils";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { api, parseApiError } from '@/lib/api';
+import { sneakerQueryOptions } from '@/lib/queries';
+import { formatCondition, formatCurrency, formatDate } from '@/lib/utils';
 
-export const Route = createFileRoute("/_authenticated/sneakers/$sneakerId/")({
+export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
   component: SneakerDetailPage,
 });
 
@@ -23,18 +23,18 @@ function SneakerDetailPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.api.sneakers[":id"].$delete({
+      const response = await api.api.sneakers[':id'].$delete({
         param: { id: sneakerId },
       });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, "Failed to delete sneaker"));
+        throw new Error(await parseApiError(response, 'Failed to delete sneaker'));
       }
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["sneakers"] });
-      await queryClient.invalidateQueries({ queryKey: ["stats"] });
-      await navigate({ to: "/" });
+      await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
+      await queryClient.invalidateQueries({ queryKey: ['stats'] });
+      await navigate({ to: '/' });
     },
     onError: (mutationError) => {
       setActionError(mutationError.message);
@@ -70,7 +70,7 @@ function SneakerDetailPage() {
   if (error || !data?.sneaker) {
     return (
       <div className="mx-auto max-w-3xl">
-        <p className="text-sm text-destructive">{error?.message ?? "Sneaker not found"}</p>
+        <p className="text-sm text-destructive">{error?.message ?? 'Sneaker not found'}</p>
       </div>
     );
   }
@@ -95,7 +95,7 @@ function SneakerDetailPage() {
               />
               <div className="space-y-2">
                 <CardTitle className="text-2xl sm:text-3xl">{title}</CardTitle>
-                <p className="text-muted-foreground">{sneaker.colorway || "No colorway listed"}</p>
+                <p className="text-muted-foreground">{sneaker.colorway || 'No colorway listed'}</p>
                 {sneaker.sku ? (
                   <p className="text-sm text-muted-foreground">SKU {sneaker.sku}</p>
                 ) : null}
@@ -106,7 +106,7 @@ function SneakerDetailPage() {
               <Button
                 variant="outline"
                 className="w-full sm:w-auto"
-                onClick={() => navigate({ to: "/sneakers/$sneakerId/edit", params: { sneakerId } })}
+                onClick={() => navigate({ to: '/sneakers/$sneakerId/edit', params: { sneakerId } })}
               >
                 Edit
               </Button>
@@ -115,7 +115,7 @@ function SneakerDetailPage() {
                 className="w-full sm:w-auto"
                 disabled={deleteMutation.isPending}
                 onClick={() => {
-                  if (window.confirm("Delete this pair from your collection?")) {
+                  if (window.confirm('Delete this pair from your collection?')) {
                     setActionError(null);
                     deleteMutation.mutate();
                   }
@@ -132,7 +132,7 @@ function SneakerDetailPage() {
           <DetailItem label="Purchase date" value={formatDate(sneaker.purchaseDate)} />
           <DetailItem label="Added" value={formatDate(sneaker.createdAt)} />
           <div className="sm:col-span-2">
-            <DetailItem label="Notes" value={sneaker.notes || "—"} />
+            <DetailItem label="Notes" value={sneaker.notes || '—'} />
           </div>
         </CardContent>
       </Card>

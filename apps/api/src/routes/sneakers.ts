@@ -1,13 +1,13 @@
-import { zValidator } from "@hono/zod-validator";
-import { sneakers } from "@kixvault/db";
+import { zValidator } from '@hono/zod-validator';
+import { sneakers } from '@kixvault/db';
 import {
   createSneakerSchema,
   listSneakersQuerySchema,
   updateSneakerSchema,
-} from "@kixvault/shared";
-import { and, asc, desc, eq } from "drizzle-orm";
-import { Hono } from "hono";
-import { db } from "../lib/db.js";
+} from '@kixvault/shared';
+import { and, asc, desc, eq } from 'drizzle-orm';
+import { Hono } from 'hono';
+import { db } from '../lib/db';
 import {
   buildSneakerSearchCondition,
   buildSneakerUpdate,
@@ -15,18 +15,18 @@ import {
   getCatalogLinkedModelFieldViolations,
   parsePurchaseDate,
   parseSneakerId,
-} from "../lib/sneakers.js";
-import { requireAuth, sessionMiddleware } from "../middleware/session.js";
-import type { ApiEnv } from "../types.js";
+} from '../lib/sneakers';
+import { requireAuth, sessionMiddleware } from '../middleware/session';
+import type { ApiEnv } from '../types';
 
 export const sneakerRoutes = new Hono<ApiEnv>()
   .use(sessionMiddleware)
   .use(requireAuth)
-  .get("/", zValidator("query", listSneakersQuerySchema), async (c) => {
-    const user = c.get("user");
-    const query = c.req.valid("query");
+  .get('/', zValidator('query', listSneakersQuerySchema), async (c) => {
+    const user = c.get('user');
+    const query = c.req.valid('query');
 
-    const filters = [eq(sneakers.userId, user?.id ?? "")];
+    const filters = [eq(sneakers.userId, user?.id ?? '')];
 
     const searchCondition = query.search ? buildSneakerSearchCondition(query.search) : undefined;
 
@@ -45,7 +45,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       brand: sneakers.brand,
     }[query.sort];
 
-    const orderBy = query.order === "asc" ? asc(sortColumn) : desc(sortColumn);
+    const orderBy = query.order === 'asc' ? asc(sortColumn) : desc(sortColumn);
 
     const rows = await db
       .select()
@@ -55,33 +55,33 @@ export const sneakerRoutes = new Hono<ApiEnv>()
 
     return c.json({ sneakers: rows.map(formatSneaker) });
   })
-  .get("/:id", async (c) => {
-    const user = c.get("user");
-    const id = parseSneakerId(c.req.param("id"));
+  .get('/:id', async (c) => {
+    const user = c.get('user');
+    const id = parseSneakerId(c.req.param('id'));
 
     if (!id) {
-      return c.json({ error: "Invalid sneaker id" }, 400);
+      return c.json({ error: 'Invalid sneaker id' }, 400);
     }
 
     const [row] = await db
       .select()
       .from(sneakers)
-      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? "")));
+      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? '')));
 
     if (!row) {
-      return c.json({ error: "Sneaker not found" }, 404);
+      return c.json({ error: 'Sneaker not found' }, 404);
     }
 
     return c.json({ sneaker: formatSneaker(row) });
   })
-  .post("/", zValidator("json", createSneakerSchema), async (c) => {
-    const user = c.get("user");
-    const input = c.req.valid("json");
+  .post('/', zValidator('json', createSneakerSchema), async (c) => {
+    const user = c.get('user');
+    const input = c.req.valid('json');
 
     const [row] = await db
       .insert(sneakers)
       .values({
-        userId: user?.id ?? "",
+        userId: user?.id ?? '',
         brand: input.brand,
         model: input.model,
         colorway: input.colorway ?? null,
@@ -99,22 +99,22 @@ export const sneakerRoutes = new Hono<ApiEnv>()
 
     return c.json({ sneaker: formatSneaker(row) }, 201);
   })
-  .patch("/:id", zValidator("json", updateSneakerSchema), async (c) => {
-    const user = c.get("user");
-    const id = parseSneakerId(c.req.param("id"));
-    const input = c.req.valid("json");
+  .patch('/:id', zValidator('json', updateSneakerSchema), async (c) => {
+    const user = c.get('user');
+    const id = parseSneakerId(c.req.param('id'));
+    const input = c.req.valid('json');
 
     if (!id) {
-      return c.json({ error: "Invalid sneaker id" }, 400);
+      return c.json({ error: 'Invalid sneaker id' }, 400);
     }
 
     const [existing] = await db
       .select()
       .from(sneakers)
-      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? "")));
+      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? '')));
 
     if (!existing) {
-      return c.json({ error: "Sneaker not found" }, 404);
+      return c.json({ error: 'Sneaker not found' }, 404);
     }
 
     const violations = getCatalogLinkedModelFieldViolations(existing, input);
@@ -122,7 +122,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
     if (violations.length > 0) {
       return c.json(
         {
-          error: `Cannot update ${violations.join(", ")} for catalog-linked sneakers`,
+          error: `Cannot update ${violations.join(', ')} for catalog-linked sneakers`,
         },
         400,
       );
@@ -138,21 +138,21 @@ export const sneakerRoutes = new Hono<ApiEnv>()
 
     return c.json({ sneaker: formatSneaker(row) });
   })
-  .delete("/:id", async (c) => {
-    const user = c.get("user");
-    const id = parseSneakerId(c.req.param("id"));
+  .delete('/:id', async (c) => {
+    const user = c.get('user');
+    const id = parseSneakerId(c.req.param('id'));
 
     if (!id) {
-      return c.json({ error: "Invalid sneaker id" }, 400);
+      return c.json({ error: 'Invalid sneaker id' }, 400);
     }
 
     const [row] = await db
       .delete(sneakers)
-      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? "")))
+      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? '')))
       .returning({ id: sneakers.id });
 
     if (!row) {
-      return c.json({ error: "Sneaker not found" }, 404);
+      return c.json({ error: 'Sneaker not found' }, 404);
     }
 
     return c.json({ success: true });
