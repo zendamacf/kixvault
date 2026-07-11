@@ -3,6 +3,10 @@ import { env } from './env';
 
 let configured = false;
 
+export function resetKicksdbClientForTests(): void {
+  configured = false;
+}
+
 export const isKicksdbConfigured = (): boolean => !!env.kicksdbApiKey;
 
 /** Configure the KicksDB SDK client. Call before any catalog API requests. */

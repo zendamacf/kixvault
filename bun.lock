@@ -25,6 +25,7 @@
       },
       "devDependencies": {
         "@types/bun": "^1.2.18",
+        "postgres": "^3.4.7",
       },
     },
     "apps/web": {
