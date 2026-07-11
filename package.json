@@ -8,6 +8,7 @@
   "scripts": {
     "check": "biome check .",
     "check:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit && bun run --cwd apps/web typecheck && bun run --cwd apps/api typecheck && bun run --cwd packages/db typecheck && bun run --cwd packages/shared typecheck",
     "db:up": "docker compose -f docker-compose.dev.yml up -d",
     "db:down": "docker compose -f docker-compose.dev.yml down",
     "db:generate": "bun run --cwd packages/db db:generate",

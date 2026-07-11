@@ -22,12 +22,18 @@ bun run check
 # Typecheck all packages
 bun run typecheck
 
-# Run API (port 3000)
+# Run API (requires .env with DATABASE_URL)
 bun run --cwd apps/api dev
 
 # Run web (port 5173, proxies /api to API)
 bun run --cwd apps/web dev
 ```
+
+## API
+
+Auth uses Lucia with httpOnly session cookies. All sneaker routes require a valid session.
+
+The API exports `AppType` from `apps/api/src/index.ts` for a typed Hono RPC client (`hc`) in the frontend.
 
 ## Database
 
