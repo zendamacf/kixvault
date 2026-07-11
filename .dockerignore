@@ -1,0 +1,15 @@
+node_modules
+**/node_modules
+.git
+.gitignore
+**/.env
+**/.env.*
+!**/.env.example
+**/dist
+**/*.tsbuildinfo
+.cursor
+**/.cursor
+README.md
+docker-compose*.yml
+infra/caddy/data
+infra/caddy/config
