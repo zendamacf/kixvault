@@ -25,7 +25,7 @@ jobs:
       - name: Fetch pull request base
         run: git fetch --no-tags origin "${{ github.event.pull_request.base.sha }}"
 
-      - uses: dependabot/fetch-metadata@v2
+      - uses: dependabot/fetch-metadata@v3
         id: metadata
 
       - name: Write changeset
