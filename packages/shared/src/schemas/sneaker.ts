@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { sneakerConditions } from '../types.js';
-import { catalogSources } from './catalog.js';
+import { sneakerConditions } from '../types';
+import { catalogSources } from './catalog';
 
 const sneakerCatalogFields = {
   sku: z.string().trim().max(50).optional().nullable(),

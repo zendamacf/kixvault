@@ -1,7 +1,7 @@
 export const APP_NAME = 'KixVault';
 
-export * from './schemas/auth.js';
-export * from './schemas/catalog.js';
-export * from './schemas/router.js';
-export * from './schemas/sneaker.js';
-export * from './types.js';
+export * from './schemas/auth';
+export * from './schemas/catalog';
+export * from './schemas/router';
+export * from './schemas/sneaker';
+export * from './types';

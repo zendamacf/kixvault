@@ -1,9 +1,9 @@
 import { sneakers } from '@kixvault/db';
 import { eq, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { db } from '../lib/db.js';
-import { requireAuth, sessionMiddleware } from '../middleware/session.js';
-import type { ApiEnv } from '../types.js';
+import { db } from '../lib/db';
+import { requireAuth, sessionMiddleware } from '../middleware/session';
+import type { ApiEnv } from '../types';
 
 export const statsRoutes = new Hono<ApiEnv>()
   .use(sessionMiddleware)

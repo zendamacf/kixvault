@@ -5,7 +5,7 @@ import {
   type StockXProduct,
 } from '@kicksdb/sdk';
 import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
-import { ensureKicksdbClient } from './kicksdb.js';
+import { ensureKicksdbClient } from './kicksdb';
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const MARKET = 'US'; // Other markets require paid plan

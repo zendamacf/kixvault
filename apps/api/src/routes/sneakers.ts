@@ -7,7 +7,7 @@ import {
 } from '@kixvault/shared';
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { db } from '../lib/db.js';
+import { db } from '../lib/db';
 import {
   buildSneakerSearchCondition,
   buildSneakerUpdate,
@@ -15,9 +15,9 @@ import {
   getCatalogLinkedModelFieldViolations,
   parsePurchaseDate,
   parseSneakerId,
-} from '../lib/sneakers.js';
-import { requireAuth, sessionMiddleware } from '../middleware/session.js';
-import type { ApiEnv } from '../types.js';
+} from '../lib/sneakers';
+import { requireAuth, sessionMiddleware } from '../middleware/session';
+import type { ApiEnv } from '../types';
 
 export const sneakerRoutes = new Hono<ApiEnv>()
   .use(sessionMiddleware)

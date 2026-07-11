@@ -4,10 +4,10 @@ import { loginSchema, registerSchema } from '@kixvault/shared';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { generateIdFromEntropySize } from 'lucia';
-import { lucia } from '../lib/auth.js';
-import { db } from '../lib/db.js';
-import { sessionMiddleware } from '../middleware/session.js';
-import type { ApiEnv } from '../types.js';
+import { lucia } from '../lib/auth';
+import { db } from '../lib/db';
+import { sessionMiddleware } from '../middleware/session';
+import type { ApiEnv } from '../types';
 
 export const authRoutes = new Hono<ApiEnv>()
   .use(sessionMiddleware)

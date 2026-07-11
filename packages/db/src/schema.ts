@@ -1,6 +1,6 @@
 import { relations, type SQL, sql } from 'drizzle-orm';
 import { date, index, numeric, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { tsvector } from './custom-types.js';
+import { tsvector } from './custom-types';
 
 export const sneakerConditions = ['deadstock', 'lightly_worn', 'worn', 'beat'] as const;
 export type SneakerCondition = (typeof sneakerConditions)[number];

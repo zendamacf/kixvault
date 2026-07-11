@@ -1,8 +1,8 @@
 import { sessions, users } from '@kixvault/db';
 import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
 import { Lucia, TimeSpan } from 'lucia';
-import { db } from './db.js';
-import { env } from './env.js';
+import { db } from './db';
+import { env } from './env';
 
 const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users);
 

@@ -1,7 +1,7 @@
-import { app } from './app.js';
-import { env } from './lib/env.js';
+import { app } from './app';
+import { env } from './lib/env';
 
-export type { AppType } from './app.js';
+export type { AppType } from './app';
 
 console.log('KixVault API listening on port', env.port);
 

@@ -2,10 +2,10 @@ import { zValidator } from '@hono/zod-validator';
 import { catalogSearchQuerySchema } from '@kixvault/shared';
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
-import { CatalogSearchError, searchCatalog } from '../lib/catalog.js';
-import { isKicksdbConfigured } from '../lib/kicksdb.js';
-import { requireAuth, sessionMiddleware } from '../middleware/session.js';
-import type { ApiEnv } from '../types.js';
+import { CatalogSearchError, searchCatalog } from '../lib/catalog';
+import { isKicksdbConfigured } from '../lib/kicksdb';
+import { requireAuth, sessionMiddleware } from '../middleware/session';
+import type { ApiEnv } from '../types';
 
 export const catalogRoutes = new Hono<ApiEnv>()
   .use(sessionMiddleware)

@@ -1,7 +1,7 @@
 import { getCookie } from 'hono/cookie';
 import { createMiddleware } from 'hono/factory';
-import { lucia } from '../lib/auth.js';
-import type { ApiEnv } from '../types.js';
+import { lucia } from '../lib/auth';
+import type { ApiEnv } from '../types';
 
 export const sessionMiddleware = createMiddleware<ApiEnv>(async (c, next) => {
   const sessionId = getCookie(c, lucia.sessionCookieName) ?? null;

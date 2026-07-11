@@ -1,5 +1,5 @@
 import { configureClient } from '@kicksdb/sdk';
-import { env } from './env.js';
+import { env } from './env';
 
 let configured = false;
 
