@@ -1,7 +1,6 @@
 # TODO
 
  - Set up unit/integration tests and CI/CD jobs.
-    - packages/db
     - apps/api
     - apps/web
  - CI/CD deployment smoke tests of apps running.
