@@ -18,12 +18,6 @@ mock.module('./env', () => ({
   },
 }));
 
-mock.module('./kicksdb', () => ({
-  ensureKicksdbClient: () => {},
-  isKicksdbConfigured: () => true,
-  resetKicksdbClientForTests: () => {},
-}));
-
 const stockxProduct = {
   slug: 'air-jordan-1-chicago',
   title: 'Air Jordan 1 Retro High OG Chicago',

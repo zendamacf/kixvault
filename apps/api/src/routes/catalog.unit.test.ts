@@ -19,8 +19,13 @@ mock.module('../lib/catalog', () => ({
   CatalogSearchError,
 }));
 
-mock.module('../lib/kicksdb', () => ({
-  isKicksdbConfigured: () => true,
+mock.module('../lib/env', () => ({
+  env: {
+    kicksdbApiKey: 'KICKS-test-key',
+    databaseUrl: 'postgresql://example.com/db',
+    port: 3000,
+    isProduction: false,
+  },
 }));
 
 mock.module('../middleware/session', () => ({
