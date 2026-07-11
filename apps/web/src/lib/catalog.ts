@@ -12,7 +12,7 @@ export function catalogSearchQueryOptions(query: string, marketplace: CatalogMar
     queryKey: ['catalog', 'search', marketplace, query],
     queryFn: async (): Promise<CatalogSearchResponse> => {
       const response = await api.api.catalog.search.$get({
-        query: { q: query, limit: 10, marketplace },
+        query: { q: query, limit: '10', marketplace },
       });
 
       if (response.status === 503) {

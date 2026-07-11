@@ -7,7 +7,7 @@
     "declaration": false,
     "declarationMap": false,
     "noEmit": true,
-    "baseUrl": ".",
+    "types": ["bun"],
     "paths": {
       "@/*": ["./src/*"],
       "@kixvault/api/app": ["../api/src/app.ts"],
