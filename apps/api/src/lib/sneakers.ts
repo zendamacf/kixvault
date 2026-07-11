@@ -1,6 +1,95 @@
 import type { sneakers as sneakersTable } from "@kixvault/db";
+import type { UpdateSneakerInput } from "@kixvault/shared";
 
 type SneakerRow = typeof sneakersTable.$inferSelect;
+
+const catalogLinkedModelFields = [
+  "brand",
+  "model",
+  "colorway",
+  "sku",
+  "imageUrl",
+  "catalogSource",
+  "catalogId",
+] as const;
+
+type CatalogLinkedModelField = (typeof catalogLinkedModelFields)[number];
+
+function nullableFieldChanged(
+  existingValue: string | null,
+  inputValue: string | null | undefined,
+): boolean {
+  return inputValue !== undefined && (inputValue ?? null) !== existingValue;
+}
+
+export function getCatalogLinkedModelFieldViolations(
+  existing: SneakerRow,
+  input: UpdateSneakerInput,
+): CatalogLinkedModelField[] {
+  if (!existing.sku) {
+    return [];
+  }
+
+  const violations: CatalogLinkedModelField[] = [];
+
+  if (input.brand !== undefined && input.brand !== existing.brand) {
+    violations.push("brand");
+  }
+
+  if (input.model !== undefined && input.model !== existing.model) {
+    violations.push("model");
+  }
+
+  if (nullableFieldChanged(existing.colorway, input.colorway)) {
+    violations.push("colorway");
+  }
+
+  if (nullableFieldChanged(existing.sku, input.sku)) {
+    violations.push("sku");
+  }
+
+  if (nullableFieldChanged(existing.imageUrl, input.imageUrl)) {
+    violations.push("imageUrl");
+  }
+
+  if (nullableFieldChanged(existing.catalogSource, input.catalogSource)) {
+    violations.push("catalogSource");
+  }
+
+  if (nullableFieldChanged(existing.catalogId, input.catalogId)) {
+    violations.push("catalogId");
+  }
+
+  return violations;
+}
+
+export function buildSneakerUpdate(
+  existing: SneakerRow,
+  input: UpdateSneakerInput,
+): Partial<typeof sneakersTable.$inferInsert> {
+  const isCatalogLinked = Boolean(existing.sku);
+
+  return {
+    ...(!isCatalogLinked && input.brand !== undefined ? { brand: input.brand } : {}),
+    ...(!isCatalogLinked && input.model !== undefined ? { model: input.model } : {}),
+    ...(!isCatalogLinked && input.colorway !== undefined ? { colorway: input.colorway } : {}),
+    ...(input.size !== undefined ? { size: input.size.toString() } : {}),
+    ...(input.condition !== undefined ? { condition: input.condition } : {}),
+    ...(input.purchasePrice !== undefined
+      ? { purchasePrice: input.purchasePrice?.toString() ?? null }
+      : {}),
+    ...(input.purchaseDate !== undefined
+      ? { purchaseDate: parsePurchaseDate(input.purchaseDate) }
+      : {}),
+    ...(input.notes !== undefined ? { notes: input.notes } : {}),
+    ...(!isCatalogLinked && input.sku !== undefined ? { sku: input.sku } : {}),
+    ...(!isCatalogLinked && input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
+    ...(!isCatalogLinked && input.catalogSource !== undefined
+      ? { catalogSource: input.catalogSource }
+      : {}),
+    ...(!isCatalogLinked && input.catalogId !== undefined ? { catalogId: input.catalogId } : {}),
+  };
+}
 
 export function parseSneakerId(id: string): string | null {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

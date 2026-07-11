@@ -45,7 +45,7 @@ function NewSneakerPage() {
         <CardHeader>
           <CardTitle>Add a pair</CardTitle>
           <CardDescription>
-            Search the catalog to pre-fill details, or enter them manually.
+            Search the catalog to find your pair, or enter details manually.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -8,7 +8,13 @@ import {
 import { and, asc, desc, eq, ilike } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../lib/db.js";
-import { formatSneaker, parsePurchaseDate, parseSneakerId } from "../lib/sneakers.js";
+import {
+  buildSneakerUpdate,
+  formatSneaker,
+  getCatalogLinkedModelFieldViolations,
+  parsePurchaseDate,
+  parseSneakerId,
+} from "../lib/sneakers.js";
 import { requireAuth, sessionMiddleware } from "../middleware/session.js";
 import type { ApiEnv } from "../types.js";
 
@@ -100,7 +106,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
     }
 
     const [existing] = await db
-      .select({ id: sneakers.id })
+      .select()
       .from(sneakers)
       .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? "")));
 
@@ -108,28 +114,24 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       return c.json({ error: "Sneaker not found" }, 404);
     }
 
-    const [row] = await db
-      .update(sneakers)
-      .set({
-        ...(input.brand !== undefined ? { brand: input.brand } : {}),
-        ...(input.model !== undefined ? { model: input.model } : {}),
-        ...(input.colorway !== undefined ? { colorway: input.colorway } : {}),
-        ...(input.size !== undefined ? { size: input.size.toString() } : {}),
-        ...(input.condition !== undefined ? { condition: input.condition } : {}),
-        ...(input.purchasePrice !== undefined
-          ? { purchasePrice: input.purchasePrice?.toString() ?? null }
-          : {}),
-        ...(input.purchaseDate !== undefined
-          ? { purchaseDate: parsePurchaseDate(input.purchaseDate) }
-          : {}),
-        ...(input.notes !== undefined ? { notes: input.notes } : {}),
-        ...(input.sku !== undefined ? { sku: input.sku } : {}),
-        ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
-        ...(input.catalogSource !== undefined ? { catalogSource: input.catalogSource } : {}),
-        ...(input.catalogId !== undefined ? { catalogId: input.catalogId } : {}),
-      })
-      .where(eq(sneakers.id, id))
-      .returning();
+    const violations = getCatalogLinkedModelFieldViolations(existing, input);
+
+    if (violations.length > 0) {
+      return c.json(
+        {
+          error: `Cannot update ${violations.join(", ")} for catalog-linked sneakers`,
+        },
+        400,
+      );
+    }
+
+    const updates = buildSneakerUpdate(existing, input);
+
+    if (Object.keys(updates).length === 0) {
+      return c.json({ sneaker: formatSneaker(existing) });
+    }
+
+    const [row] = await db.update(sneakers).set(updates).where(eq(sneakers.id, id)).returning();
 
     return c.json({ sneaker: formatSneaker(row) });
   })

@@ -1,6 +1,7 @@
 import type { CatalogSearchResult } from "@kixvault/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { SneakerThumbnail } from "@/components/sneakers/sneaker-thumbnail";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,7 +9,7 @@ import { catalogSearchQueryOptions } from "@/lib/catalog";
 import { useDebouncedValue } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 
-const DEBOUNCE_DELAY = 2000;
+const DEBOUNCE_DELAY = 1000;
 
 type CatalogSearchPickerProps = {
   onSelect: (result: CatalogSearchResult) => void;
@@ -29,7 +30,7 @@ export function CatalogSearchPicker({ onSelect, selectedCatalogId }: CatalogSear
   const unavailable = data?.unavailable ?? false;
 
   return (
-    <div className="space-y-3 rounded-lg border border-dashed p-4">
+    <div className="min-w-0 space-y-3 rounded-lg border border-dashed p-4">
       <div className="space-y-2">
         <Label htmlFor="catalog-search">Find a sneaker</Label>
         <Input
@@ -49,17 +50,23 @@ export function CatalogSearchPicker({ onSelect, selectedCatalogId }: CatalogSear
 
       {unavailable ? (
         <p className="text-sm text-muted-foreground">
-          Catalog search is unavailable. Add details manually below.
+          Catalog search is unavailable. Use the button below to enter details manually.
         </p>
       ) : null}
 
       {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
 
       {canSearch && (isLoading || isFetching) ? (
-        <div className="space-y-2">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
+        <div className="grid max-h-96 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
+          {(["one", "two", "three", "four"] as const).map((key) => (
+            <div key={key} className="flex min-w-0 items-center gap-4 rounded-md border p-3">
+              <Skeleton className="h-24 w-24 shrink-0 rounded-md" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : null}
 
@@ -70,31 +77,25 @@ export function CatalogSearchPicker({ onSelect, selectedCatalogId }: CatalogSear
       ) : null}
 
       {results.length > 0 ? (
-        <ul className="max-h-72 space-y-2 overflow-y-auto">
+        <ul className="grid max-h-96 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
           {results.map((result) => {
             const isSelected = selectedCatalogId === result.catalogId;
 
             return (
-              <li key={result.catalogId}>
+              <li key={result.catalogId} className="min-w-0">
                 <button
                   type="button"
                   onClick={() => onSelect(result)}
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors hover:bg-accent/50",
+                    "flex w-full min-w-0 items-center gap-4 overflow-hidden rounded-md border p-3 text-left transition-colors hover:bg-accent/50",
                     isSelected && "border-primary bg-accent/40",
                   )}
                 >
-                  {result.imageUrl ? (
-                    <img
-                      src={result.imageUrl}
-                      alt=""
-                      className="h-14 w-14 shrink-0 rounded-md bg-muted object-contain"
-                    />
-                  ) : (
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
-                      No image
-                    </div>
-                  )}
+                  <SneakerThumbnail
+                    imageUrl={result.imageUrl}
+                    alt={result.title}
+                    className="h-24 w-24 shrink-0"
+                  />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium">{result.title}</span>
                     <span className="block truncate text-sm text-muted-foreground">

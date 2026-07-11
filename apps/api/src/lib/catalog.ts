@@ -35,9 +35,13 @@ export function normalizeStockxProduct(product: StockXProduct): CatalogSearchRes
   };
 }
 
-export async function searchCatalog(query: string, limit: number): Promise<CatalogSearchResult[]> {
-  const cacheKey = `${query.toLowerCase()}:${limit}`;
+export async function searchCatalog(
+  searchQuery: string,
+  limit: number,
+): Promise<CatalogSearchResult[]> {
+  const cacheKey = `${searchQuery.toLowerCase()}:${limit}`;
   const cached = cache.get(cacheKey);
+  const query = searchQuery.trim();
 
   if (cached && cached.expiresAt > Date.now()) {
     return cached.results;
@@ -48,6 +52,7 @@ export async function searchCatalog(query: string, limit: number): Promise<Catal
   const { data, error, response } = await getStockxProducts({
     query: {
       query,
+      filters: "product_type=sneakers",
       limit: BigInt(limit),
       market: MARKET,
     },

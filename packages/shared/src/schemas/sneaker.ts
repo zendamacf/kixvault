@@ -18,9 +18,12 @@ export const createSneakerSchema = z.object({
   purchasePrice: z.coerce.number().nonnegative().optional().nullable(),
   purchaseDate: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD")
+    .trim()
     .optional()
-    .nullable(),
+    .nullable()
+    .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), {
+      message: "Expected YYYY-MM-DD",
+    }),
   notes: z.string().trim().max(2000).optional().nullable(),
   ...sneakerCatalogFields,
 });

@@ -33,6 +33,8 @@ export function SneakerForm({
   const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(
     defaultValues?.catalogId ?? null,
   );
+  const [showForm, setShowForm] = useState(!enableCatalogSearch);
+  const lockModelDetails = Boolean(defaultValues?.sku);
 
   const {
     register,
@@ -61,6 +63,7 @@ export function SneakerForm({
 
   function applyCatalogResult(result: CatalogSearchResult) {
     setSelectedCatalogId(result.catalogId);
+    setShowForm(true);
     reset({
       ...getValues(),
       brand: result.brand,
@@ -77,7 +80,7 @@ export function SneakerForm({
     <form
       className="grid gap-5"
       onSubmit={handleSubmit(async (values) => {
-        await onSubmit({
+        const normalized = {
           ...values,
           colorway: values.colorway || null,
           purchasePrice: values.purchasePrice ?? null,
@@ -87,77 +90,141 @@ export function SneakerForm({
           imageUrl: values.imageUrl ?? null,
           catalogSource: values.catalogSource ?? null,
           catalogId: values.catalogId ?? null,
-        });
+        };
+
+        if (lockModelDetails) {
+          await onSubmit({
+            ...normalized,
+            brand: defaultValues?.brand ?? values.brand,
+            model: defaultValues?.model ?? values.model,
+            colorway: defaultValues?.colorway ?? null,
+            sku: defaultValues?.sku ?? null,
+            imageUrl: defaultValues?.imageUrl ?? null,
+            catalogSource: defaultValues?.catalogSource ?? null,
+            catalogId: defaultValues?.catalogId ?? null,
+          });
+          return;
+        }
+
+        await onSubmit(normalized);
       })}
     >
       {enableCatalogSearch ? (
-        <CatalogSearchPicker selectedCatalogId={selectedCatalogId} onSelect={applyCatalogResult} />
+        <>
+          <CatalogSearchPicker
+            selectedCatalogId={selectedCatalogId}
+            onSelect={applyCatalogResult}
+          />
+          {!showForm ? (
+            <Button type="button" variant="outline" onClick={() => setShowForm(true)}>
+              Enter details manually
+            </Button>
+          ) : null}
+        </>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="brand">Brand</Label>
-          <Input id="brand" placeholder="Nike" {...register("brand")} />
-          {errors.brand ? <p className="text-sm text-destructive">{errors.brand.message}</p> : null}
-        </div>
+      {showForm ? (
+        <>
+          {lockModelDetails ? (
+            <p className="text-sm text-muted-foreground">
+              Model details are linked to the catalog (SKU {defaultValues?.sku}) and cannot be
+              edited.
+            </p>
+          ) : null}
 
-        <div className="space-y-2">
-          <Label htmlFor="model">Model</Label>
-          <Input id="model" placeholder="Air Jordan 1" {...register("model")} />
-          {errors.model ? <p className="text-sm text-destructive">{errors.model.message}</p> : null}
-        </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="brand">Brand</Label>
+              <Input
+                id="brand"
+                placeholder="Nike"
+                readOnly={lockModelDetails}
+                className={lockModelDetails ? "cursor-default bg-muted" : undefined}
+                {...register("brand")}
+              />
+              {errors.brand ? (
+                <p className="text-sm text-destructive">{errors.brand.message}</p>
+              ) : null}
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="colorway">Colorway</Label>
-          <Input id="colorway" placeholder="Chicago" {...register("colorway")} />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="model">Model</Label>
+              <Input
+                id="model"
+                placeholder="Air Jordan 1"
+                readOnly={lockModelDetails}
+                className={lockModelDetails ? "cursor-default bg-muted" : undefined}
+                {...register("model")}
+              />
+              {errors.model ? (
+                <p className="text-sm text-destructive">{errors.model.message}</p>
+              ) : null}
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="size">Size</Label>
-          <Input id="size" type="number" step="0.5" placeholder="10" {...register("size")} />
-          {errors.size ? <p className="text-sm text-destructive">{errors.size.message}</p> : null}
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="colorway">Colorway</Label>
+              <Input
+                id="colorway"
+                placeholder="Chicago"
+                readOnly={lockModelDetails}
+                className={lockModelDetails ? "cursor-default bg-muted" : undefined}
+                {...register("colorway")}
+              />
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="condition">Condition</Label>
-          <Select id="condition" {...register("condition")}>
-            {sneakerConditions.map((condition) => (
-              <option key={condition} value={condition}>
-                {formatCondition(condition)}
-              </option>
-            ))}
-          </Select>
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="size">Size</Label>
+              <Input id="size" type="number" step="0.5" placeholder="10" {...register("size")} />
+              {errors.size ? (
+                <p className="text-sm text-destructive">{errors.size.message}</p>
+              ) : null}
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="purchasePrice">Purchase price</Label>
-          <Input
-            id="purchasePrice"
-            type="number"
-            step="1"
-            placeholder="180"
-            {...register("purchasePrice")}
-          />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="condition">Condition</Label>
+              <Select id="condition" {...register("condition")}>
+                {sneakerConditions.map((condition) => (
+                  <option key={condition} value={condition}>
+                    {formatCondition(condition)}
+                  </option>
+                ))}
+              </Select>
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="purchaseDate">Purchase date</Label>
-          <Input id="purchaseDate" type="date" {...register("purchaseDate")} />
-        </div>
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="purchasePrice">Purchase price</Label>
+              <Input
+                id="purchasePrice"
+                type="number"
+                step="1"
+                placeholder="180"
+                {...register("purchasePrice")}
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
-        <Textarea
-          id="notes"
-          placeholder="Where you bought them, lace swap, etc."
-          {...register("notes")}
-        />
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="purchaseDate">Purchase date (optional)</Label>
+              <Input id="purchaseDate" type="date" {...register("purchaseDate")} />
+              {errors.purchaseDate ? (
+                <p className="text-sm text-destructive">{errors.purchaseDate.message}</p>
+              ) : null}
+            </div>
+          </div>
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Saving..." : submitLabel}
-      </Button>
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea
+              id="notes"
+              placeholder="Where you bought them, lace swap, etc."
+              {...register("notes")}
+            />
+          </div>
+
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : submitLabel}
+          </Button>
+        </>
+      ) : null}
     </form>
   );
 }

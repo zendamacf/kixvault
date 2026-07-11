@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { SneakerThumbnail } from "@/components/sneakers/sneaker-thumbnail";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,10 +46,15 @@ function SneakerDetailPage() {
       <div className="mx-auto max-w-3xl space-y-4">
         <Skeleton className="h-4 w-36" />
         <Card>
-          <CardHeader className="space-y-3">
-            <Skeleton className="h-8 w-2/3" />
-            <Skeleton className="h-4 w-1/3" />
-            <Skeleton className="h-6 w-24 rounded-full" />
+          <CardHeader className="space-y-4">
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <Skeleton className="h-48 w-full max-w-xs rounded-md sm:h-56" />
+              <div className="flex-1 space-y-3">
+                <Skeleton className="h-8 w-2/3" />
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-6 w-24 rounded-full" />
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <Skeleton className="h-16" />
@@ -70,6 +76,7 @@ function SneakerDetailPage() {
   }
 
   const sneaker = data.sneaker;
+  const title = `${sneaker.brand} ${sneaker.model}`;
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
@@ -80,12 +87,20 @@ function SneakerDetailPage() {
       <Card>
         <CardHeader className="space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-2">
-              <CardTitle className="text-2xl sm:text-3xl">
-                {sneaker.brand} {sneaker.model}
-              </CardTitle>
-              <p className="text-muted-foreground">{sneaker.colorway || "No colorway listed"}</p>
-              <Badge>{formatCondition(sneaker.condition)}</Badge>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <SneakerThumbnail
+                imageUrl={sneaker.imageUrl}
+                alt={title}
+                className="h-64 w-full max-w-xs sm:h-72"
+              />
+              <div className="space-y-2">
+                <CardTitle className="text-2xl sm:text-3xl">{title}</CardTitle>
+                <p className="text-muted-foreground">{sneaker.colorway || "No colorway listed"}</p>
+                {sneaker.sku ? (
+                  <p className="text-sm text-muted-foreground">SKU {sneaker.sku}</p>
+                ) : null}
+                <Badge>{formatCondition(sneaker.condition)}</Badge>
+              </div>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
               <Button
