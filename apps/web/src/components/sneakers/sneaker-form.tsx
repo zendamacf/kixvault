@@ -7,6 +7,7 @@ import {
 } from '@kixvault/shared';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,13 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCondition } from '@/lib/utils';
+
+const sneakerFormSchema = createSneakerSchema.extend({
+  size: z.number({ error: 'Size is required' }).positive().max(99),
+  purchasePrice: z.number().nonnegative().optional().nullable(),
+});
+
+type SneakerFormValues = z.infer<typeof sneakerFormSchema>;
 
 type SneakerFormProps = {
   defaultValues?: Partial<CreateSneakerInput>;
@@ -42,8 +50,8 @@ export function SneakerForm({
     reset,
     getValues,
     formState: { errors },
-  } = useForm<CreateSneakerInput>({
-    resolver: zodResolver(createSneakerSchema),
+  } = useForm<SneakerFormValues>({
+    resolver: zodResolver(sneakerFormSchema),
     defaultValues: {
       brand: '',
       model: '',
@@ -175,7 +183,13 @@ export function SneakerForm({
 
             <div className="space-y-2">
               <Label htmlFor="size">Size</Label>
-              <Input id="size" type="number" step="0.5" placeholder="10" {...register('size')} />
+              <Input
+                id="size"
+                type="number"
+                step="0.5"
+                placeholder="10"
+                {...register('size', { valueAsNumber: true })}
+              />
               {errors.size ? (
                 <p className="text-sm text-destructive">{errors.size.message}</p>
               ) : null}
@@ -199,7 +213,7 @@ export function SneakerForm({
                 type="number"
                 step="1"
                 placeholder="180"
-                {...register('purchasePrice')}
+                {...register('purchasePrice', { valueAsNumber: true })}
               />
             </div>
 
