@@ -35,25 +35,17 @@ jobs:
       - name: Typecheck
         run: bun run --cwd ${{ matrix.package }} typecheck
 
-  test-shared:
-    name: Test / packages/shared
+  test:
+    name: Test / ${{ matrix.package }}
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.13
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Test
-        run: bun run --cwd packages/shared test
-
-  test-db:
-    name: Test / packages/db
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - packages/shared
+          - packages/db
+          - apps/api
+          - apps/web
     services:
       postgres:
         image: postgres:18-alpine
@@ -81,52 +73,4 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Test
-        run: bun run --cwd packages/db test
-
-  test-api:
-    name: Test / apps/api
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:18-alpine
-        env:
-          POSTGRES_USER: kixvault
-          POSTGRES_PASSWORD: kixvault
-          POSTGRES_DB: kixvault
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U kixvault -d kixvault"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-    env:
-      DATABASE_URL: postgresql://kixvault:kixvault@localhost:5432/kixvault
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.13
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Test
-        run: bun run --cwd apps/api test
-
-  test-web:
-    name: Test / apps/web
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.13
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Test
-        run: bun run --cwd apps/web test
+        run: bun run --cwd ${{ matrix.package }} test
