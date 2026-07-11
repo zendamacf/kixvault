@@ -48,7 +48,7 @@ The API exports `AppType` from `apps/api/src/app.ts` for a typed Hono RPC client
 Deploy the full stack — PostgreSQL 18, API, static web, and Caddy reverse proxy — with:
 
 ```bash
-cp .env.example .env
+cp .env.prod.example .env
 # Set POSTGRES_PASSWORD (required) and DOMAIN for your VPS
 
 bun run prod:up
@@ -74,16 +74,13 @@ Local development uses PostgreSQL 18 via Docker Compose.
 
 ```bash
 # Copy env template and adjust if needed
-cp .env.example .env
+cp .env.dev.example .env
 
 # Start Postgres 18
-bun run db:up
+bun run dev:up
 
 # Apply migrations
 bun run db:migrate
-
-# Open Drizzle Studio (optional)
-bun run db:studio
 ```
 
 After changing the schema in `packages/db/src/schema.ts`:
@@ -93,11 +90,7 @@ bun run db:generate   # create a new migration
 bun run db:migrate    # apply it
 ```
 
-Default connection string (see `.env.example`):
-
-```
-postgresql://kixvault:kixvault@localhost:5432/kixvault
-```
+Default connection string in [.env.dev.example](.env.dev.example).
 
 ## Monorepo layout
 

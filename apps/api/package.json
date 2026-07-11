@@ -14,7 +14,7 @@
     }
   },
   "scripts": {
-    "dev": "bun run --watch src/index.ts",
+    "dev": "bun run --env-file ../../.env --watch src/index.ts",
     "start": "bun run src/index.ts",
     "build": "tsc --build",
     "typecheck": "tsc --noEmit"
