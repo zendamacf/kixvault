@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   check:
-    name: PR Check / ${{ matrix.package }}
+    name: Check / ${{ matrix.package }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
