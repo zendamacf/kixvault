@@ -15,10 +15,10 @@ export const catalogRoutes = new Hono<ApiEnv>()
       return c.json({ error: "Catalog search is not configured" }, 503);
     }
 
-    const { q, limit } = c.req.valid("query");
+    const { q, limit, marketplace } = c.req.valid("query");
 
     try {
-      const results = await searchCatalog(q, limit);
+      const results = await searchCatalog(q, limit, marketplace);
       return c.json({ results });
     } catch (error) {
       if (error instanceof CatalogSearchError) {

@@ -1,4 +1,4 @@
-import type { CatalogSearchResult } from "@kixvault/shared";
+import type { CatalogMarketplace, CatalogSearchResult } from "@kixvault/shared";
 import { queryOptions } from "@tanstack/react-query";
 import { api, parseApiError } from "./api";
 
@@ -7,12 +7,12 @@ export type CatalogSearchResponse = {
   unavailable?: boolean;
 };
 
-export function catalogSearchQueryOptions(query: string) {
+export function catalogSearchQueryOptions(query: string, marketplace: CatalogMarketplace) {
   return queryOptions({
-    queryKey: ["catalog", "search", query],
+    queryKey: ["catalog", "search", marketplace, query],
     queryFn: async (): Promise<CatalogSearchResponse> => {
       const response = await api.api.catalog.search.$get({
-        query: { q: query, limit: 10 },
+        query: { q: query, limit: 10, marketplace },
       });
 
       if (response.status === 503) {

@@ -114,6 +114,7 @@ export function SneakerForm({
           <CatalogSearchPicker
             selectedCatalogId={selectedCatalogId}
             onSelect={applyCatalogResult}
+            onMarketplaceChange={() => setSelectedCatalogId(null)}
           />
           {!showForm ? (
             <Button type="button" variant="outline" onClick={() => setShowForm(true)}>

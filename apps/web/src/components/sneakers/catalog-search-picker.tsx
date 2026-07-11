@@ -1,9 +1,10 @@
-import type { CatalogSearchResult } from "@kixvault/shared";
+import type { CatalogMarketplace, CatalogSearchResult } from "@kixvault/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { SneakerThumbnail } from "@/components/sneakers/sneaker-thumbnail";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { catalogSearchQueryOptions } from "@/lib/catalog";
 import { useDebouncedValue } from "@/lib/hooks";
@@ -14,33 +15,56 @@ const DEBOUNCE_DELAY = 1000;
 type CatalogSearchPickerProps = {
   onSelect: (result: CatalogSearchResult) => void;
   selectedCatalogId?: string | null;
+  onMarketplaceChange?: () => void;
 };
 
-export function CatalogSearchPicker({ onSelect, selectedCatalogId }: CatalogSearchPickerProps) {
+export function CatalogSearchPicker({
+  onSelect,
+  selectedCatalogId,
+  onMarketplaceChange,
+}: CatalogSearchPickerProps) {
   const [query, setQuery] = useState("");
+  const [marketplace, setMarketplace] = useState<CatalogMarketplace>("goat");
   const debouncedQuery = useDebouncedValue(query.trim(), DEBOUNCE_DELAY);
   const canSearch = debouncedQuery.length >= 2;
 
   const { data, isLoading, isFetching, error } = useQuery({
-    ...catalogSearchQueryOptions(debouncedQuery),
+    ...catalogSearchQueryOptions(debouncedQuery, marketplace),
     enabled: canSearch,
   });
 
   const results = data?.results ?? [];
   const unavailable = data?.unavailable ?? false;
+  const marketplaceLabel = marketplace === "stockx" ? "StockX" : "GOAT";
 
   return (
     <div className="min-w-0 space-y-3 rounded-lg border border-dashed p-4">
       <div className="space-y-2">
         <Label htmlFor="catalog-search">Find a sneaker</Label>
-        <Input
-          id="catalog-search"
-          placeholder="Search by name or SKU (e.g. Air Jordan 1 Chicago, DZ5485-100)"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
+        <div className="flex gap-2">
+          <Input
+            id="catalog-search"
+            className="min-w-0 flex-1"
+            placeholder="Search by name or SKU (e.g. Air Jordan 1 Chicago, DZ5485-100)"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+          <Select
+            id="catalog-marketplace"
+            aria-label="Marketplace"
+            className="w-28 shrink-0"
+            value={marketplace}
+            onChange={(event) => {
+              setMarketplace(event.target.value as CatalogMarketplace);
+              onMarketplaceChange?.();
+            }}
+          >
+            <option value="stockx">StockX</option>
+            <option value="goat">GOAT</option>
+          </Select>
+        </div>
         <p className="text-xs text-muted-foreground">
-          Search StockX catalog to pre-fill brand, model, and colorway.
+          Search {marketplaceLabel} to pre-fill brand, model, and colorway.
         </p>
       </div>
 
@@ -72,7 +96,7 @@ export function CatalogSearchPicker({ onSelect, selectedCatalogId }: CatalogSear
 
       {canSearch && !isLoading && !isFetching && !error && !unavailable && results.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No sneakers found for &ldquo;{debouncedQuery}&rdquo;.
+          No sneakers found on {marketplaceLabel} for &ldquo;{debouncedQuery}&rdquo;.
         </p>
       ) : null}
 
@@ -82,7 +106,7 @@ export function CatalogSearchPicker({ onSelect, selectedCatalogId }: CatalogSear
             const isSelected = selectedCatalogId === result.catalogId;
 
             return (
-              <li key={result.catalogId} className="min-w-0">
+              <li key={`${result.catalogSource}:${result.catalogId}`} className="min-w-0">
                 <button
                   type="button"
                   onClick={() => onSelect(result)}
