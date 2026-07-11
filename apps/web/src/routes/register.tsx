@@ -1,22 +1,22 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema } from "@kixvault/shared";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { api, parseApiError } from "@/lib/api";
-import { sessionQueryOptions } from "@/lib/queries";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { registerSchema } from '@kixvault/shared';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { api, parseApiError } from '@/lib/api';
+import { sessionQueryOptions } from '@/lib/queries';
 
-export const Route = createFileRoute("/register")({
+export const Route = createFileRoute('/register')({
   beforeLoad: async ({ context }) => {
     const session = await context.queryClient.ensureQueryData(sessionQueryOptions);
 
     if (session.user) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: '/' });
     }
   },
   component: RegisterPage,
@@ -40,14 +40,14 @@ function RegisterPage() {
       const response = await api.api.auth.register.$post({ json: values });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, "Failed to create account"));
+        throw new Error(await parseApiError(response, 'Failed to create account'));
       }
 
       return response.json();
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["auth"] });
-      await navigate({ to: "/" });
+      await queryClient.invalidateQueries({ queryKey: ['auth'] });
+      await navigate({ to: '/' });
     },
     onError: (error) => {
       setFormError(error.message);
@@ -71,7 +71,7 @@ function RegisterPage() {
           >
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" autoComplete="email" {...register("email")} />
+              <Input id="email" type="email" autoComplete="email" {...register('email')} />
               {errors.email ? (
                 <p className="text-sm text-destructive">{errors.email.message}</p>
               ) : null}
@@ -83,7 +83,7 @@ function RegisterPage() {
                 id="password"
                 type="password"
                 autoComplete="new-password"
-                {...register("password")}
+                {...register('password')}
               />
               {errors.password ? (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
@@ -93,12 +93,12 @@ function RegisterPage() {
             {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
 
             <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
-              {registerMutation.isPending ? "Creating account..." : "Create account"}
+              {registerMutation.isPending ? 'Creating account...' : 'Create account'}
             </Button>
           </form>
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
+            Already have an account?{' '}
             <Link to="/login" className="font-medium text-primary hover:underline">
               Sign in
             </Link>

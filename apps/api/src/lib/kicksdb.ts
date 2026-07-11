@@ -1,5 +1,5 @@
-import { configureClient } from "@kicksdb/sdk";
-import { env } from "./env.js";
+import { configureClient } from '@kicksdb/sdk';
+import { env } from './env.js';
 
 let configured = false;
 
@@ -12,7 +12,7 @@ export function ensureKicksdbClient(): void {
   }
 
   if (!isKicksdbConfigured()) {
-    throw new Error("KICKSDB_API_KEY environment variable is required for catalog search");
+    throw new Error('KICKSDB_API_KEY environment variable is required for catalog search');
   }
 
   configureClient(env.kicksdbApiKey as string);

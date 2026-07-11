@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 type SneakerThumbnailProps = {
   imageUrl: string | null;
@@ -11,7 +11,7 @@ export function SneakerThumbnail({ imageUrl, alt, className }: SneakerThumbnailP
     return (
       <div
         className={cn(
-          "flex items-center justify-center rounded-md bg-transparent text-xs text-muted-foreground",
+          'flex items-center justify-center rounded-md bg-transparent text-xs text-muted-foreground',
           className,
         )}
       >
@@ -24,7 +24,7 @@ export function SneakerThumbnail({ imageUrl, alt, className }: SneakerThumbnailP
     <img
       src={imageUrl}
       alt={alt}
-      className={cn("rounded-md bg-transparent object-contain", className)}
+      className={cn('rounded-md bg-transparent object-contain', className)}
       loading="lazy"
     />
   );

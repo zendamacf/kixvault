@@ -1,10 +1,10 @@
-import { APP_NAME } from "@kixvault/shared";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { LogOut, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { api, parseApiError } from "@/lib/api";
-import { sessionQueryOptions } from "@/lib/queries";
+import { APP_NAME } from '@kixvault/shared';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link, Outlet, useRouterState } from '@tanstack/react-router';
+import { LogOut, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { api, parseApiError } from '@/lib/api';
+import { sessionQueryOptions } from '@/lib/queries';
 
 export function AppShell() {
   const routerState = useRouterState();
@@ -17,18 +17,18 @@ export function AppShell() {
       const response = await api.api.auth.logout.$post();
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, "Failed to log out"));
+        throw new Error(await parseApiError(response, 'Failed to log out'));
       }
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["auth"] });
+      await queryClient.invalidateQueries({ queryKey: ['auth'] });
       await queryClient.clear();
-      window.location.href = "/login";
+      window.location.href = '/login';
     },
   });
 
   const isAuthRoute =
-    routerState.location.pathname === "/login" || routerState.location.pathname === "/register";
+    routerState.location.pathname === '/login' || routerState.location.pathname === '/register';
 
   if (isAuthRoute) {
     return (

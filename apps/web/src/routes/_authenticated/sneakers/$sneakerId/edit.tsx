@@ -1,13 +1,13 @@
-import type { CreateSneakerInput, SneakerCondition } from "@kixvault/shared";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { SneakerForm } from "@/components/sneakers/sneaker-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, parseApiError } from "@/lib/api";
-import { sneakerQueryOptions } from "@/lib/queries";
+import type { CreateSneakerInput, SneakerCondition } from '@kixvault/shared';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+import { SneakerForm } from '@/components/sneakers/sneaker-form';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { api, parseApiError } from '@/lib/api';
+import { sneakerQueryOptions } from '@/lib/queries';
 
-export const Route = createFileRoute("/_authenticated/sneakers/$sneakerId/edit")({
+export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/edit')({
   component: EditSneakerPage,
 });
 
@@ -20,22 +20,22 @@ function EditSneakerPage() {
 
   const updateMutation = useMutation({
     mutationFn: async (values: CreateSneakerInput) => {
-      const response = await api.api.sneakers[":id"].$patch({
+      const response = await api.api.sneakers[':id'].$patch({
         param: { id: sneakerId },
         json: values,
       });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, "Failed to update sneaker"));
+        throw new Error(await parseApiError(response, 'Failed to update sneaker'));
       }
 
       return response.json();
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["sneakers"] });
-      await queryClient.invalidateQueries({ queryKey: ["stats"] });
-      await queryClient.invalidateQueries({ queryKey: ["sneakers", sneakerId] });
-      await navigate({ to: "/sneakers/$sneakerId", params: { sneakerId } });
+      await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
+      await queryClient.invalidateQueries({ queryKey: ['stats'] });
+      await queryClient.invalidateQueries({ queryKey: ['sneakers', sneakerId] });
+      await navigate({ to: '/sneakers/$sneakerId', params: { sneakerId } });
     },
     onError: (mutationError) => {
       setFormError(mutationError.message);
@@ -47,7 +47,7 @@ function EditSneakerPage() {
   }
 
   if (error || !data?.sneaker) {
-    return <p className="text-sm text-destructive">{error?.message ?? "Sneaker not found"}</p>;
+    return <p className="text-sm text-destructive">{error?.message ?? 'Sneaker not found'}</p>;
   }
 
   const sneaker = data.sneaker;
@@ -81,11 +81,11 @@ function EditSneakerPage() {
               size: sneaker.size,
               condition: sneaker.condition as SneakerCondition,
               purchasePrice: sneaker.purchasePrice,
-              purchaseDate: sneaker.purchaseDate ?? "",
+              purchaseDate: sneaker.purchaseDate ?? '',
               notes: sneaker.notes,
               sku: sneaker.sku,
               imageUrl: sneaker.imageUrl,
-              catalogSource: sneaker.catalogSource as CreateSneakerInput["catalogSource"],
+              catalogSource: sneaker.catalogSource as CreateSneakerInput['catalogSource'],
               catalogId: sneaker.catalogId,
             }}
             onSubmit={async (values) => {

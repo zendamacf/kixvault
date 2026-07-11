@@ -1,14 +1,14 @@
-import type { CatalogMarketplace, CatalogSearchResult } from "@kixvault/shared";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { SneakerThumbnail } from "@/components/sneakers/sneaker-thumbnail";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { catalogSearchQueryOptions } from "@/lib/catalog";
-import { useDebouncedValue } from "@/lib/hooks";
-import { cn } from "@/lib/utils";
+import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { catalogSearchQueryOptions } from '@/lib/catalog';
+import { useDebouncedValue } from '@/lib/hooks';
+import { cn } from '@/lib/utils';
 
 const DEBOUNCE_DELAY = 1000;
 
@@ -23,8 +23,8 @@ export function CatalogSearchPicker({
   selectedCatalogId,
   onMarketplaceChange,
 }: CatalogSearchPickerProps) {
-  const [query, setQuery] = useState("");
-  const [marketplace, setMarketplace] = useState<CatalogMarketplace>("goat");
+  const [query, setQuery] = useState('');
+  const [marketplace, setMarketplace] = useState<CatalogMarketplace>('goat');
   const debouncedQuery = useDebouncedValue(query.trim(), DEBOUNCE_DELAY);
   const canSearch = debouncedQuery.length >= 2;
 
@@ -35,7 +35,7 @@ export function CatalogSearchPicker({
 
   const results = data?.results ?? [];
   const unavailable = data?.unavailable ?? false;
-  const marketplaceLabel = marketplace === "stockx" ? "StockX" : "GOAT";
+  const marketplaceLabel = marketplace === 'stockx' ? 'StockX' : 'GOAT';
 
   return (
     <div className="min-w-0 space-y-3 rounded-lg border border-dashed p-4">
@@ -82,7 +82,7 @@ export function CatalogSearchPicker({
 
       {canSearch && (isLoading || isFetching) ? (
         <div className="grid max-h-96 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
-          {(["one", "two", "three", "four"] as const).map((key) => (
+          {(['one', 'two', 'three', 'four'] as const).map((key) => (
             <div key={key} className="flex min-w-0 items-center gap-4 rounded-md border p-3">
               <Skeleton className="h-24 w-24 shrink-0 rounded-md" />
               <div className="min-w-0 flex-1 space-y-2">
@@ -111,8 +111,8 @@ export function CatalogSearchPicker({
                   type="button"
                   onClick={() => onSelect(result)}
                   className={cn(
-                    "flex w-full min-w-0 items-center gap-4 overflow-hidden rounded-md border p-3 text-left transition-colors hover:bg-accent/50",
-                    isSelected && "border-primary bg-accent/40",
+                    'flex w-full min-w-0 items-center gap-4 overflow-hidden rounded-md border p-3 text-left transition-colors hover:bg-accent/50',
+                    isSelected && 'border-primary bg-accent/40',
                   )}
                 >
                   <SneakerThumbnail

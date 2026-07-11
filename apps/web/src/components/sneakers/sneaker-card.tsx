@@ -1,9 +1,9 @@
-import { Link } from "@tanstack/react-router";
-import { SneakerThumbnail } from "@/components/sneakers/sneaker-thumbnail";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Sneaker } from "@/lib/queries";
-import { formatCondition, formatCurrency, formatDate } from "@/lib/utils";
+import { Link } from '@tanstack/react-router';
+import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { Sneaker } from '@/lib/queries';
+import { formatCondition, formatCurrency, formatDate } from '@/lib/utils';
 
 type SneakerCardProps = {
   sneaker: Sneaker;
@@ -25,7 +25,7 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
             <div className="min-w-0">
               <CardTitle className="truncate text-base">{title}</CardTitle>
               <p className="truncate text-sm text-muted-foreground">
-                {sneaker.colorway || "No colorway"} · Size {sneaker.size}
+                {sneaker.colorway || 'No colorway'} · Size {sneaker.size}
               </p>
             </div>
             <Badge className="shrink-0">{formatCondition(sneaker.condition)}</Badge>

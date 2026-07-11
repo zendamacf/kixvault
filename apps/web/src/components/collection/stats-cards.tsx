@@ -1,7 +1,7 @@
-import { DollarSign, Footprints, TrendingUp } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { formatCurrency } from "@/lib/utils";
+import { DollarSign, Footprints, TrendingUp } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { formatCurrency } from '@/lib/utils';
 
 type StatsCardsProps = {
   count?: number;
@@ -18,17 +18,17 @@ export function StatsCards({
 }: StatsCardsProps) {
   const items = [
     {
-      label: "Total pairs",
+      label: 'Total pairs',
       value: String(count),
       icon: Footprints,
     },
     {
-      label: "Total spend",
+      label: 'Total spend',
       value: formatCurrency(totalSpend),
       icon: DollarSign,
     },
     {
-      label: "Avg per pair",
+      label: 'Avg per pair',
       value: formatCurrency(avgSpend),
       icon: TrendingUp,
     },

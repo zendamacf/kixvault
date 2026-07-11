@@ -1,17 +1,17 @@
-import { sneakers as sneakersTable } from "@kixvault/db";
-import type { UpdateSneakerInput } from "@kixvault/shared";
-import { or, type SQL, sql } from "drizzle-orm";
+import { sneakers as sneakersTable } from '@kixvault/db';
+import type { UpdateSneakerInput } from '@kixvault/shared';
+import { or, type SQL, sql } from 'drizzle-orm';
 
 type SneakerRow = typeof sneakersTable.$inferSelect;
 
 const catalogLinkedModelFields = [
-  "brand",
-  "model",
-  "colorway",
-  "sku",
-  "imageUrl",
-  "catalogSource",
-  "catalogId",
+  'brand',
+  'model',
+  'colorway',
+  'sku',
+  'imageUrl',
+  'catalogSource',
+  'catalogId',
 ] as const;
 
 type CatalogLinkedModelField = (typeof catalogLinkedModelFields)[number];
@@ -34,31 +34,31 @@ export function getCatalogLinkedModelFieldViolations(
   const violations: CatalogLinkedModelField[] = [];
 
   if (input.brand !== undefined && input.brand !== existing.brand) {
-    violations.push("brand");
+    violations.push('brand');
   }
 
   if (input.model !== undefined && input.model !== existing.model) {
-    violations.push("model");
+    violations.push('model');
   }
 
   if (nullableFieldChanged(existing.colorway, input.colorway)) {
-    violations.push("colorway");
+    violations.push('colorway');
   }
 
   if (nullableFieldChanged(existing.sku, input.sku)) {
-    violations.push("sku");
+    violations.push('sku');
   }
 
   if (nullableFieldChanged(existing.imageUrl, input.imageUrl)) {
-    violations.push("imageUrl");
+    violations.push('imageUrl');
   }
 
   if (nullableFieldChanged(existing.catalogSource, input.catalogSource)) {
-    violations.push("catalogSource");
+    violations.push('catalogSource');
   }
 
   if (nullableFieldChanged(existing.catalogId, input.catalogId)) {
-    violations.push("catalogId");
+    violations.push('catalogId');
   }
 
   return violations;
