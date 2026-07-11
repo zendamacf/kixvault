@@ -19,7 +19,9 @@
     "build": "tsc --build",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "test": "bun test",
+    "test": "bun run test:unit && bun run test:integration",
+    "test:unit": "bun test src/lib src/middleware src/routes",
+    "test:integration": "bun test src/integration",
     "typecheck": "tsc -b"
   },
   "dependencies": {

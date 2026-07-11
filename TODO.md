@@ -11,3 +11,4 @@
  - Branding.
  - Compare custom components vs component library.
  - Barcode scanning.
+ - Sentry integration.
