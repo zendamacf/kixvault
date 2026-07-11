@@ -31,38 +31,47 @@ export function AppShell() {
     routerState.location.pathname === "/login" || routerState.location.pathname === "/register";
 
   if (isAuthRoute) {
-    return <Outlet />;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-accent/40">
+        <div className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-8">
+          <Outlet />
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-          <div>
+      <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:py-4">
+          <div className="min-w-0">
             <Link to="/" className="text-lg font-semibold tracking-tight">
               {APP_NAME}
             </Link>
-            {user ? <p className="text-sm text-muted-foreground">{user.email}</p> : null}
+            {user ? (
+              <p className="truncate text-sm text-muted-foreground sm:max-w-xs">{user.email}</p>
+            ) : null}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             {user ? (
               <>
                 <Link
                   to="/sneakers/new"
-                  className="inline-flex h-8 items-center justify-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-medium transition-colors hover:bg-accent"
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-medium transition-colors hover:bg-accent sm:h-8"
                 >
                   <Plus className="size-4" />
-                  Add pair
+                  <span className="hidden sm:inline">Add pair</span>
                 </Link>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => logoutMutation.mutate()}
                   disabled={logoutMutation.isPending}
+                  aria-label="Log out"
                 >
                   <LogOut className="size-4" />
-                  Log out
+                  <span className="hidden sm:inline">Log out</span>
                 </Button>
               </>
             ) : null}
@@ -70,7 +79,7 @@ export function AppShell() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
         <Outlet />
       </main>
     </div>

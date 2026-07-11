@@ -55,8 +55,8 @@ function RegisterPage() {
   });
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md items-center">
-      <Card className="w-full">
+    <div className="w-full max-w-md">
+      <Card className="w-full shadow-sm">
         <CardHeader>
           <CardTitle>Create your vault</CardTitle>
           <CardDescription>Track every pair in one place.</CardDescription>

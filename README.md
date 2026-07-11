@@ -35,6 +35,8 @@ The web app uses TanStack Router, TanStack Query, Tailwind CSS, and a typed Hono
 
 Protected routes redirect to `/login` when no session cookie is present.
 
+The dashboard shows collection stats (total pairs, spend, average per pair), debounced brand search, condition filters, sorting, loading skeletons, and distinct empty states for an empty vault vs. no filter matches.
+
 ## API
 
 Auth uses Lucia with httpOnly session cookies. All sneaker routes require a valid session.

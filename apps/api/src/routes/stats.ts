@@ -19,10 +19,14 @@ export const statsRoutes = new Hono<ApiEnv>()
       .from(sneakers)
       .where(eq(sneakers.userId, user?.id ?? ""));
 
+    const count = result?.count ?? 0;
+    const totalSpend = result?.totalSpend ? Number(result.totalSpend) : 0;
+
     return c.json({
       stats: {
-        count: result?.count ?? 0,
-        totalSpend: result?.totalSpend ? Number(result.totalSpend) : 0,
+        count,
+        totalSpend,
+        avgSpend: count > 0 ? totalSpend / count : 0,
       },
     });
   });

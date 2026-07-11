@@ -23,3 +23,16 @@ export function formatCondition(condition: string) {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
+
+export function formatDate(value: string | Date | null | undefined) {
+  if (!value) {
+    return "—";
+  }
+
+  const date = typeof value === "string" ? new Date(value) : value;
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
