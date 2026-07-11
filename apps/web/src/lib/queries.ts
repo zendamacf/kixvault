@@ -1,0 +1,99 @@
+import { queryOptions } from "@tanstack/react-query";
+import { api } from "./api";
+
+export type Sneaker = {
+  id: string;
+  userId: string;
+  brand: string;
+  model: string;
+  colorway: string | null;
+  size: number;
+  condition: string;
+  purchasePrice: number | null;
+  purchaseDate: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AuthUser = {
+  id: string;
+  email: string;
+};
+
+export const sessionQueryOptions = queryOptions({
+  queryKey: ["auth", "me"],
+  queryFn: async () => {
+    const response = await api.api.auth.me.$get();
+
+    if (!response.ok) {
+      throw new Error("Failed to load session");
+    }
+
+    return response.json();
+  },
+});
+
+export const statsQueryOptions = queryOptions({
+  queryKey: ["stats"],
+  queryFn: async () => {
+    const response = await api.api.stats.$get();
+
+    if (!response.ok) {
+      throw new Error("Failed to load stats");
+    }
+
+    return response.json();
+  },
+});
+
+export function sneakersQueryOptions(filters: {
+  brand?: string;
+  condition?: string;
+  sort?: string;
+  order?: string;
+}) {
+  return queryOptions({
+    queryKey: ["sneakers", filters],
+    queryFn: async () => {
+      const response = await api.api.sneakers.$get({
+        query: {
+          brand: filters.brand || undefined,
+          condition: filters.condition as
+            | "deadstock"
+            | "lightly_worn"
+            | "worn"
+            | "beat"
+            | undefined,
+          sort:
+            (filters.sort as "created_at" | "purchase_date" | "purchase_price" | "brand") ??
+            "created_at",
+          order: (filters.order as "asc" | "desc") ?? "desc",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to load sneakers");
+      }
+
+      return response.json();
+    },
+  });
+}
+
+export function sneakerQueryOptions(id: string) {
+  return queryOptions({
+    queryKey: ["sneakers", id],
+    queryFn: async () => {
+      const response = await api.api.sneakers[":id"].$get({
+        param: { id },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to load sneaker");
+      }
+
+      return response.json();
+    },
+  });
+}

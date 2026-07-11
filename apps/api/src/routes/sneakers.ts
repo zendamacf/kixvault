@@ -12,141 +12,135 @@ import { formatSneaker, parsePurchaseDate, parseSneakerId } from "../lib/sneaker
 import { requireAuth, sessionMiddleware } from "../middleware/session.js";
 import type { ApiEnv } from "../types.js";
 
-export const sneakerRoutes = new Hono<ApiEnv>();
+export const sneakerRoutes = new Hono<ApiEnv>()
+  .use(sessionMiddleware)
+  .use(requireAuth)
+  .get("/", zValidator("query", listSneakersQuerySchema), async (c) => {
+    const user = c.get("user");
+    const query = c.req.valid("query");
 
-sneakerRoutes.use("*", sessionMiddleware);
-sneakerRoutes.use("*", requireAuth);
+    const filters = [eq(sneakers.userId, user?.id ?? "")];
 
-sneakerRoutes.get("/", zValidator("query", listSneakersQuerySchema), async (c) => {
-  const user = c.get("user");
-  const query = c.req.valid("query");
+    if (query.brand) {
+      filters.push(ilike(sneakers.brand, `%${query.brand}%`));
+    }
 
-  const filters = [eq(sneakers.userId, user?.id ?? "")];
+    if (query.condition) {
+      filters.push(eq(sneakers.condition, query.condition));
+    }
 
-  if (query.brand) {
-    filters.push(ilike(sneakers.brand, `%${query.brand}%`));
-  }
+    const sortColumn = {
+      created_at: sneakers.createdAt,
+      purchase_date: sneakers.purchaseDate,
+      purchase_price: sneakers.purchasePrice,
+      brand: sneakers.brand,
+    }[query.sort];
 
-  if (query.condition) {
-    filters.push(eq(sneakers.condition, query.condition));
-  }
+    const orderBy = query.order === "asc" ? asc(sortColumn) : desc(sortColumn);
 
-  const sortColumn = {
-    created_at: sneakers.createdAt,
-    purchase_date: sneakers.purchaseDate,
-    purchase_price: sneakers.purchasePrice,
-    brand: sneakers.brand,
-  }[query.sort];
+    const rows = await db
+      .select()
+      .from(sneakers)
+      .where(and(...filters))
+      .orderBy(orderBy);
 
-  const orderBy = query.order === "asc" ? asc(sortColumn) : desc(sortColumn);
+    return c.json({ sneakers: rows.map(formatSneaker) });
+  })
+  .get("/:id", async (c) => {
+    const user = c.get("user");
+    const id = parseSneakerId(c.req.param("id"));
 
-  const rows = await db
-    .select()
-    .from(sneakers)
-    .where(and(...filters))
-    .orderBy(orderBy);
+    if (!id) {
+      return c.json({ error: "Invalid sneaker id" }, 400);
+    }
 
-  return c.json({ sneakers: rows.map(formatSneaker) });
-});
+    const [row] = await db
+      .select()
+      .from(sneakers)
+      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? "")));
 
-sneakerRoutes.get("/:id", async (c) => {
-  const user = c.get("user");
-  const id = parseSneakerId(c.req.param("id"));
+    if (!row) {
+      return c.json({ error: "Sneaker not found" }, 404);
+    }
 
-  if (!id) {
-    return c.json({ error: "Invalid sneaker id" }, 400);
-  }
+    return c.json({ sneaker: formatSneaker(row) });
+  })
+  .post("/", zValidator("json", createSneakerSchema), async (c) => {
+    const user = c.get("user");
+    const input = c.req.valid("json");
 
-  const [row] = await db
-    .select()
-    .from(sneakers)
-    .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? "")));
+    const [row] = await db
+      .insert(sneakers)
+      .values({
+        userId: user?.id ?? "",
+        brand: input.brand,
+        model: input.model,
+        colorway: input.colorway ?? null,
+        size: input.size.toString(),
+        condition: input.condition,
+        purchasePrice: input.purchasePrice?.toString() ?? null,
+        purchaseDate: parsePurchaseDate(input.purchaseDate),
+        notes: input.notes ?? null,
+      })
+      .returning();
 
-  if (!row) {
-    return c.json({ error: "Sneaker not found" }, 404);
-  }
+    return c.json({ sneaker: formatSneaker(row) }, 201);
+  })
+  .patch("/:id", zValidator("json", updateSneakerSchema), async (c) => {
+    const user = c.get("user");
+    const id = parseSneakerId(c.req.param("id"));
+    const input = c.req.valid("json");
 
-  return c.json({ sneaker: formatSneaker(row) });
-});
+    if (!id) {
+      return c.json({ error: "Invalid sneaker id" }, 400);
+    }
 
-sneakerRoutes.post("/", zValidator("json", createSneakerSchema), async (c) => {
-  const user = c.get("user");
-  const input = c.req.valid("json");
+    const [existing] = await db
+      .select({ id: sneakers.id })
+      .from(sneakers)
+      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? "")));
 
-  const [row] = await db
-    .insert(sneakers)
-    .values({
-      userId: user?.id ?? "",
-      brand: input.brand,
-      model: input.model,
-      colorway: input.colorway ?? null,
-      size: input.size.toString(),
-      condition: input.condition,
-      purchasePrice: input.purchasePrice?.toString() ?? null,
-      purchaseDate: parsePurchaseDate(input.purchaseDate),
-      notes: input.notes ?? null,
-    })
-    .returning();
+    if (!existing) {
+      return c.json({ error: "Sneaker not found" }, 404);
+    }
 
-  return c.json({ sneaker: formatSneaker(row) }, 201);
-});
+    const [row] = await db
+      .update(sneakers)
+      .set({
+        ...(input.brand !== undefined ? { brand: input.brand } : {}),
+        ...(input.model !== undefined ? { model: input.model } : {}),
+        ...(input.colorway !== undefined ? { colorway: input.colorway } : {}),
+        ...(input.size !== undefined ? { size: input.size.toString() } : {}),
+        ...(input.condition !== undefined ? { condition: input.condition } : {}),
+        ...(input.purchasePrice !== undefined
+          ? { purchasePrice: input.purchasePrice?.toString() ?? null }
+          : {}),
+        ...(input.purchaseDate !== undefined
+          ? { purchaseDate: parsePurchaseDate(input.purchaseDate) }
+          : {}),
+        ...(input.notes !== undefined ? { notes: input.notes } : {}),
+      })
+      .where(eq(sneakers.id, id))
+      .returning();
 
-sneakerRoutes.patch("/:id", zValidator("json", updateSneakerSchema), async (c) => {
-  const user = c.get("user");
-  const id = parseSneakerId(c.req.param("id"));
-  const input = c.req.valid("json");
+    return c.json({ sneaker: formatSneaker(row) });
+  })
+  .delete("/:id", async (c) => {
+    const user = c.get("user");
+    const id = parseSneakerId(c.req.param("id"));
 
-  if (!id) {
-    return c.json({ error: "Invalid sneaker id" }, 400);
-  }
+    if (!id) {
+      return c.json({ error: "Invalid sneaker id" }, 400);
+    }
 
-  const [existing] = await db
-    .select({ id: sneakers.id })
-    .from(sneakers)
-    .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? "")));
+    const [row] = await db
+      .delete(sneakers)
+      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? "")))
+      .returning({ id: sneakers.id });
 
-  if (!existing) {
-    return c.json({ error: "Sneaker not found" }, 404);
-  }
+    if (!row) {
+      return c.json({ error: "Sneaker not found" }, 404);
+    }
 
-  const [row] = await db
-    .update(sneakers)
-    .set({
-      ...(input.brand !== undefined ? { brand: input.brand } : {}),
-      ...(input.model !== undefined ? { model: input.model } : {}),
-      ...(input.colorway !== undefined ? { colorway: input.colorway } : {}),
-      ...(input.size !== undefined ? { size: input.size.toString() } : {}),
-      ...(input.condition !== undefined ? { condition: input.condition } : {}),
-      ...(input.purchasePrice !== undefined
-        ? { purchasePrice: input.purchasePrice?.toString() ?? null }
-        : {}),
-      ...(input.purchaseDate !== undefined
-        ? { purchaseDate: parsePurchaseDate(input.purchaseDate) }
-        : {}),
-      ...(input.notes !== undefined ? { notes: input.notes } : {}),
-    })
-    .where(eq(sneakers.id, id))
-    .returning();
-
-  return c.json({ sneaker: formatSneaker(row) });
-});
-
-sneakerRoutes.delete("/:id", async (c) => {
-  const user = c.get("user");
-  const id = parseSneakerId(c.req.param("id"));
-
-  if (!id) {
-    return c.json({ error: "Invalid sneaker id" }, 400);
-  }
-
-  const [row] = await db
-    .delete(sneakers)
-    .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? "")))
-    .returning({ id: sneakers.id });
-
-  if (!row) {
-    return c.json({ error: "Sneaker not found" }, 404);
-  }
-
-  return c.json({ success: true });
-});
+    return c.json({ success: true });
+  });

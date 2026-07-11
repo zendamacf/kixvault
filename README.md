@@ -29,11 +29,17 @@ bun run --cwd apps/api dev
 bun run --cwd apps/web dev
 ```
 
+## Frontend
+
+The web app uses TanStack Router, TanStack Query, Tailwind CSS, and a typed Hono RPC client (`hc<AppType>`).
+
+Protected routes redirect to `/login` when no session cookie is present.
+
 ## API
 
 Auth uses Lucia with httpOnly session cookies. All sneaker routes require a valid session.
 
-The API exports `AppType` from `apps/api/src/index.ts` for a typed Hono RPC client (`hc`) in the frontend.
+The API exports `AppType` from `apps/api/src/app.ts` for a typed Hono RPC client (`hc`) in the frontend.
 
 ## Database
 

@@ -6,7 +6,12 @@
     "composite": false,
     "declaration": false,
     "declarationMap": false,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@kixvault/api/app": ["../api/src/app.ts"]
+    }
   },
   "include": ["src", "vite.config.ts"],
   "references": [{ "path": "../../packages/shared" }]
