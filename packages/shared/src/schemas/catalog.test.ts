@@ -1,0 +1,76 @@
+import { describe, expect, test } from 'bun:test';
+import { catalogSearchQuerySchema, catalogSearchResultSchema } from './catalog';
+
+describe('catalogSearchQuerySchema', () => {
+  test('applies defaults for limit and marketplace', () => {
+    const result = catalogSearchQuerySchema.safeParse({ q: 'jordan 1' });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.limit).toBe(10);
+      expect(result.data.marketplace).toBe('stockx');
+    }
+  });
+
+  test('coerces limit from a string query value', () => {
+    const result = catalogSearchQuerySchema.safeParse({
+      q: 'dunk low',
+      limit: '5',
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.limit).toBe(5);
+    }
+  });
+
+  test('accepts goat marketplace', () => {
+    const result = catalogSearchQuerySchema.safeParse({
+      q: 'yeezy',
+      marketplace: 'goat',
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.marketplace).toBe('goat');
+    }
+  });
+
+  test('rejects queries shorter than 2 characters', () => {
+    const result = catalogSearchQuerySchema.safeParse({ q: 'a' });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('catalogSearchResultSchema', () => {
+  test('accepts a normalized catalog result', () => {
+    const result = catalogSearchResultSchema.safeParse({
+      catalogSource: 'kicksdb:stockx',
+      catalogId: 'air-jordan-1-chicago',
+      title: 'Air Jordan 1 Retro High OG Chicago',
+      brand: 'Jordan',
+      model: 'Air Jordan 1',
+      colorway: 'Chicago',
+      sku: 'DZ5485-612',
+      imageUrl: 'https://images.stockx.com/example.png',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test('rejects invalid catalog source', () => {
+    const result = catalogSearchResultSchema.safeParse({
+      catalogSource: 'stockx',
+      catalogId: 'air-jordan-1',
+      title: 'Air Jordan 1',
+      brand: 'Jordan',
+      model: 'Air Jordan 1',
+      colorway: null,
+      sku: 'DZ5485-612',
+      imageUrl: null,
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
