@@ -7,7 +7,6 @@
     "declaration": false,
     "declarationMap": false,
     "noEmit": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@kixvault/api/app": ["../api/src/app.ts"],
