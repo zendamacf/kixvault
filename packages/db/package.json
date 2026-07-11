@@ -13,6 +13,7 @@
     "build": "tsc --build",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
+    "test": "bun test",
     "typecheck": "tsc --noEmit",
     "db:generate": "bun run --env-file ../../.env drizzle-kit generate",
     "db:migrate": "bun run --env-file ../../.env drizzle-kit migrate"
@@ -22,6 +23,7 @@
     "postgres": "^3.4.7"
   },
   "devDependencies": {
+    "@types/bun": "^1.2.18",
     "drizzle-kit": "^0.31.4"
   }
 }

@@ -66,6 +66,7 @@
         "postgres": "^3.4.7",
       },
       "devDependencies": {
+        "@types/bun": "^1.2.18",
         "drizzle-kit": "^0.31.4",
       },
     },
