@@ -1,7 +1,9 @@
 # TODO
 
- - Set up tests.
- - Set up CI/CD using GitHub Actions
+ - Set up unit/integration tests.
+ - CI/CD unit/integration tests.
+ - CI/CD deployment smoke tests of apps running.
+ - CI/CD build & deploy
  - Integrate w/ an API for pulling Sneaker details. Update database schema accordingly.
  - tsvector (or similar) search for full text.
  - Value snapshots

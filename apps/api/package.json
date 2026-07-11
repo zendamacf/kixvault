@@ -17,6 +17,8 @@
     "dev": "bun run --env-file ../../.env --watch src/index.ts",
     "start": "bun run src/index.ts",
     "build": "tsc --build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

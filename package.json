@@ -6,9 +6,6 @@
     "packages/*"
   ],
   "scripts": {
-    "check": "biome check .",
-    "check:fix": "biome check --write .",
-    "typecheck": "tsc --noEmit && bun run --cwd apps/web typecheck && bun run --cwd apps/api typecheck && bun run --cwd packages/db typecheck && bun run --cwd packages/shared typecheck",
     "db:generate": "bun run --cwd packages/db db:generate",
     "db:migrate": "bun run --cwd packages/db db:migrate",
     "dev:up": "docker compose --file docker-compose.dev.yml up -d",
@@ -16,10 +13,13 @@
     "dev:logs": "docker compose --file docker-compose.dev.yml logs -f",
     "prod:up": "docker compose --env-file .env up -d --build",
     "prod:down": "docker compose down",
-    "prod:logs": "docker compose logs -f"
+    "prod:logs": "docker compose logs -f",
+    "changeset": "changeset",
+    "changeset:version": "changeset version"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",
+    "@changesets/cli": "^2.31.0",
     "typescript": "^5.8.3"
   }
 }

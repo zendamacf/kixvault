@@ -11,9 +11,11 @@
   },
   "scripts": {
     "build": "tsc --build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "db:generate": "bun run --env-file ../../.env drizzle-kit generate",
-    "db:migrate": "bun run --env-file ../../.env drizzle-kit migrate",
+    "db:migrate": "bun run --env-file ../../.env drizzle-kit migrate"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.2",
