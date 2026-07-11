@@ -1,0 +1,41 @@
+{
+  "name": "@kixvault/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsr generate && vite",
+    "build": "tsr generate && vite build",
+    "preview": "vite preview",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsr generate && tsc -b"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
+    "@kixvault/api": "workspace:*",
+    "@kixvault/shared": "workspace:*",
+    "@tanstack/react-query": "^5.83.0",
+    "@tanstack/react-router": "^1.129.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "hono": "^4.8.3",
+    "lucide-react": "^0.525.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.60.0",
+    "tailwind-merge": "^3.3.1",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "@tanstack/router-cli": "^1.129.0",
+    "@tanstack/router-plugin": "^1.129.0",
+    "@types/bun": "^1.2.18",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "tailwindcss": "^4.1.11",
+    "vite": "^7.0.4"
+  }
+}

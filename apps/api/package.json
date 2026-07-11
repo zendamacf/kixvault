@@ -1,0 +1,36 @@
+{
+  "name": "@kixvault/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./app": {
+      "types": "./src/app.ts",
+      "default": "./src/app.ts"
+    }
+  },
+  "scripts": {
+    "dev": "bun run --env-file ../../.env --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "build": "tsc --build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.0",
+    "@kixvault/db": "workspace:*",
+    "@kixvault/shared": "workspace:*",
+    "@lucia-auth/adapter-drizzle": "^1.1.0",
+    "drizzle-orm": "^0.44.2",
+    "hono": "^4.8.3",
+    "lucia": "^3.2.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.18"
+  }
+}

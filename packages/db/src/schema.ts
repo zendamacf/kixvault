@@ -1,0 +1,61 @@
+import { relations } from "drizzle-orm";
+import { date, numeric, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+
+export const sneakerConditions = ["deadstock", "lightly_worn", "worn", "beat"] as const;
+export type SneakerCondition = (typeof sneakerConditions)[number];
+
+export const sneakerConditionEnum = pgEnum("sneaker_condition", sneakerConditions);
+
+export const users = pgTable("users", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+});
+
+export const sessions = pgTable("sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+});
+
+export const sneakers = pgTable("sneakers", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  brand: text("brand").notNull(),
+  model: text("model").notNull(),
+  colorway: text("colorway"),
+  size: numeric("size", { precision: 4, scale: 1 }).notNull(),
+  condition: sneakerConditionEnum("condition").notNull(),
+  purchasePrice: numeric("purchase_price", { precision: 10, scale: 2 }),
+  purchaseDate: date("purchase_date", { mode: "date" }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const usersRelations = relations(users, ({ many }) => ({
+  sessions: many(sessions),
+  sneakers: many(sneakers),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const sneakersRelations = relations(sneakers, ({ one }) => ({
+  user: one(users, {
+    fields: [sneakers.userId],
+    references: [users.id],
+  }),
+}));
