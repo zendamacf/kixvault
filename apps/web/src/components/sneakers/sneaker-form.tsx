@@ -1,6 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type CreateSneakerInput, createSneakerSchema, sneakerConditions } from "@kixvault/shared";
+import {
+  type CatalogSearchResult,
+  type CreateSneakerInput,
+  createSneakerSchema,
+  sneakerConditions,
+} from "@kixvault/shared";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { CatalogSearchPicker } from "@/components/sneakers/catalog-search-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +19,7 @@ type SneakerFormProps = {
   defaultValues?: Partial<CreateSneakerInput>;
   submitLabel: string;
   isSubmitting?: boolean;
+  enableCatalogSearch?: boolean;
   onSubmit: (values: CreateSneakerInput) => Promise<void>;
 };
 
@@ -19,11 +27,18 @@ export function SneakerForm({
   defaultValues,
   submitLabel,
   isSubmitting = false,
+  enableCatalogSearch = false,
   onSubmit,
 }: SneakerFormProps) {
+  const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(
+    defaultValues?.catalogId ?? null,
+  );
+
   const {
     register,
     handleSubmit,
+    reset,
+    getValues,
     formState: { errors },
   } = useForm<CreateSneakerInput>({
     resolver: zodResolver(createSneakerSchema),
@@ -36,9 +51,27 @@ export function SneakerForm({
       purchasePrice: undefined,
       purchaseDate: "",
       notes: "",
+      sku: null,
+      imageUrl: null,
+      catalogSource: null,
+      catalogId: null,
       ...defaultValues,
     },
   });
+
+  function applyCatalogResult(result: CatalogSearchResult) {
+    setSelectedCatalogId(result.catalogId);
+    reset({
+      ...getValues(),
+      brand: result.brand,
+      model: result.model,
+      colorway: result.colorway ?? "",
+      sku: result.sku,
+      imageUrl: result.imageUrl,
+      catalogSource: result.catalogSource,
+      catalogId: result.catalogId,
+    });
+  }
 
   return (
     <form
@@ -50,9 +83,17 @@ export function SneakerForm({
           purchasePrice: values.purchasePrice ?? null,
           purchaseDate: values.purchaseDate || null,
           notes: values.notes || null,
+          sku: values.sku ?? null,
+          imageUrl: values.imageUrl ?? null,
+          catalogSource: values.catalogSource ?? null,
+          catalogId: values.catalogId ?? null,
         });
       })}
     >
+      {enableCatalogSearch ? (
+        <CatalogSearchPicker selectedCatalogId={selectedCatalogId} onSelect={applyCatalogResult} />
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="brand">Brand</Label>

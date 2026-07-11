@@ -14,6 +14,8 @@ import { useDebouncedValue } from "@/lib/hooks";
 import { type Sneaker, sneakersQueryOptions, statsQueryOptions } from "@/lib/queries";
 import { formatCondition } from "@/lib/utils";
 
+const DEBOUNCE_DELAY = 300;
+
 export const Route = createFileRoute("/_authenticated/")({
   component: CollectionPage,
 });
@@ -24,7 +26,7 @@ function CollectionPage() {
   const [sort, setSort] = useState("created_at");
   const [order, setOrder] = useState("desc");
 
-  const debouncedBrand = useDebouncedValue(brand.trim(), 300);
+  const debouncedBrand = useDebouncedValue(brand.trim(), DEBOUNCE_DELAY);
 
   const filters = useMemo(
     () => ({

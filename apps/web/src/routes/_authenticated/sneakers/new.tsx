@@ -44,11 +44,14 @@ function NewSneakerPage() {
       <Card>
         <CardHeader>
           <CardTitle>Add a pair</CardTitle>
-          <CardDescription>Log the basics now — you can always edit later.</CardDescription>
+          <CardDescription>
+            Search the catalog to pre-fill details, or enter them manually.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {formError ? <p className="mb-4 text-sm text-destructive">{formError}</p> : null}
           <SneakerForm
+            enableCatalogSearch
             submitLabel="Add to collection"
             isSubmitting={createMutation.isPending}
             onSubmit={async (values) => {
