@@ -10,9 +10,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@kixvault/api/app": ["../api/src/app.ts"]
+      "@kixvault/api/app": ["../api/src/app.ts"],
+      "@kixvault/shared": ["../../packages/shared/src/index.ts"]
     }
   },
-  "include": ["src", "vite.config.ts"],
-  "references": [{ "path": "../../packages/shared" }]
+  "include": ["src", "vite.config.ts"]
 }
