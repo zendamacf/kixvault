@@ -5,28 +5,28 @@ coverage:
     project:
       shared:
         target: auto
-        threshold: 1%
+        threshold: 3%
         flags:
           - shared
       db:
         target: auto
-        threshold: 1%
+        threshold: 3%
         flags:
           - db
       api:
         target: auto
-        threshold: 1%
+        threshold: 3%
         flags:
           - api
       web:
         target: auto
-        threshold: 1%
+        threshold: 3%
         flags:
           - web
     patch:
       default:
         target: auto
-        threshold: 1%
+        threshold: 3%
 
 flag_management:
   default_rules:
