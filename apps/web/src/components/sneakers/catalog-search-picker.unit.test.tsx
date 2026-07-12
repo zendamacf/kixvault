@@ -1,17 +1,10 @@
-import { afterEach, beforeAll, describe, expect, mock, test } from 'bun:test';
+import { afterEach, describe, expect, mock, test } from 'bun:test';
 import type { CatalogSearchResult } from '@kixvault/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { ComponentType, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { createJsonResponse, installFetchMock } from '@/test/mocks/api';
-
-type CatalogSearchPickerProps = {
-  onSelect: (result: CatalogSearchResult) => void;
-  selectedCatalogId?: string | null;
-  onMarketplaceChange?: () => void;
-};
-
-let CatalogSearchPicker: ComponentType<CatalogSearchPickerProps>;
 
 const goatResult: CatalogSearchResult = {
   catalogSource: 'kicksdb:goat',
@@ -60,11 +53,7 @@ afterEach(() => {
   cleanup();
 });
 
-beforeAll(async () => {
-  ({ CatalogSearchPicker } = await import('@/components/sneakers/catalog-search-picker'));
-});
-
-function renderPicker(props: Partial<CatalogSearchPickerProps> = {}) {
+function renderPicker(props: Partial<Parameters<typeof CatalogSearchPicker>[0]> = {}) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
