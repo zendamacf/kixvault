@@ -60,9 +60,7 @@ describe('SneakerForm', () => {
   test('submits catalog nickname after selecting a result', async () => {
     const onSubmit = mock(async () => {});
 
-    render(
-      <SneakerForm enableCatalogSearch submitLabel="Add to collection" onSubmit={onSubmit} />,
-    );
+    render(<SneakerForm enableCatalogSearch submitLabel="Add to collection" onSubmit={onSubmit} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Select catalog result' }));
     expect((screen.getByLabelText('Nickname') as HTMLInputElement).value).toBe('Chicago');

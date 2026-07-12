@@ -7,4 +7,5 @@ coveragePathIgnorePatterns = [
   "**/test/**",
   "**/*.gen.ts",
   "../../packages/**",
+  "../**",
 ]
