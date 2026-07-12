@@ -24,7 +24,12 @@ import { formatCondition } from '@/lib/utils';
 
 const sneakerFormSchema = createSneakerSchema.extend({
   size: z.number({ error: 'Size is required' }).positive().max(99),
-  purchasePrice: z.number().nonnegative().optional().nullable(),
+  purchasePrice: z
+    .number()
+    .nonnegative()
+    .optional()
+    .nullable()
+    .or(z.nan().transform(() => undefined)),
 });
 
 type SneakerFormValues = z.infer<typeof sneakerFormSchema>;
@@ -65,7 +70,6 @@ export function SneakerForm({
       colorway: '',
       size: undefined,
       condition: 'deadstock',
-      purchasePrice: undefined,
       purchaseDate: '',
       notes: '',
       sku: null,
@@ -73,6 +77,7 @@ export function SneakerForm({
       catalogSource: null,
       catalogId: null,
       ...defaultValues,
+      purchasePrice: defaultValues?.purchasePrice ?? undefined,
     },
   });
 
@@ -231,7 +236,9 @@ export function SneakerForm({
                 type="number"
                 step="1"
                 placeholder="180"
-                {...register('purchasePrice', { valueAsNumber: true })}
+                {...register('purchasePrice', {
+                  setValueAs: (value) => (value === '' ? undefined : Number(value)),
+                })}
               />
             </div>
 

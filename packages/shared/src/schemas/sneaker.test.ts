@@ -37,6 +37,27 @@ describe('createSneakerSchema', () => {
     }
   });
 
+  test('allows purchase price to be omitted', () => {
+    const result = createSneakerSchema.safeParse({
+      ...validSneaker,
+      purchasePrice: undefined,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test('treats an empty purchase price as omitted', () => {
+    const result = createSneakerSchema.safeParse({
+      ...validSneaker,
+      purchasePrice: '',
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.purchasePrice).toBeUndefined();
+    }
+  });
+
   test('accepts an empty purchase date', () => {
     const result = createSneakerSchema.safeParse({
       ...validSneaker,
