@@ -36,3 +36,15 @@ export function formatDate(value: string | Date | null | undefined) {
     day: 'numeric',
   });
 }
+
+export function getCatalogSourceLabel(catalogSource: string | null | undefined) {
+  if (catalogSource === 'kicksdb:stockx') {
+    return 'StockX';
+  }
+
+  if (catalogSource === 'kicksdb:goat') {
+    return 'GOAT';
+  }
+
+  return null;
+}

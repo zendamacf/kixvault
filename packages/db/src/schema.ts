@@ -41,6 +41,7 @@ export const sneakers = pgTable(
     imageUrl: text('image_url'),
     catalogSource: text('catalog_source'),
     catalogId: text('catalog_id'),
+    nickname: text('nickname'),
     searchVector: tsvector('search_vector')
       .notNull()
       .generatedAlwaysAs(
@@ -48,6 +49,7 @@ export const sneakers = pgTable(
           sql`setweight(to_tsvector('english', coalesce(${sneakers.brand}, '')), 'A') ||
               setweight(to_tsvector('english', coalesce(${sneakers.model}, '')), 'A') ||
               setweight(to_tsvector('english', coalesce(${sneakers.colorway}, '')), 'B') ||
+              setweight(to_tsvector('english', coalesce(${sneakers.nickname}, '')), 'B') ||
               setweight(to_tsvector('simple', coalesce(${sneakers.sku}, '')), 'A') ||
               setweight(to_tsvector('english', coalesce(${sneakers.notes}, '')), 'C')`,
       ),

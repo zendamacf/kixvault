@@ -52,8 +52,10 @@ describe('catalogSearchResultSchema', () => {
       brand: 'Jordan',
       model: 'Air Jordan 1',
       colorway: 'Chicago',
+      nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.stockx.com/example.png',
+      catalogUrl: 'https://stockx.com/air-jordan-1-chicago',
     });
 
     expect(result.success).toBe(true);
@@ -67,8 +69,10 @@ describe('catalogSearchResultSchema', () => {
       brand: 'Jordan',
       model: 'Air Jordan 1',
       colorway: null,
+      nickname: null,
       sku: 'DZ5485-612',
       imageUrl: null,
+      catalogUrl: null,
     });
 
     expect(result.success).toBe(false);

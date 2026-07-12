@@ -1,5 +1,6 @@
 import { sneakers as sneakersTable } from '@kixvault/db';
-import type { UpdateSneakerInput } from '@kixvault/shared';
+import type { CatalogSource, UpdateSneakerInput } from '@kixvault/shared';
+import { buildCatalogUrl } from '@kixvault/shared';
 import { or, type SQL, sql } from 'drizzle-orm';
 
 type SneakerRow = typeof sneakersTable.$inferSelect;
@@ -8,6 +9,7 @@ const catalogLinkedModelFields = [
   'brand',
   'model',
   'colorway',
+  'nickname',
   'sku',
   'imageUrl',
   'catalogSource',
@@ -45,6 +47,10 @@ export function getCatalogLinkedModelFieldViolations(
     violations.push('colorway');
   }
 
+  if (nullableFieldChanged(existing.nickname, input.nickname)) {
+    violations.push('nickname');
+  }
+
   if (nullableFieldChanged(existing.sku, input.sku)) {
     violations.push('sku');
   }
@@ -74,6 +80,7 @@ export function buildSneakerUpdate(
     ...(!isCatalogLinked && input.brand !== undefined ? { brand: input.brand } : {}),
     ...(!isCatalogLinked && input.model !== undefined ? { model: input.model } : {}),
     ...(!isCatalogLinked && input.colorway !== undefined ? { colorway: input.colorway } : {}),
+    ...(!isCatalogLinked && input.nickname !== undefined ? { nickname: input.nickname } : {}),
     ...(input.size !== undefined ? { size: input.size.toString() } : {}),
     ...(input.condition !== undefined ? { condition: input.condition } : {}),
     ...(input.purchasePrice !== undefined
@@ -133,6 +140,7 @@ export function formatSneaker(row: SneakerRow) {
     brand: row.brand,
     model: row.model,
     colorway: row.colorway,
+    nickname: row.nickname,
     size: Number(row.size),
     condition: row.condition,
     purchasePrice: row.purchasePrice ? Number(row.purchasePrice) : null,
@@ -140,8 +148,12 @@ export function formatSneaker(row: SneakerRow) {
     notes: row.notes,
     sku: row.sku,
     imageUrl: row.imageUrl,
-    catalogSource: row.catalogSource,
+    catalogSource: row.catalogSource as CatalogSource | null,
     catalogId: row.catalogId,
+    catalogUrl:
+      row.catalogSource && row.catalogId
+        ? buildCatalogUrl(row.catalogSource as CatalogSource, row.catalogId)
+        : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

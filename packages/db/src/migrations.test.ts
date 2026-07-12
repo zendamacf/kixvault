@@ -73,6 +73,7 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       'id',
       'image_url',
       'model',
+      'nickname',
       'notes',
       'purchase_date',
       'purchase_price',

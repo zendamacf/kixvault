@@ -16,6 +16,7 @@ export const catalogSearchResultSchema = z.object({
   brand: z.string(),
   model: z.string(),
   colorway: z.string().nullable(),
+  nickname: z.string().nullable(),
   sku: z.string(),
   imageUrl: z.string().url().nullable(),
 });

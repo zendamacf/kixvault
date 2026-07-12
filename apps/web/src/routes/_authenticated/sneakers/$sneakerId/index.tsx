@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api, parseApiError } from '@/lib/api';
 import { sneakerQueryOptions } from '@/lib/queries';
-import { formatCondition, formatCurrency, formatDate } from '@/lib/utils';
+import { formatCondition, formatCurrency, formatDate, getCatalogSourceLabel } from '@/lib/utils';
 
 export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
   component: SneakerDetailPage,
@@ -88,6 +88,7 @@ function SneakerDetailPage() {
 
   const sneaker = data.sneaker;
   const title = `${sneaker.brand} ${sneaker.model}`;
+  const catalogSourceLabel = getCatalogSourceLabel(sneaker.catalogSource);
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
@@ -106,11 +107,26 @@ function SneakerDetailPage() {
               />
               <div className="space-y-2">
                 <CardTitle className="text-2xl sm:text-3xl">{title}</CardTitle>
+                {sneaker.nickname ? (
+                  <p className="text-base font-medium text-foreground">{sneaker.nickname}</p>
+                ) : null}
                 <p className="text-muted-foreground">{sneaker.colorway || 'No colorway listed'}</p>
                 {sneaker.sku ? (
                   <p className="text-sm text-muted-foreground">SKU {sneaker.sku}</p>
                 ) : null}
-                <Badge>{formatCondition(sneaker.condition)}</Badge>
+                <div>
+                  <Badge>{formatCondition(sneaker.condition)}</Badge>
+                </div>
+                {sneaker.catalogUrl && catalogSourceLabel ? (
+                  <a
+                    href={sneaker.catalogUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex text-sm text-primary hover:underline"
+                  >
+                    View on {catalogSourceLabel}
+                  </a>
+                ) : null}
               </div>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">

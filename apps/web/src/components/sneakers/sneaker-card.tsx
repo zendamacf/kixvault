@@ -11,6 +11,7 @@ type SneakerCardProps = {
 
 export function SneakerCard({ sneaker }: SneakerCardProps) {
   const title = `${sneaker.brand} ${sneaker.model}`;
+  const subtitle = sneaker.nickname || sneaker.colorway || 'No colorway';
 
   return (
     <Link to="/sneakers/$sneakerId" params={{ sneakerId: sneaker.id }} className="block h-full">
@@ -25,7 +26,7 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
             <div className="min-w-0">
               <CardTitle className="truncate text-base">{title}</CardTitle>
               <p className="truncate text-sm text-muted-foreground">
-                {sneaker.colorway || 'No colorway'} · Size {sneaker.size}
+                {subtitle} · Size {sneaker.size}
               </p>
             </div>
             <Badge className="shrink-0">{formatCondition(sneaker.condition)}</Badge>

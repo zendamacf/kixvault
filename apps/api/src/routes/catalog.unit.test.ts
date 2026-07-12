@@ -9,8 +9,10 @@ const mockSearchCatalog = mock(async () => [
     brand: 'Jordan',
     model: 'Air Jordan 1',
     colorway: 'Chicago',
+    nickname: 'Chicago',
     sku: 'DZ5485-612',
     imageUrl: null,
+    catalogUrl: 'https://stockx.com/air-jordan-1',
   },
 ]);
 
@@ -56,8 +58,10 @@ describe('catalog routes', () => {
           brand: 'Jordan',
           model: 'Air Jordan 1',
           colorway: 'Chicago',
+          nickname: 'Chicago',
           sku: 'DZ5485-612',
           imageUrl: null,
+          catalogUrl: 'https://stockx.com/air-jordan-1',
         },
       ],
     });

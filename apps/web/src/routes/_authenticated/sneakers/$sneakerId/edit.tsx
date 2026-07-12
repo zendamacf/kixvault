@@ -78,6 +78,7 @@ function EditSneakerPage() {
               brand: sneaker.brand,
               model: sneaker.model,
               colorway: sneaker.colorway,
+              nickname: sneaker.nickname,
               size: sneaker.size,
               condition: sneaker.condition as SneakerCondition,
               purchasePrice: sneaker.purchasePrice,

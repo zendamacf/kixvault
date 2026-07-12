@@ -7,6 +7,7 @@ const sneakerCatalogFields = {
   imageUrl: z.string().trim().url().max(2000).optional().nullable(),
   catalogSource: z.enum(catalogSources).optional().nullable(),
   catalogId: z.string().trim().max(200).optional().nullable(),
+  nickname: z.string().trim().max(100).optional().nullable(),
 } as const;
 
 const optionalNumericField = z.preprocess(

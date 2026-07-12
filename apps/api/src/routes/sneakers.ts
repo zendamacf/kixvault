@@ -85,6 +85,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
         brand: input.brand,
         model: input.model,
         colorway: input.colorway ?? null,
+        nickname: input.nickname ?? null,
         size: input.size.toString(),
         condition: input.condition,
         purchasePrice: input.purchasePrice?.toString() ?? null,

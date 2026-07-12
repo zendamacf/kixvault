@@ -29,6 +29,7 @@ const sneaker = {
   brand: 'Nike',
   model: 'Air Max 1',
   colorway: 'Anniversary Red',
+  nickname: null,
   size: 10,
   condition: 'deadstock',
   purchasePrice: 180,
@@ -38,6 +39,7 @@ const sneaker = {
   imageUrl: null,
   catalogSource: null,
   catalogId: null,
+  catalogUrl: null,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-02T00:00:00.000Z',
 };
@@ -50,5 +52,11 @@ describe('SneakerCard', () => {
     expect(screen.getByText('Anniversary Red · Size 10')).toBeTruthy();
     expect(screen.getByText('Deadstock')).toBeTruthy();
     expect(screen.getByText('Paid $180')).toBeTruthy();
+  });
+
+  test('prefers nickname over colorway in the subtitle', () => {
+    render(<SneakerCard sneaker={{ ...sneaker, nickname: 'Patta' }} />);
+
+    expect(screen.getByText('Patta · Size 10')).toBeTruthy();
   });
 });

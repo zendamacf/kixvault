@@ -39,6 +39,7 @@ export function normalizeStockxProduct(product: StockXProduct): CatalogSearchRes
     brand: product.brand,
     model: product.model || product.primary_title,
     colorway: product.secondary_title || null,
+    nickname: product.secondary_title || null,
     sku: product.sku,
     imageUrl: product.image || product.gallery?.[0] || null,
   };
@@ -51,7 +52,8 @@ export function normalizeGoatProduct(product: GoatProduct): CatalogSearchResult 
     title: product.name,
     brand: product.brand,
     model: product.model,
-    colorway: product.colorway || product.nickname || null,
+    colorway: product.colorway || null,
+    nickname: product.nickname || null,
     sku: product.sku,
     imageUrl: product.image_url || product.images?.[0] || null,
   };

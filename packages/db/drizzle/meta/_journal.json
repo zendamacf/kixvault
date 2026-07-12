@@ -22,6 +22,20 @@
       "when": 1783771959449,
       "tag": "0002_shocking_luminals",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783843514961,
+      "tag": "0003_brave_mulholland_black",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1783844784774,
+      "tag": "0004_heavy_ultimatum",
+      "breakpoints": true
     }
   ]
 }

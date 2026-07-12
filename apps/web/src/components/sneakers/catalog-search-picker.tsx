@@ -134,6 +134,11 @@ export function CatalogSearchPicker({
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium">{result.title}</span>
+                    {result.nickname ? (
+                      <span className="block truncate text-sm text-foreground">
+                        {result.nickname}
+                      </span>
+                    ) : null}
                     <span className="block truncate text-sm text-muted-foreground">
                       {result.brand} · {result.sku}
                     </span>

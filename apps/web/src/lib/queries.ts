@@ -7,6 +7,7 @@ export type Sneaker = {
   brand: string;
   model: string;
   colorway: string | null;
+  nickname: string | null;
   size: number;
   condition: string;
   purchasePrice: number | null;
@@ -16,6 +17,7 @@ export type Sneaker = {
   imageUrl: string | null;
   catalogSource: string | null;
   catalogId: string | null;
+  catalogUrl: string | null;
   createdAt: string;
   updatedAt: string;
 };
