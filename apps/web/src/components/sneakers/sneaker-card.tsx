@@ -11,7 +11,7 @@ type SneakerCardProps = {
 
 export function SneakerCard({ sneaker }: SneakerCardProps) {
   const title = `${sneaker.brand} ${sneaker.model}`;
-  const subtitle = sneaker.nickname || sneaker.colorway || 'No colorway';
+  const subtitle = sneaker.nickname ? `"${sneaker.nickname}"` : sneaker.colorway || 'No colorway';
 
   return (
     <Link to="/sneakers/$sneakerId" params={{ sneakerId: sneaker.id }} className="block h-full">

@@ -96,6 +96,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
         brand: 'Nike',
         model: 'Air Max 1',
         colorway: 'Anniversary Red',
+        nickname: 'Big Bubble',
         size: 10,
         condition: 'deadstock',
         purchasePrice: 180,
@@ -108,8 +109,9 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(createResponse.status).toBe(201);
 
     const created = (await createResponse.json()) as {
-      sneaker: { id: string; brand: string; sku: string };
+      sneaker: { id: string; brand: string; sku: string; nickname: string | null };
     };
+    expect(created.sneaker.nickname).toBe('Big Bubble');
 
     const listResponse = await app.request('/api/sneakers', {
       headers: { Cookie: cookie },

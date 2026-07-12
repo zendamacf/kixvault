@@ -108,7 +108,7 @@ function SneakerDetailPage() {
               <div className="space-y-2">
                 <CardTitle className="text-2xl sm:text-3xl">{title}</CardTitle>
                 {sneaker.nickname ? (
-                  <p className="text-base font-medium text-foreground">{sneaker.nickname}</p>
+                  <p className="text-base font-medium text-foreground">{`"${sneaker.nickname}"`}</p>
                 ) : null}
                 <p className="text-muted-foreground">{sneaker.colorway || 'No colorway listed'}</p>
                 {sneaker.sku ? (

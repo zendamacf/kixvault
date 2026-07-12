@@ -136,11 +136,11 @@ export function CatalogSearchPicker({
                     <span className="block truncate font-medium">{result.title}</span>
                     {result.nickname ? (
                       <span className="block truncate text-sm text-foreground">
-                        {result.nickname}
+                        {`"${result.nickname}"`}
                       </span>
                     ) : null}
                     <span className="block truncate text-sm text-muted-foreground">
-                      {result.brand} · {result.sku}
+                      {result.sku}
                     </span>
                   </span>
                 </button>

@@ -57,6 +57,6 @@ describe('SneakerCard', () => {
   test('prefers nickname over colorway in the subtitle', () => {
     render(<SneakerCard sneaker={{ ...sneaker, nickname: 'Patta' }} />);
 
-    expect(screen.getByText('Patta · Size 10')).toBeTruthy();
+    expect(screen.getByText('"Patta" · Size 10')).toBeTruthy();
   });
 });
