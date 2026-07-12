@@ -23,4 +23,9 @@ describe('buildCatalogUrl', () => {
   test('returns null when slug is missing', () => {
     expect(buildCatalogUrl('kicksdb:stockx', '')).toBeNull();
   });
+
+  test('returns null when source is unknown', () => {
+    // @ts-expect-error - unknown source
+    expect(buildCatalogUrl('unknown:test', 'air-jordan-1-chicago')).toBeNull();
+  });
 });
