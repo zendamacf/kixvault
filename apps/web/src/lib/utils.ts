@@ -95,7 +95,10 @@ const sneakerBrandMatchers: Array<{ key: SneakerBrandColor; matches: (brand: str
   [
     { key: 'jordan', matches: (brand) => brand.includes('jordan') },
     { key: 'new-balance', matches: (brand) => brand.includes('new balance') || brand === 'nb' },
-    { key: 'under-armour', matches: (brand) => brand.includes('under armour') || brand.includes('under armor') },
+    {
+      key: 'under-armour',
+      matches: (brand) => brand.includes('under armour') || brand.includes('under armor'),
+    },
     { key: 'on-running', matches: (brand) => brand === 'on' || brand.includes('on running') },
     { key: 'yeezy', matches: (brand) => brand.includes('yeezy') },
     { key: 'adidas', matches: (brand) => brand.includes('adidas') },
