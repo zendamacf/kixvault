@@ -114,6 +114,9 @@ function SneakerDetailPage() {
                 {sneaker.sku ? (
                   <p className="text-sm text-muted-foreground">SKU {sneaker.sku}</p>
                 ) : null}
+                <div>
+                  <Badge>{formatCondition(sneaker.condition)}</Badge>
+                </div>
                 {sneaker.catalogUrl && catalogSourceLabel ? (
                   <a
                     href={sneaker.catalogUrl}
@@ -124,7 +127,6 @@ function SneakerDetailPage() {
                     View on {catalogSourceLabel}
                   </a>
                 ) : null}
-                <Badge>{formatCondition(sneaker.condition)}</Badge>
               </div>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
