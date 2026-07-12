@@ -28,6 +28,8 @@ function createSneakerRow(overrides: Partial<SneakerRow> = {}): SneakerRow {
     catalogSource: 'kicksdb:stockx',
     catalogId: 'air-max-1',
     nickname: 'Anniversary Red',
+    releaseDate: new Date('2015-04-25T00:00:00.000Z'),
+    description: 'The original Air Max with visible Air cushioning.',
     searchVector: "'air':1 'max':2 'nike':3",
     createdAt: new Date('2024-01-01T00:00:00.000Z'),
     updatedAt: new Date('2024-01-02T00:00:00.000Z'),
@@ -81,6 +83,8 @@ describe('formatSneaker', () => {
       catalogSource: 'kicksdb:stockx',
       catalogId: 'air-max-1',
       catalogUrl: 'https://stockx.com/air-max-1',
+      releaseDate: '2015-04-25',
+      description: 'The original Air Max with visible Air cushioning.',
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-02T00:00:00.000Z',
     });

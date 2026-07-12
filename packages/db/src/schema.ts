@@ -42,6 +42,8 @@ export const sneakers = pgTable(
     catalogSource: text('catalog_source'),
     catalogId: text('catalog_id'),
     nickname: text('nickname'),
+    releaseDate: date('release_date', { mode: 'date' }),
+    description: text('description'),
     searchVector: tsvector('search_vector')
       .notNull()
       .generatedAlwaysAs(

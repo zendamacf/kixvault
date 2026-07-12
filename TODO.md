@@ -7,3 +7,4 @@
  - Branding.
  - Barcode scanning.
  - Sentry integration.
+ - Add sneaker either manually or via catalog, don't rely on frontend to supply all fields from catalog.

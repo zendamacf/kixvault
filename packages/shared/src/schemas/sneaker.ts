@@ -2,12 +2,23 @@ import { z } from 'zod';
 import { sneakerConditions } from '../types';
 import { catalogSources } from './catalog';
 
+const dateField = z
+  .string()
+  .trim()
+  .optional()
+  .nullable()
+  .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), {
+    message: 'Expected YYYY-MM-DD',
+  });
+
 const sneakerCatalogFields = {
   sku: z.string().trim().max(50).optional().nullable(),
   imageUrl: z.string().trim().url().max(2000).optional().nullable(),
   catalogSource: z.enum(catalogSources).optional().nullable(),
   catalogId: z.string().trim().max(200).optional().nullable(),
   nickname: z.string().trim().max(100).optional().nullable(),
+  releaseDate: dateField,
+  description: z.string().trim().max(5000).optional().nullable(),
 } as const;
 
 const optionalNumericField = z.preprocess(
@@ -22,14 +33,7 @@ export const createSneakerSchema = z.object({
   size: z.coerce.number().positive().max(99),
   condition: z.enum(sneakerConditions),
   purchasePrice: optionalNumericField,
-  purchaseDate: z
-    .string()
-    .trim()
-    .optional()
-    .nullable()
-    .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), {
-      message: 'Expected YYYY-MM-DD',
-    }),
+  purchaseDate: dateField,
   notes: z.string().trim().max(2000).optional().nullable(),
   ...sneakerCatalogFields,
 });

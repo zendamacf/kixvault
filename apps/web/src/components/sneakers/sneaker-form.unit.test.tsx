@@ -16,6 +16,8 @@ const catalogResult: CatalogSearchResult = {
   nickname: 'Chicago',
   sku: 'DZ5485-612',
   imageUrl: 'https://images.goat.com/chicago.png',
+  releaseDate: '2016-12-13',
+  description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
 };
 
 // Bypass the 1s catalog search debounce so results appear immediately
@@ -95,6 +97,8 @@ describe('SneakerForm', () => {
         model: 'Air Jordan 1',
         nickname: 'Chicago',
         sku: 'DZ5485-612',
+        releaseDate: '2016-12-13',
+        description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
         size: 10,
       }),
     );

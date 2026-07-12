@@ -29,6 +29,8 @@ const stockxProduct = {
   image: 'https://images.stockx.com/chicago.png',
   gallery: ['https://images.stockx.com/chicago-alt.png'],
   link: 'https://stockx.com/air-jordan-1-chicago',
+  description: '<p>Released in 1985, the Air Jordan 1 changed basketball forever.</p>',
+  traits: [{ trait: 'Release Date', value: '2015-04-25' }],
 } as StockXProduct;
 
 const goatProduct = {
@@ -42,6 +44,8 @@ const goatProduct = {
   image_url: 'https://images.goat.com/chicago.png',
   images: ['https://images.goat.com/chicago-alt.png'],
   link: 'https://www.goat.com/sneakers/air-jordan-1-chicago-goat',
+  description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
+  release_date: '2016-12-13T23:59:59.999Z',
 } as GoatProduct;
 
 describe('catalog normalization', () => {
@@ -58,6 +62,8 @@ describe('catalog normalization', () => {
       nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.stockx.com/chicago.png',
+      releaseDate: '2015-04-25',
+      description: 'Released in 1985, the Air Jordan 1 changed basketball forever.',
     });
   });
 
@@ -74,6 +80,8 @@ describe('catalog normalization', () => {
       nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.goat.com/chicago.png',
+      releaseDate: '2016-12-13',
+      description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
     });
   });
 });

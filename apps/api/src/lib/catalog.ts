@@ -31,6 +31,41 @@ export class CatalogSearchError extends Error {
   }
 }
 
+function normalizeDescription(description: string | null | undefined): string | null {
+  if (!description?.trim()) {
+    return null;
+  }
+
+  return (
+    description
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim() || null
+  );
+}
+
+export function parseCatalogReleaseDate(value: string | Date | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const date = value instanceof Date ? value : new Date(String(value));
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
+function getStockxReleaseDate(product: StockXProduct): string | null {
+  const releaseDateTrait = product.traits?.find(
+    (trait) => trait.trait.toLowerCase() === 'release date',
+  );
+
+  return releaseDateTrait ? parseCatalogReleaseDate(releaseDateTrait.value) : null;
+}
+
 export function normalizeStockxProduct(product: StockXProduct): CatalogSearchResult {
   return {
     catalogSource: 'kicksdb:stockx',
@@ -42,6 +77,8 @@ export function normalizeStockxProduct(product: StockXProduct): CatalogSearchRes
     nickname: product.secondary_title || null,
     sku: product.sku,
     imageUrl: product.image || product.gallery?.[0] || null,
+    releaseDate: getStockxReleaseDate(product),
+    description: normalizeDescription(product.description),
   };
 }
 
@@ -56,6 +93,8 @@ export function normalizeGoatProduct(product: GoatProduct): CatalogSearchResult 
     nickname: product.nickname || null,
     sku: product.sku,
     imageUrl: product.image_url || product.images?.[0] || null,
+    releaseDate: parseCatalogReleaseDate(product.release_date),
+    description: normalizeDescription(product.description),
   };
 }
 

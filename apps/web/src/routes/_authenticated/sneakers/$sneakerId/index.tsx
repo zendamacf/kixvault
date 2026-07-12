@@ -176,12 +176,20 @@ function SneakerDetailPage() {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <DetailItem label="Size" value={String(sneaker.size)} />
+          {sneaker.releaseDate ? (
+            <DetailItem label="Release date" value={formatDate(sneaker.releaseDate)} />
+          ) : null}
           <DetailItem label="Purchase price" value={formatCurrency(sneaker.purchasePrice)} />
           <DetailItem label="Purchase date" value={formatDate(sneaker.purchaseDate)} />
           <DetailItem label="Added" value={formatDate(sneaker.createdAt)} />
           <div className="sm:col-span-2">
             <DetailItem label="Notes" value={sneaker.notes || '—'} />
           </div>
+          {sneaker.description ? (
+            <div className="sm:col-span-2">
+              <DetailItem label="Description" value={sneaker.description} />
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 

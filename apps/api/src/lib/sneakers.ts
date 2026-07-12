@@ -14,6 +14,8 @@ const catalogLinkedModelFields = [
   'imageUrl',
   'catalogSource',
   'catalogId',
+  'releaseDate',
+  'description',
 ] as const;
 
 type CatalogLinkedModelField = (typeof catalogLinkedModelFields)[number];
@@ -67,6 +69,14 @@ export function getCatalogLinkedModelFieldViolations(
     violations.push('catalogId');
   }
 
+  if (nullableFieldChanged(formatPurchaseDate(existing.releaseDate), input.releaseDate)) {
+    violations.push('releaseDate');
+  }
+
+  if (nullableFieldChanged(existing.description, input.description)) {
+    violations.push('description');
+  }
+
   return violations;
 }
 
@@ -96,6 +106,12 @@ export function buildSneakerUpdate(
       ? { catalogSource: input.catalogSource }
       : {}),
     ...(!isCatalogLinked && input.catalogId !== undefined ? { catalogId: input.catalogId } : {}),
+    ...(!isCatalogLinked && input.releaseDate !== undefined
+      ? { releaseDate: parsePurchaseDate(input.releaseDate) }
+      : {}),
+    ...(!isCatalogLinked && input.description !== undefined
+      ? { description: input.description }
+      : {}),
   };
 }
 
@@ -150,6 +166,8 @@ export function formatSneaker(row: SneakerRow) {
     imageUrl: row.imageUrl,
     catalogSource: row.catalogSource as CatalogSource | null,
     catalogId: row.catalogId,
+    releaseDate: formatPurchaseDate(row.releaseDate),
+    description: row.description,
     catalogUrl:
       row.catalogSource && row.catalogId
         ? buildCatalogUrl(row.catalogSource as CatalogSource, row.catalogId)

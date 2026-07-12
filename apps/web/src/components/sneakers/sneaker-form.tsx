@@ -95,6 +95,8 @@ export function SneakerForm({
       imageUrl: result.imageUrl,
       catalogSource: result.catalogSource,
       catalogId: result.catalogId,
+      releaseDate: result.releaseDate ?? '',
+      description: result.description,
     });
   }
 
@@ -113,6 +115,8 @@ export function SneakerForm({
           imageUrl: values.imageUrl ?? null,
           catalogSource: values.catalogSource ?? null,
           catalogId: values.catalogId ?? null,
+          releaseDate: values.releaseDate || null,
+          description: values.description ?? null,
         };
 
         if (lockModelDetails) {
@@ -126,6 +130,8 @@ export function SneakerForm({
             imageUrl: defaultValues?.imageUrl ?? null,
             catalogSource: defaultValues?.catalogSource ?? null,
             catalogId: defaultValues?.catalogId ?? null,
+            releaseDate: defaultValues?.releaseDate ?? null,
+            description: defaultValues?.description ?? null,
           });
           return;
         }
@@ -156,6 +162,14 @@ export function SneakerForm({
           {...register('catalogSource', { setValueAs: (value) => value || null })}
         />
         <input type="hidden" {...register('catalogId', { setValueAs: (value) => value || null })} />
+        <input
+          type="hidden"
+          {...register('releaseDate', { setValueAs: (value) => value || null })}
+        />
+        <input
+          type="hidden"
+          {...register('description', { setValueAs: (value) => value || null })}
+        />
         {lockModelDetails ? (
           <p className="text-sm text-muted-foreground">
             Model details are linked to the catalog (SKU {defaultValues?.sku}) and cannot be edited.
