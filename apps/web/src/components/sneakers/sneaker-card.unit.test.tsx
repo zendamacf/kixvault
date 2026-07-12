@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { cleanup, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
+import type { Sneaker } from '@/lib/queries';
 import { SneakerCard } from './sneaker-card';
 
 afterEach(() => {
@@ -23,7 +24,7 @@ mock.module('@tanstack/react-router', () => ({
   ),
 }));
 
-const sneaker = {
+const sneaker: Sneaker = {
   id: '11111111-1111-4111-8111-111111111111',
   userId: 'user-1',
   brand: 'Nike',
@@ -40,6 +41,8 @@ const sneaker = {
   catalogSource: null,
   catalogId: null,
   catalogUrl: null,
+  releaseDate: null,
+  description: null,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-02T00:00:00.000Z',
 };

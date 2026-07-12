@@ -36,6 +36,13 @@
       "when": 1783844784774,
       "tag": "0004_heavy_ultimatum",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1783850987332,
+      "tag": "0005_right_absorbing_man",
+      "breakpoints": true
     }
   ]
 }

@@ -18,6 +18,8 @@ export type Sneaker = {
   catalogSource: string | null;
   catalogId: string | null;
   catalogUrl: string | null;
+  releaseDate: string | null;
+  description: string | null;
   createdAt: string;
   updatedAt: string;
 };
