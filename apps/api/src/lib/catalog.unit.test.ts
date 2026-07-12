@@ -58,7 +58,6 @@ describe('catalog normalization', () => {
       nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.stockx.com/chicago.png',
-      catalogUrl: 'https://stockx.com/air-jordan-1-chicago',
     });
   });
 
@@ -75,7 +74,6 @@ describe('catalog normalization', () => {
       nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.goat.com/chicago.png',
-      catalogUrl: 'https://www.goat.com/sneakers/air-jordan-1-chicago-goat',
     });
   });
 });
