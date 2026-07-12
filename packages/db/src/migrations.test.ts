@@ -9,23 +9,20 @@ import journal from '../drizzle/meta/_journal.json';
 import * as schema from './schema';
 import { sneakers, users } from './schema';
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.TEST_DATABASE_URL ?? null;
+
 const migrationsFolder = join(fileURLToPath(new URL('.', import.meta.url)), '../drizzle');
-
-function getDatabaseUrl(): string {
-  if (!databaseUrl) {
-    throw new Error('DATABASE_URL is required for migration tests');
-  }
-
-  return databaseUrl;
-}
 
 describe.skipIf(!databaseUrl)('migrations', () => {
   let client: ReturnType<typeof postgres>;
   let db: ReturnType<typeof drizzle<typeof schema>>;
 
   beforeAll(async () => {
-    const connectionString = getDatabaseUrl();
+    if (!databaseUrl) {
+      return;
+    }
+
+    const connectionString = databaseUrl;
     client = postgres(connectionString, { max: 1 });
     db = drizzle(client, { schema });
 
