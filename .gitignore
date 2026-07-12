@@ -6,3 +6,4 @@ dist/
 .DS_Store
 **/routeTree.gen.ts
 .vite/
+coverage/

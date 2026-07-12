@@ -22,6 +22,7 @@
     "test": "bun run test:unit && bun run test:integration",
     "test:unit": "bun test src/lib src/middleware src/routes",
     "test:integration": "bun test src/integration",
+    "test:coverage": "bun test src/lib src/middleware src/routes src/integration --coverage",
     "typecheck": "tsc -b"
   },
   "dependencies": {
