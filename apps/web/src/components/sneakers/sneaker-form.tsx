@@ -154,6 +154,23 @@ export function SneakerForm({
 
       {showForm ? (
         <>
+          <input type="hidden" {...register('sku', { setValueAs: (value) => value || null })} />
+          <input
+            type="hidden"
+            {...register('imageUrl', { setValueAs: (value) => value || null })}
+          />
+          <input
+            type="hidden"
+            {...register('catalogSource', { setValueAs: (value) => value || null })}
+          />
+          <input
+            type="hidden"
+            {...register('catalogId', { setValueAs: (value) => value || null })}
+          />
+          <input
+            type="hidden"
+            {...register('catalogUrl', { setValueAs: (value) => value || null })}
+          />
           {lockModelDetails ? (
             <p className="text-sm text-muted-foreground">
               Model details are linked to the catalog (SKU {defaultValues?.sku}) and cannot be
