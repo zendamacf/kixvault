@@ -2,6 +2,7 @@ import { APP_NAME } from '@kixvault/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { LogOut, Plus } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { api, parseApiError } from '@/lib/api';
 import { sessionQueryOptions } from '@/lib/queries';
@@ -54,6 +55,7 @@ export function AppShell() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
+            <ThemeToggle />
             {user ? (
               <>
                 <Link

@@ -6,19 +6,30 @@ import {
   sneakerConditions,
 } from '@kixvault/shared';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCondition } from '@/lib/utils';
 
 const sneakerFormSchema = createSneakerSchema.extend({
   size: z.number({ error: 'Size is required' }).positive().max(99),
-  purchasePrice: z.number().nonnegative().optional().nullable(),
+  purchasePrice: z
+    .number()
+    .nonnegative()
+    .optional()
+    .nullable()
+    .or(z.nan().transform(() => undefined)),
 });
 
 type SneakerFormValues = z.infer<typeof sneakerFormSchema>;
@@ -49,6 +60,7 @@ export function SneakerForm({
     handleSubmit,
     reset,
     getValues,
+    control,
     formState: { errors },
   } = useForm<SneakerFormValues>({
     resolver: zodResolver(sneakerFormSchema),
@@ -58,7 +70,6 @@ export function SneakerForm({
       colorway: '',
       size: undefined,
       condition: 'deadstock',
-      purchasePrice: undefined,
       purchaseDate: '',
       notes: '',
       sku: null,
@@ -66,6 +77,7 @@ export function SneakerForm({
       catalogSource: null,
       catalogId: null,
       ...defaultValues,
+      purchasePrice: defaultValues?.purchasePrice ?? undefined,
     },
   });
 
@@ -197,13 +209,24 @@ export function SneakerForm({
 
             <div className="space-y-2">
               <Label htmlFor="condition">Condition</Label>
-              <Select id="condition" {...register('condition')}>
-                {sneakerConditions.map((condition) => (
-                  <option key={condition} value={condition}>
-                    {formatCondition(condition)}
-                  </option>
-                ))}
-              </Select>
+              <Controller
+                name="condition"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="condition" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sneakerConditions.map((condition) => (
+                        <SelectItem key={condition} value={condition}>
+                          {formatCondition(condition)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <div className="space-y-2">
@@ -213,7 +236,9 @@ export function SneakerForm({
                 type="number"
                 step="1"
                 placeholder="180"
-                {...register('purchasePrice', { valueAsNumber: true })}
+                {...register('purchasePrice', {
+                  setValueAs: (value) => (value === '' ? undefined : Number(value)),
+                })}
               />
             </div>
 

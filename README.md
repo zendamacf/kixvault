@@ -81,7 +81,12 @@ bun run dev:up
 
 # Apply migrations
 bun run db:migrate
+
+# Prepare an isolated test database for integration tests
+bun run --cwd apps/api db:test:prepare
 ```
+
+Integration and migration tests use `TEST_DATABASE_URL`, a separate database from development, so they do not truncate your development database.
 
 After changing the schema in `packages/db/src/schema.ts`:
 

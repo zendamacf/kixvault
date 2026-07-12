@@ -1,22 +1,27 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import type { app as AppType } from '../app';
 import {
-  getDatabaseUrl,
   getSessionCookie,
+  getTestDatabaseUrl,
   prepareTestDatabase,
   registerTestUser,
   resetDatabase,
 } from '../test/helpers';
 
-const databaseUrl = process.env.DATABASE_URL;
+const testDatabaseUrl = getTestDatabaseUrl();
 
-describe.skipIf(!databaseUrl)('API integration', () => {
+describe.skipIf(!testDatabaseUrl)('API integration', () => {
   let app: typeof AppType;
   let connectionString = '';
 
   beforeAll(async () => {
-    connectionString = getDatabaseUrl();
+    if (!testDatabaseUrl) {
+      return;
+    }
+
+    connectionString = testDatabaseUrl;
     await prepareTestDatabase(connectionString);
+    process.env.DATABASE_URL = connectionString;
 
     const appModule = await import('../app');
     app = appModule.app;

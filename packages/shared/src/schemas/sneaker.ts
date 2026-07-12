@@ -9,13 +9,18 @@ const sneakerCatalogFields = {
   catalogId: z.string().trim().max(200).optional().nullable(),
 } as const;
 
+const optionalNumericField = z.preprocess(
+  (value) => (value === '' ? undefined : value),
+  z.coerce.number().nonnegative().optional().nullable(),
+);
+
 export const createSneakerSchema = z.object({
   brand: z.string().trim().min(1).max(100),
   model: z.string().trim().min(1).max(100),
   colorway: z.string().trim().max(100).optional().nullable(),
   size: z.coerce.number().positive().max(99),
   condition: z.enum(sneakerConditions),
-  purchasePrice: z.coerce.number().nonnegative().optional().nullable(),
+  purchasePrice: optionalNumericField,
   purchaseDate: z
     .string()
     .trim()

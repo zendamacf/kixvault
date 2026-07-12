@@ -13,8 +13,8 @@
     "build": "tsc --build",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "test": "bun test",
-    "test:coverage": "bun test --coverage",
+    "test": "bun --env-file=../../.env test",
+    "test:coverage": "bun --env-file=../../.env test --coverage",
     "typecheck": "tsc --noEmit",
     "db:generate": "bun run --env-file ../../.env drizzle-kit generate",
     "db:migrate": "bun run --env-file ../../.env drizzle-kit migrate"

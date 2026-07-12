@@ -12,17 +12,43 @@ const migrationsFolder = join(
   '../../../../packages/db/drizzle',
 );
 
-export function getDatabaseUrl(): string {
-  const databaseUrl = process.env.DATABASE_URL;
+export function getTestDatabaseUrl(): string | null {
+  return process.env.TEST_DATABASE_URL ?? null;
+}
 
-  if (!databaseUrl) {
-    throw new Error('DATABASE_URL is required for API tests');
+export async function ensureTestDatabase(databaseUrl: string) {
+  const url = new URL(databaseUrl);
+  const databaseName = url.pathname.replace(/^\//, '');
+
+  if (!databaseName) {
+    throw new Error('Test database URL must include a database name');
   }
 
-  return databaseUrl;
+  if (!/^[a-zA-Z0-9_]+$/.test(databaseName)) {
+    throw new Error(`Invalid test database name: ${databaseName}`);
+  }
+
+  url.pathname = '/postgres';
+  const admin = postgres(url.toString(), { max: 1 });
+
+  try {
+    const [{ exists }] = await admin<{ exists: boolean }[]>`
+      SELECT EXISTS (
+        SELECT 1 FROM pg_database WHERE datname = ${databaseName}
+      ) AS exists
+    `;
+
+    if (!exists) {
+      await admin.unsafe(`CREATE DATABASE ${databaseName}`);
+    }
+  } finally {
+    await admin.end({ timeout: 5 });
+  }
 }
 
 export async function prepareTestDatabase(databaseUrl: string) {
+  await ensureTestDatabase(databaseUrl);
+
   const client = postgres(databaseUrl, { max: 1 });
   const db = drizzle(client, { schema });
 

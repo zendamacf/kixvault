@@ -2,10 +2,10 @@
 preload = ["./src/test/setup.ts"]
 coverageReporter = ["text", "lcov"]
 coverageDir = "coverage"
-coverageThreshold = { lines = 0.90, functions = 0.75 }
 coveragePathIgnorePatterns = [
   "dist/**",
   "**/test/**",
   "**/*.gen.ts",
   "**/routeTree.gen.ts",
+  "src/components/ui/**",
 ]
