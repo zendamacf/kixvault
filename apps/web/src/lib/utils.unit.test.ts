@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'bun:test';
-import { formatCondition, formatCurrency, formatDate, getCatalogSourceLabel } from './utils';
+import {
+  formatCondition,
+  formatCurrency,
+  formatDate,
+  getCatalogSourceLabel,
+  getSneakerBrandColor,
+} from './utils';
 
 describe('formatCurrency', () => {
   test('formats USD values without cents', () => {
@@ -33,5 +39,20 @@ describe('getCatalogSourceLabel', () => {
     expect(getCatalogSourceLabel('kicksdb:stockx')).toBe('StockX');
     expect(getCatalogSourceLabel('kicksdb:goat')).toBe('GOAT');
     expect(getCatalogSourceLabel(null)).toBeNull();
+  });
+});
+
+describe('getSneakerBrandColor', () => {
+  test('maps known sneaker brands to theme tokens', () => {
+    expect(getSneakerBrandColor('Nike')).toBe('nike');
+    expect(getSneakerBrandColor('Air Jordan')).toBe('jordan');
+    expect(getSneakerBrandColor('adidas')).toBe('adidas');
+    expect(getSneakerBrandColor('New Balance')).toBe('new-balance');
+    expect(getSneakerBrandColor('ASICS')).toBe('asics');
+    expect(getSneakerBrandColor('PUMA')).toBe('puma');
+  });
+
+  test('returns null for unknown brands', () => {
+    expect(getSneakerBrandColor('Salomon')).toBeNull();
   });
 });

@@ -48,6 +48,7 @@ describe('SneakerCard', () => {
   test('renders sneaker details', () => {
     render(<SneakerCard sneaker={sneaker} />);
 
+    expect(screen.getByText('Nike')).toBeTruthy();
     expect(screen.getByText('Nike Air Max 1')).toBeTruthy();
     expect(screen.getByText('Anniversary Red · Size 10')).toBeTruthy();
     expect(screen.getByText('Deadstock')).toBeTruthy();

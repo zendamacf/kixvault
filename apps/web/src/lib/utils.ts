@@ -48,3 +48,69 @@ export function getCatalogSourceLabel(catalogSource: string | null | undefined) 
 
   return null;
 }
+
+export const sneakerBrandColorKeys = [
+  'nike',
+  'jordan',
+  'adidas',
+  'new-balance',
+  'asics',
+  'puma',
+] as const;
+
+export type SneakerBrandColor = (typeof sneakerBrandColorKeys)[number];
+
+const sneakerBrandBadgeClasses: Record<SneakerBrandColor, string> = {
+  nike: 'border-nike/30 bg-nike/10 text-nike',
+  jordan: 'border-jordan/30 bg-jordan/10 text-jordan',
+  adidas: 'border-adidas/30 bg-adidas/10 text-adidas',
+  'new-balance': 'border-new-balance/30 bg-new-balance/10 text-new-balance',
+  asics: 'border-asics/30 bg-asics/10 text-asics',
+  puma: 'border-puma/30 bg-puma/10 text-puma',
+};
+
+export function getSneakerBrandColor(brand: string): SneakerBrandColor | null {
+  const normalized = brand.trim().toLowerCase();
+
+  if (normalized.includes('jordan')) {
+    return 'jordan';
+  }
+
+  if (normalized.includes('new balance') || normalized === 'nb') {
+    return 'new-balance';
+  }
+
+  if (normalized.includes('nike')) {
+    return 'nike';
+  }
+
+  if (normalized.includes('adidas')) {
+    return 'adidas';
+  }
+
+  if (normalized.includes('asics')) {
+    return 'asics';
+  }
+
+  if (normalized.includes('puma')) {
+    return 'puma';
+  }
+
+  return null;
+}
+
+export function getSneakerBrandStyles(brand: string) {
+  const brandColor = getSneakerBrandColor(brand);
+
+  if (!brandColor) {
+    return {
+      brandColor: null,
+      badgeClassName: '',
+    };
+  }
+
+  return {
+    brandColor,
+    badgeClassName: sneakerBrandBadgeClasses[brandColor],
+  };
+}
