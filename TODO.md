@@ -8,3 +8,4 @@
  - Branding.
  - Barcode scanning.
  - Sentry integration.
+ - Store more details from KicksDB.
