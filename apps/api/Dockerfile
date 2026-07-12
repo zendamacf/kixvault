@@ -1,9 +1,10 @@
-FROM oven/bun:1.3
+FROM oven/bun:1.3.13
 
 WORKDIR /app
 
 COPY package.json bun.lock ./
 COPY apps/api/package.json apps/api/
+COPY apps/web/package.json apps/web/
 COPY packages/db/package.json packages/db/
 COPY packages/shared/package.json packages/shared/
 
@@ -12,6 +13,7 @@ RUN bun install --frozen-lockfile
 COPY packages/shared packages/shared
 COPY packages/db packages/db
 COPY apps/api apps/api
+COPY tsconfig.base.json tsconfig.json ./
 
 RUN bun run --cwd packages/shared build && bun run --cwd packages/db build
 

@@ -1,7 +1,5 @@
 # TODO
 
- - Test coverage.
- - CI/CD deployment smoke tests of apps running.
  - CI/CD build & deploy
  - Value snapshots
  - OAuth?

@@ -54,6 +54,11 @@ services:
     depends_on:
       - api
       - web
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost/"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
 volumes:
   kixvault_pgdata:
