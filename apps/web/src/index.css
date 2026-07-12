@@ -70,6 +70,17 @@
   --color-new-balance: var(--new-balance);
   --color-asics: var(--asics);
   --color-puma: var(--puma);
+  --color-converse: var(--converse);
+  --color-vans: var(--vans);
+  --color-reebok: var(--reebok);
+  --color-saucony: var(--saucony);
+  --color-hoka: var(--hoka);
+  --color-salomon: var(--salomon);
+  --color-on-running: var(--on-running);
+  --color-under-armour: var(--under-armour);
+  --color-brooks: var(--brooks);
+  --color-yeezy: var(--yeezy);
+  --color-fila: var(--fila);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -115,6 +126,17 @@
   --new-balance: hsl(145 63% 42%);
   --asics: hsl(38 92% 55%);
   --puma: hsl(270 70% 60%);
+  --converse: hsl(220 10% 32%);
+  --vans: hsl(0 72% 48%);
+  --reebok: hsl(350 88% 46%);
+  --saucony: hsl(208 48% 38%);
+  --hoka: hsl(199 90% 50%);
+  --salomon: hsl(14 88% 52%);
+  --on-running: hsl(168 52% 40%);
+  --under-armour: hsl(0 75% 48%);
+  --brooks: hsl(214 72% 46%);
+  --yeezy: hsl(38 30% 55%);
+  --fila: hsl(225 65% 42%);
 
   --sidebar: hsl(220 22% 96%);
   --sidebar-foreground: hsl(220 15% 13%);
@@ -161,6 +183,17 @@
   --new-balance: hsl(145 63% 42%);
   --asics: hsl(38 92% 55%);
   --puma: hsl(270 70% 60%);
+  --converse: hsl(220 10% 72%);
+  --vans: hsl(0 78% 58%);
+  --reebok: hsl(350 88% 58%);
+  --saucony: hsl(208 55% 58%);
+  --hoka: hsl(199 90% 62%);
+  --salomon: hsl(14 88% 60%);
+  --on-running: hsl(168 52% 52%);
+  --under-armour: hsl(0 75% 58%);
+  --brooks: hsl(214 72% 58%);
+  --yeezy: hsl(38 30% 65%);
+  --fila: hsl(225 65% 62%);
 
   --sidebar: hsl(220 16% 5%);
   --sidebar-foreground: hsl(0 0% 98%);
