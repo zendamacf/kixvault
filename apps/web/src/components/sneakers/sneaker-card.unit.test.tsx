@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { cleanup, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
+import type { Sneaker } from '@/lib/queries';
 import { SneakerCard } from './sneaker-card';
-import { Sneaker } from '@/lib/queries';
 
 afterEach(() => {
   cleanup();
