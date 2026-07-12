@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,7 +24,8 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
         />
         <CardHeader className="pt-2 pb-2">
           <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
+            <div className="min-w-0 space-y-2">
+              <SneakerBrandBadge brand={sneaker.brand} />
               <CardTitle className="truncate text-base">{title}</CardTitle>
               <p className="truncate text-sm text-muted-foreground">
                 {subtitle} · Size {sneaker.size}

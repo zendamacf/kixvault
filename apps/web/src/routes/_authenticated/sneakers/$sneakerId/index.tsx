@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import {
   AlertDialog,
@@ -106,6 +107,7 @@ function SneakerDetailPage() {
                 className="h-64 w-full max-w-xs sm:h-72"
               />
               <div className="space-y-2">
+                <SneakerBrandBadge brand={sneaker.brand} />
                 <CardTitle className="text-2xl sm:text-3xl">{title}</CardTitle>
                 {sneaker.nickname ? (
                   <p className="text-base font-medium text-foreground">{`"${sneaker.nickname}"`}</p>
