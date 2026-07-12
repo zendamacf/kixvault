@@ -68,6 +68,7 @@ export function SneakerForm({
       brand: '',
       model: '',
       colorway: '',
+      nickname: null,
       size: undefined,
       condition: 'deadstock',
       purchaseDate: '',
@@ -76,6 +77,7 @@ export function SneakerForm({
       imageUrl: null,
       catalogSource: null,
       catalogId: null,
+      catalogUrl: null,
       ...defaultValues,
       purchasePrice: defaultValues?.purchasePrice ?? undefined,
     },
@@ -89,10 +91,12 @@ export function SneakerForm({
       brand: result.brand,
       model: result.model,
       colorway: result.colorway ?? '',
+      nickname: result.nickname,
       sku: result.sku,
       imageUrl: result.imageUrl,
       catalogSource: result.catalogSource,
       catalogId: result.catalogId,
+      catalogUrl: result.catalogUrl,
     });
   }
 
@@ -103,6 +107,7 @@ export function SneakerForm({
         const normalized = {
           ...values,
           colorway: values.colorway || null,
+          nickname: values.nickname ?? null,
           purchasePrice: values.purchasePrice ?? null,
           purchaseDate: values.purchaseDate || null,
           notes: values.notes || null,
@@ -110,6 +115,7 @@ export function SneakerForm({
           imageUrl: values.imageUrl ?? null,
           catalogSource: values.catalogSource ?? null,
           catalogId: values.catalogId ?? null,
+          catalogUrl: values.catalogUrl ?? null,
         };
 
         if (lockModelDetails) {
@@ -118,10 +124,12 @@ export function SneakerForm({
             brand: defaultValues?.brand ?? values.brand,
             model: defaultValues?.model ?? values.model,
             colorway: defaultValues?.colorway ?? null,
+            nickname: defaultValues?.nickname ?? null,
             sku: defaultValues?.sku ?? null,
             imageUrl: defaultValues?.imageUrl ?? null,
             catalogSource: defaultValues?.catalogSource ?? null,
             catalogId: defaultValues?.catalogId ?? null,
+            catalogUrl: defaultValues?.catalogUrl ?? null,
           });
           return;
         }
@@ -190,6 +198,17 @@ export function SneakerForm({
                 readOnly={lockModelDetails}
                 className={lockModelDetails ? 'cursor-default bg-muted' : undefined}
                 {...register('colorway')}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nickname">Nickname</Label>
+              <Input
+                id="nickname"
+                placeholder="Chicago"
+                readOnly={lockModelDetails}
+                className={lockModelDetails ? 'cursor-default bg-muted' : undefined}
+                {...register('nickname')}
               />
             </div>
 

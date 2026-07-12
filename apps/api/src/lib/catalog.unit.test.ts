@@ -28,6 +28,7 @@ const stockxProduct = {
   sku: 'DZ5485-612',
   image: 'https://images.stockx.com/chicago.png',
   gallery: ['https://images.stockx.com/chicago-alt.png'],
+  link: 'https://stockx.com/air-jordan-1-chicago',
 } as StockXProduct;
 
 const goatProduct = {
@@ -35,11 +36,12 @@ const goatProduct = {
   name: 'Air Jordan 1 Retro High OG Chicago',
   brand: 'Jordan',
   model: 'Air Jordan 1',
-  colorway: 'Chicago',
+  colorway: 'White/Black-Varsity Red',
   nickname: 'Chicago',
   sku: 'DZ5485-612',
   image_url: 'https://images.goat.com/chicago.png',
   images: ['https://images.goat.com/chicago-alt.png'],
+  link: 'https://www.goat.com/sneakers/air-jordan-1-chicago-goat',
 } as GoatProduct;
 
 describe('catalog normalization', () => {
@@ -53,8 +55,10 @@ describe('catalog normalization', () => {
       brand: 'Jordan',
       model: 'Air Jordan 1',
       colorway: 'Chicago',
+      nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.stockx.com/chicago.png',
+      catalogUrl: 'https://stockx.com/air-jordan-1-chicago',
     });
   });
 
@@ -67,9 +71,11 @@ describe('catalog normalization', () => {
       title: 'Air Jordan 1 Retro High OG Chicago',
       brand: 'Jordan',
       model: 'Air Jordan 1',
-      colorway: 'Chicago',
+      colorway: 'White/Black-Varsity Red',
+      nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.goat.com/chicago.png',
+      catalogUrl: 'https://www.goat.com/sneakers/air-jordan-1-chicago-goat',
     });
   });
 });

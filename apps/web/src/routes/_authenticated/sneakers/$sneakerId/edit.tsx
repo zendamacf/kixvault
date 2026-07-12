@@ -78,6 +78,7 @@ function EditSneakerPage() {
               brand: sneaker.brand,
               model: sneaker.model,
               colorway: sneaker.colorway,
+              nickname: sneaker.nickname,
               size: sneaker.size,
               condition: sneaker.condition as SneakerCondition,
               purchasePrice: sneaker.purchasePrice,
@@ -87,6 +88,7 @@ function EditSneakerPage() {
               imageUrl: sneaker.imageUrl,
               catalogSource: sneaker.catalogSource as CreateSneakerInput['catalogSource'],
               catalogId: sneaker.catalogId,
+              catalogUrl: sneaker.catalogUrl,
             }}
             onSubmit={async (values) => {
               await updateMutation.mutateAsync(values);

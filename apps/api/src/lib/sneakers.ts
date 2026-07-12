@@ -8,10 +8,12 @@ const catalogLinkedModelFields = [
   'brand',
   'model',
   'colorway',
+  'nickname',
   'sku',
   'imageUrl',
   'catalogSource',
   'catalogId',
+  'catalogUrl',
 ] as const;
 
 type CatalogLinkedModelField = (typeof catalogLinkedModelFields)[number];
@@ -45,6 +47,10 @@ export function getCatalogLinkedModelFieldViolations(
     violations.push('colorway');
   }
 
+  if (nullableFieldChanged(existing.nickname, input.nickname)) {
+    violations.push('nickname');
+  }
+
   if (nullableFieldChanged(existing.sku, input.sku)) {
     violations.push('sku');
   }
@@ -74,6 +80,7 @@ export function buildSneakerUpdate(
     ...(!isCatalogLinked && input.brand !== undefined ? { brand: input.brand } : {}),
     ...(!isCatalogLinked && input.model !== undefined ? { model: input.model } : {}),
     ...(!isCatalogLinked && input.colorway !== undefined ? { colorway: input.colorway } : {}),
+    ...(!isCatalogLinked && input.nickname !== undefined ? { nickname: input.nickname } : {}),
     ...(input.size !== undefined ? { size: input.size.toString() } : {}),
     ...(input.condition !== undefined ? { condition: input.condition } : {}),
     ...(input.purchasePrice !== undefined
@@ -89,6 +96,7 @@ export function buildSneakerUpdate(
       ? { catalogSource: input.catalogSource }
       : {}),
     ...(!isCatalogLinked && input.catalogId !== undefined ? { catalogId: input.catalogId } : {}),
+    ...(!isCatalogLinked && input.catalogUrl !== undefined ? { catalogUrl: input.catalogUrl } : {}),
   };
 }
 
@@ -133,6 +141,7 @@ export function formatSneaker(row: SneakerRow) {
     brand: row.brand,
     model: row.model,
     colorway: row.colorway,
+    nickname: row.nickname,
     size: Number(row.size),
     condition: row.condition,
     purchasePrice: row.purchasePrice ? Number(row.purchasePrice) : null,
@@ -142,6 +151,7 @@ export function formatSneaker(row: SneakerRow) {
     imageUrl: row.imageUrl,
     catalogSource: row.catalogSource,
     catalogId: row.catalogId,
+    catalogUrl: row.catalogUrl,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

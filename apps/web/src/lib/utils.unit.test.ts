@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { formatCondition, formatCurrency, formatDate } from './utils';
+import { formatCondition, formatCurrency, formatDate, getCatalogSourceLabel } from './utils';
 
 describe('formatCurrency', () => {
   test('formats USD values without cents', () => {
@@ -25,5 +25,13 @@ describe('formatDate', () => {
 
   test('returns an em dash for empty values', () => {
     expect(formatDate(null)).toBe('—');
+  });
+});
+
+describe('getCatalogSourceLabel', () => {
+  test('maps catalog sources to marketplace labels', () => {
+    expect(getCatalogSourceLabel('kicksdb:stockx')).toBe('StockX');
+    expect(getCatalogSourceLabel('kicksdb:goat')).toBe('GOAT');
+    expect(getCatalogSourceLabel(null)).toBeNull();
   });
 });
