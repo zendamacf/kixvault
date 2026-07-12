@@ -1,8 +1,7 @@
-import { afterEach, describe, expect, mock, test } from 'bun:test';
+import { afterAll, afterEach, beforeAll, describe, expect, mock, test } from 'bun:test';
 import type { CatalogSearchResult } from '@kixvault/shared';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { SneakerForm } from '@/components/sneakers/sneaker-form';
 
 const catalogResult: CatalogSearchResult = {
   catalogSource: 'kicksdb:stockx',
@@ -20,44 +19,51 @@ afterEach(() => {
   cleanup();
 });
 
-mock.module('@/components/sneakers/catalog-search-picker', () => ({
-  CatalogSearchPicker: ({
-    onSelect,
-  }: {
-    selectedCatalogId: string | null;
-    onSelect: (result: CatalogSearchResult) => void;
-    onMarketplaceChange: () => void;
-  }) => (
-    <button type="button" onClick={() => onSelect(catalogResult)}>
-      Select catalog result
-    </button>
-  ),
-}));
-
-mock.module('@/components/ui/select', () => ({
-  Select: ({
-    children,
-    value,
-    onValueChange,
-  }: {
-    children: ReactNode;
-    value: string;
-    onValueChange: (value: string) => void;
-  }) => (
-    <select value={value} onChange={(event) => onValueChange(event.target.value)}>
-      {children}
-    </select>
-  ),
-  SelectContent: ({ children }: { children: ReactNode }) => <>{children}</>,
-  SelectItem: ({ children, value }: { children: ReactNode; value: string }) => (
-    <option value={value}>{children}</option>
-  ),
-  SelectTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
-  SelectValue: () => null,
-}));
-
 describe('SneakerForm', () => {
+  beforeAll(() => {
+    mock.module('@/components/sneakers/catalog-search-picker', () => ({
+      CatalogSearchPicker: ({
+        onSelect,
+      }: {
+        selectedCatalogId: string | null;
+        onSelect: (result: CatalogSearchResult) => void;
+        onMarketplaceChange: () => void;
+      }) => (
+        <button type="button" onClick={() => onSelect(catalogResult)}>
+          Select catalog result
+        </button>
+      ),
+    }));
+
+    mock.module('@/components/ui/select', () => ({
+      Select: ({
+        children,
+        value,
+        onValueChange,
+      }: {
+        children: ReactNode;
+        value: string;
+        onValueChange: (value: string) => void;
+      }) => (
+        <select value={value} onChange={(event) => onValueChange(event.target.value)}>
+          {children}
+        </select>
+      ),
+      SelectContent: ({ children }: { children: ReactNode }) => <>{children}</>,
+      SelectItem: ({ children, value }: { children: ReactNode; value: string }) => (
+        <option value={value}>{children}</option>
+      ),
+      SelectTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
+      SelectValue: () => null,
+    }));
+  });
+
+  afterAll(() => {
+    mock.restore();
+  });
+
   test('submits catalog nickname after selecting a result', async () => {
+    const { SneakerForm } = await import('@/components/sneakers/sneaker-form');
     const onSubmit = mock(async () => {});
 
     render(<SneakerForm enableCatalogSearch submitLabel="Add to collection" onSubmit={onSubmit} />);
