@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as schema from '@kixvault/db';
-import { createDb, sessions, sneakers, users } from '@kixvault/db';
+import { sessions, sneakers, users } from '@kixvault/db';
 import { sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
@@ -31,9 +31,16 @@ export async function prepareTestDatabase(databaseUrl: string) {
 }
 
 export async function resetDatabase(databaseUrl: string) {
-  const db = createDb(databaseUrl);
+  const client = postgres(databaseUrl, { max: 1 });
+  const db = drizzle(client, { schema });
 
-  await db.execute(sql`TRUNCATE TABLE ${sneakers}, ${sessions}, ${users} RESTART IDENTITY CASCADE`);
+  try {
+    await db.execute(
+      sql`TRUNCATE TABLE ${sneakers}, ${sessions}, ${users} RESTART IDENTITY CASCADE`,
+    );
+  } finally {
+    await client.end({ timeout: 5 });
+  }
 }
 
 export function getSessionCookie(response: Response): string {
