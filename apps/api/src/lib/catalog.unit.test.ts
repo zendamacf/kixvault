@@ -78,22 +78,6 @@ describe('catalog normalization', () => {
       catalogUrl: 'https://www.goat.com/sneakers/air-jordan-1-chicago-goat',
     });
   });
-
-  test('builds catalog URLs from slug when link is missing', async () => {
-    const { normalizeStockxProduct, normalizeGoatProduct } = await import('./catalog');
-
-    expect(
-      normalizeStockxProduct({
-        ...stockxProduct,
-      } as StockXProduct).catalogUrl,
-    ).toBe('https://stockx.com/air-jordan-1-chicago');
-
-    expect(
-      normalizeGoatProduct({
-        ...goatProduct,
-      } as GoatProduct).catalogUrl,
-    ).toBe('https://www.goat.com/sneakers/air-jordan-1-chicago-goat');
-  });
 });
 
 describe('searchCatalog', () => {

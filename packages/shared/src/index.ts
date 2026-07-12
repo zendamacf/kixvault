@@ -1,5 +1,6 @@
 export const APP_NAME = 'KixVault';
 
+export * from './catalog';
 export * from './schemas/auth';
 export * from './schemas/catalog';
 export * from './schemas/router';

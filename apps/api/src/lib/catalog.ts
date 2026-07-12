@@ -4,7 +4,7 @@ import {
   getStockxProducts,
   type StockXProduct,
 } from '@kicksdb/sdk';
-import type { CatalogMarketplace, CatalogSearchResult, CatalogSource } from '@kixvault/shared';
+import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
 import { ensureKicksdbClient } from './kicksdb';
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -16,26 +16,6 @@ type CacheEntry = {
 };
 
 const cache = new Map<string, CacheEntry>();
-
-export function buildCatalogUrl(
-  catalogSource: CatalogSource,
-  catalogId: string,
-  link?: string | null,
-): string | null {
-  if (link) {
-    return link;
-  }
-
-  if (catalogSource === 'kicksdb:stockx') {
-    return `https://stockx.com/${catalogId}`;
-  }
-
-  if (catalogSource === 'kicksdb:goat') {
-    return `https://www.goat.com/sneakers/${catalogId}`;
-  }
-
-  return null;
-}
 
 export function resetCatalogCacheForTests(): void {
   cache.clear();
@@ -62,8 +42,6 @@ export function normalizeStockxProduct(product: StockXProduct): CatalogSearchRes
     nickname: product.secondary_title || null,
     sku: product.sku,
     imageUrl: product.image || product.gallery?.[0] || null,
-    // KicksDB sometimes omits link field, so we build it from the slug
-    catalogUrl: buildCatalogUrl('kicksdb:stockx', product.slug, product.link),
   };
 }
 
@@ -78,8 +56,6 @@ export function normalizeGoatProduct(product: GoatProduct): CatalogSearchResult 
     nickname: product.nickname || null,
     sku: product.sku,
     imageUrl: product.image_url || product.images?.[0] || null,
-    // KicksDB sometimes omits link field, so we build it from the slug
-    catalogUrl: buildCatalogUrl('kicksdb:goat', product.slug, product.link),
   };
 }
 

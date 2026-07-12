@@ -41,7 +41,6 @@ export const sneakers = pgTable(
     imageUrl: text('image_url'),
     catalogSource: text('catalog_source'),
     catalogId: text('catalog_id'),
-    catalogUrl: text('catalog_url'),
     nickname: text('nickname'),
     searchVector: tsvector('search_vector')
       .notNull()

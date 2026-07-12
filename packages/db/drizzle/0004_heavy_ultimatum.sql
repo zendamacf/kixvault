@@ -1,0 +1,1 @@
+ALTER TABLE "sneakers" DROP COLUMN "catalog_url";

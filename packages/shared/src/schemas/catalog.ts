@@ -19,7 +19,6 @@ export const catalogSearchResultSchema = z.object({
   nickname: z.string().nullable(),
   sku: z.string(),
   imageUrl: z.string().url().nullable(),
-  catalogUrl: z.string().url().nullable(),
 });
 
 export type CatalogMarketplace = (typeof catalogMarketplaces)[number];

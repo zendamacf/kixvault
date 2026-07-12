@@ -67,7 +67,6 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       'brand',
       'catalog_id',
       'catalog_source',
-      'catalog_url',
       'colorway',
       'condition',
       'created_at',

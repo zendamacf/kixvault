@@ -77,7 +77,6 @@ export function SneakerForm({
       imageUrl: null,
       catalogSource: null,
       catalogId: null,
-      catalogUrl: null,
       ...defaultValues,
       purchasePrice: defaultValues?.purchasePrice ?? undefined,
     },
@@ -96,7 +95,6 @@ export function SneakerForm({
       imageUrl: result.imageUrl,
       catalogSource: result.catalogSource,
       catalogId: result.catalogId,
-      catalogUrl: result.catalogUrl,
     });
   }
 
@@ -115,7 +113,6 @@ export function SneakerForm({
           imageUrl: values.imageUrl ?? null,
           catalogSource: values.catalogSource ?? null,
           catalogId: values.catalogId ?? null,
-          catalogUrl: values.catalogUrl ?? null,
         };
 
         if (lockModelDetails) {
@@ -129,7 +126,6 @@ export function SneakerForm({
             imageUrl: defaultValues?.imageUrl ?? null,
             catalogSource: defaultValues?.catalogSource ?? null,
             catalogId: defaultValues?.catalogId ?? null,
-            catalogUrl: defaultValues?.catalogUrl ?? null,
           });
           return;
         }
@@ -166,10 +162,6 @@ export function SneakerForm({
           <input
             type="hidden"
             {...register('catalogId', { setValueAs: (value) => value || null })}
-          />
-          <input
-            type="hidden"
-            {...register('catalogUrl', { setValueAs: (value) => value || null })}
           />
           {lockModelDetails ? (
             <p className="text-sm text-muted-foreground">

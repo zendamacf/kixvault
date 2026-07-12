@@ -27,7 +27,6 @@ function createSneakerRow(overrides: Partial<SneakerRow> = {}): SneakerRow {
     imageUrl: 'https://images.example.com/sneaker.png',
     catalogSource: 'kicksdb:stockx',
     catalogId: 'air-max-1',
-    catalogUrl: 'https://stockx.com/air-max-1',
     nickname: 'Anniversary Red',
     searchVector: "'air':1 'max':2 'nike':3",
     createdAt: new Date('2024-01-01T00:00:00.000Z'),

@@ -88,7 +88,6 @@ function EditSneakerPage() {
               imageUrl: sneaker.imageUrl,
               catalogSource: sneaker.catalogSource as CreateSneakerInput['catalogSource'],
               catalogId: sneaker.catalogId,
-              catalogUrl: sneaker.catalogUrl,
             }}
             onSubmit={async (values) => {
               await updateMutation.mutateAsync(values);

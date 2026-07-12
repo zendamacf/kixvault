@@ -95,7 +95,6 @@ export const sneakerRoutes = new Hono<ApiEnv>()
         imageUrl: input.imageUrl ?? null,
         catalogSource: input.catalogSource ?? null,
         catalogId: input.catalogId ?? null,
-        catalogUrl: input.catalogUrl ?? null,
       })
       .returning();
 

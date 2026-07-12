@@ -1,5 +1,6 @@
 import { sneakers as sneakersTable } from '@kixvault/db';
-import type { UpdateSneakerInput } from '@kixvault/shared';
+import type { CatalogSource, UpdateSneakerInput } from '@kixvault/shared';
+import { buildCatalogUrl } from '@kixvault/shared';
 import { or, type SQL, sql } from 'drizzle-orm';
 
 type SneakerRow = typeof sneakersTable.$inferSelect;
@@ -13,7 +14,6 @@ const catalogLinkedModelFields = [
   'imageUrl',
   'catalogSource',
   'catalogId',
-  'catalogUrl',
 ] as const;
 
 type CatalogLinkedModelField = (typeof catalogLinkedModelFields)[number];
@@ -96,7 +96,6 @@ export function buildSneakerUpdate(
       ? { catalogSource: input.catalogSource }
       : {}),
     ...(!isCatalogLinked && input.catalogId !== undefined ? { catalogId: input.catalogId } : {}),
-    ...(!isCatalogLinked && input.catalogUrl !== undefined ? { catalogUrl: input.catalogUrl } : {}),
   };
 }
 
@@ -149,9 +148,12 @@ export function formatSneaker(row: SneakerRow) {
     notes: row.notes,
     sku: row.sku,
     imageUrl: row.imageUrl,
-    catalogSource: row.catalogSource,
+    catalogSource: row.catalogSource as CatalogSource | null,
     catalogId: row.catalogId,
-    catalogUrl: row.catalogUrl,
+    catalogUrl:
+      row.catalogSource && row.catalogId
+        ? buildCatalogUrl(row.catalogSource as CatalogSource, row.catalogId)
+        : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
