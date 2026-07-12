@@ -1,12 +1,9 @@
 [test]
-root = "src"
 coverageReporter = ["text", "lcov"]
 coverageDir = "coverage"
-# Disabling threshold until catalog coverage improved
-# coverageThreshold = { lines = 0.30, functions = 0.30 }
+coverageThreshold = { lines = 0.76, functions = 0 }
 coveragePathIgnorePatterns = [
   "dist/**",
   "**/test/**",
   "**/*.gen.ts",
-  "../../packages/**",
 ]

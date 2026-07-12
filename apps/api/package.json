@@ -22,6 +22,9 @@
     "test": "bun run test:unit && bun run test:integration",
     "test:unit": "bun test src/lib src/middleware src/routes",
     "test:integration": "bun test src/integration",
+    "test:coverage:unit": "bun test src/lib src/middleware src/routes --coverage && mkdir -p coverage && mv coverage/lcov.info coverage/unit.lcov.info",
+    "test:coverage:integration": "bun test src/integration --coverage && mkdir -p coverage && mv coverage/lcov.info coverage/integration.lcov.info",
+    "test:coverage": "bun run test:coverage:unit && bun run test:coverage:integration && bun scripts/merge-lcov.ts coverage/lcov.info coverage/unit.lcov.info coverage/integration.lcov.info",
     "typecheck": "tsc -b"
   },
   "dependencies": {

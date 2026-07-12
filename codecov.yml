@@ -1,0 +1,52 @@
+coverage:
+  status:
+    default_rules:
+      flag_coverage_not_uploaded_behavior: exclude
+    project:
+      shared:
+        target: auto
+        threshold: 1%
+        flags:
+          - shared
+      db:
+        target: auto
+        threshold: 1%
+        flags:
+          - db
+      api:
+        target: auto
+        threshold: 1%
+        flags:
+          - api
+      web:
+        target: auto
+        threshold: 1%
+        flags:
+          - web
+    patch:
+      default:
+        target: auto
+        threshold: 0%
+
+flag_management:
+  default_rules:
+    carryforward: true
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+
+flags:
+  shared:
+    paths:
+      - packages/shared/
+  db:
+    paths:
+      - packages/db/src/
+  api:
+    paths:
+      - apps/api/src/
+  web:
+    paths:
+      - apps/web/src/
