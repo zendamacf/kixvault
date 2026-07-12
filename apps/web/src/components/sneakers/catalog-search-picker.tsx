@@ -4,7 +4,13 @@ import { useState } from 'react';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { catalogSearchQueryOptions } from '@/lib/catalog';
 import { useDebouncedValue } from '@/lib/hooks';
@@ -50,17 +56,23 @@ export function CatalogSearchPicker({
             onChange={(event) => setQuery(event.target.value)}
           />
           <Select
-            id="catalog-marketplace"
-            aria-label="Marketplace"
-            className="w-28 shrink-0"
             value={marketplace}
-            onChange={(event) => {
-              setMarketplace(event.target.value as CatalogMarketplace);
+            onValueChange={(value) => {
+              setMarketplace(value as CatalogMarketplace);
               onMarketplaceChange?.();
             }}
           >
-            <option value="stockx">StockX</option>
-            <option value="goat">GOAT</option>
+            <SelectTrigger
+              id="catalog-marketplace"
+              aria-label="Marketplace"
+              className="w-28 shrink-0"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="stockx">StockX</SelectItem>
+              <SelectItem value="goat">GOAT</SelectItem>
+            </SelectContent>
           </Select>
         </div>
         <p className="text-xs text-muted-foreground">

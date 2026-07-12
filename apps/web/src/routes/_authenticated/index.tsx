@@ -9,7 +9,13 @@ import { SneakerCard } from '@/components/sneakers/sneaker-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useDebouncedValue } from '@/lib/hooks';
 import { type Sneaker, sneakersQueryOptions, statsQueryOptions } from '@/lib/queries';
 import { formatCondition } from '@/lib/utils';
@@ -106,40 +112,46 @@ function CollectionPage() {
             <div className="space-y-2">
               <Label htmlFor="condition-filter">Condition</Label>
               <Select
-                id="condition-filter"
-                value={condition}
-                onChange={(event) => setCondition(event.target.value)}
+                value={condition || 'all'}
+                onValueChange={(value) => setCondition(value === 'all' ? '' : value)}
               >
-                <option value="">All conditions</option>
-                {sneakerConditions.map((value) => (
-                  <option key={value} value={value}>
-                    {formatCondition(value)}
-                  </option>
-                ))}
+                <SelectTrigger id="condition-filter" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All conditions</SelectItem>
+                  {sneakerConditions.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {formatCondition(value)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="sort-filter">Sort by</Label>
-              <Select
-                id="sort-filter"
-                value={sort}
-                onChange={(event) => setSort(event.target.value)}
-              >
-                <option value="created_at">Date added</option>
-                <option value="purchase_date">Purchase date</option>
-                <option value="purchase_price">Purchase price</option>
-                <option value="brand">Brand</option>
+              <Select value={sort} onValueChange={setSort}>
+                <SelectTrigger id="sort-filter" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="created_at">Date added</SelectItem>
+                  <SelectItem value="purchase_date">Purchase date</SelectItem>
+                  <SelectItem value="purchase_price">Purchase price</SelectItem>
+                  <SelectItem value="brand">Brand</SelectItem>
+                </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="order-filter">Order</Label>
-              <Select
-                id="order-filter"
-                value={order}
-                onChange={(event) => setOrder(event.target.value)}
-              >
-                <option value="desc">Descending</option>
-                <option value="asc">Ascending</option>
+              <Select value={order} onValueChange={setOrder}>
+                <SelectTrigger id="order-filter" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Descending</SelectItem>
+                  <SelectItem value="asc">Ascending</SelectItem>
+                </SelectContent>
               </Select>
             </div>
           </div>
