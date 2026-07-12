@@ -70,6 +70,44 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.package }}
+          name: coverage-${{ matrix.flag }}
           path: ${{ matrix.package }}/coverage/lcov.info
           if-no-files-found: ignore
+
+  coverage-report:
+    name: Coverage report
+    needs: test
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage
+          merge-multiple: false
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+
+      - name: Generate coverage summary
+        id: summary
+        run: |
+          MARKDOWN="$(bun .github/scripts/summarize-coverage.ts coverage)"
+          {
+            echo 'markdown<<EOF'
+            echo "$MARKDOWN"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post coverage comment
+        if: steps.summary.outputs.markdown != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: coverage
+          message: ${{ steps.summary.outputs.markdown }}
