@@ -82,6 +82,7 @@ describe('CatalogSneakerForm', () => {
     );
 
     expect(screen.getByText('SKU DZ5485-612')).toBeTruthy();
+    expect(screen.queryByLabelText('Find a sneaker')).toBeNull();
 
     fireEvent.change(screen.getByLabelText('Size'), { target: { value: '10' } });
     fireEvent.click(screen.getByRole('button', { name: 'Add to collection' }));
@@ -99,5 +100,26 @@ describe('CatalogSneakerForm', () => {
       purchaseDate: null,
       notes: null,
     });
+  });
+
+  test('returns to search when back is clicked', async () => {
+    installFetchMock({
+      catalogSearch: async () => createJsonResponse({ results: [catalogResult] }),
+    });
+
+    renderForm(mock(async () => {}));
+
+    fireEvent.change(screen.getByLabelText('Find a sneaker'), { target: { value: 'jordan' } });
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: /Air Jordan 1 Retro High OG Chicago/ }),
+    );
+
+    expect(screen.queryByLabelText('Find a sneaker')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: '← Back to search' }));
+
+    expect(screen.getByLabelText('Find a sneaker')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Air Jordan 1 Retro High OG Chicago/ })).toBeTruthy();
   });
 });

@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
-import type { CatalogSearchResult } from '@kixvault/shared';
+import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { createJsonResponse, installFetchMock } from '@/test/mocks/api';
 
@@ -55,16 +55,36 @@ afterEach(() => {
   cleanup();
 });
 
-function renderPicker(props: Partial<Parameters<typeof CatalogSearchPicker>[0]> = {}) {
+function StatefulPicker({
+  onMarketplaceChange,
+  onSelect,
+  ...props
+}: Partial<Parameters<typeof CatalogSearchPicker>[0]> = {}) {
+  const [query, setQuery] = useState('');
+  const [marketplace, setMarketplace] = useState<CatalogMarketplace>('goat');
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
 
-  return render(
+  return (
     <QueryClientProvider client={client}>
-      <CatalogSearchPicker onSelect={mock()} {...props} />
-    </QueryClientProvider>,
+      <CatalogSearchPicker
+        query={query}
+        onQueryChange={setQuery}
+        marketplace={marketplace}
+        onMarketplaceChange={(value) => {
+          setMarketplace(value);
+          onMarketplaceChange?.(value);
+        }}
+        onSelect={onSelect ?? mock()}
+        {...props}
+      />
+    </QueryClientProvider>
   );
+}
+
+function renderPicker(props: Partial<Parameters<typeof CatalogSearchPicker>[0]> = {}) {
+  return render(<StatefulPicker {...props} />);
 }
 
 function searchFor(query: string) {

@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  type CatalogMarketplace,
   type CatalogSearchResult,
   type CreateSneakerFromCatalogInput,
   createSneakerFromCatalogSchema,
@@ -48,6 +49,8 @@ export function CatalogSneakerForm({
   onSubmit,
 }: CatalogSneakerFormProps) {
   const [selectedResult, setSelectedResult] = useState<CatalogSearchResult | null>(null);
+  const [query, setQuery] = useState('');
+  const [marketplace, setMarketplace] = useState<CatalogMarketplace>('goat');
 
   const {
     register,
@@ -83,35 +86,43 @@ export function CatalogSneakerForm({
         });
       })}
     >
-      <CatalogSearchPicker
-        selectedCatalogId={selectedResult?.catalogId ?? null}
-        onSelect={setSelectedResult}
-        onMarketplaceChange={() => setSelectedResult(null)}
-      />
-
-      {selectedResult ? (
-        <div className="flex gap-4 rounded-lg border bg-background/60 p-4">
-          <SneakerThumbnail
-            imageUrl={selectedResult.imageUrl}
-            alt={selectedResult.title}
-            className="h-24 w-24 shrink-0"
-          />
-          <div className="min-w-0 space-y-1">
-            <p className="font-medium">{selectedResult.title}</p>
-            <SneakerBrandBadge brand={selectedResult.brand} />
-            {selectedResult.nickname ? (
-              <p className="text-sm text-foreground">{`"${selectedResult.nickname}"`}</p>
-            ) : null}
-            {selectedResult.colorway ? (
-              <p className="text-sm text-muted-foreground">{selectedResult.colorway}</p>
-            ) : null}
-            <p className="text-sm text-muted-foreground">SKU {selectedResult.sku}</p>
-          </div>
-        </div>
-      ) : null}
-
-      {selectedResult ? (
+      {!selectedResult ? (
+        <CatalogSearchPicker
+          query={query}
+          onQueryChange={setQuery}
+          marketplace={marketplace}
+          onMarketplaceChange={setMarketplace}
+          onSelect={setSelectedResult}
+        />
+      ) : (
         <>
+          <button
+            type="button"
+            className="inline-flex w-fit text-sm text-muted-foreground hover:text-foreground"
+            onClick={() => setSelectedResult(null)}
+          >
+            ← Back to search
+          </button>
+
+          <div className="flex gap-4 rounded-lg border bg-background/60 p-4">
+            <SneakerThumbnail
+              imageUrl={selectedResult.imageUrl}
+              alt={selectedResult.title}
+              className="h-24 w-24 shrink-0"
+            />
+            <div className="min-w-0 space-y-1">
+              <p className="font-medium">{selectedResult.title}</p>
+              <SneakerBrandBadge brand={selectedResult.brand} />
+              {selectedResult.nickname ? (
+                <p className="text-sm text-foreground">{`"${selectedResult.nickname}"`}</p>
+              ) : null}
+              {selectedResult.colorway ? (
+                <p className="text-sm text-muted-foreground">{selectedResult.colorway}</p>
+              ) : null}
+              <p className="text-sm text-muted-foreground">SKU {selectedResult.sku}</p>
+            </div>
+          </div>
+
           <SneakerCollectionFields
             register={register as unknown as UseFormRegister<CollectionFieldValues>}
             control={control as unknown as Control<CollectionFieldValues>}
@@ -122,7 +133,7 @@ export function CatalogSneakerForm({
             {isSubmitting ? 'Saving...' : submitLabel}
           </Button>
         </>
-      ) : null}
+      )}
     </form>
   );
 }
