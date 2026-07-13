@@ -2,7 +2,7 @@ import type { CreateSneakerInput, SneakerCondition } from '@kixvault/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
-import { SneakerForm } from '@/components/sneakers/sneaker-form';
+import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { api, parseApiError } from '@/lib/api';
 import { sneakerQueryOptions } from '@/lib/queries';
@@ -71,9 +71,10 @@ function EditSneakerPage() {
         </CardHeader>
         <CardContent>
           {formError ? <p className="mb-4 text-sm text-destructive">{formError}</p> : null}
-          <SneakerForm
+          <ManualSneakerForm
             submitLabel="Save changes"
             isSubmitting={updateMutation.isPending}
+            lockModelDetails={Boolean(sneaker.sku)}
             defaultValues={{
               brand: sneaker.brand,
               model: sneaker.model,

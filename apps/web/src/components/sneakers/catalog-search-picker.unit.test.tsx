@@ -164,7 +164,7 @@ describe('CatalogSearchPicker', () => {
 
     expect(
       await screen.findByText(
-        'Catalog search is unavailable. Use the button below to enter details manually.',
+        'Catalog search is unavailable. Switch to manual entry to add a pair.',
       ),
     ).toBeTruthy();
   });

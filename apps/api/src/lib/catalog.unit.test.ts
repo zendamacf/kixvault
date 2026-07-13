@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test';
 import type { GoatProduct, StockXProduct } from '@kicksdb/sdk';
 import {
+  mockGetGoatProduct,
   mockGetGoatProducts,
+  mockGetStockxProduct,
   mockGetStockxProducts,
   mockKicksdbSdk,
   resetKicksdbSdkMocks,
@@ -83,6 +85,64 @@ describe('catalog normalization', () => {
       releaseDate: '2016-12-13',
       description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
     });
+  });
+});
+
+describe('fetchCatalogProduct', () => {
+  beforeEach(() => {
+    resetKicksdbSdkMocks();
+  });
+
+  test('fetches and normalizes a GOAT product by slug', async () => {
+    mockGetGoatProduct.mockImplementation(() =>
+      Promise.resolve({
+        data: { data: goatProduct },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const { fetchCatalogProduct } = await import('./catalog');
+    const result = await fetchCatalogProduct('kicksdb:goat', 'air-jordan-1-chicago-goat');
+
+    expect(result.catalogSource).toBe('kicksdb:goat');
+    expect(result.catalogId).toBe('air-jordan-1-chicago-goat');
+    expect(result.releaseDate).toBe('2016-12-13');
+    expect(mockGetGoatProduct).toHaveBeenCalledTimes(1);
+  });
+
+  test('fetches and normalizes a StockX product by slug', async () => {
+    mockGetStockxProduct.mockImplementation(() =>
+      Promise.resolve({
+        data: { data: stockxProduct },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const { fetchCatalogProduct } = await import('./catalog');
+    const result = await fetchCatalogProduct('kicksdb:stockx', 'air-jordan-1-chicago');
+
+    expect(result.catalogSource).toBe('kicksdb:stockx');
+    expect(result.catalogId).toBe('air-jordan-1-chicago');
+    expect(result.releaseDate).toBe('2015-04-25');
+    expect(mockGetStockxProduct).toHaveBeenCalledTimes(1);
+  });
+
+  test('throws CatalogProductNotFoundError when the product is missing', async () => {
+    mockGetGoatProduct.mockImplementation(() =>
+      Promise.resolve({
+        data: null,
+        error: { message: 'not found' },
+        response: { status: 404 },
+      }),
+    );
+
+    const { fetchCatalogProduct, CatalogProductNotFoundError } = await import('./catalog');
+
+    await expect(fetchCatalogProduct('kicksdb:goat', 'missing-slug')).rejects.toBeInstanceOf(
+      CatalogProductNotFoundError,
+    );
   });
 });
 

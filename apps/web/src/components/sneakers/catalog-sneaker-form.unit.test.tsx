@@ -3,7 +3,7 @@ import type { CatalogSearchResult } from '@kixvault/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { SneakerForm } from '@/components/sneakers/sneaker-form';
+import { CatalogSneakerForm } from '@/components/sneakers/catalog-sneaker-form';
 import { createJsonResponse, installFetchMock } from '@/test/mocks/api';
 
 const catalogResult: CatalogSearchResult = {
@@ -20,7 +20,6 @@ const catalogResult: CatalogSearchResult = {
   description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
 };
 
-// Bypass the 1s catalog search debounce so results appear immediately
 mock.module('@/lib/hooks', () => ({
   useDebouncedValue: <T,>(value: T) => value,
 }));
@@ -62,13 +61,13 @@ function renderForm(onSubmit: (values: unknown) => Promise<void>) {
 
   return render(
     <QueryClientProvider client={client}>
-      <SneakerForm enableCatalogSearch submitLabel="Add to collection" onSubmit={onSubmit} />
+      <CatalogSneakerForm submitLabel="Add to collection" onSubmit={onSubmit} />
     </QueryClientProvider>,
   );
 }
 
-describe('SneakerForm', () => {
-  test('submits catalog nickname after selecting a result', async () => {
+describe('CatalogSneakerForm', () => {
+  test('submits catalog id and collection details after selecting a result', async () => {
     installFetchMock({
       catalogSearch: async () => createJsonResponse({ results: [catalogResult] }),
     });
@@ -82,7 +81,7 @@ describe('SneakerForm', () => {
       await screen.findByRole('button', { name: /Air Jordan 1 Retro High OG Chicago/ }),
     );
 
-    expect((screen.getByLabelText('Nickname') as HTMLInputElement).value).toBe('Chicago');
+    expect(screen.getByText('SKU DZ5485-612')).toBeTruthy();
 
     fireEvent.change(screen.getByLabelText('Size'), { target: { value: '10' } });
     fireEvent.click(screen.getByRole('button', { name: 'Add to collection' }));
@@ -91,16 +90,14 @@ describe('SneakerForm', () => {
       expect(onSubmit).toHaveBeenCalledTimes(1);
     });
 
-    expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        brand: 'Jordan',
-        model: 'Air Jordan 1',
-        nickname: 'Chicago',
-        sku: 'DZ5485-612',
-        releaseDate: '2016-12-13',
-        description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
-        size: 10,
-      }),
-    );
+    expect(onSubmit).toHaveBeenCalledWith({
+      catalogSource: 'kicksdb:goat',
+      catalogId: 'air-jordan-1-chicago',
+      size: 10,
+      condition: 'deadstock',
+      purchasePrice: null,
+      purchaseDate: null,
+      notes: null,
+    });
   });
 });

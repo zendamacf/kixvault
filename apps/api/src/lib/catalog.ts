@@ -1,10 +1,12 @@
 import {
   type GoatProduct,
+  getGoatProduct,
   getGoatProducts,
+  getStockxProduct,
   getStockxProducts,
   type StockXProduct,
 } from '@kicksdb/sdk';
-import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
+import type { CatalogMarketplace, CatalogSearchResult, CatalogSource } from '@kixvault/shared';
 import { ensureKicksdbClient } from './kicksdb';
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -28,6 +30,13 @@ export class CatalogSearchError extends Error {
   ) {
     super(message);
     this.name = 'CatalogSearchError';
+  }
+}
+
+export class CatalogProductNotFoundError extends Error {
+  constructor(message = 'Catalog product not found') {
+    super(message);
+    this.name = 'CatalogProductNotFoundError';
   }
 }
 
@@ -158,4 +167,58 @@ async function searchGoatCatalog(query: string, limit: number): Promise<CatalogS
   }
 
   return (data?.data ?? []).map(normalizeGoatProduct);
+}
+
+export async function fetchCatalogProduct(
+  catalogSource: CatalogSource,
+  catalogId: string,
+): Promise<CatalogSearchResult> {
+  ensureKicksdbClient();
+
+  if (catalogSource === 'kicksdb:goat') {
+    const { data, error, response } = await getGoatProduct({
+      path: { id: catalogId },
+      query: { market: MARKET },
+    });
+
+    if (error) {
+      if (response.status === 404) {
+        throw new CatalogProductNotFoundError();
+      }
+
+      throw new CatalogSearchError('KicksDB request failed', response.status);
+    }
+
+    if (!data?.data) {
+      throw new CatalogProductNotFoundError();
+    }
+
+    return normalizeGoatProduct(data.data);
+  }
+
+  if (catalogSource === 'kicksdb:stockx') {
+    const { data, error, response } = await getStockxProduct({
+      path: { id: catalogId },
+      query: {
+        market: MARKET,
+        'display[traits]': true,
+      },
+    });
+
+    if (error) {
+      if (response.status === 404) {
+        throw new CatalogProductNotFoundError();
+      }
+
+      throw new CatalogSearchError('KicksDB request failed', response.status);
+    }
+
+    if (!data?.data) {
+      throw new CatalogProductNotFoundError();
+    }
+
+    return normalizeStockxProduct(data.data);
+  }
+
+  throw new CatalogSearchError('Unsupported catalog source', 400);
 }

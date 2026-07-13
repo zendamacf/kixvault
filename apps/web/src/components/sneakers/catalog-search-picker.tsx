@@ -77,7 +77,7 @@ export function CatalogSearchPicker({
           </Select>
         </div>
         <p className="text-xs text-muted-foreground">
-          Search {marketplaceLabel} to pre-fill brand, model, and colorway.
+          Search {marketplaceLabel} to find your pair.
         </p>
       </div>
 
@@ -87,7 +87,7 @@ export function CatalogSearchPicker({
 
       {unavailable ? (
         <p className="text-sm text-muted-foreground">
-          Catalog search is unavailable. Use the button below to enter details manually.
+          Catalog search is unavailable. Switch to manual entry to add a pair.
         </p>
       ) : null}
 
