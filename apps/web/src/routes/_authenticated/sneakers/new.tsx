@@ -1,7 +1,8 @@
 import type { CreateSneakerFromCatalogInput, CreateSneakerInput } from '@kixvault/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { BackLink } from '@/components/layout/back-link';
 import { CatalogSneakerForm } from '@/components/sneakers/catalog-sneaker-form';
 import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
 import { Button } from '@/components/ui/button';
@@ -73,9 +74,7 @@ function NewSneakerPage() {
 
   return (
     <div className="space-y-4">
-      <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
-        ← Back to collection
-      </Link>
+      <BackLink to="/">← Back to collection</BackLink>
 
       <Card>
         <CardHeader className="space-y-4">

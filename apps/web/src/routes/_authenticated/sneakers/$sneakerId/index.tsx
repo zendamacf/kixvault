@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { BackLink } from '@/components/layout/back-link';
 import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import {
@@ -93,9 +94,7 @@ function SneakerDetailPage() {
 
   return (
     <div className="space-y-4">
-      <Link to="/" className="inline-flex text-sm text-muted-foreground hover:text-foreground">
-        ← Back to collection
-      </Link>
+      <BackLink to="/">← Back to collection</BackLink>
 
       <Card>
         <CardHeader className="space-y-4">

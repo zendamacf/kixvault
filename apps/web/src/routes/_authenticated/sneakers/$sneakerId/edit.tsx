@@ -1,7 +1,8 @@
 import type { CreateSneakerInput, SneakerCondition, UpdateSneakerInput } from '@kixvault/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { BackLink } from '@/components/layout/back-link';
 import { CollectionSneakerForm } from '@/components/sneakers/collection-sneaker-form';
 import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -56,13 +57,9 @@ function EditSneakerPage() {
 
   return (
     <div className="space-y-4">
-      <Link
-        to="/sneakers/$sneakerId"
-        params={{ sneakerId }}
-        className="text-sm text-muted-foreground hover:text-foreground"
-      >
+      <BackLink to="/sneakers/$sneakerId" params={{ sneakerId }}>
         ← Back to details
-      </Link>
+      </BackLink>
 
       <Card>
         <CardHeader>
