@@ -31,9 +31,7 @@ export function CatalogSneakerSummary({ sneaker }: CatalogSneakerSummaryProps) {
         {sneaker.colorway ? (
           <p className="text-sm text-muted-foreground">{sneaker.colorway}</p>
         ) : null}
-        {sneaker.sku ? (
-          <p className="text-sm text-muted-foreground">SKU {sneaker.sku}</p>
-        ) : null}
+        {sneaker.sku ? <p className="text-sm text-muted-foreground">SKU {sneaker.sku}</p> : null}
       </div>
     </div>
   );

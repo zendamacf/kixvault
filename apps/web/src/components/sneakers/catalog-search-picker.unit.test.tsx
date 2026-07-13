@@ -2,7 +2,7 @@ import { afterEach, describe, expect, mock, test } from 'bun:test';
 import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { useState, type ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { createJsonResponse, installFetchMock } from '@/test/mocks/api';
 

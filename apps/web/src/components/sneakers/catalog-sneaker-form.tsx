@@ -1,7 +1,7 @@
-import {
-  type CatalogMarketplace,
-  type CatalogSearchResult,
-  type CreateSneakerFromCatalogInput,
+import type {
+  CatalogMarketplace,
+  CatalogSearchResult,
+  CreateSneakerFromCatalogInput,
 } from '@kixvault/shared';
 import { useState } from 'react';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';

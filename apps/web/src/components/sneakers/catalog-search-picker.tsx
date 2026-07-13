@@ -97,7 +97,10 @@ export function CatalogSearchPicker({
 
       {canSearch && (isLoading || isFetching) ? (
         <div
-          className={cn('grid grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2', RESULTS_MAX_HEIGHT)}
+          className={cn(
+            'grid grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2',
+            RESULTS_MAX_HEIGHT,
+          )}
         >
           {(['one', 'two', 'three', 'four'] as const).map((key) => (
             <div key={key} className="flex min-w-0 items-center gap-4 rounded-md border p-3">
@@ -119,7 +122,10 @@ export function CatalogSearchPicker({
 
       {results.length > 0 ? (
         <ul
-          className={cn('grid grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2', RESULTS_MAX_HEIGHT)}
+          className={cn(
+            'grid grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2',
+            RESULTS_MAX_HEIGHT,
+          )}
         >
           {results.map((result) => {
             const isSelected = selectedCatalogId === result.catalogId;
