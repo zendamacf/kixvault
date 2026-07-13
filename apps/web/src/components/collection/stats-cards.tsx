@@ -10,6 +10,7 @@ type StatsCardsProps = {
   isLoading?: boolean;
 };
 
+/** Summary cards for pair count, total spend, and average spend. */
 export function StatsCards({
   count = 0,
   totalSpend = 0,

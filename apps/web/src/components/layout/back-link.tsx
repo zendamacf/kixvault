@@ -14,4 +14,5 @@ const BackLinkComponent = forwardRef<HTMLAnchorElement, ComponentPropsWithoutRef
   },
 );
 
+/** Router-aware link styled for “← Back to …” navigation between pages. */
 export const BackLink = createLink(BackLinkComponent);

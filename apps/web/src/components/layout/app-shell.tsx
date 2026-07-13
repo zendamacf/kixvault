@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { api, parseApiError } from '@/lib/api';
 import { sessionQueryOptions } from '@/lib/queries';
 
+/** Root layout with header, main content area, and auth vs. authenticated shells. */
 export function AppShell() {
   const routerState = useRouterState();
   const queryClient = useQueryClient();

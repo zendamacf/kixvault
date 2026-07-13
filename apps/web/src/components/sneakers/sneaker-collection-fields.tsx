@@ -27,6 +27,7 @@ type SneakerCollectionFieldsProps = {
   errors: FieldErrors<CollectionFieldValues>;
 };
 
+/** Shared form fields for size, condition, purchase price/date, and notes. */
 export function SneakerCollectionFields({
   register,
   control,

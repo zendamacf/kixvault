@@ -6,6 +6,7 @@ type SneakerThumbnailProps = {
   className?: string;
 };
 
+/** Product image with a fallback placeholder when no URL is available. */
 export function SneakerThumbnail({ imageUrl, alt, className }: SneakerThumbnailProps) {
   if (!imageUrl) {
     return (

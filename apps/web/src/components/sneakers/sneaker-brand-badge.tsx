@@ -6,6 +6,7 @@ type SneakerBrandBadgeProps = {
   className?: string;
 };
 
+/** Brand label with brand-specific badge colors. */
 export function SneakerBrandBadge({ brand, className }: SneakerBrandBadgeProps) {
   const { badgeClassName } = getSneakerBrandStyles(brand);
 

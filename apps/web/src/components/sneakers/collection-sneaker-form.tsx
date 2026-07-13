@@ -40,6 +40,7 @@ type CollectionSneakerFormProps = {
   onSubmit: (values: CollectionSneakerFormValues) => Promise<void>;
 };
 
+/** Form with a read-only catalog summary and editable collection fields. */
 export function CollectionSneakerForm({
   summary,
   defaultValues,

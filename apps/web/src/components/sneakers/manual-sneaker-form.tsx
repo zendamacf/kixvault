@@ -35,6 +35,7 @@ type ManualSneakerFormProps = {
   onSubmit: (values: CreateSneakerInput) => Promise<void>;
 };
 
+/** Full manual entry form for brand, model, and collection fields. */
 export function ManualSneakerForm({
   defaultValues,
   submitLabel,

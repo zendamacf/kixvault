@@ -13,6 +13,7 @@ type CatalogSneakerFormProps = {
   onSubmit: (values: CreateSneakerFromCatalogInput) => Promise<void>;
 };
 
+/** Catalog search flow for adding a sneaker via the from-catalog API. */
 export function CatalogSneakerForm({
   submitLabel,
   isSubmitting = false,

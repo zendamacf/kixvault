@@ -29,6 +29,7 @@ type CatalogSearchPickerProps = {
   selectedCatalogId?: string | null;
 };
 
+/** GOAT/StockX catalog search input, marketplace selector, and result list. */
 export function CatalogSearchPicker({
   query,
   onQueryChange,

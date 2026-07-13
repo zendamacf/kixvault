@@ -14,6 +14,7 @@ type CatalogSneakerSummaryProps = {
   sneaker: CatalogSneakerSummaryData;
 };
 
+/** Read-only product summary shown when adding or editing a catalog-linked sneaker. */
 export function CatalogSneakerSummary({ sneaker }: CatalogSneakerSummaryProps) {
   return (
     <div className="flex flex-col gap-4 rounded-lg border bg-background/60 p-4 sm:flex-row sm:items-center">

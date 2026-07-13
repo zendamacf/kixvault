@@ -1,5 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
+/** Loading skeleton for the collection sneaker grid. */
 export function SneakerGridSkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
