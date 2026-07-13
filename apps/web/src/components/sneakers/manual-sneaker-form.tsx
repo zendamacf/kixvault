@@ -32,7 +32,6 @@ type ManualSneakerFormProps = {
   defaultValues?: Partial<CreateSneakerInput>;
   submitLabel: string;
   isSubmitting?: boolean;
-  lockModelDetails?: boolean;
   onSubmit: (values: CreateSneakerInput) => Promise<void>;
 };
 
@@ -40,7 +39,6 @@ export function ManualSneakerForm({
   defaultValues,
   submitLabel,
   isSubmitting = false,
-  lockModelDetails = false,
   onSubmit,
 }: ManualSneakerFormProps) {
   const {
@@ -68,7 +66,7 @@ export function ManualSneakerForm({
     <form
       className="grid gap-5"
       onSubmit={handleSubmit(async (values) => {
-        const normalized = {
+        await onSubmit({
           brand: values.brand,
           model: values.model,
           colorway: values.colorway || null,
@@ -78,79 +76,36 @@ export function ManualSneakerForm({
           purchasePrice: values.purchasePrice ?? null,
           purchaseDate: values.purchaseDate || null,
           notes: values.notes || null,
-          sku: lockModelDetails ? (defaultValues?.sku ?? null) : null,
-          imageUrl: lockModelDetails ? (defaultValues?.imageUrl ?? null) : null,
-          catalogSource: lockModelDetails ? (defaultValues?.catalogSource ?? null) : null,
-          catalogId: lockModelDetails ? (defaultValues?.catalogId ?? null) : null,
-          releaseDate: lockModelDetails ? (defaultValues?.releaseDate ?? null) : null,
-          description: lockModelDetails ? (defaultValues?.description ?? null) : null,
-        };
-
-        if (lockModelDetails) {
-          await onSubmit({
-            ...normalized,
-            brand: defaultValues?.brand ?? values.brand,
-            model: defaultValues?.model ?? values.model,
-            colorway: defaultValues?.colorway ?? null,
-            nickname: defaultValues?.nickname ?? null,
-          });
-          return;
-        }
-
-        await onSubmit(normalized);
+          sku: null,
+          imageUrl: null,
+          catalogSource: null,
+          catalogId: null,
+          releaseDate: null,
+          description: null,
+        });
       })}
     >
-      {lockModelDetails ? (
-        <p className="text-sm text-muted-foreground">
-          Model details are linked to the catalog (SKU {defaultValues?.sku}) and cannot be edited.
-        </p>
-      ) : null}
-
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="brand">Brand</Label>
-          <Input
-            id="brand"
-            placeholder="Nike"
-            readOnly={lockModelDetails}
-            className={lockModelDetails ? 'cursor-default bg-muted' : undefined}
-            {...register('brand')}
-          />
+          <Input id="brand" placeholder="Nike" {...register('brand')} />
           {errors.brand ? <p className="text-sm text-destructive">{errors.brand.message}</p> : null}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="model">Model</Label>
-          <Input
-            id="model"
-            placeholder="Air Jordan 1"
-            readOnly={lockModelDetails}
-            className={lockModelDetails ? 'cursor-default bg-muted' : undefined}
-            {...register('model')}
-          />
+          <Input id="model" placeholder="Air Jordan 1" {...register('model')} />
           {errors.model ? <p className="text-sm text-destructive">{errors.model.message}</p> : null}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="colorway">Colorway</Label>
-          <Input
-            id="colorway"
-            placeholder="Chicago"
-            readOnly={lockModelDetails}
-            className={lockModelDetails ? 'cursor-default bg-muted' : undefined}
-            {...register('colorway')}
-          />
+          <Input id="colorway" placeholder="Chicago" {...register('colorway')} />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="nickname">Nickname</Label>
-          <Input
-            id="nickname"
-            placeholder="Chicago"
-            readOnly={lockModelDetails}
-            className={lockModelDetails ? 'cursor-default bg-muted' : undefined}
-            {...register('nickname')}
-          />
+          <Input id="nickname" placeholder="Chicago" {...register('nickname')} />
         </div>
       </div>
 
