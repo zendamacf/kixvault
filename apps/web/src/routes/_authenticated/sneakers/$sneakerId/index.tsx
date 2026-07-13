@@ -175,21 +175,21 @@ function SneakerDetailPage() {
           </div>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <DetailItem label="Size" value={String(sneaker.size)} />
-          {sneaker.releaseDate ? (
-            <DetailItem label="Release date" value={formatDate(sneaker.releaseDate)} />
+          {sneaker.description ? (
+            <div className="sm:col-span-2">
+              <StaticDetailItem label="Description" value={sneaker.description} />
+            </div>
           ) : null}
+          {sneaker.releaseDate ? (
+            <StaticDetailItem label="Release date" value={formatDate(sneaker.releaseDate)} />
+          ) : null}
+          <StaticDetailItem label="Added" value={formatDate(sneaker.createdAt)} />
+          <DetailItem label="Size" value={String(sneaker.size)} />
           <DetailItem label="Purchase price" value={formatCurrency(sneaker.purchasePrice)} />
           <DetailItem label="Purchase date" value={formatDate(sneaker.purchaseDate)} />
-          <DetailItem label="Added" value={formatDate(sneaker.createdAt)} />
           <div className="sm:col-span-2">
             <DetailItem label="Notes" value={sneaker.notes || '—'} />
           </div>
-          {sneaker.description ? (
-            <div className="sm:col-span-2">
-              <DetailItem label="Description" value={sneaker.description} />
-            </div>
-          ) : null}
         </CardContent>
       </Card>
 
@@ -201,6 +201,15 @@ function SneakerDetailPage() {
 function DetailItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-border bg-background/60 p-4">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 text-base">{value}</p>
+    </div>
+  );
+}
+
+function StaticDetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="p-4">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
       <p className="mt-1 text-base">{value}</p>
     </div>
