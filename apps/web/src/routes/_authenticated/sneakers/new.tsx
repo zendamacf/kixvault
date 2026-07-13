@@ -72,7 +72,7 @@ function NewSneakerPage() {
   const isSubmitting = createFromCatalogMutation.isPending || createManualMutation.isPending;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
+    <div className="space-y-4">
       <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
         ← Back to collection
       </Link>

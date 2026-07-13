@@ -55,7 +55,7 @@ function SneakerDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-3xl space-y-4">
+      <div className="space-y-4">
         <Skeleton className="h-4 w-36" />
         <Card>
           <CardHeader className="space-y-4">
@@ -81,7 +81,7 @@ function SneakerDetailPage() {
 
   if (error || !data?.sneaker) {
     return (
-      <div className="mx-auto max-w-3xl">
+      <div>
         <p className="text-sm text-destructive">{error?.message ?? 'Sneaker not found'}</p>
       </div>
     );
@@ -92,15 +92,15 @@ function SneakerDetailPage() {
   const catalogSourceLabel = getCatalogSourceLabel(sneaker.catalogSource);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
+    <div className="space-y-4">
       <Link to="/" className="inline-flex text-sm text-muted-foreground hover:text-foreground">
         ← Back to collection
       </Link>
 
       <Card>
         <CardHeader className="space-y-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row items-center">
               <SneakerThumbnail
                 imageUrl={sneaker.imageUrl}
                 alt={title}

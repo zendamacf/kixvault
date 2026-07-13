@@ -18,6 +18,7 @@ import { SneakerBrandBadge } from './sneaker-brand-badge';
 
 const DEBOUNCE_DELAY = 1000;
 const RESULTS_MAX_HEIGHT = 'max-h-[32rem]';
+const RESULT_THUMBNAIL_CLASS = 'h-32 w-32 shrink-0';
 
 type CatalogSearchPickerProps = {
   query: string;
@@ -100,7 +101,7 @@ export function CatalogSearchPicker({
         >
           {(['one', 'two', 'three', 'four'] as const).map((key) => (
             <div key={key} className="flex min-w-0 items-center gap-4 rounded-md border p-3">
-              <Skeleton className="h-24 w-24 shrink-0 rounded-md" />
+              <Skeleton className={cn(RESULT_THUMBNAIL_CLASS, 'rounded-md')} />
               <div className="min-w-0 flex-1 space-y-2">
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
@@ -136,7 +137,7 @@ export function CatalogSearchPicker({
                   <SneakerThumbnail
                     imageUrl={result.imageUrl}
                     alt={result.title}
-                    className="h-24 w-24 shrink-0"
+                    className={RESULT_THUMBNAIL_CLASS}
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium">{result.title}</span>

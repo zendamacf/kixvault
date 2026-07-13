@@ -53,7 +53,7 @@ function EditSneakerPage() {
   const sneaker = data.sneaker;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
+    <div className="space-y-4">
       <Link
         to="/sneakers/$sneakerId"
         params={{ sneakerId }}

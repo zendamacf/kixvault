@@ -104,11 +104,11 @@ export function CatalogSneakerForm({
             ← Back to search
           </button>
 
-          <div className="flex gap-4 rounded-lg border bg-background/60 p-4">
+          <div className="flex flex-col gap-4 rounded-lg border bg-background/60 p-4 sm:flex-row items-center">
             <SneakerThumbnail
               imageUrl={selectedResult.imageUrl}
               alt={selectedResult.title}
-              className="h-24 w-24 shrink-0"
+              className="h-48 w-48 shrink-0 sm:h-56 sm:w-56"
             />
             <div className="min-w-0 space-y-1">
               <p className="font-medium">{selectedResult.title}</p>
