@@ -1,8 +1,10 @@
-import type { CreateSneakerInput, SneakerCondition } from '@kixvault/shared';
+import type { CreateSneakerInput, SneakerCondition, UpdateSneakerInput } from '@kixvault/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
-import { SneakerForm } from '@/components/sneakers/sneaker-form';
+import { BackLink } from '@/components/layout/back-link';
+import { CollectionSneakerForm } from '@/components/sneakers/collection-sneaker-form';
+import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { api, parseApiError } from '@/lib/api';
 import { sneakerQueryOptions } from '@/lib/queries';
@@ -19,7 +21,7 @@ function EditSneakerPage() {
   const { data, isLoading, error } = useQuery(sneakerQueryOptions(sneakerId));
 
   const updateMutation = useMutation({
-    mutationFn: async (values: CreateSneakerInput) => {
+    mutationFn: async (values: UpdateSneakerInput) => {
       const response = await api.api.sneakers[':id'].$patch({
         param: { id: sneakerId },
         json: values,
@@ -51,16 +53,13 @@ function EditSneakerPage() {
   }
 
   const sneaker = data.sneaker;
+  const isCatalogLinked = Boolean(sneaker.sku);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
-      <Link
-        to="/sneakers/$sneakerId"
-        params={{ sneakerId }}
-        className="text-sm text-muted-foreground hover:text-foreground"
-      >
+    <div className="space-y-4">
+      <BackLink to="/sneakers/$sneakerId" params={{ sneakerId }}>
         ← Back to details
-      </Link>
+      </BackLink>
 
       <Card>
         <CardHeader>
@@ -71,30 +70,50 @@ function EditSneakerPage() {
         </CardHeader>
         <CardContent>
           {formError ? <p className="mb-4 text-sm text-destructive">{formError}</p> : null}
-          <SneakerForm
-            submitLabel="Save changes"
-            isSubmitting={updateMutation.isPending}
-            defaultValues={{
-              brand: sneaker.brand,
-              model: sneaker.model,
-              colorway: sneaker.colorway,
-              nickname: sneaker.nickname,
-              size: sneaker.size,
-              condition: sneaker.condition as SneakerCondition,
-              purchasePrice: sneaker.purchasePrice,
-              purchaseDate: sneaker.purchaseDate ?? '',
-              notes: sneaker.notes,
-              sku: sneaker.sku,
-              imageUrl: sneaker.imageUrl,
-              catalogSource: sneaker.catalogSource as CreateSneakerInput['catalogSource'],
-              catalogId: sneaker.catalogId,
-              releaseDate: sneaker.releaseDate ?? '',
-              description: sneaker.description,
-            }}
-            onSubmit={async (values) => {
-              await updateMutation.mutateAsync(values);
-            }}
-          />
+
+          {isCatalogLinked ? (
+            <CollectionSneakerForm
+              summary={{
+                imageUrl: sneaker.imageUrl,
+                title: `${sneaker.brand} ${sneaker.model}`,
+                brand: sneaker.brand,
+                nickname: sneaker.nickname,
+                colorway: sneaker.colorway,
+                sku: sneaker.sku,
+              }}
+              submitLabel="Save changes"
+              isSubmitting={updateMutation.isPending}
+              defaultValues={{
+                size: sneaker.size,
+                condition: sneaker.condition as SneakerCondition,
+                purchasePrice: sneaker.purchasePrice,
+                purchaseDate: sneaker.purchaseDate ?? '',
+                notes: sneaker.notes,
+              }}
+              onSubmit={async (values) => {
+                await updateMutation.mutateAsync(values);
+              }}
+            />
+          ) : (
+            <ManualSneakerForm
+              submitLabel="Save changes"
+              isSubmitting={updateMutation.isPending}
+              defaultValues={{
+                brand: sneaker.brand,
+                model: sneaker.model,
+                colorway: sneaker.colorway,
+                nickname: sneaker.nickname,
+                size: sneaker.size,
+                condition: sneaker.condition as SneakerCondition,
+                purchasePrice: sneaker.purchasePrice,
+                purchaseDate: sneaker.purchaseDate ?? '',
+                notes: sneaker.notes,
+              }}
+              onSubmit={async (values) => {
+                await updateMutation.mutateAsync(values as CreateSneakerInput);
+              }}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

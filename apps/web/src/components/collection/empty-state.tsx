@@ -10,6 +10,7 @@ type EmptyStateProps = {
   onClearFilters?: () => void;
 };
 
+/** Message and action when the collection is empty or filtered to zero results. */
 export function EmptyState({
   title,
   description,

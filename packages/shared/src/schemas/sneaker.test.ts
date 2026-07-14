@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'bun:test';
-import { createSneakerSchema, listSneakersQuerySchema, updateSneakerSchema } from './sneaker';
+import {
+  createSneakerFromCatalogSchema,
+  createSneakerSchema,
+  listSneakersQuerySchema,
+  updateSneakerSchema,
+} from './sneaker';
 
 const validSneaker = {
   brand: 'Nike',
@@ -85,6 +90,31 @@ describe('updateSneakerSchema', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+});
+
+describe('createSneakerFromCatalogSchema', () => {
+  test('accepts catalog-linked sneaker input', () => {
+    const result = createSneakerFromCatalogSchema.safeParse({
+      catalogSource: 'kicksdb:goat',
+      catalogId: 'air-jordan-1-chicago',
+      size: 10,
+      condition: 'deadstock',
+      purchasePrice: 180,
+      purchaseDate: '2024-06-15',
+      notes: 'DS pickup',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test('requires catalog source and id', () => {
+    const result = createSneakerFromCatalogSchema.safeParse({
+      size: 10,
+      condition: 'deadstock',
+    });
+
+    expect(result.success).toBe(false);
   });
 });
 

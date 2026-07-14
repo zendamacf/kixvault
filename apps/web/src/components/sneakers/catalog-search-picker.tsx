@@ -1,6 +1,5 @@
 import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,20 +17,27 @@ import { cn } from '@/lib/utils';
 import { SneakerBrandBadge } from './sneaker-brand-badge';
 
 const DEBOUNCE_DELAY = 1000;
+const RESULTS_MAX_HEIGHT = 'max-h-[32rem]';
+const RESULT_THUMBNAIL_CLASS = 'h-32 w-32 shrink-0';
 
 type CatalogSearchPickerProps = {
+  query: string;
+  onQueryChange: (query: string) => void;
+  marketplace: CatalogMarketplace;
+  onMarketplaceChange: (marketplace: CatalogMarketplace) => void;
   onSelect: (result: CatalogSearchResult) => void;
   selectedCatalogId?: string | null;
-  onMarketplaceChange?: () => void;
 };
 
+/** GOAT/StockX catalog search input, marketplace selector, and result list. */
 export function CatalogSearchPicker({
+  query,
+  onQueryChange,
+  marketplace,
+  onMarketplaceChange,
   onSelect,
   selectedCatalogId,
-  onMarketplaceChange,
 }: CatalogSearchPickerProps) {
-  const [query, setQuery] = useState('');
-  const [marketplace, setMarketplace] = useState<CatalogMarketplace>('goat');
   const debouncedQuery = useDebouncedValue(query.trim(), DEBOUNCE_DELAY);
   const canSearch = debouncedQuery.length >= 2;
 
@@ -54,14 +60,11 @@ export function CatalogSearchPicker({
             className="min-w-0 flex-1"
             placeholder="Search by name or SKU (e.g. Air Jordan 1 Chicago, DZ5485-100)"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => onQueryChange(event.target.value)}
           />
           <Select
             value={marketplace}
-            onValueChange={(value) => {
-              setMarketplace(value as CatalogMarketplace);
-              onMarketplaceChange?.();
-            }}
+            onValueChange={(value) => onMarketplaceChange(value as CatalogMarketplace)}
           >
             <SelectTrigger
               id="catalog-marketplace"
@@ -77,7 +80,7 @@ export function CatalogSearchPicker({
           </Select>
         </div>
         <p className="text-xs text-muted-foreground">
-          Search {marketplaceLabel} to pre-fill brand, model, and colorway.
+          Search {marketplaceLabel} to find your pair.
         </p>
       </div>
 
@@ -87,17 +90,22 @@ export function CatalogSearchPicker({
 
       {unavailable ? (
         <p className="text-sm text-muted-foreground">
-          Catalog search is unavailable. Use the button below to enter details manually.
+          Catalog search is unavailable. Switch to manual entry to add a pair.
         </p>
       ) : null}
 
       {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
 
       {canSearch && (isLoading || isFetching) ? (
-        <div className="grid max-h-96 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
+        <div
+          className={cn(
+            'grid grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2',
+            RESULTS_MAX_HEIGHT,
+          )}
+        >
           {(['one', 'two', 'three', 'four'] as const).map((key) => (
             <div key={key} className="flex min-w-0 items-center gap-4 rounded-md border p-3">
-              <Skeleton className="h-24 w-24 shrink-0 rounded-md" />
+              <Skeleton className={cn(RESULT_THUMBNAIL_CLASS, 'rounded-md')} />
               <div className="min-w-0 flex-1 space-y-2">
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
@@ -114,7 +122,12 @@ export function CatalogSearchPicker({
       ) : null}
 
       {results.length > 0 ? (
-        <ul className="grid max-h-96 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
+        <ul
+          className={cn(
+            'grid grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2',
+            RESULTS_MAX_HEIGHT,
+          )}
+        >
           {results.map((result) => {
             const isSelected = selectedCatalogId === result.catalogId;
 
@@ -131,7 +144,7 @@ export function CatalogSearchPicker({
                   <SneakerThumbnail
                     imageUrl={result.imageUrl}
                     alt={result.title}
-                    className="h-24 w-24 shrink-0"
+                    className={RESULT_THUMBNAIL_CLASS}
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium">{result.title}</span>

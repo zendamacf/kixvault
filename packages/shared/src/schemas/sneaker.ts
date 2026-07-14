@@ -40,6 +40,16 @@ export const createSneakerSchema = z.object({
 
 export const updateSneakerSchema = createSneakerSchema.partial();
 
+export const createSneakerFromCatalogSchema = z.object({
+  catalogSource: z.enum(catalogSources),
+  catalogId: z.string().trim().min(1).max(200),
+  size: z.coerce.number().positive().max(99),
+  condition: z.enum(sneakerConditions),
+  purchasePrice: optionalNumericField,
+  purchaseDate: dateField,
+  notes: z.string().trim().max(2000).optional().nullable(),
+});
+
 export const listSneakersQuerySchema = z.object({
   search: z.string().trim().min(1).max(100).optional(),
   condition: z.enum(sneakerConditions).optional(),
@@ -48,5 +58,6 @@ export const listSneakersQuerySchema = z.object({
 });
 
 export type CreateSneakerInput = z.infer<typeof createSneakerSchema>;
+export type CreateSneakerFromCatalogInput = z.infer<typeof createSneakerFromCatalogSchema>;
 export type UpdateSneakerInput = z.infer<typeof updateSneakerSchema>;
 export type ListSneakersQuery = z.infer<typeof listSneakersQuerySchema>;

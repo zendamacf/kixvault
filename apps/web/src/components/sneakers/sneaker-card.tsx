@@ -10,6 +10,7 @@ type SneakerCardProps = {
   sneaker: Sneaker;
 };
 
+/** Grid card linking to a sneaker's detail page. */
 export function SneakerCard({ sneaker }: SneakerCardProps) {
   const title = `${sneaker.brand} ${sneaker.model}`;
   const subtitle = sneaker.nickname ? `"${sneaker.nickname}"` : sneaker.colorway || 'No colorway';

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { BackLink } from '@/components/layout/back-link';
 import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import {
@@ -55,7 +56,7 @@ function SneakerDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-3xl space-y-4">
+      <div className="space-y-4">
         <Skeleton className="h-4 w-36" />
         <Card>
           <CardHeader className="space-y-4">
@@ -81,7 +82,7 @@ function SneakerDetailPage() {
 
   if (error || !data?.sneaker) {
     return (
-      <div className="mx-auto max-w-3xl">
+      <div>
         <p className="text-sm text-destructive">{error?.message ?? 'Sneaker not found'}</p>
       </div>
     );
@@ -92,15 +93,13 @@ function SneakerDetailPage() {
   const catalogSourceLabel = getCatalogSourceLabel(sneaker.catalogSource);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
-      <Link to="/" className="inline-flex text-sm text-muted-foreground hover:text-foreground">
-        ← Back to collection
-      </Link>
+    <div className="space-y-4">
+      <BackLink to="/">← Back to collection</BackLink>
 
       <Card>
         <CardHeader className="space-y-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row items-center">
               <SneakerThumbnail
                 imageUrl={sneaker.imageUrl}
                 alt={title}
@@ -175,21 +174,21 @@ function SneakerDetailPage() {
           </div>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <DetailItem label="Size" value={String(sneaker.size)} />
-          {sneaker.releaseDate ? (
-            <DetailItem label="Release date" value={formatDate(sneaker.releaseDate)} />
+          {sneaker.description ? (
+            <div className="sm:col-span-2">
+              <StaticDetailItem label="Description" value={sneaker.description} />
+            </div>
           ) : null}
+          {sneaker.releaseDate ? (
+            <StaticDetailItem label="Release date" value={formatDate(sneaker.releaseDate)} />
+          ) : null}
+          <StaticDetailItem label="Added" value={formatDate(sneaker.createdAt)} />
+          <DetailItem label="Size" value={String(sneaker.size)} />
           <DetailItem label="Purchase price" value={formatCurrency(sneaker.purchasePrice)} />
           <DetailItem label="Purchase date" value={formatDate(sneaker.purchaseDate)} />
-          <DetailItem label="Added" value={formatDate(sneaker.createdAt)} />
           <div className="sm:col-span-2">
             <DetailItem label="Notes" value={sneaker.notes || '—'} />
           </div>
-          {sneaker.description ? (
-            <div className="sm:col-span-2">
-              <DetailItem label="Description" value={sneaker.description} />
-            </div>
-          ) : null}
         </CardContent>
       </Card>
 
@@ -201,6 +200,15 @@ function SneakerDetailPage() {
 function DetailItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-border bg-background/60 p-4">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 text-base">{value}</p>
+    </div>
+  );
+}
+
+function StaticDetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="p-4">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
       <p className="mt-1 text-base">{value}</p>
     </div>

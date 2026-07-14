@@ -1,0 +1,168 @@
+import { beforeEach, describe, expect, mock, test } from 'bun:test';
+
+class CatalogProductNotFoundError extends Error {
+  constructor(message = 'Catalog product not found') {
+    super(message);
+    this.name = 'CatalogProductNotFoundError';
+  }
+}
+
+class CatalogSearchError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = 'CatalogSearchError';
+  }
+}
+
+const mockFetchCatalogProduct = mock(async () => ({
+  catalogSource: 'kicksdb:stockx' as const,
+  catalogId: 'air-max-1',
+  title: 'Nike Air Max 1',
+  brand: 'Nike',
+  model: 'Air Max 1',
+  colorway: 'Anniversary Red',
+  nickname: 'Big Bubble',
+  sku: 'TEST-SKU-001',
+  imageUrl: null,
+  releaseDate: '2015-04-25',
+  description: 'The original Air Max with visible Air cushioning.',
+}));
+
+const mockEnv = {
+  kicksdbApiKey: 'KICKS-test-key' as string | undefined,
+  databaseUrl: 'postgresql://example.com/db',
+  port: 3000,
+  isProduction: false,
+};
+
+mock.module('../lib/env', () => ({
+  env: mockEnv,
+}));
+
+mock.module('../lib/catalog', () => ({
+  fetchCatalogProduct: mockFetchCatalogProduct,
+  CatalogProductNotFoundError,
+  CatalogSearchError,
+}));
+
+mock.module('../middleware/session', () => ({
+  sessionMiddleware: async (
+    c: { set: (key: 'user' | 'session', value: unknown) => void },
+    next: () => Promise<void>,
+  ) => {
+    c.set('user', { id: 'user-1', email: 'user@example.com' });
+    c.set('session', { id: 'session-1', fresh: false });
+    await next();
+  },
+  requireAuth: async (_c: unknown, next: () => Promise<void>) => next(),
+}));
+
+const { sneakerRoutes } = await import('./sneakers');
+
+describe('sneaker routes', () => {
+  beforeEach(() => {
+    mockEnv.kicksdbApiKey = 'KICKS-test-key';
+    mockFetchCatalogProduct.mockClear();
+    mockFetchCatalogProduct.mockImplementation(async () => ({
+      catalogSource: 'kicksdb:stockx' as const,
+      catalogId: 'air-max-1',
+      title: 'Nike Air Max 1',
+      brand: 'Nike',
+      model: 'Air Max 1',
+      colorway: 'Anniversary Red',
+      nickname: 'Big Bubble',
+      sku: 'TEST-SKU-001',
+      imageUrl: null,
+      releaseDate: '2015-04-25',
+      description: 'The original Air Max with visible Air cushioning.',
+    }));
+  });
+
+  test('POST /from-catalog returns 503 when KicksDB is not configured', async () => {
+    mockEnv.kicksdbApiKey = undefined;
+
+    const response = await sneakerRoutes.request('/from-catalog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        catalogSource: 'kicksdb:stockx',
+        catalogId: 'air-max-1',
+        size: 10,
+        condition: 'deadstock',
+      }),
+    });
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({ error: 'Catalog is not configured' });
+  });
+
+  test('POST /from-catalog returns 404 when the catalog product is missing', async () => {
+    mockFetchCatalogProduct.mockImplementationOnce(async () => {
+      throw new CatalogProductNotFoundError();
+    });
+
+    const response = await sneakerRoutes.request('/from-catalog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        catalogSource: 'kicksdb:stockx',
+        catalogId: 'missing',
+        size: 10,
+        condition: 'deadstock',
+      }),
+    });
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({ error: 'Catalog product not found' });
+  });
+
+  test('POST /from-catalog maps catalog search failures to API errors', async () => {
+    mockFetchCatalogProduct.mockImplementationOnce(async () => {
+      throw new CatalogSearchError('KicksDB request failed', 502);
+    });
+
+    const response = await sneakerRoutes.request('/from-catalog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        catalogSource: 'kicksdb:stockx',
+        catalogId: 'air-max-1',
+        size: 10,
+        condition: 'deadstock',
+      }),
+    });
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toEqual({ error: 'Failed to fetch catalog product' });
+  });
+
+  test('GET /:id returns 400 for invalid ids', async () => {
+    const response = await sneakerRoutes.request('/not-a-uuid');
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: 'Invalid sneaker id' });
+  });
+
+  test('PATCH /:id returns 400 for invalid ids', async () => {
+    const response = await sneakerRoutes.request('/not-a-uuid', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notes: 'Updated' }),
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: 'Invalid sneaker id' });
+  });
+
+  test('DELETE /:id returns 400 for invalid ids', async () => {
+    const response = await sneakerRoutes.request('/not-a-uuid', {
+      method: 'DELETE',
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: 'Invalid sneaker id' });
+  });
+});

@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+/** Light, dark, and system theme switcher for the app header. */
 export function ThemeToggle() {
   const { setTheme } = useTheme();
 
