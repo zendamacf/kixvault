@@ -197,6 +197,228 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(response.status).toBe(400);
   });
 
+  test('authenticated sneaker CRUD and search flow', async () => {
+    const email = `collector-${crypto.randomUUID()}@example.com`;
+    const { cookie } = await registerTestUser(app, email);
+
+    const createResponse = await app.request('/api/sneakers/custom', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: cookie,
+      },
+      body: JSON.stringify({
+        brand: 'Nike',
+        model: 'Air Max 1',
+        colorway: 'Anniversary Red',
+        nickname: 'Big Bubble',
+        size: 10,
+        condition: 'deadstock',
+        purchasePrice: 180,
+        purchaseDate: '2024-06-15',
+        notes: 'Deadstock pickup',
+        sku: 'TEST-SKU-001',
+      }),
+    });
+
+    expect(createResponse.status).toBe(201);
+
+    const created = (await createResponse.json()) as {
+      sneaker: { id: string; brand: string; sku: string; nickname: string | null };
+    };
+    expect(created.sneaker.nickname).toBe('Big Bubble');
+
+    const listResponse = await app.request('/api/sneakers', {
+      headers: { Cookie: cookie },
+    });
+
+    expect(listResponse.status).toBe(200);
+
+    const listed = (await listResponse.json()) as { sneakers: Array<{ id: string }> };
+    expect(listed.sneakers).toHaveLength(1);
+    expect(listed.sneakers[0]?.id).toBe(created.sneaker.id);
+
+    const searchResponse = await app.request('/api/sneakers?search=Nike', {
+      headers: { Cookie: cookie },
+    });
+
+    expect(searchResponse.status).toBe(200);
+
+    const searched = (await searchResponse.json()) as { sneakers: Array<{ id: string }> };
+    expect(searched.sneakers.some((sneaker) => sneaker.id === created.sneaker.id)).toBe(true);
+
+    const conditionResponse = await app.request('/api/sneakers?condition=deadstock', {
+      headers: { Cookie: cookie },
+    });
+
+    expect(conditionResponse.status).toBe(200);
+
+    const conditioned = (await conditionResponse.json()) as { sneakers: Array<{ id: string }> };
+    expect(conditioned.sneakers.some((sneaker) => sneaker.id === created.sneaker.id)).toBe(true);
+
+    const detailResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
+      headers: { Cookie: cookie },
+    });
+
+    expect(detailResponse.status).toBe(200);
+
+    const detail = (await detailResponse.json()) as { sneaker: { brand: string } };
+    expect(detail.sneaker.brand).toBe('Nike');
+
+    const noopUpdateResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: cookie,
+      },
+      body: JSON.stringify({}),
+    });
+
+    expect(noopUpdateResponse.status).toBe(200);
+
+    const updateResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: cookie,
+      },
+      body: JSON.stringify({
+        notes: 'Worn once',
+        purchasePrice: 150,
+      }),
+    });
+
+    expect(updateResponse.status).toBe(200);
+
+    const updated = (await updateResponse.json()) as { sneaker: { notes: string | null } };
+    expect(updated.sneaker.notes).toBe('Worn once');
+
+    const statsResponse = await app.request('/api/stats', {
+      headers: { Cookie: cookie },
+    });
+
+    expect(statsResponse.status).toBe(200);
+
+    const stats = (await statsResponse.json()) as {
+      stats: { count: number; totalSpend: number };
+    };
+    expect(stats.stats.count).toBe(1);
+    expect(stats.stats.totalSpend).toBe(150);
+
+    const deleteResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
+      method: 'DELETE',
+      headers: { Cookie: cookie },
+    });
+
+    expect(deleteResponse.status).toBe(200);
+    await expect(deleteResponse.json()).resolves.toEqual({ success: true });
+
+    const missingDetailResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
+      headers: { Cookie: cookie },
+    });
+
+    expect(missingDetailResponse.status).toBe(404);
+
+    const missingDeleteResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
+      method: 'DELETE',
+      headers: { Cookie: cookie },
+    });
+
+    expect(missingDeleteResponse.status).toBe(404);
+  });
+
+  test('POST /api/sneakers/from-catalog returns 503 when KicksDB is not configured', async () => {
+    const email = `catalog-503-${crypto.randomUUID()}@example.com`;
+    const { cookie } = await registerTestUser(app, email);
+
+    const response = await app.request('/api/sneakers/from-catalog', {
+      method: 'POST',
+      headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        catalogSource: 'kicksdb:stockx',
+        catalogId: '1234567890',
+        size: 10,
+        condition: 'deadstock',
+      }),
+    });
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({ error: 'Catalog is not configured' });
+  });
+
+  test('returns 404 for unknown sneaker ids', async () => {
+    const email = `missing-${crypto.randomUUID()}@example.com`;
+    const { cookie } = await registerTestUser(app, email);
+    const unknownId = '22222222-2222-4222-8222-222222222222';
+
+    const detailResponse = await app.request(`/api/sneakers/${unknownId}`, {
+      headers: { Cookie: cookie },
+    });
+
+    expect(detailResponse.status).toBe(404);
+
+    const updateResponse = await app.request(`/api/sneakers/${unknownId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({ notes: 'Nope' }),
+    });
+
+    expect(updateResponse.status).toBe(404);
+  });
+
+  test('PATCH /api/sneakers/:id rejects catalog-linked model field changes', async () => {
+    mockIsKicksdbConfigured.mockReturnValue(true);
+    mockGetStockxProduct.mockImplementation(() =>
+      Promise.resolve({
+        data: {
+          data: {
+            slug: '1234567890',
+            title: 'Nike Air Max 1',
+            brand: 'Nike',
+            model: 'Air Max 1',
+            primary_title: 'Nike Air Max 1',
+            secondary_title: 'Big Bubble',
+            sku: '319986-171',
+            image: null,
+            gallery: [],
+            traits: [],
+          },
+        },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const email = `catalog-edit-${crypto.randomUUID()}@example.com`;
+    const { cookie } = await registerTestUser(app, email);
+
+    const createResponse = await app.request('/api/sneakers/from-catalog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({
+        catalogSource: 'kicksdb:stockx',
+        catalogId: '1234567890',
+        size: 10,
+        condition: 'deadstock',
+      }),
+    });
+
+    expect(createResponse.status).toBe(201);
+
+    const created = (await createResponse.json()) as { sneaker: { id: string } };
+
+    const updateResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({ brand: 'Adidas' }),
+    });
+
+    expect(updateResponse.status).toBe(400);
+    await expect(updateResponse.json()).resolves.toEqual({
+      error: 'Cannot update brand for catalog-linked sneakers',
+    });
+  });
+
   test('POST /api/auth/login validates credentials', async () => {
     const email = `login-${crypto.randomUUID()}@example.com`;
     const password = 'password123';
