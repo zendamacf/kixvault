@@ -17,6 +17,9 @@
     "dev": "bun run --env-file ../../.env --watch src/index.ts",
     "start": "bun run src/index.ts",
     "build": "tsc --build",
+    "build:release": "tsc --build && bun run sentry:sourcemaps",
+    "sentry:sourcemaps": "sh scripts/upload-sourcemaps.sh",
+    "sentry:wizard:sourcemaps": "bun x @sentry/wizard@latest -i sourcemaps --saas --org kalopsiadev --project kixvault-api",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "test": "bun run test:unit && bun run test:integration",
@@ -34,11 +37,14 @@
     "@kixvault/db": "workspace:*",
     "@kixvault/shared": "workspace:*",
     "@lucia-auth/adapter-drizzle": "^1.1.0",
+    "@sentry/bun": "^10.65.0",
+    "@sentry/hono": "^10.65.0",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.8.3",
     "lucia": "^3.2.2"
   },
   "devDependencies": {
+    "@sentry/cli": "^3.6.0",
     "@types/bun": "^1.2.18",
     "postgres": "^3.4.7"
   }
