@@ -46,6 +46,9 @@ export const mockGetGoatProduct = mock(
     }),
 );
 
+export const mockIsKicksdbConfigured = mock(() => false);
+export const mockEnsureKicksdbClient = mock(() => {});
+
 export function mockKicksdbSdk() {
   mock.module('@kicksdb/sdk', () => ({
     configureClient: mockConfigureClient,
@@ -62,4 +65,7 @@ export function resetKicksdbSdkMocks() {
   mockGetGoatProducts.mockClear();
   mockGetStockxProduct.mockClear();
   mockGetGoatProduct.mockClear();
+  mockIsKicksdbConfigured.mockClear();
+  mockEnsureKicksdbClient.mockClear();
+  mockIsKicksdbConfigured.mockReturnValue(false);
 }
