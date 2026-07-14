@@ -20,4 +20,4 @@ echo "Running migrations..."
 bun run --cwd packages/db db:migrate
 
 echo "Starting API..."
-exec bun run --cwd apps/api src/index.ts
+exec bun --cwd apps/api dist/index.js

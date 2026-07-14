@@ -22,10 +22,15 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+      args:
+        SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN:-}
+        SENTRY_RELEASE: ${SENTRY_RELEASE:-kixvault-api@local}
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
       KICKSDB_API_KEY: ${KICKSDB_API_KEY:-KICKS-xxxx-xxxx-xxxx-xxxxxxxxxxxx}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_RELEASE: ${SENTRY_RELEASE:-}
       NODE_ENV: production
       PORT: 3000
     depends_on:

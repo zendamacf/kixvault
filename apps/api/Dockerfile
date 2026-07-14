@@ -17,6 +17,14 @@ COPY tsconfig.base.json tsconfig.json ./
 
 RUN bun run --cwd packages/shared build && bun run --cwd packages/db build
 
+ARG SENTRY_AUTH_TOKEN
+ARG SENTRY_RELEASE
+ENV SENTRY_ORG=kalopsiadev
+ENV SENTRY_PROJECT=kixvault-api
+ENV SENTRY_RELEASE=${SENTRY_RELEASE}
+
+RUN bun run --cwd apps/api build:release
+
 COPY apps/api/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
