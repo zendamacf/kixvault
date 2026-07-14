@@ -10,8 +10,8 @@ import type { ApiEnv } from './types';
 
 const routes = new Hono<ApiEnv>();
 
-if (env.sentryDsn) {
-  routes.use(
+export const app = routes
+  .use(
     sentry(routes, {
       dsn: env.sentryDsn,
       environment: env.isProduction ? 'production' : 'development',
@@ -19,15 +19,11 @@ if (env.sentryDsn) {
       tracesSampleRate: env.isProduction ? 0.2 : 1.0,
       enableLogs: true,
     }),
-  );
-}
-
-routes
+  )
   .get('/api/health', (c) => c.json({ status: 'ok', app: APP_NAME }))
   .route('/api/auth', authRoutes)
   .route('/api/catalog', catalogRoutes)
   .route('/api/sneakers', sneakerRoutes)
   .route('/api/stats', statsRoutes);
 
-export const app = routes;
-export type AppType = typeof routes;
+export type AppType = typeof app;
