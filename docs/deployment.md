@@ -23,12 +23,16 @@ The following must be configured in the GitHub repository before creating a rele
 
 ## Creating a Release
 
-1. Tag the commit with a semver tag: `git tag v1.0.0 && git push origin v1.0.0`
-2. Create a GitHub release from the tag (or use `gh release create v1.0.0`).
-3. The **Release** workflow builds and pushes `kixvault-api` and `kixvault-web` images to GHCR, tagged with:
-   - The full version (`1.0.0`)
-   - Major.minor (`1.0`)
-   - `latest`
+Releases are driven by [changesets](https://github.com/changesets/changesets). Each PR that changes application behaviour should include a changeset file (created via `bun run changeset`).
+
+1. Merge a PR that contains changeset files into `main`.
+2. The **Release** workflow detects pending changesets and creates (or updates) a **"Version Packages"** PR that bumps versions in `package.json` and generates changelogs.
+3. When the Version Packages PR is merged, the workflow runs again. This time there are no pending changesets, so it detects which apps had version bumps and builds only those Docker images.
+4. Images are pushed to GHCR with version tags and `latest`:
+   - `ghcr.io/zendamacf/kixvault-api:<version>` / `latest`
+   - `ghcr.io/zendamacf/kixvault-web:<version>` / `latest`
+
+API and web versions are independent -- a changeset that only touches `@kixvault/api` will only bump and rebuild the API image.
 
 ## VPS Setup
 
@@ -58,7 +62,7 @@ services:
       retries: 10
 
   api:
-    image: ghcr.io/zendamacf/kixvault-api:${KIXVAULT_VERSION:-latest}
+    image: ghcr.io/zendamacf/kixvault-api:${API_VERSION:-latest}
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
@@ -71,7 +75,7 @@ services:
         condition: service_healthy
 
   web:
-    image: ghcr.io/zendamacf/kixvault-web:${KIXVAULT_VERSION:-latest}
+    image: ghcr.io/zendamacf/kixvault-web:${WEB_VERSION:-latest}
     restart: unless-stopped
 
   caddy:
@@ -105,8 +109,9 @@ volumes:
 ### `.env`
 
 ```sh
-# Version — pin to a release tag or use "latest"
-KIXVAULT_VERSION=latest
+# Versions — pin to a release version or use "latest"
+API_VERSION=latest
+WEB_VERSION=latest
 
 # Caddy
 DOMAIN=example.com
@@ -153,17 +158,14 @@ The API container automatically waits for PostgreSQL to be ready and runs databa
 To deploy a new release:
 
 ```sh
-# Pull a specific version
-KIXVAULT_VERSION=1.2.0 docker compose pull api web
-
-# Or pull latest
+# Pull latest images
 docker compose pull api web
 
 # Recreate with new images
 docker compose up -d
 ```
 
-To pin a specific version permanently, update `KIXVAULT_VERSION` in `.env` and run:
+To pin specific versions, update `API_VERSION` and/or `WEB_VERSION` in `.env` and run:
 
 ```sh
 docker compose pull api web && docker compose up -d
