@@ -63,6 +63,7 @@ jobs:
             echo "web_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
+  # Only runs if api version has changed
   build-api:
     name: Build / kixvault-api
     needs: release
@@ -99,6 +100,7 @@ jobs:
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
             SENTRY_RELEASE=${{ needs.release.outputs.api_version }}
 
+  # Only runs if web version has changed
   build-web:
     name: Build / kixvault-web
     needs: release

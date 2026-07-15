@@ -43,30 +43,9 @@ Auth uses Lucia with httpOnly session cookies. All sneaker routes require a vali
 
 The API exports `AppType` from `apps/api/src/app.ts` for a typed Hono RPC client (`hc`) in the frontend.
 
-## Production (Docker Compose)
+## Production
 
-Deploy the full stack — PostgreSQL 18, API, static web, and Caddy reverse proxy — with:
-
-```bash
-cp .env.prod.example .env
-# Set POSTGRES_PASSWORD (required) and DOMAIN for your VPS
-
-bun run prod:up
-```
-
-| Service | Role |
-|---------|------|
-| `db` | PostgreSQL 18 |
-| `api` | Hono API on Bun (runs migrations on startup) |
-| `web` | Nginx serving the Vite production build |
-| `caddy` | Reverse proxy — `/api/*` → API, everything else → web |
-
-Open `http://localhost` (or your `DOMAIN`). Caddy obtains HTTPS automatically when `DOMAIN` is a public hostname and `ACME_EMAIL` is set.
-
-```bash
-bun run prod:logs   # follow logs
-bun run prod:down   # stop stack
-```
+See [deployment.md](./docs/deployment.md)
 
 ## Database
 
