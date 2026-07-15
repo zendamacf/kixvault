@@ -45,23 +45,20 @@ jobs:
           api_version=$(jq -r .version apps/api/package.json)
           web_version=$(jq -r .version apps/web/package.json)
 
-          api_prev=$(git show HEAD~1:apps/api/package.json | jq -r .version)
-          web_prev=$(git show HEAD~1:apps/web/package.json | jq -r .version)
-
-          echo "api_version=$api_version" >> "$GITHUB_OUTPUT"
-          echo "web_version=$web_version" >> "$GITHUB_OUTPUT"
-
-          if [ "$api_version" != "$api_prev" ]; then
+          if git diff HEAD~1 -- apps/api/package.json | grep -q '"version"'; then
             echo "api_changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "api_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-          if [ "$web_version" != "$web_prev" ]; then
+          if git diff HEAD~1 -- apps/web/package.json | grep -q '"version"'; then
             echo "web_changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "web_changed=false" >> "$GITHUB_OUTPUT"
           fi
+
+          echo "api_version=$api_version" >> "$GITHUB_OUTPUT"
+          echo "web_version=$web_version" >> "$GITHUB_OUTPUT"
 
   # Only runs if api version has changed
   build-api:
