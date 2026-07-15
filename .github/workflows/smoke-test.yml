@@ -8,11 +8,102 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  smoke:
-    name: Docker Compose deployment
+  api:
+    name: Smoke / api
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: kixvault
+          POSTGRES_PASSWORD: kixvault
+          POSTGRES_DB: kixvault
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kixvault -d kixvault"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+        run: docker build -f apps/api/Dockerfile -t kixvault-api-smoke .
+
+      - name: Wait for Postgres
+        run: |
+          for i in $(seq 1 30); do
+            if pg_isready -h 127.0.0.1 -p 5432 -U kixvault -d kixvault; then
+              echo "Postgres ready on attempt $i"
+              exit 0
+            fi
+            echo "Waiting for Postgres ($i/30)..."
+            sleep 2
+          done
+          echo "Postgres did not become ready"
+          exit 1
+
+      - name: Start API container
+        run: |
+          docker run -d --name api-smoke \
+            --network host \
+            -e DATABASE_URL=postgresql://kixvault:kixvault@127.0.0.1:5432/kixvault \
+            -e KICKSDB_API_KEY=KICKS-xxxx-xxxx-xxxx-xxxxxxxxxxxx \
+            -e NODE_ENV=production \
+            -e PORT=3000 \
+            kixvault-api-smoke
+
+          sleep 5
+          echo "Initial API container logs:"
+          docker logs api-smoke
+
+      - name: Wait for API health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS --connect-timeout 3 --max-time 5 http://127.0.0.1:3000/api/health; then
+              echo ""
+              echo "API healthy on attempt $i"
+              exit 0
+            fi
+            echo "Waiting for API ($i/30)..."
+            sleep 3
+          done
+          echo "API did not become healthy"
+          docker ps -a --filter name=api-smoke
+          docker inspect api-smoke --format 'State: {{.State.Status}}, ExitCode: {{.State.ExitCode}}, OOMKilled: {{.State.OOMKilled}}'
+          docker logs api-smoke
+          exit 1
+
+  web:
+    name: Smoke / web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run deployment smoke test
-        run: bash .github/scripts/smoke-test.sh
+      - name: Build web image
+        run: docker build -f apps/web/Dockerfile -t kixvault-web-smoke .
+
+      - name: Start web container
+        run: |
+          docker run -d --name web-smoke -p 8080:80 kixvault-web-smoke
+
+          sleep 3
+          echo "Initial web container logs:"
+          docker logs web-smoke
+
+      - name: Wait for web health
+        run: |
+          for i in $(seq 1 15); do
+            if curl -fsS --connect-timeout 3 --max-time 5 http://127.0.0.1:8080/ | grep -q KixVault; then
+              echo "Web serving on attempt $i"
+              exit 0
+            fi
+            echo "Waiting for web ($i/15)..."
+            sleep 2
+          done
+          echo "Web did not become healthy"
+          docker ps -a --filter name=web-smoke
+          docker inspect web-smoke --format 'State: {{.State.Status}}, ExitCode: {{.State.ExitCode}}, OOMKilled: {{.State.OOMKilled}}'
+          docker logs web-smoke
+          exit 1

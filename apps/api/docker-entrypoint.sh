@@ -7,7 +7,7 @@ if [ -z "$DATABASE_URL" ]; then
 fi
 
 echo "Waiting for database..."
-until bun -e "
+until bun --cwd packages/db -e "
 import postgres from 'postgres';
 const sql = postgres(process.env.DATABASE_URL, { max: 1 });
 await sql\`select 1\`;

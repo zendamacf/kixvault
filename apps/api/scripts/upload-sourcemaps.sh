@@ -6,8 +6,8 @@ if [ -z "$SENTRY_AUTH_TOKEN" ]; then
   exit 0
 fi
 
-org="${SENTRY_ORG:-kalopsiadev}"
-project="${SENTRY_PROJECT:-kixvault-api}"
+org="kalopsiadev"
+project="kixvault-api"
 release="${SENTRY_RELEASE:-kixvault-api@local}"
 
 echo "Uploading source maps to ${org}/${project} (release: ${release})"

@@ -22,8 +22,8 @@ export default defineConfig({
     ...(process.env.SENTRY_AUTH_TOKEN
       ? [
           sentryVitePlugin({
-            org: process.env.SENTRY_ORG,
-            project: process.env.SENTRY_PROJECT,
+            org: 'kalopsiadev',
+            project: 'kixvault-web',
             authToken: process.env.SENTRY_AUTH_TOKEN,
           }),
         ]
