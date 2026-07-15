@@ -16,6 +16,12 @@ COPY apps/api apps/api
 COPY apps/web apps/web
 COPY biome.json tsconfig.base.json ./
 
+ARG SENTRY_AUTH_TOKEN
+ARG VITE_APP_VERSION
+
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+ENV VITE_APP_VERSION=${VITE_APP_VERSION}
+
 WORKDIR /app/apps/web
 RUN bun run build
 
