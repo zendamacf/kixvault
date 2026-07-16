@@ -1,5 +1,11 @@
 # @kixvault/api
 
+## 0.0.2
+
+### Patch Changes
+
+- f9512c4: Fix release workflow Docker builds by setting up Buildx before exporting GitHub Actions build cache.
+
 ## 0.0.1
 
 ### Patch Changes
