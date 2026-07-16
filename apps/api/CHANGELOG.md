@@ -1,5 +1,11 @@
 # @kixvault/api
 
+## 0.0.3
+
+### Patch Changes
+
+- 0043e1c: Fix API Docker build sourcemap upload by installing CA certificates for sentry-cli TLS verification.
+
 ## 0.0.2
 
 ### Patch Changes
