@@ -1,6 +1,7 @@
 import { type QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRootRouteWithContext } from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
+import { RouteErrorFallback } from '@/components/errors/route-error-fallback';
 import { AppShell } from '@/components/layout/app-shell';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -10,6 +11,7 @@ export type RouterContext = {
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootComponent,
+  errorComponent: RouteErrorFallback,
 });
 
 function RootComponent() {
