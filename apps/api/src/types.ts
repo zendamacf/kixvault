@@ -4,5 +4,6 @@ export type ApiEnv = {
   Variables: {
     user: User | null;
     session: Session | null;
+    requestId: string;
   };
 };

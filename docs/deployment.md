@@ -69,6 +69,7 @@ services:
       KICKSDB_API_KEY: ${KICKSDB_API_KEY}
       SIGNUPS_ENABLED: ${SIGNUPS_ENABLED:-false}
       SENTRY_RELEASE: ${SENTRY_RELEASE:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
       PORT: 3000
     depends_on:
@@ -127,6 +128,9 @@ POSTGRES_DB=kixvault
 KICKSDB_API_KEY=KICKS-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 SIGNUPS_ENABLED=true
+
+# API logging (silent disables request logs)
+LOG_LEVEL=info
 
 # Sentry (optional)
 SENTRY_RELEASE=
