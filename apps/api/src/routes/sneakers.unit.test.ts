@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test';
+import { resetRateLimitersForTests } from '../middleware/catalog-rate-limit';
 
 class CatalogProductNotFoundError extends Error {
   constructor(message = 'Catalog product not found') {
@@ -64,6 +65,7 @@ const { sneakerRoutes } = await import('./sneakers');
 
 describe('sneaker routes', () => {
   beforeEach(() => {
+    resetRateLimitersForTests();
     mockEnv.kicksdbApiKey = 'KICKS-test-key';
     mockFetchCatalogProduct.mockClear();
     mockFetchCatalogProduct.mockImplementation(async () => ({

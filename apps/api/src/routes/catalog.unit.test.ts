@@ -1,4 +1,5 @@
-import { describe, expect, mock, test } from 'bun:test';
+import { beforeEach, describe, expect, mock, test } from 'bun:test';
+import { resetRateLimitersForTests } from '../middleware/catalog-rate-limit';
 
 class CatalogSearchError extends Error {
   constructor(
@@ -54,6 +55,11 @@ mock.module('../middleware/session', () => ({
 const { catalogRoutes } = await import('./catalog');
 
 describe('catalog routes', () => {
+  beforeEach(() => {
+    resetRateLimitersForTests();
+    mockSearchCatalog.mockClear();
+  });
+
   test('returns search results when KicksDB is configured', async () => {
     const response = await catalogRoutes.request('/search?q=jordan&limit=10&marketplace=stockx');
 

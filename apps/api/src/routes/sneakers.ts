@@ -16,6 +16,7 @@ import {
 } from '../lib/catalog';
 import { db } from '../lib/db';
 import { isKicksdbConfigured } from '../lib/kicksdb';
+import { catalogFromCatalogRateLimit } from '../middleware/catalog-rate-limit';
 import {
   buildSneakerSearchCondition,
   buildSneakerUpdate,
@@ -63,7 +64,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
 
     return c.json({ sneakers: rows.map(formatSneaker) });
   })
-  .post('/from-catalog', zValidator('json', createSneakerFromCatalogSchema), async (c) => {
+  .post('/from-catalog', catalogFromCatalogRateLimit, zValidator('json', createSneakerFromCatalogSchema), async (c) => {
     if (!isKicksdbConfigured()) {
       return c.json({ error: 'Catalog is not configured' }, 503);
     }
