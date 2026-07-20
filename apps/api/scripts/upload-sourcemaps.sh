@@ -19,3 +19,5 @@ sentry-cli releases new "$release" --org "$org" --project "$project" 2>/dev/null
 sentry-cli sourcemaps upload --org "$org" --project "$project" --release "$release" ./dist
 
 sentry-cli releases finalize "$release" --org "$org" --project "$project"
+
+find ./dist -name '*.map' -delete
