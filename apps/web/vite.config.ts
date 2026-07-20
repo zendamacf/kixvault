@@ -27,6 +27,14 @@ export default defineConfig({
             authToken: process.env.SENTRY_AUTH_TOKEN,
             release: {
               name: process.env.VITE_APP_VERSION,
+              setCommits:
+                process.env.SENTRY_COMMIT_SHA && process.env.SENTRY_REPO
+                  ? {
+                      auto: false,
+                      repo: process.env.SENTRY_REPO,
+                      commit: process.env.SENTRY_COMMIT_SHA,
+                    }
+                  : false,
             },
             sourcemaps: {
               filesToDeleteAfterUpload: '**/*.map',
