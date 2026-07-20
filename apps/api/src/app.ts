@@ -11,16 +11,19 @@ import type { ApiEnv } from './types';
 
 const routes = new Hono<ApiEnv>();
 
-export const app = routes
-  .use(
-    sentry(routes, {
-      dsn: env.sentryDsn,
-      environment: env.isProduction ? 'production' : 'development',
-      release: env.sentryRelease,
-      tracesSampleRate: env.isProduction ? 0.2 : 1.0,
-      enableLogs: true,
-    }),
-  )
+const withSentry = env.isProduction
+  ? routes.use(
+      sentry(routes, {
+        dsn: env.sentryDsn,
+        environment: 'production',
+        release: env.sentryRelease,
+        tracesSampleRate: 0.2,
+        enableLogs: true,
+      }),
+    )
+  : routes;
+
+export const app = withSentry
   .use(requestLogMiddleware)
   .get('/api/health', (c) => c.json({ status: 'ok', app: APP_NAME }))
   .route('/api/auth', authRoutes)
