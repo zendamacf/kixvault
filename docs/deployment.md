@@ -68,7 +68,6 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
       KICKSDB_API_KEY: ${KICKSDB_API_KEY}
       SIGNUPS_ENABLED: ${SIGNUPS_ENABLED:-false}
-      SENTRY_RELEASE: ${SENTRY_RELEASE:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
       PORT: 3000
@@ -131,9 +130,6 @@ SIGNUPS_ENABLED=true
 
 # API logging (silent disables request logs)
 LOG_LEVEL=info
-
-# Sentry (optional)
-SENTRY_RELEASE=
 ```
 
 ### `Caddyfile`
