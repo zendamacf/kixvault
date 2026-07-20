@@ -1,5 +1,14 @@
 import { describe, expect, mock, test } from 'bun:test';
-import { CatalogSearchError } from '../lib/catalog';
+
+class CatalogSearchError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = 'CatalogSearchError';
+  }
+}
 
 const mockSearchCatalog = mock(async () => [
   {
