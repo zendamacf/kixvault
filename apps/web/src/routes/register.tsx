@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema } from '@kixvault/shared';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -31,7 +31,6 @@ export const Route = createFileRoute('/register')({
 
 function RegisterPage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | null>(null);
 
   const {
@@ -52,9 +51,11 @@ function RegisterPage() {
 
       return response.json();
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['auth'] });
-      await navigate({ to: '/' });
+    onSuccess: async (_data, values) => {
+      await navigate({
+        to: '/verify-email-pending',
+        search: { email: values.email },
+      });
     },
     onError: (error) => {
       setFormError(error.message);

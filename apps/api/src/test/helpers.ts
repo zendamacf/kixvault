@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as schema from '@kixvault/db';
-import { sessions, sneakers, users } from '@kixvault/db';
-import { sql } from 'drizzle-orm';
+import { emailVerificationTokens, sessions, sneakers, users } from '@kixvault/db';
+import { eq, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
@@ -62,7 +62,7 @@ export async function resetDatabase(databaseUrl: string) {
 
   try {
     await db.execute(
-      sql`TRUNCATE TABLE ${sneakers}, ${sessions}, ${users} RESTART IDENTITY CASCADE`,
+      sql`TRUNCATE TABLE ${sneakers}, ${emailVerificationTokens}, ${sessions}, ${users} RESTART IDENTITY CASCADE`,
     );
   } finally {
     await client.end({ timeout: 5 });
@@ -93,5 +93,60 @@ export async function registerTestUser(
   return {
     response,
     cookie: getSessionCookie(response),
+  };
+}
+
+export async function verifyTestUserEmail(databaseUrl: string, email: string) {
+  const client = postgres(databaseUrl, { max: 1 });
+  const db = drizzle(client, { schema });
+
+  try {
+    const [user] = await db.select({ id: users.id }).from(users).where(eq(users.email, email));
+
+    if (!user) {
+      return;
+    }
+
+    await db
+      .update(users)
+      .set({ emailVerified: true, emailVerifiedAt: new Date() })
+      .where(eq(users.id, user.id));
+    await db.delete(emailVerificationTokens).where(eq(emailVerificationTokens.userId, user.id));
+  } finally {
+    await client.end({ timeout: 5 });
+  }
+}
+
+export async function loginTestUser(
+  app: { request: (input: string, init?: RequestInit) => Response | Promise<Response> },
+  email: string,
+  password = 'password123',
+) {
+  const response = await app.request('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+
+  return {
+    response,
+    cookie: getSessionCookie(response),
+  };
+}
+
+export async function registerAndLoginTestUser(
+  app: { request: (input: string, init?: RequestInit) => Response | Promise<Response> },
+  email: string,
+  password = 'password123',
+  databaseUrl: string,
+) {
+  const { response: registerResponse } = await registerTestUser(app, email, password);
+  await verifyTestUserEmail(databaseUrl, email);
+  const { response: loginResponse, cookie } = await loginTestUser(app, email, password);
+
+  return {
+    registerResponse,
+    loginResponse,
+    cookie,
   };
 }

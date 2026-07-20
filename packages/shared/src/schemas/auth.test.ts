@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { loginSchema, registerSchema } from './auth';
+import { loginSchema, registerSchema, resendVerificationSchema, verifyEmailSchema } from './auth';
 
 describe('registerSchema', () => {
   test('accepts valid registration input', () => {
@@ -47,5 +47,19 @@ describe('loginSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe('verifyEmailSchema', () => {
+  test('accepts a non-empty token', () => {
+    const result = verifyEmailSchema.safeParse({ token: 'abc123' });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe('resendVerificationSchema', () => {
+  test('accepts a valid email', () => {
+    const result = resendVerificationSchema.safeParse({ email: 'user@example.com' });
+    expect(result.success).toBe(true);
   });
 });

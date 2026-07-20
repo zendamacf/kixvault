@@ -7,7 +7,7 @@ describe('sessionQueryOptions', () => {
     installFetchMock({
       authMe: async () =>
         createJsonResponse({
-          user: { id: 'user-1', email: 'collector@example.com' },
+          user: { id: 'user-1', email: 'collector@example.com', emailVerified: true },
         }),
     });
 
@@ -17,7 +17,7 @@ describe('sessionQueryOptions', () => {
     const result = await client.fetchQuery(sessionQueryOptions);
 
     expect(result).toEqual({
-      user: { id: 'user-1', email: 'collector@example.com' },
+      user: { id: 'user-1', email: 'collector@example.com', emailVerified: true },
     });
   });
 });

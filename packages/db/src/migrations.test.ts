@@ -54,6 +54,7 @@ describe.skipIf(!databaseUrl)('migrations', () => {
     expect(tables.map((row) => row.table_name)).toEqual([
       'catalog_market_prices',
       'catalog_product_cache',
+      'email_verification_tokens',
       'price_snapshots',
       'pricing_refresh_runs',
       'sessions',
