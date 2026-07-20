@@ -17,10 +17,47 @@ type CacheEntry = {
   expiresAt: number;
 };
 
+type SearchResultIndexEntry = {
+  result: CatalogSearchResult;
+  expiresAt: number;
+};
+
 const cache = new Map<string, CacheEntry>();
+const searchResultIndex = new Map<string, SearchResultIndexEntry>();
+
+function getSearchResultIndexKey(catalogSource: CatalogSource, catalogId: string): string {
+  return `${catalogSource}:${catalogId}`;
+}
+
+function indexSearchResults(results: CatalogSearchResult[], expiresAt: number): void {
+  for (const result of results) {
+    searchResultIndex.set(getSearchResultIndexKey(result.catalogSource, result.catalogId), {
+      result,
+      expiresAt,
+    });
+  }
+}
+
+function getIndexedSearchResult(
+  catalogSource: CatalogSource,
+  catalogId: string,
+): CatalogSearchResult | null {
+  const indexed = searchResultIndex.get(getSearchResultIndexKey(catalogSource, catalogId));
+
+  if (!indexed || indexed.expiresAt <= Date.now()) {
+    if (indexed) {
+      searchResultIndex.delete(getSearchResultIndexKey(catalogSource, catalogId));
+    }
+
+    return null;
+  }
+
+  return indexed.result;
+}
 
 export function resetCatalogCacheForTests(): void {
   cache.clear();
+  searchResultIndex.clear();
 }
 
 export class CatalogSearchError extends Error {
@@ -127,10 +164,13 @@ export async function searchCatalog(
       ? await searchGoatCatalog(query, limit)
       : await searchStockxCatalog(query, limit);
 
+  const expiresAt = Date.now() + CACHE_TTL_MS;
+
   cache.set(cacheKey, {
     results,
-    expiresAt: Date.now() + CACHE_TTL_MS,
+    expiresAt,
   });
+  indexSearchResults(results, expiresAt);
 
   return results;
 }
@@ -173,6 +213,12 @@ export async function fetchCatalogProduct(
   catalogSource: CatalogSource,
   catalogId: string,
 ): Promise<CatalogSearchResult> {
+  const cachedResult = getIndexedSearchResult(catalogSource, catalogId);
+
+  if (cachedResult) {
+    return cachedResult;
+  }
+
   ensureKicksdbClient();
 
   if (catalogSource === 'kicksdb:goat') {
