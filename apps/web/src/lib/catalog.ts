@@ -26,7 +26,7 @@ export function catalogSearchQueryOptions(query: string, marketplace: CatalogMar
       const data = await response.json();
       return 'results' in data ? data : { results: [] };
     },
-    enabled: query.length >= 2,
+    enabled: query.length >= 3,
     staleTime: 24 * 60 * 60 * 1000,
   });
 }
