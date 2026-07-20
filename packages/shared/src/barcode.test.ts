@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { getBarcodeLookupVariants, isValidBarcode, normalizeBarcode } from './barcode';
+import { isValidBarcode, normalizeBarcode } from './barcode';
 
 describe('normalizeBarcode', () => {
   test('accepts a 12-digit UPC', () => {
@@ -17,20 +17,6 @@ describe('normalizeBarcode', () => {
   test('rejects invalid lengths', () => {
     expect(normalizeBarcode('12345')).toBeNull();
     expect(normalizeBarcode('')).toBeNull();
-  });
-});
-
-describe('getBarcodeLookupVariants', () => {
-  test('returns UPC and EAN forms for a 12-digit code', () => {
-    expect(getBarcodeLookupVariants('197863114996')).toEqual(['197863114996', '0197863114996']);
-  });
-
-  test('returns both forms for a leading-zero EAN', () => {
-    expect(getBarcodeLookupVariants('0197863114996')).toEqual(['0197863114996', '197863114996']);
-  });
-
-  test('returns an empty array for invalid input', () => {
-    expect(getBarcodeLookupVariants('abc')).toEqual([]);
   });
 });
 

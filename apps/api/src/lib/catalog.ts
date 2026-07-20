@@ -7,7 +7,6 @@ import {
   type StockXProduct,
 } from '@kicksdb/sdk';
 import type { CatalogMarketplace, CatalogSearchResult, CatalogSource } from '@kixvault/shared';
-import { getBarcodeLookupVariants } from '@kixvault/shared';
 import { ensureKicksdbClient } from './kicksdb';
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -168,64 +167,6 @@ async function searchGoatCatalog(query: string, limit: number): Promise<CatalogS
   }
 
   return (data?.data ?? []).map(normalizeGoatProduct);
-}
-
-export async function searchCatalogByBarcode(
-  barcode: string,
-  limit: number,
-): Promise<CatalogSearchResult[]> {
-  const variants = getBarcodeLookupVariants(barcode);
-
-  if (variants.length === 0) {
-    return [];
-  }
-
-  for (const variant of variants) {
-    const cacheKey = `barcode:stockx:${variant.toLowerCase()}:${limit}`;
-    const cached = cache.get(cacheKey);
-
-    if (cached && cached.expiresAt > Date.now()) {
-      if (cached.results.length > 0) {
-        return cached.results;
-      }
-
-      continue;
-    }
-
-    ensureKicksdbClient();
-
-    const results = await searchStockxCatalogByBarcode(variant, limit);
-
-    cache.set(cacheKey, {
-      results,
-      expiresAt: Date.now() + CACHE_TTL_MS,
-    });
-
-    if (results.length > 0) {
-      return results;
-    }
-  }
-
-  return [];
-}
-
-async function searchStockxCatalogByBarcode(
-  barcode: string,
-  limit: number,
-): Promise<CatalogSearchResult[]> {
-  const { data, error, response } = await getStockxProducts({
-    query: {
-      filters: `barcodes = "${barcode}" AND product_type = "sneakers"`,
-      limit: BigInt(limit),
-      market: MARKET,
-    },
-  });
-
-  if (error) {
-    throw new CatalogSearchError('KicksDB request failed', response.status);
-  }
-
-  return (data?.data ?? []).map(normalizeStockxProduct);
 }
 
 export async function fetchCatalogProduct(

@@ -111,8 +111,7 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
         <DialogHeader>
           <DialogTitle>Scan box barcode</DialogTitle>
           <DialogDescription>
-            Point your camera at the UPC barcode on the sneaker box. Lookup uses StockX catalog
-            data.
+            Point your camera at the UPC barcode on the sneaker box.
           </DialogDescription>
         </DialogHeader>
 

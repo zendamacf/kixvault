@@ -208,36 +208,33 @@ describe('CatalogSearchPicker', () => {
     expect(await screen.findByText('Rate limit exceeded')).toBeTruthy();
   });
 
-  test('looks up scanned barcodes on StockX and auto-selects a single match', async () => {
-    const stockxResult: CatalogSearchResult = {
-      ...goatResult,
-      catalogSource: 'kicksdb:stockx',
-      catalogId: 'air-jordan-1-chicago',
-    };
-    const catalogBarcode = mock(async () => createJsonResponse({ results: [stockxResult] }));
+  test('searches the selected marketplace when a barcode is scanned', async () => {
+    const catalogSearch = mock(async (_url: URL) => createJsonResponse({ results: [goatResult] }));
     const onSelect = mock();
     const onMarketplaceChange = mock();
 
-    installFetchMock({ catalogBarcode });
+    installFetchMock({ catalogSearch });
     renderPicker({ onSelect, onMarketplaceChange });
 
     fireEvent.click(screen.getByLabelText('Scan box barcode'));
 
     await waitFor(() => {
-      expect(catalogBarcode).toHaveBeenCalled();
+      expect(catalogSearch).toHaveBeenCalled();
     });
-    expect(onMarketplaceChange).toHaveBeenCalledWith('stockx');
-    expect(onSelect).toHaveBeenCalledWith(stockxResult);
+    expect(onMarketplaceChange).not.toHaveBeenCalled();
+    expect(catalogSearch.mock.calls[0]?.[0].searchParams.get('q')).toBe('197863114996');
+    expect(catalogSearch.mock.calls[0]?.[0].searchParams.get('marketplace')).toBe('goat');
+    expect(onSelect).toHaveBeenCalledWith(goatResult);
   });
 
-  test('shows an empty state when barcode lookup has no results', async () => {
+  test('shows an empty state when a scanned barcode has no results', async () => {
     installFetchMock({
-      catalogBarcode: async () => createJsonResponse({ results: [] }),
+      catalogSearch: async () => createJsonResponse({ results: [] }),
     });
 
     renderPicker();
     fireEvent.click(screen.getByLabelText('Scan box barcode'));
 
-    expect(await screen.findByText(/No sneakers found on StockX for barcode/)).toBeTruthy();
+    expect(await screen.findByText(/No sneakers found on GOAT for/)).toBeTruthy();
   });
 });

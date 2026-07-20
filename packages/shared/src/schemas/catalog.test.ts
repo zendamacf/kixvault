@@ -1,9 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import {
-  catalogBarcodeQuerySchema,
-  catalogSearchQuerySchema,
-  catalogSearchResultSchema,
-} from './catalog';
+import { catalogSearchQuerySchema, catalogSearchResultSchema } from './catalog';
 
 describe('catalogSearchQuerySchema', () => {
   test('applies defaults for limit and marketplace', () => {
@@ -42,23 +38,6 @@ describe('catalogSearchQuerySchema', () => {
 
   test('rejects queries shorter than 2 characters', () => {
     const result = catalogSearchQuerySchema.safeParse({ q: 'a' });
-
-    expect(result.success).toBe(false);
-  });
-});
-
-describe('catalogBarcodeQuerySchema', () => {
-  test('accepts a barcode lookup request', () => {
-    const result = catalogBarcodeQuerySchema.safeParse({ code: '197863114996' });
-
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.limit).toBe(10);
-    }
-  });
-
-  test('rejects empty barcode values', () => {
-    const result = catalogBarcodeQuerySchema.safeParse({ code: '   ' });
 
     expect(result.success).toBe(false);
   });
