@@ -16,6 +16,13 @@ COPY apps/api apps/api
 COPY apps/web apps/web
 COPY biome.json tsconfig.base.json ./
 
+# sentry-cli uses the system OpenSSL CA store (Bun's bundled CAs are not enough)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
 ARG SENTRY_AUTH_TOKEN
 ARG VITE_APP_VERSION
 

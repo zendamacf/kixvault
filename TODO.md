@@ -6,4 +6,3 @@
  - Branding.
  - Barcode scanning.
  - Email verification before signing up.
- - Bake Sentry release (`SENTRY_RELEASE` env var) into docker images where possible.

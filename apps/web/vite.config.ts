@@ -25,6 +25,12 @@ export default defineConfig({
             org: 'kalopsiadev',
             project: 'kixvault-web',
             authToken: process.env.SENTRY_AUTH_TOKEN,
+            release: {
+              name: process.env.VITE_APP_VERSION,
+            },
+            sourcemaps: {
+              filesToDeleteAfterUpload: '**/*.map',
+            },
           }),
         ]
       : []),
