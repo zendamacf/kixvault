@@ -1,4 +1,6 @@
+import * as Sentry from '@sentry/react';
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import { sessionQueryOptions } from '@/lib/queries';
 
 export const Route = createFileRoute('/_authenticated')({
@@ -14,5 +16,19 @@ export const Route = createFileRoute('/_authenticated')({
 
     return { user: session.user };
   },
-  component: () => <Outlet />,
+  component: AuthenticatedLayout,
 });
+
+function AuthenticatedLayout() {
+  const { user } = Route.useRouteContext();
+
+  useEffect(() => {
+    Sentry.setUser({ id: user.id });
+
+    return () => {
+      Sentry.setUser(null);
+    };
+  }, [user.id]);
+
+  return <Outlet />;
+}
