@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 FROM oven/bun:1.3.13 AS build
 
 WORKDIR /app
@@ -24,10 +26,11 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
-ARG SENTRY_AUTH_TOKEN
 ARG SENTRY_RELEASE
 
-RUN SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN SENTRY_RELEASE=$SENTRY_RELEASE \
+RUN --mount=type=secret,id=sentry_auth_token \
+    SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token)" \
+    SENTRY_RELEASE=$SENTRY_RELEASE \
     bun run --cwd apps/api build:release
 
 FROM oven/bun:1.3.13
