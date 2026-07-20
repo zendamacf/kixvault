@@ -9,6 +9,11 @@ export const catalogSearchQuerySchema = z.object({
   marketplace: z.enum(catalogMarketplaces).default('stockx'),
 });
 
+export const catalogBarcodeQuerySchema = z.object({
+  code: z.string().trim().min(1).max(100),
+  limit: z.coerce.number().int().min(1).max(20).default(10),
+});
+
 export const catalogSearchResultSchema = z.object({
   catalogSource: z.enum(catalogSources),
   catalogId: z.string(),
@@ -24,6 +29,7 @@ export const catalogSearchResultSchema = z.object({
 });
 
 export type CatalogMarketplace = (typeof catalogMarketplaces)[number];
+export type CatalogBarcodeQuery = z.infer<typeof catalogBarcodeQuerySchema>;
 export type CatalogSearchQuery = z.infer<typeof catalogSearchQuerySchema>;
 export type CatalogSearchResult = z.infer<typeof catalogSearchResultSchema>;
 export type CatalogSource = (typeof catalogSources)[number];

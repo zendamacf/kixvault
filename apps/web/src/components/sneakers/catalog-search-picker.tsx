@@ -1,5 +1,8 @@
 import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
+import { isValidBarcode, normalizeBarcode } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { BarcodeScanButton } from '@/components/sneakers/barcode-scanner';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { catalogSearchQueryOptions } from '@/lib/catalog';
+import { catalogBarcodeQueryOptions, catalogSearchQueryOptions } from '@/lib/catalog';
 import { useDebouncedValue } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { SneakerBrandBadge } from './sneaker-brand-badge';
@@ -38,17 +41,63 @@ export function CatalogSearchPicker({
   onSelect,
   selectedCatalogId,
 }: CatalogSearchPickerProps) {
+  const [barcodeCode, setBarcodeCode] = useState<string | null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
   const debouncedQuery = useDebouncedValue(query.trim(), DEBOUNCE_DELAY);
-  const canSearch = debouncedQuery.length >= 2;
+  const isBarcodeSearch = barcodeCode !== null;
+  const canTextSearch = !isBarcodeSearch && debouncedQuery.length >= 2;
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const textSearch = useQuery({
     ...catalogSearchQueryOptions(debouncedQuery, marketplace),
-    enabled: canSearch,
+    enabled: canTextSearch,
   });
+
+  const barcodeSearch = useQuery({
+    ...catalogBarcodeQueryOptions(barcodeCode ?? ''),
+    enabled: isBarcodeSearch,
+  });
+
+  const activeSearch = isBarcodeSearch ? barcodeSearch : textSearch;
+  const { data, isLoading, isFetching, error } = activeSearch;
 
   const results = data?.results ?? [];
   const unavailable = data?.unavailable ?? false;
-  const marketplaceLabel = marketplace === 'stockx' ? 'StockX' : 'GOAT';
+  const marketplaceLabel = isBarcodeSearch
+    ? 'StockX'
+    : marketplace === 'stockx'
+      ? 'StockX'
+      : 'GOAT';
+
+  useEffect(() => {
+    if (!isBarcodeSearch || isLoading || isFetching || error || unavailable) {
+      return;
+    }
+
+    if (results.length === 1) {
+      onSelect(results[0]);
+      setBarcodeCode(null);
+    }
+  }, [isBarcodeSearch, isLoading, isFetching, error, unavailable, results, onSelect]);
+
+  const handleBarcodeScan = (rawValue: string) => {
+    setScanError(null);
+
+    if (!isValidBarcode(rawValue)) {
+      setScanError('That barcode is not a valid UPC or EAN. Try scanning again or type the SKU.');
+      return;
+    }
+
+    const normalized = normalizeBarcode(rawValue);
+
+    if (!normalized) {
+      setScanError('That barcode is not a valid UPC or EAN. Try scanning again or type the SKU.');
+      return;
+    }
+
+    onMarketplaceChange('stockx');
+    onQueryChange(normalized);
+    setBarcodeCode(normalized);
+  };
 
   return (
     <div className="min-w-0 space-y-3 rounded-lg border border-dashed p-4">
@@ -60,11 +109,17 @@ export function CatalogSearchPicker({
             className="min-w-0 flex-1"
             placeholder="Search by name or SKU (e.g. Air Jordan 1 Chicago, DZ5485-100)"
             value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
+            onChange={(event) => {
+              setBarcodeCode(null);
+              setScanError(null);
+              onQueryChange(event.target.value);
+            }}
           />
+          <BarcodeScanButton onScan={handleBarcodeScan} />
           <Select
             value={marketplace}
             onValueChange={(value) => onMarketplaceChange(value as CatalogMarketplace)}
+            disabled={isBarcodeSearch}
           >
             <SelectTrigger
               id="catalog-marketplace"
@@ -80,11 +135,15 @@ export function CatalogSearchPicker({
           </Select>
         </div>
         <p className="text-xs text-muted-foreground">
-          Search {marketplaceLabel} to find your pair.
+          {isBarcodeSearch
+            ? 'Looking up the scanned barcode on StockX.'
+            : `Search ${marketplaceLabel} to find your pair, or scan the box barcode.`}
         </p>
       </div>
 
-      {!canSearch && query.trim().length > 0 ? (
+      {scanError ? <p className="text-sm text-destructive">{scanError}</p> : null}
+
+      {!isBarcodeSearch && !canTextSearch && query.trim().length > 0 ? (
         <p className="text-sm text-muted-foreground">Type at least 2 characters to search.</p>
       ) : null}
 
@@ -96,7 +155,7 @@ export function CatalogSearchPicker({
 
       {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
 
-      {canSearch && (isLoading || isFetching) ? (
+      {(isBarcodeSearch || canTextSearch) && (isLoading || isFetching) ? (
         <div
           className={cn(
             'grid grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2',
@@ -115,9 +174,16 @@ export function CatalogSearchPicker({
         </div>
       ) : null}
 
-      {canSearch && !isLoading && !isFetching && !error && !unavailable && results.length === 0 ? (
+      {(isBarcodeSearch || canTextSearch) &&
+      !isLoading &&
+      !isFetching &&
+      !error &&
+      !unavailable &&
+      results.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No sneakers found on {marketplaceLabel} for &ldquo;{debouncedQuery}&rdquo;.
+          {isBarcodeSearch
+            ? `No sneakers found on StockX for barcode “${barcodeCode}”. Try typing the style code or add manually.`
+            : `No sneakers found on ${marketplaceLabel} for “${debouncedQuery}”.`}
         </p>
       ) : null}
 

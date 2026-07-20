@@ -30,3 +30,27 @@ export function catalogSearchQueryOptions(query: string, marketplace: CatalogMar
     staleTime: 24 * 60 * 60 * 1000,
   });
 }
+
+export function catalogBarcodeQueryOptions(code: string) {
+  return queryOptions({
+    queryKey: ['catalog', 'barcode', code],
+    queryFn: async (): Promise<CatalogSearchResponse> => {
+      const response = await api.api.catalog.barcode.$get({
+        query: { code, limit: '10' },
+      });
+
+      if (response.status === 503) {
+        return { results: [], unavailable: true };
+      }
+
+      if (!response.ok) {
+        throw new Error(await parseApiError(response, 'Barcode lookup failed'));
+      }
+
+      const data = await response.json();
+      return 'results' in data ? data : { results: [] };
+    },
+    enabled: code.length > 0,
+    staleTime: 24 * 60 * 60 * 1000,
+  });
+}

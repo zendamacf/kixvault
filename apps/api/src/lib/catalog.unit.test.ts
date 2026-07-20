@@ -209,3 +209,72 @@ describe('searchCatalog', () => {
     );
   });
 });
+
+describe('searchCatalogByBarcode', () => {
+  beforeEach(async () => {
+    resetKicksdbSdkMocks();
+    const catalog = await import('./catalog');
+    catalog.resetCatalogCacheForTests();
+  });
+
+  afterEach(async () => {
+    const catalog = await import('./catalog');
+    catalog.resetCatalogCacheForTests();
+  });
+
+  test('looks up StockX products by barcode filter', async () => {
+    mockGetStockxProducts.mockImplementation(() =>
+      Promise.resolve({
+        data: { data: [stockxProduct] },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const { searchCatalogByBarcode } = await import('./catalog');
+    const results = await searchCatalogByBarcode('197863114996', 10);
+
+    expect(results).toHaveLength(1);
+    expect(results[0]?.sku).toBe('DZ5485-612');
+    expect(mockGetStockxProducts).toHaveBeenCalledTimes(1);
+    expect(mockGetStockxProducts.mock.calls[0]?.[0]).toEqual({
+      query: {
+        filters: 'barcodes = "197863114996" AND product_type = "sneakers"',
+        limit: 10n,
+        market: 'US',
+      },
+    });
+  });
+
+  test('returns an empty array for invalid barcodes', async () => {
+    const { searchCatalogByBarcode } = await import('./catalog');
+    const results = await searchCatalogByBarcode('invalid', 10);
+
+    expect(results).toEqual([]);
+    expect(mockGetStockxProducts).not.toHaveBeenCalled();
+  });
+
+  test('tries alternate EAN forms when the first lookup has no results', async () => {
+    mockGetStockxProducts
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          data: { data: [] },
+          error: null,
+          response: { status: 200 },
+        }),
+      )
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          data: { data: [stockxProduct] },
+          error: null,
+          response: { status: 200 },
+        }),
+      );
+
+    const { searchCatalogByBarcode } = await import('./catalog');
+    const results = await searchCatalogByBarcode('197863114996', 10);
+
+    expect(results).toHaveLength(1);
+    expect(mockGetStockxProducts).toHaveBeenCalledTimes(2);
+  });
+});

@@ -12,6 +12,7 @@ type FetchHandlers = {
   stats?: () => Response | Promise<Response>;
   sneakers?: (url: URL) => Response | Promise<Response>;
   catalogSearch?: (url: URL) => Response | Promise<Response>;
+  catalogBarcode?: (url: URL) => Response | Promise<Response>;
 };
 
 export function installFetchMock(handlers: FetchHandlers = {}) {
@@ -33,6 +34,10 @@ export function installFetchMock(handlers: FetchHandlers = {}) {
 
     if (url.pathname === '/api/catalog/search' && handlers.catalogSearch) {
       return handlers.catalogSearch(url);
+    }
+
+    if (url.pathname === '/api/catalog/barcode' && handlers.catalogBarcode) {
+      return handlers.catalogBarcode(url);
     }
 
     return createJsonResponse({ error: `Unhandled fetch: ${url.pathname}` }, 404);

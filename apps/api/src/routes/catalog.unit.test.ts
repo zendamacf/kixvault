@@ -25,8 +25,25 @@ const mockSearchCatalog = mock(async () => [
   },
 ]);
 
+const mockSearchCatalogByBarcode = mock(async () => [
+  {
+    catalogSource: 'kicksdb:stockx' as const,
+    catalogId: 'air-jordan-1',
+    title: 'Air Jordan 1',
+    brand: 'Jordan',
+    model: 'Air Jordan 1',
+    colorway: 'Chicago',
+    nickname: 'Chicago',
+    sku: 'DZ5485-612',
+    imageUrl: null,
+    releaseDate: '2015-04-25',
+    description: null,
+  },
+]);
+
 mock.module('../lib/catalog', () => ({
   searchCatalog: mockSearchCatalog,
+  searchCatalogByBarcode: mockSearchCatalogByBarcode,
   CatalogSearchError,
 }));
 
@@ -75,6 +92,41 @@ describe('catalog routes', () => {
       ],
     });
     expect(mockSearchCatalog).toHaveBeenCalledWith('jordan', 10, 'stockx');
+  });
+
+  test('returns barcode lookup results when KicksDB is configured', async () => {
+    const response = await catalogRoutes.request('/barcode?code=197863114996&limit=10');
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      results: [
+        {
+          catalogSource: 'kicksdb:stockx',
+          catalogId: 'air-jordan-1',
+          title: 'Air Jordan 1',
+          brand: 'Jordan',
+          model: 'Air Jordan 1',
+          colorway: 'Chicago',
+          nickname: 'Chicago',
+          sku: 'DZ5485-612',
+          imageUrl: null,
+          releaseDate: '2015-04-25',
+          description: null,
+        },
+      ],
+    });
+    expect(mockSearchCatalogByBarcode).toHaveBeenCalledWith('197863114996', 10);
+  });
+
+  test('maps barcode lookup failures to API errors', async () => {
+    mockSearchCatalogByBarcode.mockImplementationOnce(async () => {
+      throw new CatalogSearchError('KicksDB request failed', 502);
+    });
+
+    const response = await catalogRoutes.request('/barcode?code=197863114996&limit=10');
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toEqual({ error: 'Barcode lookup failed' });
   });
 
   test('maps catalog search failures to API errors', async () => {

@@ -25,6 +25,14 @@ mock.module('@/lib/hooks', () => ({
   useDebouncedValue: <T,>(value: T) => value,
 }));
 
+mock.module('@/components/sneakers/barcode-scanner', () => ({
+  BarcodeScanButton: ({ onScan }: { onScan: (value: string) => void }) => (
+    <button type="button" aria-label="Scan box barcode" onClick={() => onScan('197863114996')}>
+      Scan
+    </button>
+  ),
+}));
+
 mock.module('@/components/ui/select', () => ({
   Select: ({
     children,
@@ -198,5 +206,38 @@ describe('CatalogSearchPicker', () => {
     searchFor('jordan');
 
     expect(await screen.findByText('Rate limit exceeded')).toBeTruthy();
+  });
+
+  test('looks up scanned barcodes on StockX and auto-selects a single match', async () => {
+    const stockxResult: CatalogSearchResult = {
+      ...goatResult,
+      catalogSource: 'kicksdb:stockx',
+      catalogId: 'air-jordan-1-chicago',
+    };
+    const catalogBarcode = mock(async () => createJsonResponse({ results: [stockxResult] }));
+    const onSelect = mock();
+    const onMarketplaceChange = mock();
+
+    installFetchMock({ catalogBarcode });
+    renderPicker({ onSelect, onMarketplaceChange });
+
+    fireEvent.click(screen.getByLabelText('Scan box barcode'));
+
+    await waitFor(() => {
+      expect(catalogBarcode).toHaveBeenCalled();
+    });
+    expect(onMarketplaceChange).toHaveBeenCalledWith('stockx');
+    expect(onSelect).toHaveBeenCalledWith(stockxResult);
+  });
+
+  test('shows an empty state when barcode lookup has no results', async () => {
+    installFetchMock({
+      catalogBarcode: async () => createJsonResponse({ results: [] }),
+    });
+
+    renderPicker();
+    fireEvent.click(screen.getByLabelText('Scan box barcode'));
+
+    expect(await screen.findByText(/No sneakers found on StockX for barcode/)).toBeTruthy();
   });
 });
