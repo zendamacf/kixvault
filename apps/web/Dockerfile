@@ -26,8 +26,12 @@ RUN apt-get update \
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 ARG VITE_APP_VERSION
+ARG SENTRY_COMMIT_SHA
+ARG SENTRY_REPO
 
 ENV VITE_APP_VERSION=${VITE_APP_VERSION}
+ENV SENTRY_COMMIT_SHA=${SENTRY_COMMIT_SHA}
+ENV SENTRY_REPO=${SENTRY_REPO}
 
 WORKDIR /app/apps/web
 RUN --mount=type=secret,id=sentry_auth_token \

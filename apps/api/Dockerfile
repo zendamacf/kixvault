@@ -27,10 +27,13 @@ RUN apt-get update \
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 ARG SENTRY_RELEASE
+ARG SENTRY_COMMIT_SHA
+ARG SENTRY_REPO
 
 RUN --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token)" \
     SENTRY_RELEASE=$SENTRY_RELEASE \
+    SENTRY_COMMIT_SHA=$SENTRY_COMMIT_SHA SENTRY_REPO=$SENTRY_REPO \
     bun run --cwd apps/api build:release
 
 FROM oven/bun:1.3.13
