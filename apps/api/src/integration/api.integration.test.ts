@@ -38,6 +38,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     connectionString = testDatabaseUrl;
     await prepareTestDatabase(connectionString);
     process.env.DATABASE_URL = connectionString;
+    process.env.SIGNUPS_ENABLED = 'true';
 
     const appModule = await import('../app');
     app = appModule.app;

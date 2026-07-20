@@ -1,5 +1,7 @@
 import { app } from './app';
-import { env } from './lib/env';
+import { env, requireDatabaseUrl } from './lib/env';
+
+requireDatabaseUrl();
 
 export type { AppType } from './app';
 

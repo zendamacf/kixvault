@@ -9,14 +9,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api, parseApiError } from '@/lib/api';
-import { sessionQueryOptions } from '@/lib/queries';
+import { authConfigQueryOptions, sessionQueryOptions } from '@/lib/queries';
 
 export const Route = createFileRoute('/register')({
   beforeLoad: async ({ context }) => {
-    const session = await context.queryClient.ensureQueryData(sessionQueryOptions);
+    const [session, config] = await Promise.all([
+      context.queryClient.ensureQueryData(sessionQueryOptions),
+      context.queryClient.ensureQueryData(authConfigQueryOptions),
+    ]);
 
     if (session.user) {
       throw redirect({ to: '/' });
+    }
+
+    if (!config.signupsEnabled) {
+      throw redirect({ to: '/login' });
     }
   },
   component: RegisterPage,

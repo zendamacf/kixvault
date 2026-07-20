@@ -67,6 +67,7 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
       KICKSDB_API_KEY: ${KICKSDB_API_KEY}
+      SIGNUPS_ENABLED: ${SIGNUPS_ENABLED:-false}
       SENTRY_RELEASE: ${SENTRY_RELEASE:-}
       NODE_ENV: production
       PORT: 3000
@@ -124,6 +125,8 @@ POSTGRES_DB=kixvault
 
 # API
 KICKSDB_API_KEY=KICKS-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+SIGNUPS_ENABLED=true
 
 # Sentry (optional)
 SENTRY_RELEASE=
