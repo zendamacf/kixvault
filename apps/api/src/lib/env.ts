@@ -5,6 +5,7 @@ const databaseUrl = process.env.DATABASE_URL ?? process.env.TEST_DATABASE_URL ??
 export const env = {
   databaseUrl,
   kicksdbApiKey: process.env.KICKSDB_API_KEY,
+  redisUrl: process.env.REDIS_URL,
   signupsEnabled: process.env.SIGNUPS_ENABLED === 'true',
   port: Number(process.env.PORT) || 3000,
   isProduction: process.env.NODE_ENV === 'production',

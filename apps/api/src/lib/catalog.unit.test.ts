@@ -208,4 +208,23 @@ describe('searchCatalog', () => {
       CatalogSearchError,
     );
   });
+
+  test('caches empty search results', async () => {
+    mockGetStockxProducts.mockImplementation(() =>
+      Promise.resolve({
+        data: { data: [] },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const { searchCatalog } = await import('./catalog');
+
+    const first = await searchCatalog('nonexistent shoe', 10, 'stockx');
+    const second = await searchCatalog('nonexistent shoe', 10, 'stockx');
+
+    expect(first).toEqual([]);
+    expect(second).toEqual([]);
+    expect(mockGetStockxProducts).toHaveBeenCalledTimes(1);
+  });
 });

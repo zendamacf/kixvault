@@ -67,6 +67,7 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
       KICKSDB_API_KEY: ${KICKSDB_API_KEY}
+      REDIS_URL: ${REDIS_URL:-}
       SIGNUPS_ENABLED: ${SIGNUPS_ENABLED:-false}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
@@ -74,6 +75,20 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+        required: false
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    profiles:
+      - redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   web:
     image: ghcr.io/zendamacf/kixvault-web:${WEB_VERSION:-latest}
@@ -125,6 +140,8 @@ POSTGRES_DB=kixvault
 
 # API
 KICKSDB_API_KEY=KICKS-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+# Optional — shared catalog search cache across API instances (start redis with: docker compose --profile redis up -d)
+REDIS_URL=redis://redis:6379
 
 SIGNUPS_ENABLED=true
 

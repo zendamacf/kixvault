@@ -7,20 +7,14 @@ import {
   type StockXProduct,
 } from '@kicksdb/sdk';
 import type { CatalogMarketplace, CatalogSearchResult, CatalogSource } from '@kixvault/shared';
+import { getCatalogSearchCache, resetCatalogSearchCacheForTests } from './catalog-cache';
 import { ensureKicksdbClient } from './kicksdb';
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const MARKET = 'US'; // Other markets require paid plan
 
-type CacheEntry = {
-  results: CatalogSearchResult[];
-  expiresAt: number;
-};
-
-const cache = new Map<string, CacheEntry>();
-
 export function resetCatalogCacheForTests(): void {
-  cache.clear();
+  resetCatalogSearchCacheForTests();
 }
 
 export class CatalogSearchError extends Error {
@@ -114,10 +108,11 @@ export async function searchCatalog(
 ): Promise<CatalogSearchResult[]> {
   const query = searchQuery.trim();
   const cacheKey = `${marketplace}:${query.toLowerCase()}:${limit}`;
-  const cached = cache.get(cacheKey);
+  const cache = getCatalogSearchCache();
+  const cached = await cache.get(cacheKey);
 
-  if (cached && cached.expiresAt > Date.now()) {
-    return cached.results;
+  if (cached) {
+    return cached;
   }
 
   ensureKicksdbClient();
@@ -127,10 +122,7 @@ export async function searchCatalog(
       ? await searchGoatCatalog(query, limit)
       : await searchStockxCatalog(query, limit);
 
-  cache.set(cacheKey, {
-    results,
-    expiresAt: Date.now() + CACHE_TTL_MS,
-  });
+  await cache.set(cacheKey, results, CACHE_TTL_MS);
 
   return results;
 }
