@@ -6,12 +6,18 @@ import { Hono } from 'hono';
 import { generateIdFromEntropySize } from 'lucia';
 import { lucia } from '../lib/auth';
 import { db } from '../lib/db';
+import { env } from '../lib/env';
 import { sessionMiddleware } from '../middleware/session';
 import type { ApiEnv } from '../types';
 
 export const authRoutes = new Hono<ApiEnv>()
   .use(sessionMiddleware)
+  .get('/config', (c) => c.json({ signupsEnabled: env.signupsEnabled }))
   .post('/register', zValidator('json', registerSchema), async (c) => {
+    if (!env.signupsEnabled) {
+      return c.json({ error: 'Signups are disabled' }, 403);
+    }
+
     const { email, password } = c.req.valid('json');
 
     const [existingUser] = await db

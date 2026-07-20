@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, loginSearchSchema } from '@kixvault/shared';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api, parseApiError } from '@/lib/api';
-import { sessionQueryOptions } from '@/lib/queries';
+import { authConfigQueryOptions, sessionQueryOptions } from '@/lib/queries';
 
 export const Route = createFileRoute('/login')({
   validateSearch: loginSearchSchema,
@@ -28,6 +28,7 @@ function LoginPage() {
   const queryClient = useQueryClient();
   const { redirect: redirectTo } = Route.useSearch();
   const [formError, setFormError] = useState<string | null>(null);
+  const { data: authConfig } = useQuery(authConfigQueryOptions);
 
   const {
     register,
@@ -100,10 +101,16 @@ function LoginPage() {
           </form>
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            New here?{' '}
-            <Link to="/register" className="font-medium text-primary hover:underline">
-              Create an account
-            </Link>
+            {authConfig?.signupsEnabled ? (
+              <>
+                New here?{' '}
+                <Link to="/register" className="font-medium text-primary hover:underline">
+                  Create an account
+                </Link>
+              </>
+            ) : (
+              'Contact an administrator to create an account.'
+            )}
           </p>
         </CardContent>
       </Card>

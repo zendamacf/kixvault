@@ -42,6 +42,20 @@ export const sessionQueryOptions = queryOptions({
   },
 });
 
+export const authConfigQueryOptions = queryOptions({
+  queryKey: ['auth', 'config'],
+  queryFn: async () => {
+    const response = await api.api.auth.config.$get();
+
+    if (!response.ok) {
+      throw new Error('Failed to load auth config');
+    }
+
+    return response.json();
+  },
+  staleTime: Number.POSITIVE_INFINITY,
+});
+
 export const statsQueryOptions = queryOptions({
   queryKey: ['stats'],
   queryFn: async () => {
