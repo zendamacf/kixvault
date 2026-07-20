@@ -17,10 +17,21 @@ type CacheEntry = {
   expiresAt: number;
 };
 
+type ProductCacheEntry = {
+  result: CatalogSearchResult;
+  expiresAt: number;
+};
+
 const cache = new Map<string, CacheEntry>();
+const productCache = new Map<string, ProductCacheEntry>();
+
+function getProductCacheKey(catalogSource: CatalogSource, catalogId: string): string {
+  return `${catalogSource}:${catalogId}`;
+}
 
 export function resetCatalogCacheForTests(): void {
   cache.clear();
+  productCache.clear();
 }
 
 export class CatalogSearchError extends Error {
@@ -173,7 +184,16 @@ export async function fetchCatalogProduct(
   catalogSource: CatalogSource,
   catalogId: string,
 ): Promise<CatalogSearchResult> {
+  const productCacheKey = getProductCacheKey(catalogSource, catalogId);
+  const cachedProduct = productCache.get(productCacheKey);
+
+  if (cachedProduct && cachedProduct.expiresAt > Date.now()) {
+    return cachedProduct.result;
+  }
+
   ensureKicksdbClient();
+
+  let product: CatalogSearchResult;
 
   if (catalogSource === 'kicksdb:goat') {
     const { data, error, response } = await getGoatProduct({
@@ -193,10 +213,8 @@ export async function fetchCatalogProduct(
       throw new CatalogProductNotFoundError();
     }
 
-    return normalizeGoatProduct(data.data);
-  }
-
-  if (catalogSource === 'kicksdb:stockx') {
+    product = normalizeGoatProduct(data.data);
+  } else if (catalogSource === 'kicksdb:stockx') {
     const { data, error, response } = await getStockxProduct({
       path: { id: catalogId },
       query: {
@@ -217,8 +235,15 @@ export async function fetchCatalogProduct(
       throw new CatalogProductNotFoundError();
     }
 
-    return normalizeStockxProduct(data.data);
+    product = normalizeStockxProduct(data.data);
+  } else {
+    throw new CatalogSearchError('Unsupported catalog source', 400);
   }
 
-  throw new CatalogSearchError('Unsupported catalog source', 400);
+  productCache.set(productCacheKey, {
+    result: product,
+    expiresAt: Date.now() + CACHE_TTL_MS,
+  });
+
+  return product;
 }

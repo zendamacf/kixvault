@@ -89,8 +89,15 @@ describe('catalog normalization', () => {
 });
 
 describe('fetchCatalogProduct', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     resetKicksdbSdkMocks();
+    const catalog = await import('./catalog');
+    catalog.resetCatalogCacheForTests();
+  });
+
+  afterEach(async () => {
+    const catalog = await import('./catalog');
+    catalog.resetCatalogCacheForTests();
   });
 
   test('fetches and normalizes a GOAT product by slug', async () => {
@@ -143,6 +150,24 @@ describe('fetchCatalogProduct', () => {
     await expect(fetchCatalogProduct('kicksdb:goat', 'missing-slug')).rejects.toBeInstanceOf(
       CatalogProductNotFoundError,
     );
+  });
+
+  test('caches product lookups for repeated requests', async () => {
+    mockGetStockxProduct.mockImplementation(() =>
+      Promise.resolve({
+        data: { data: stockxProduct },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const { fetchCatalogProduct } = await import('./catalog');
+
+    const first = await fetchCatalogProduct('kicksdb:stockx', 'air-jordan-1-chicago');
+    const second = await fetchCatalogProduct('kicksdb:stockx', 'air-jordan-1-chicago');
+
+    expect(second).toEqual(first);
+    expect(mockGetStockxProduct).toHaveBeenCalledTimes(1);
   });
 });
 
