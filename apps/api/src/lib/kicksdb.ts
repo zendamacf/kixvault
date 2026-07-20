@@ -1,17 +1,19 @@
 import { configureClient } from '@kicksdb/sdk';
 import { env } from './env';
 
-let configured = false;
+const clientState = {
+  configured: false,
+};
 
 export function resetKicksdbClientForTests(): void {
-  configured = false;
+  clientState.configured = false;
 }
 
 export const isKicksdbConfigured = (): boolean => !!env.kicksdbApiKey;
 
 /** Configure the KicksDB SDK client. Call before any catalog API requests. */
 export function ensureKicksdbClient(): void {
-  if (configured) {
+  if (clientState.configured) {
     return;
   }
 
@@ -20,5 +22,5 @@ export function ensureKicksdbClient(): void {
   }
 
   configureClient(env.kicksdbApiKey as string);
-  configured = true;
+  clientState.configured = true;
 }

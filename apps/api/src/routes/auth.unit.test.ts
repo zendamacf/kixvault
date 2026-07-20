@@ -1,4 +1,4 @@
-import { describe, expect, mock, test } from 'bun:test';
+import { beforeEach, describe, expect, mock, test } from 'bun:test';
 
 const mockInsert = mock(async () => undefined);
 const mockSelect = mock(() => ({
@@ -10,6 +10,16 @@ const mockCreateSession = mock(async () => ({ id: 'session-1' }));
 const mockCreateSessionCookie = mock(() => ({
   serialize: () => 'auth_session=session-1; Path=/',
 }));
+
+const mockEnv = {
+  signupsEnabled: false,
+  databaseUrl: 'postgresql://example.com/db',
+  kicksdbApiKey: undefined,
+  port: 3000,
+  isProduction: false,
+  sentryDsn: '',
+  sentryRelease: undefined,
+};
 
 mock.module('../lib/db', () => ({
   db: {
@@ -33,29 +43,21 @@ mock.module('../middleware/session', () => ({
   },
 }));
 
-function mockEnv(signupsEnabled: boolean) {
-  mock.module('../lib/env', () => ({
-    env: {
-      signupsEnabled,
-      databaseUrl: 'postgresql://example.com/db',
-      kicksdbApiKey: undefined,
-      port: 3000,
-      isProduction: false,
-      sentryDsn: '',
-      sentryRelease: undefined,
-    },
-  }));
-}
+mock.module('../lib/env', () => ({
+  env: mockEnv,
+}));
 
-async function loadAuthRoutes() {
-  const module = await import(`./auth?t=${Date.now()}`);
-  return module.authRoutes;
-}
+const { authRoutes } = await import('./auth');
 
 describe('authRoutes register', () => {
+  beforeEach(() => {
+    mockInsert.mockClear();
+    mockCreateSession.mockClear();
+    mockCreateSessionCookie.mockClear();
+  });
+
   test('returns 403 when signups are disabled', async () => {
-    mockEnv(false);
-    const authRoutes = await loadAuthRoutes();
+    mockEnv.signupsEnabled = false;
 
     const response = await authRoutes.request('/register', {
       method: 'POST',
@@ -69,8 +71,7 @@ describe('authRoutes register', () => {
   });
 
   test('creates a user when signups are enabled', async () => {
-    mockEnv(true);
-    const authRoutes = await loadAuthRoutes();
+    mockEnv.signupsEnabled = true;
 
     const response = await authRoutes.request('/register', {
       method: 'POST',
