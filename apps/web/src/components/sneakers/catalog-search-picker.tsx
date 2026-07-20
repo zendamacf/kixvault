@@ -16,7 +16,7 @@ import { useDebouncedValue } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { SneakerBrandBadge } from './sneaker-brand-badge';
 
-const DEBOUNCE_DELAY = 1000;
+const DEBOUNCE_DELAY = 2000;
 const RESULTS_MAX_HEIGHT = 'max-h-[32rem]';
 const RESULT_THUMBNAIL_CLASS = 'h-32 w-32 shrink-0';
 
@@ -39,7 +39,7 @@ export function CatalogSearchPicker({
   selectedCatalogId,
 }: CatalogSearchPickerProps) {
   const debouncedQuery = useDebouncedValue(query.trim(), DEBOUNCE_DELAY);
-  const canSearch = debouncedQuery.length >= 2;
+  const canSearch = debouncedQuery.length >= 3;
 
   const { data, isLoading, isFetching, error } = useQuery({
     ...catalogSearchQueryOptions(debouncedQuery, marketplace),
@@ -85,7 +85,7 @@ export function CatalogSearchPicker({
       </div>
 
       {!canSearch && query.trim().length > 0 ? (
-        <p className="text-sm text-muted-foreground">Type at least 2 characters to search.</p>
+        <p className="text-sm text-muted-foreground">Type at least 3 characters to search.</p>
       ) : null}
 
       {unavailable ? (
