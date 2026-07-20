@@ -1,6 +1,8 @@
+import * as Sentry from '@sentry/bun';
 import { getCookie } from 'hono/cookie';
 import { createMiddleware } from 'hono/factory';
 import { lucia } from '../lib/auth';
+import { env } from '../lib/env';
 import type { ApiEnv } from '../types';
 
 export const sessionMiddleware = createMiddleware<ApiEnv>(async (c, next) => {
@@ -9,6 +11,9 @@ export const sessionMiddleware = createMiddleware<ApiEnv>(async (c, next) => {
   if (!sessionId) {
     c.set('user', null);
     c.set('session', null);
+    if (env.isProduction) {
+      Sentry.setUser(null);
+    }
     return next();
   }
 
@@ -28,6 +33,9 @@ export const sessionMiddleware = createMiddleware<ApiEnv>(async (c, next) => {
 
   c.set('session', session);
   c.set('user', user);
+  if (env.isProduction) {
+    Sentry.setUser(user ? { id: user.id } : null);
+  }
   return next();
 });
 

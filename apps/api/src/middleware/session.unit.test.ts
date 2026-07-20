@@ -2,6 +2,8 @@ import { describe, expect, mock, test } from 'bun:test';
 import { Hono } from 'hono';
 import type { ApiEnv } from '../types';
 
+const mockSetUser = mock(() => {});
+
 const mockValidateSession = mock(async (sessionId: string) => {
   if (sessionId === 'valid-session') {
     return {
@@ -12,6 +14,16 @@ const mockValidateSession = mock(async (sessionId: string) => {
 
   return { session: null, user: null };
 });
+
+mock.module('@sentry/bun', () => ({
+  setUser: mockSetUser,
+}));
+
+mock.module('../lib/env', () => ({
+  env: {
+    isProduction: true,
+  },
+}));
 
 mock.module('../lib/auth', () => ({
   lucia: {
@@ -46,6 +58,8 @@ function createApp() {
 
 describe('sessionMiddleware', () => {
   test('sets null user and session when no cookie is present', async () => {
+    mockSetUser.mockClear();
+
     const app = createApp();
     const response = await app.request('/public');
 
@@ -54,9 +68,12 @@ describe('sessionMiddleware', () => {
       user: null,
       session: null,
     });
+    expect(mockSetUser).toHaveBeenCalledWith(null);
   });
 
   test('hydrates user and session from a valid cookie', async () => {
+    mockSetUser.mockClear();
+
     const app = createApp();
     const response = await app.request('/public', {
       headers: { Cookie: 'auth_session=valid-session' },
@@ -67,6 +84,7 @@ describe('sessionMiddleware', () => {
       user: { id: 'user-1', email: 'user@example.com' },
       session: { id: 'valid-session', fresh: false },
     });
+    expect(mockSetUser).toHaveBeenCalledWith({ id: 'user-1' });
   });
 });
 
