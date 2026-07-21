@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { Hono } from 'hono';
+import type { ApiEnv } from '../types';
 import {
   catalogFromCatalogRateLimit,
   catalogSearchRateLimit,
   resetRateLimitersForTests,
 } from './catalog-rate-limit';
-import type { ApiEnv } from '../types';
 
 function createTestApp(rateLimit = catalogSearchRateLimit) {
   return new Hono<ApiEnv>()
@@ -55,7 +55,12 @@ describe('catalog rate limiting', () => {
     const fromCatalogApp = new Hono<ApiEnv>()
       .use(async (c, next) => {
         c.set('user', { id: 'user-1', email: 'user@example.com' });
-        c.set('session', { id: 'session-1', fresh: false, userId: 'user-1', expiresAt: new Date() });
+        c.set('session', {
+          id: 'session-1',
+          fresh: false,
+          userId: 'user-1',
+          expiresAt: new Date(),
+        });
         await next();
       })
       .use(catalogFromCatalogRateLimit)

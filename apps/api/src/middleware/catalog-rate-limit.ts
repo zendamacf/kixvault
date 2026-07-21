@@ -44,7 +44,8 @@ export function createRateLimiter({ keyPrefix, maxRequests, windowMs }: RateLimi
     const timestamps = (store.get(key) ?? []).filter((timestamp) => timestamp > windowStart);
 
     if (timestamps.length >= maxRequests) {
-      const retryAfterMs = timestamps[0]! + windowMs - now;
+      const oldestTimestamp = timestamps[0] ?? now;
+      const retryAfterMs = oldestTimestamp + windowMs - now;
       const retryAfterSeconds = Math.max(1, Math.ceil(retryAfterMs / 1000));
       c.header('Retry-After', String(retryAfterSeconds));
       return c.json({ error: 'Too many requests' }, 429);
