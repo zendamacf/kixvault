@@ -7,16 +7,12 @@ import {
   type StockXProduct,
 } from '@kicksdb/sdk';
 import type { CatalogMarketplace, CatalogSearchResult, CatalogSource } from '@kixvault/shared';
+import { getCatalogSearchCache, resetCatalogSearchCacheForTests } from './catalog-cache';
 import { ensureKicksdbClient } from './kicksdb';
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const MARKET = 'US'; // Other markets require paid plan
 const MAX_SEARCH_LIMIT = 20;
-
-type CacheEntry = {
-  results: CatalogSearchResult[];
-  expiresAt: number;
-};
 
 type ProductCacheEntry = {
   result: CatalogSearchResult;
@@ -28,7 +24,6 @@ type SearchResultIndexEntry = {
   expiresAt: number;
 };
 
-const cache = new Map<string, CacheEntry>();
 const productCache = new Map<string, ProductCacheEntry>();
 const searchResultIndex = new Map<string, SearchResultIndexEntry>();
 
@@ -75,7 +70,7 @@ function buildSearchCacheKey(marketplace: CatalogMarketplace, searchQuery: strin
 }
 
 export function resetCatalogCacheForTests(): void {
-  cache.clear();
+  resetCatalogSearchCacheForTests();
   productCache.clear();
   searchResultIndex.clear();
 }
@@ -171,10 +166,11 @@ export async function searchCatalog(
 ): Promise<CatalogSearchResult[]> {
   const query = searchQuery.trim();
   const cacheKey = buildSearchCacheKey(marketplace, query);
-  const cached = cache.get(cacheKey);
+  const searchCache = getCatalogSearchCache();
+  const cached = await searchCache.get(cacheKey);
 
-  if (cached && cached.expiresAt > Date.now()) {
-    return cached.results.slice(0, limit);
+  if (cached) {
+    return cached.slice(0, limit);
   }
 
   ensureKicksdbClient();
@@ -186,10 +182,7 @@ export async function searchCatalog(
 
   const expiresAt = Date.now() + CACHE_TTL_MS;
 
-  cache.set(cacheKey, {
-    results,
-    expiresAt,
-  });
+  await searchCache.set(cacheKey, results, CACHE_TTL_MS);
   indexSearchResults(results, expiresAt);
 
   return results.slice(0, limit);

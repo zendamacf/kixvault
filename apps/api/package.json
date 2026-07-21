@@ -41,6 +41,7 @@
     "@sentry/hono": "^10.65.0",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.8.3",
+    "ioredis": "^5.11.1",
     "lucia": "^3.2.2"
   },
   "devDependencies": {
