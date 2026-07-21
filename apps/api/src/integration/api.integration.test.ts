@@ -113,7 +113,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
             primary_title: 'Nike Air Max 1',
             secondary_title: 'Big Bubble',
             sku: '319986-171',
-            image: null,
+            image: 'https://images.stockx.com/example.png',
             gallery: [],
             traits: [],
             variants: [
@@ -156,10 +156,20 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
         sku: string;
         nickname: string | null;
         currentMarketPrice: number | null;
+        imageUrl: string | null;
+        images: Array<{ id: string; url: string; sortOrder: number }>;
       };
     };
     expect(created.sneaker.nickname).toBe('Big Bubble');
     expect(created.sneaker.currentMarketPrice).toBe(220);
+    expect(created.sneaker.imageUrl).toBe('https://images.stockx.com/example.png');
+    expect(created.sneaker.images).toEqual([
+      {
+        id: expect.any(String),
+        url: 'https://images.stockx.com/example.png',
+        sortOrder: 0,
+      },
+    ]);
   });
 
   test('POST /api/sneakers/from-catalog returns 400 for invalid catalog product', async () => {
@@ -185,6 +195,10 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
       size: 10,
       condition: 'deadstock',
       nickname: 'Big Bubble',
+      images: [
+        'https://images.example.com/air-force-1.png',
+        'https://images.example.com/air-force-1-alt.png',
+      ],
     };
 
     const response = await app.request('/api/sneakers/custom', {
@@ -196,9 +210,29 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(response.status).toBe(201);
 
     const created = (await response.json()) as {
-      sneaker: { id: string; brand: string; sku: string; nickname: string | null };
+      sneaker: {
+        id: string;
+        brand: string;
+        sku: string | null;
+        nickname: string | null;
+        imageUrl: string | null;
+        images: Array<{ id: string; url: string; sortOrder: number }>;
+      };
     };
     expect(created.sneaker.nickname).toBe('Big Bubble');
+    expect(created.sneaker.imageUrl).toBe('https://images.example.com/air-force-1.png');
+    expect(created.sneaker.images).toEqual([
+      {
+        id: expect.any(String),
+        url: 'https://images.example.com/air-force-1.png',
+        sortOrder: 0,
+      },
+      {
+        id: expect.any(String),
+        url: 'https://images.example.com/air-force-1-alt.png',
+        sortOrder: 1,
+      },
+    ]);
   });
 
   test('POST /api/sneakers/custom returns 400 for invalid custom input', async () => {
@@ -343,6 +377,52 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(missingDeleteResponse.status).toBe(404);
   });
 
+  test('PATCH /api/sneakers/:id updates images for manual sneakers', async () => {
+    const email = `manual-images-${crypto.randomUUID()}@example.com`;
+    const { cookie } = await registerTestUser(app, email);
+
+    const createResponse = await app.request('/api/sneakers/custom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({
+        brand: 'Nike',
+        model: 'Air Max 1',
+        size: 10,
+        condition: 'deadstock',
+        images: ['https://images.example.com/original.png'],
+      }),
+    });
+
+    expect(createResponse.status).toBe(201);
+
+    const created = (await createResponse.json()) as { sneaker: { id: string } };
+
+    const updateResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({
+        images: ['https://images.example.com/updated.png'],
+      }),
+    });
+
+    expect(updateResponse.status).toBe(200);
+
+    const updated = (await updateResponse.json()) as {
+      sneaker: {
+        imageUrl: string | null;
+        images: Array<{ url: string; sortOrder: number }>;
+      };
+    };
+    expect(updated.sneaker.imageUrl).toBe('https://images.example.com/updated.png');
+    expect(updated.sneaker.images).toEqual([
+      {
+        id: expect.any(String),
+        url: 'https://images.example.com/updated.png',
+        sortOrder: 0,
+      },
+    ]);
+  });
+
   test('POST /api/sneakers/from-catalog returns 503 when KicksDB is not configured', async () => {
     const email = `catalog-503-${crypto.randomUUID()}@example.com`;
     const { cookie } = await registerTestUser(app, email);
@@ -395,7 +475,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
             primary_title: 'Nike Air Max 1',
             secondary_title: 'Big Bubble',
             sku: '319986-171',
-            image: null,
+            image: 'https://images.stockx.com/example.png',
             gallery: [],
             traits: [],
           },
@@ -432,6 +512,61 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(updateResponse.status).toBe(400);
     await expect(updateResponse.json()).resolves.toEqual({
       error: 'Cannot update brand for catalog-linked sneakers',
+    });
+  });
+
+  test('PATCH /api/sneakers/:id rejects catalog-linked image changes', async () => {
+    mockIsKicksdbConfigured.mockReturnValue(true);
+    mockGetStockxProduct.mockImplementation(() =>
+      Promise.resolve({
+        data: {
+          data: {
+            slug: '1234567890',
+            title: 'Nike Air Max 1',
+            brand: 'Nike',
+            model: 'Air Max 1',
+            primary_title: 'Nike Air Max 1',
+            secondary_title: 'Big Bubble',
+            sku: '319986-171',
+            image: 'https://images.stockx.com/example.png',
+            gallery: [],
+            traits: [],
+          },
+        },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const email = `catalog-images-${crypto.randomUUID()}@example.com`;
+    const { cookie } = await registerTestUser(app, email);
+
+    const createResponse = await app.request('/api/sneakers/from-catalog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({
+        catalogSource: 'kicksdb:stockx',
+        catalogId: '1234567890',
+        size: 10,
+        condition: 'deadstock',
+      }),
+    });
+
+    expect(createResponse.status).toBe(201);
+
+    const created = (await createResponse.json()) as { sneaker: { id: string } };
+
+    const updateResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({
+        images: ['https://images.example.com/replacement.png'],
+      }),
+    });
+
+    expect(updateResponse.status).toBe(400);
+    await expect(updateResponse.json()).resolves.toEqual({
+      error: 'Cannot update images for catalog-linked sneakers',
     });
   });
 

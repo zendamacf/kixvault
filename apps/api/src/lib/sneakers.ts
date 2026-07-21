@@ -8,6 +8,13 @@ import {
   getMarketPricesForSneakers,
   type MarketPriceRecord,
 } from './pricing';
+import {
+  formatSneakerImage,
+  getImagesForSneakerIds,
+  getPrimaryImageUrl,
+  haveSneakerImagesChanged,
+  type SneakerImageRow,
+} from './sneaker-images';
 
 type SneakerRow = typeof sneakersTable.$inferSelect;
 
@@ -17,7 +24,7 @@ const catalogLinkedModelFields = [
   'colorway',
   'nickname',
   'sku',
-  'imageUrl',
+  'images',
   'catalogSource',
   'catalogId',
   'releaseDate',
@@ -36,6 +43,7 @@ function nullableFieldChanged(
 export function getCatalogLinkedModelFieldViolations(
   existing: SneakerRow,
   input: UpdateSneakerInput,
+  existingImages: SneakerImageRow[] = [],
 ): CatalogLinkedModelField[] {
   if (!existing.sku) {
     return [];
@@ -63,8 +71,8 @@ export function getCatalogLinkedModelFieldViolations(
     violations.push('sku');
   }
 
-  if (nullableFieldChanged(existing.imageUrl, input.imageUrl)) {
-    violations.push('imageUrl');
+  if (haveSneakerImagesChanged(existingImages, input.images)) {
+    violations.push('images');
   }
 
   if (nullableFieldChanged(existing.catalogSource, input.catalogSource)) {
@@ -107,7 +115,6 @@ export function buildSneakerUpdate(
       : {}),
     ...(input.notes !== undefined ? { notes: input.notes } : {}),
     ...(!isCatalogLinked && input.sku !== undefined ? { sku: input.sku } : {}),
-    ...(!isCatalogLinked && input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
     ...(!isCatalogLinked && input.catalogSource !== undefined
       ? { catalogSource: input.catalogSource }
       : {}),
@@ -155,7 +162,15 @@ export function formatPurchaseDate(value: Date | null): string | null {
   return value.toISOString().slice(0, 10);
 }
 
-export function formatSneaker(row: SneakerRow, marketPrice?: MarketPriceRecord | null) {
+export function formatSneaker(
+  row: SneakerRow,
+  options: {
+    marketPrice?: MarketPriceRecord | null;
+    images?: SneakerImageRow[];
+  } = {},
+) {
+  const marketPrice = options.marketPrice;
+  const formattedImages = (options.images ?? []).map(formatSneakerImage);
   const currentMarketPrice = marketPrice?.price ?? null;
   const pricedAt = marketPrice?.pricedAt.toISOString() ?? null;
   const gainLoss = computeGainLoss(row.purchasePrice, currentMarketPrice);
@@ -173,7 +188,8 @@ export function formatSneaker(row: SneakerRow, marketPrice?: MarketPriceRecord |
     purchaseDate: formatPurchaseDate(row.purchaseDate),
     notes: row.notes,
     sku: row.sku,
-    imageUrl: row.imageUrl,
+    images: formattedImages,
+    imageUrl: getPrimaryImageUrl(options.images ?? []),
     catalogSource: row.catalogSource as CatalogSource | null,
     catalogId: row.catalogId,
     releaseDate: formatPurchaseDate(row.releaseDate),
@@ -191,9 +207,17 @@ export function formatSneaker(row: SneakerRow, marketPrice?: MarketPriceRecord |
 }
 
 export async function formatSneakersWithPricing(rows: SneakerRow[]) {
-  const marketPrices = await getMarketPricesForSneakers(rows);
+  const [marketPrices, imagesBySneakerId] = await Promise.all([
+    getMarketPricesForSneakers(rows),
+    getImagesForSneakerIds(rows.map((row) => row.id)),
+  ]);
 
-  return rows.map((row) => formatSneaker(row, getMarketPriceForSneaker(row, marketPrices)));
+  return rows.map((row) =>
+    formatSneaker(row, {
+      marketPrice: getMarketPriceForSneaker(row, marketPrices),
+      images: imagesBySneakerId.get(row.id) ?? [],
+    }),
+  );
 }
 
 export async function formatSneakerWithPricing(row: SneakerRow) {

@@ -51,7 +51,6 @@ export const sneakers = pgTable(
     purchaseDate: date('purchase_date', { mode: 'date' }),
     notes: text('notes'),
     sku: text('sku'),
-    imageUrl: text('image_url'),
     catalogSource: text('catalog_source'),
     catalogId: text('catalog_id'),
     nickname: text('nickname'),
@@ -89,10 +88,35 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   }),
 }));
 
-export const sneakersRelations = relations(sneakers, ({ one }) => ({
+export const sneakerImages = pgTable(
+  'sneaker_images',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    sneakerId: uuid('sneaker_id')
+      .notNull()
+      .references(() => sneakers.id, { onDelete: 'cascade' }),
+    url: text('url').notNull(),
+    sortOrder: integer('sort_order').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('sneaker_images_sneaker_id_idx').on(table.sneakerId),
+    unique('sneaker_images_sneaker_id_sort_order_unique').on(table.sneakerId, table.sortOrder),
+  ],
+);
+
+export const sneakersRelations = relations(sneakers, ({ one, many }) => ({
   user: one(users, {
     fields: [sneakers.userId],
     references: [users.id],
+  }),
+  images: many(sneakerImages),
+}));
+
+export const sneakerImagesRelations = relations(sneakerImages, ({ one }) => ({
+  sneaker: one(sneakers, {
+    fields: [sneakerImages.sneakerId],
+    references: [sneakers.id],
   }),
 }));
 

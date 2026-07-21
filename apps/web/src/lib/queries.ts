@@ -15,6 +15,11 @@ export type Sneaker = {
   notes: string | null;
   sku: string | null;
   imageUrl: string | null;
+  images: Array<{
+    id: string;
+    url: string;
+    sortOrder: number;
+  }>;
   catalogSource: string | null;
   catalogId: string | null;
   catalogUrl: string | null;

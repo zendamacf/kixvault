@@ -57,6 +57,7 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       'price_snapshots',
       'pricing_refresh_runs',
       'sessions',
+      'sneaker_images',
       'sneakers',
       'users',
     ]);
@@ -80,7 +81,6 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       'created_at',
       'description',
       'id',
-      'image_url',
       'model',
       'nickname',
       'notes',
@@ -92,6 +92,24 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       'sku',
       'updated_at',
       'user_id',
+    ]);
+  });
+
+  test('creates sneaker_images table columns', async () => {
+    const columns = await client<{ column_name: string }[]>`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'sneaker_images'
+      ORDER BY column_name
+    `;
+
+    expect(columns.map((row) => row.column_name)).toEqual([
+      'created_at',
+      'id',
+      'sneaker_id',
+      'sort_order',
+      'url',
     ]);
   });
 
