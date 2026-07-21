@@ -64,6 +64,13 @@
       "when": 1784800000000,
       "tag": "0008_sneaker_images",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784900000000,
+      "tag": "0009_local_image_storage",
+      "breakpoints": true
     }
   ]
 }

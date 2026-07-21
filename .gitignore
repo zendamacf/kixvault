@@ -2,6 +2,7 @@ node_modules/
 dist/
 .env
 .env.local
+data/images/
 *.tsbuildinfo
 .DS_Store
 **/routeTree.gen.ts

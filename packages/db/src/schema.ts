@@ -88,6 +88,14 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   }),
 }));
 
+export const sneakerImageFetchStatuses = ['pending', 'ready', 'failed'] as const;
+export type SneakerImageFetchStatus = (typeof sneakerImageFetchStatuses)[number];
+
+export const sneakerImageFetchStatusEnum = pgEnum(
+  'sneaker_image_fetch_status',
+  sneakerImageFetchStatuses,
+);
+
 export const sneakerImages = pgTable(
   'sneaker_images',
   {
@@ -95,7 +103,11 @@ export const sneakerImages = pgTable(
     sneakerId: uuid('sneaker_id')
       .notNull()
       .references(() => sneakers.id, { onDelete: 'cascade' }),
-    url: text('url').notNull(),
+    sourceUrl: text('source_url').notNull(),
+    storagePath: text('storage_path'),
+    fetchStatus: sneakerImageFetchStatusEnum('fetch_status').notNull().default('pending'),
+    fetchError: text('fetch_error'),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true, mode: 'date' }),
     sortOrder: integer('sort_order').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
