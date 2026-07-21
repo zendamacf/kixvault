@@ -78,7 +78,7 @@ export function ManualSneakerForm({
           purchaseDate: values.purchaseDate || null,
           notes: values.notes || null,
           sku: null,
-          imageUrl: null,
+          images: [],
           catalogSource: null,
           catalogId: null,
           releaseDate: null,

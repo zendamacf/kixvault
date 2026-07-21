@@ -27,6 +27,11 @@ import {
   parsePurchaseDate,
   parseSneakerId,
 } from '../lib/sneakers';
+import {
+  getImagesForSneakerIds,
+  insertSneakerImages,
+  replaceSneakerImages,
+} from '../lib/sneaker-images';
 import { catalogFromCatalogRateLimit } from '../middleware/catalog-rate-limit';
 import { requireAuth, sessionMiddleware } from '../middleware/session';
 import type { ApiEnv } from '../types';
@@ -99,13 +104,16 @@ export const sneakerRoutes = new Hono<ApiEnv>()
             purchaseDate: parsePurchaseDate(input.purchaseDate),
             notes: input.notes ?? null,
             sku: catalogProduct.sku,
-            imageUrl: catalogProduct.imageUrl,
             catalogSource: catalogProduct.catalogSource,
             catalogId: catalogProduct.catalogId,
             releaseDate: parsePurchaseDate(catalogProduct.releaseDate),
             description: catalogProduct.description,
           })
           .returning();
+
+        if (catalogProduct.imageUrl) {
+          await insertSneakerImages(row.id, [catalogProduct.imageUrl]);
+        }
 
         const matchedPrice = matchVariantPrice(input.size, variantPrices);
 
@@ -196,13 +204,16 @@ export const sneakerRoutes = new Hono<ApiEnv>()
         purchaseDate: parsePurchaseDate(input.purchaseDate),
         notes: input.notes ?? null,
         sku: input.sku ?? null,
-        imageUrl: input.imageUrl ?? null,
         catalogSource: input.catalogSource ?? null,
         catalogId: input.catalogId ?? null,
         releaseDate: parsePurchaseDate(input.releaseDate),
         description: input.description ?? null,
       })
       .returning();
+
+    if (input.images?.length) {
+      await insertSneakerImages(row.id, input.images);
+    }
 
     return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
   })
@@ -224,7 +235,10 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       return c.json({ error: 'Sneaker not found' }, 404);
     }
 
-    const violations = getCatalogLinkedModelFieldViolations(existing, input);
+    const existingImagesBySneakerId = await getImagesForSneakerIds([existing.id]);
+    const existingImages = existingImagesBySneakerId.get(existing.id) ?? [];
+
+    const violations = getCatalogLinkedModelFieldViolations(existing, input, existingImages);
 
     if (violations.length > 0) {
       return c.json(
@@ -236,12 +250,21 @@ export const sneakerRoutes = new Hono<ApiEnv>()
     }
 
     const updates = buildSneakerUpdate(existing, input);
+    const isCatalogLinked = Boolean(existing.sku);
+    const shouldReplaceImages = !isCatalogLinked && input.images !== undefined;
 
-    if (Object.keys(updates).length === 0) {
+    if (Object.keys(updates).length === 0 && !shouldReplaceImages) {
       return c.json({ sneaker: await formatSneakerWithPricing(existing) });
     }
 
-    const [row] = await db.update(sneakers).set(updates).where(eq(sneakers.id, id)).returning();
+    const [row] =
+      Object.keys(updates).length > 0
+        ? await db.update(sneakers).set(updates).where(eq(sneakers.id, id)).returning()
+        : [existing];
+
+    if (shouldReplaceImages) {
+      await replaceSneakerImages(id, input.images ?? []);
+    }
 
     return c.json({ sneaker: await formatSneakerWithPricing(row) });
   })

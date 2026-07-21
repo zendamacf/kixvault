@@ -35,7 +35,6 @@ function createSneakerRow(overrides: Partial<SneakerRow> = {}): SneakerRow {
     purchaseDate: new Date('2024-06-15T00:00:00.000Z'),
     notes: 'Deadstock pickup',
     sku: 'TEST-SKU-001',
-    imageUrl: 'https://images.example.com/sneaker.png',
     catalogSource: 'kicksdb:stockx',
     catalogId: 'air-max-1',
     nickname: 'Anniversary Red',
@@ -75,7 +74,17 @@ describe('parsePurchaseDate', () => {
 
 describe('formatSneaker', () => {
   test('normalizes numeric and date fields', () => {
-    const formatted = formatSneaker(createSneakerRow());
+    const formatted = formatSneaker(createSneakerRow(), {
+      images: [
+        {
+          id: '22222222-2222-4222-8222-222222222222',
+          sneakerId: '11111111-1111-4111-8111-111111111111',
+          url: 'https://images.example.com/sneaker.png',
+          sortOrder: 0,
+          createdAt: new Date('2024-01-01T00:00:00.000Z'),
+        },
+      ],
+    });
 
     expect(formatted).toEqual({
       id: '11111111-1111-4111-8111-111111111111',
@@ -90,6 +99,13 @@ describe('formatSneaker', () => {
       purchaseDate: '2024-06-15',
       notes: 'Deadstock pickup',
       sku: 'TEST-SKU-001',
+      images: [
+        {
+          id: '22222222-2222-4222-8222-222222222222',
+          url: 'https://images.example.com/sneaker.png',
+          sortOrder: 0,
+        },
+      ],
       imageUrl: 'https://images.example.com/sneaker.png',
       catalogSource: 'kicksdb:stockx',
       catalogId: 'air-max-1',
@@ -106,9 +122,11 @@ describe('formatSneaker', () => {
 
   test('includes market pricing fields when provided', () => {
     const formatted = formatSneaker(createSneakerRow(), {
-      price: 200,
-      pricedAt: new Date('2024-06-20T12:00:00.000Z'),
-      currency: 'USD',
+      marketPrice: {
+        price: 200,
+        pricedAt: new Date('2024-06-20T12:00:00.000Z'),
+        currency: 'USD',
+      },
     });
 
     expect(formatted.currentMarketPrice).toBe(200);

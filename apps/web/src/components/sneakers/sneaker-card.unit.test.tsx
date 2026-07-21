@@ -38,6 +38,7 @@ const sneaker: Sneaker = {
   notes: null,
   sku: null,
   imageUrl: null,
+  images: [],
   catalogSource: null,
   catalogId: null,
   catalogUrl: null,
