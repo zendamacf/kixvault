@@ -33,6 +33,7 @@ export default defineConfig({
                       auto: false,
                       repo: process.env.SENTRY_REPO,
                       commit: process.env.SENTRY_COMMIT_SHA,
+                      ignoreMissing: true,
                     }
                   : false,
             },

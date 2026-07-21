@@ -103,7 +103,7 @@ jobs:
           build-args: |
             SENTRY_RELEASE=${{ needs.release.outputs.api_version }}
             SENTRY_COMMIT_SHA=${{ github.sha }}
-            SENTRY_REPO=${{ github.repository }}
+            SENTRY_REPO=${{ vars.SENTRY_GITHUB_REPO }}
 
   # Only runs if web version has changed
   build-web:
@@ -148,4 +148,4 @@ jobs:
           build-args: |
             VITE_APP_VERSION=${{ needs.release.outputs.web_version }}
             SENTRY_COMMIT_SHA=${{ github.sha }}
-            SENTRY_REPO=${{ github.repository }}
+            SENTRY_REPO=${{ vars.SENTRY_GITHUB_REPO }}
