@@ -16,7 +16,9 @@ export function getPrimaryImageUrl(images: SneakerImageRow[]): string | null {
   return images[0]?.url ?? null;
 }
 
-export function normalizeSneakerImageUrls(urls: string[] | null | undefined): string[] {
+export function normalizeSneakerImageUrls(
+  urls: Array<string | null | undefined> | null | undefined,
+): string[] {
   if (!urls?.length) {
     return [];
   }
@@ -25,6 +27,10 @@ export function normalizeSneakerImageUrls(urls: string[] | null | undefined): st
   const normalized: string[] = [];
 
   for (const url of urls) {
+    if (url == null) {
+      continue;
+    }
+
     const trimmed = url.trim();
 
     if (!trimmed || seen.has(trimmed)) {

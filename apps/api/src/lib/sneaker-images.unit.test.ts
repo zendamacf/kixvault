@@ -27,6 +27,17 @@ describe('normalizeSneakerImageUrls', () => {
     expect(normalizeSneakerImageUrls(undefined)).toEqual([]);
     expect(normalizeSneakerImageUrls([])).toEqual([]);
   });
+
+  test('ignores null and undefined entries', () => {
+    expect(
+      normalizeSneakerImageUrls([
+        null,
+        'https://images.example.com/1.png',
+        undefined,
+        'https://images.example.com/1.png',
+      ]),
+    ).toEqual(['https://images.example.com/1.png']);
+  });
 });
 
 describe('formatSneakerImage', () => {
