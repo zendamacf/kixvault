@@ -6,6 +6,7 @@ import { fetchAndStoreSneakerImage, getSneakerImageById } from './image-fetch';
 export type BackfillImageStorageOptions = {
   delayMs?: number;
   onProgress?: (message: string) => void;
+  reprocess?: boolean;
 };
 
 export type BackfillImageStorageResult = {
@@ -30,14 +31,19 @@ export async function backfillImageStorage(
   const rows = await db
     .select({ id: sneakerImages.id })
     .from(sneakerImages)
-    .where(inArray(sneakerImages.fetchStatus, ['pending', 'failed']));
+    .where(
+      inArray(
+        sneakerImages.fetchStatus,
+        options.reprocess ? ['pending', 'failed', 'ready'] : ['pending', 'failed'],
+      ),
+    );
 
   const failures: BackfillImageStorageResult['failures'] = [];
   let imagesReady = 0;
 
   for (const row of rows) {
     try {
-      await fetchAndStoreSneakerImage(row.id);
+      await fetchAndStoreSneakerImage(row.id, { force: options.reprocess });
       const image = await getSneakerImageById(row.id);
 
       if (image?.fetchStatus === 'ready') {

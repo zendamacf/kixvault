@@ -59,6 +59,14 @@ describe('normalizeSneakerImageUrls', () => {
       ]),
     ).toEqual(['https://images.example.com/1.png']);
   });
+
+  test('normalizes StockX URLs to remove opaque background params', () => {
+    expect(
+      normalizeSneakerImageUrls([
+        'https://images.stockx.com/images/Air-Jordan-1.jpg?fit=fill&bg=FFFFFF&w=700',
+      ]),
+    ).toEqual(['https://images.stockx.com/images/Air-Jordan-1.jpg?w=700']);
+  });
 });
 
 describe('formatSneakerImage', () => {

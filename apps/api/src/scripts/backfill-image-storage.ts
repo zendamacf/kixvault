@@ -1,7 +1,10 @@
 import { backfillImageStorage } from '../lib/backfill-image-storage';
 
 async function main() {
+  const reprocess = process.argv.includes('--reprocess');
+
   const result = await backfillImageStorage({
+    reprocess,
     onProgress: (message) => {
       console.log(message);
     },

@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import sharp from 'sharp';
 import { db } from './db';
 import { env } from './env';
-import { isAllowedImageSourceUrl } from './image-source-url';
+import { isAllowedImageSourceUrl, normalizeImageSourceUrl } from './image-source-url';
 import {
   buildSneakerImageStoragePath,
   getSneakerImageAbsolutePath,
@@ -71,17 +71,24 @@ async function downloadImage(sourceUrl: string): Promise<Buffer> {
 }
 
 export async function convertImageToWebp(buffer: Buffer): Promise<Buffer> {
-  return sharp(buffer)
-    .resize({ width: env.maxImageWidth, withoutEnlargement: true })
-    .webp({ quality: 85 })
-    .toBuffer();
+  const metadata = await sharp(buffer).metadata();
+  let pipeline = sharp(buffer).resize({ width: env.maxImageWidth, withoutEnlargement: true });
+
+  if (metadata.hasAlpha) {
+    pipeline = pipeline.ensureAlpha();
+  }
+
+  return pipeline.webp({ quality: 85, alphaQuality: 100 }).toBuffer();
 }
 
 /** Download, convert, and persist a sneaker image outside the request path. */
-export async function fetchAndStoreSneakerImage(imageId: string): Promise<void> {
+export async function fetchAndStoreSneakerImage(
+  imageId: string,
+  options: { force?: boolean } = {},
+): Promise<void> {
   const image = await getSneakerImageById(imageId);
 
-  if (!image || image.fetchStatus === 'ready') {
+  if (!image || (!options.force && image.fetchStatus === 'ready')) {
     return;
   }
 
@@ -91,7 +98,8 @@ export async function fetchAndStoreSneakerImage(imageId: string): Promise<void> 
   }
 
   try {
-    const downloaded = await downloadImage(image.sourceUrl);
+    const downloadUrl = normalizeImageSourceUrl(image.sourceUrl);
+    const downloaded = await downloadImage(downloadUrl);
     const converted = await convertImageToWebp(downloaded);
     const storagePath = buildSneakerImageStoragePath(image.sneakerId, image.sortOrder);
     const absolutePath = getSneakerImageAbsolutePath(storagePath);

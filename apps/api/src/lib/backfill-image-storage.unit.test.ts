@@ -39,7 +39,7 @@ describe('backfillImageStorage', () => {
 
     const result = await backfillImageStorage({ delayMs: 0 });
 
-    expect(mockFetchAndStoreSneakerImage).toHaveBeenCalledWith('image-1');
+    expect(mockFetchAndStoreSneakerImage).toHaveBeenCalledWith('image-1', { force: undefined });
     expect(result).toEqual({
       imagesProcessed: 1,
       imagesReady: 1,
