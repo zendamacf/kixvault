@@ -1,14 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createSneakerFromCatalogSchema, type SneakerCondition } from '@kixvault/shared';
 import type { Control, FieldErrors, UseFormRegister } from 'react-hook-form';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import {
   CatalogSneakerSummary,
   type CatalogSneakerSummaryData,
 } from '@/components/sneakers/catalog-sneaker-summary';
+import { CatalogMarketPricePreview } from '@/components/sneakers/market-value';
 import { SneakerCollectionFields } from '@/components/sneakers/sneaker-collection-fields';
 import { Button } from '@/components/ui/button';
+import type { VariantPrice } from '@kixvault/shared';
 
 const collectionSneakerFormSchema = createSneakerFromCatalogSchema
   .omit({ catalogSource: true, catalogId: true })
@@ -34,6 +36,7 @@ type CollectionFieldValues = {
 
 type CollectionSneakerFormProps = {
   summary: CatalogSneakerSummaryData;
+  variantPrices?: VariantPrice[];
   defaultValues?: Partial<CollectionSneakerFormValues>;
   submitLabel: string;
   isSubmitting?: boolean;
@@ -43,6 +46,7 @@ type CollectionSneakerFormProps = {
 /** Form with a read-only catalog summary and editable collection fields. */
 export function CollectionSneakerForm({
   summary,
+  variantPrices = [],
   defaultValues,
   submitLabel,
   isSubmitting = false,
@@ -65,6 +69,10 @@ export function CollectionSneakerForm({
     },
   });
 
+  const size = useWatch({ control, name: 'size' });
+  const condition = useWatch({ control, name: 'condition' });
+  const purchasePrice = useWatch({ control, name: 'purchasePrice' });
+
   return (
     <form
       className="grid gap-5"
@@ -85,6 +93,15 @@ export function CollectionSneakerForm({
         control={control as unknown as Control<CollectionFieldValues>}
         errors={errors as FieldErrors<CollectionFieldValues>}
       />
+
+      {variantPrices.length > 0 ? (
+        <CatalogMarketPricePreview
+          size={size}
+          condition={condition}
+          variantPrices={variantPrices}
+          purchasePrice={purchasePrice}
+        />
+      ) : null}
 
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Saving...' : submitLabel}

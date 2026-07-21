@@ -2,10 +2,14 @@ import type {
   CatalogMarketplace,
   CatalogSearchResult,
   CreateSneakerFromCatalogInput,
+  VariantPrice,
 } from '@kixvault/shared';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { CollectionSneakerForm } from '@/components/sneakers/collection-sneaker-form';
+import { Skeleton } from '@/components/ui/skeleton';
+import { catalogProductQueryOptions } from '@/lib/catalog';
 
 type CatalogSneakerFormProps = {
   submitLabel: string;
@@ -22,6 +26,14 @@ export function CatalogSneakerForm({
   const [selectedResult, setSelectedResult] = useState<CatalogSearchResult | null>(null);
   const [query, setQuery] = useState('');
   const [marketplace, setMarketplace] = useState<CatalogMarketplace>('goat');
+
+  const { data: catalogProduct, isLoading, error } = useQuery({
+    ...catalogProductQueryOptions(marketplace, selectedResult?.catalogId ?? ''),
+    enabled: selectedResult != null,
+  });
+
+  const summary = catalogProduct?.product ?? selectedResult;
+  const variantPrices: VariantPrice[] = catalogProduct?.variantPrices ?? [];
 
   return (
     <div className="grid gap-5">
@@ -43,25 +55,45 @@ export function CatalogSneakerForm({
             ← Back to search
           </button>
 
-          <CollectionSneakerForm
-            summary={{
-              imageUrl: selectedResult.imageUrl,
-              title: selectedResult.title,
-              brand: selectedResult.brand,
-              nickname: selectedResult.nickname,
-              colorway: selectedResult.colorway,
-              sku: selectedResult.sku,
-            }}
-            submitLabel={submitLabel}
-            isSubmitting={isSubmitting}
-            onSubmit={async (values) => {
-              await onSubmit({
-                catalogSource: selectedResult.catalogSource,
-                catalogId: selectedResult.catalogId,
-                ...values,
-              });
-            }}
-          />
+          {isLoading ? (
+            <div className="space-y-4 rounded-lg border bg-background/60 p-4">
+              <Skeleton className="h-48 w-48 rounded-md" />
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ) : null}
+
+          {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
+
+          {catalogProduct?.unavailable ? (
+            <p className="text-sm text-muted-foreground">
+              Catalog pricing is unavailable. You can still add this pair, but market value will
+              not be stored.
+            </p>
+          ) : null}
+
+          {summary ? (
+            <CollectionSneakerForm
+              summary={{
+                imageUrl: summary.imageUrl,
+                title: summary.title,
+                brand: summary.brand,
+                nickname: summary.nickname,
+                colorway: summary.colorway,
+                sku: summary.sku,
+              }}
+              variantPrices={variantPrices}
+              submitLabel={submitLabel}
+              isSubmitting={isSubmitting || isLoading}
+              onSubmit={async (values) => {
+                await onSubmit({
+                  catalogSource: selectedResult.catalogSource,
+                  catalogId: selectedResult.catalogId,
+                  ...values,
+                });
+              }}
+            />
+          ) : null}
         </>
       )}
     </div>

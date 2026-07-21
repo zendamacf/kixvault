@@ -20,6 +20,9 @@ export type Sneaker = {
   catalogUrl: string | null;
   releaseDate: string | null;
   description: string | null;
+  currentMarketPrice: number | null;
+  pricedAt: string | null;
+  gainLoss: number | null;
   createdAt: string;
   updatedAt: string;
 };

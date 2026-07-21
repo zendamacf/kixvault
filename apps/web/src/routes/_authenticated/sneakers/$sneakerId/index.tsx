@@ -20,8 +20,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api, parseApiError } from '@/lib/api';
+import { isMarketValueApplicable } from '@/lib/pricing';
 import { sneakerQueryOptions } from '@/lib/queries';
 import { formatCondition, formatCurrency, formatDate, getCatalogSourceLabel } from '@/lib/utils';
+import { MarketValue } from '@/components/sneakers/market-value';
 
 export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
   component: SneakerDetailPage,
@@ -186,6 +188,22 @@ function SneakerDetailPage() {
           <DetailItem label="Size" value={String(sneaker.size)} />
           <DetailItem label="Purchase price" value={formatCurrency(sneaker.purchasePrice)} />
           <DetailItem label="Purchase date" value={formatDate(sneaker.purchaseDate)} />
+          {isMarketValueApplicable(sneaker.condition) ? (
+            <div className="rounded-lg border border-border bg-background/60 p-4">
+              <p className="text-sm font-medium text-muted-foreground">Market value</p>
+              <MarketValue
+                price={sneaker.currentMarketPrice}
+                gainLoss={sneaker.gainLoss}
+                condition={sneaker.condition}
+                className="mt-2"
+              />
+              {sneaker.pricedAt ? (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Last updated {formatDate(sneaker.pricedAt)}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           <div className="sm:col-span-2">
             <DetailItem label="Notes" value={sneaker.notes || '—'} />
           </div>

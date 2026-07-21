@@ -43,6 +43,9 @@ const sneaker: Sneaker = {
   catalogUrl: null,
   releaseDate: null,
   description: null,
+  currentMarketPrice: null,
+  pricedAt: null,
+  gainLoss: null,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-02T00:00:00.000Z',
 };
@@ -56,6 +59,21 @@ describe('SneakerCard', () => {
     expect(screen.getByText('Anniversary Red · Size 10')).toBeTruthy();
     expect(screen.getByText('Deadstock')).toBeTruthy();
     expect(screen.getByText('Paid $180')).toBeTruthy();
+  });
+
+  test('renders market value when available', () => {
+    render(
+      <SneakerCard
+        sneaker={{
+          ...sneaker,
+          currentMarketPrice: 220,
+          gainLoss: 40,
+        }}
+      />,
+    );
+
+    expect(screen.getByText('$220')).toBeTruthy();
+    expect(screen.getByText('+$40')).toBeTruthy();
   });
 
   test('prefers nickname over colorway in the subtitle', () => {
