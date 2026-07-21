@@ -1,13 +1,24 @@
-import { describe, expect, test } from 'bun:test';
-import type { sneakers as sneakersTable } from '@kixvault/db';
-import {
+import { describe, expect, mock, test } from 'bun:test';
+
+mock.module('./env', () => ({
+  env: {
+    databaseUrl: 'postgresql://example.com/db',
+    kicksdbApiKey: 'KICKS-test-key',
+    port: 3000,
+    isProduction: false,
+  },
+}));
+
+const {
   buildSneakerSearchCondition,
   buildSneakerUpdate,
   formatSneaker,
   getCatalogLinkedModelFieldViolations,
   parsePurchaseDate,
   parseSneakerId,
-} from './sneakers';
+} = await import('./sneakers');
+
+import type { sneakers as sneakersTable } from '@kixvault/db';
 
 type SneakerRow = typeof sneakersTable.$inferSelect;
 
@@ -85,9 +96,24 @@ describe('formatSneaker', () => {
       catalogUrl: 'https://stockx.com/air-max-1',
       releaseDate: '2015-04-25',
       description: 'The original Air Max with visible Air cushioning.',
+      currentMarketPrice: null,
+      pricedAt: null,
+      gainLoss: null,
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-02T00:00:00.000Z',
     });
+  });
+
+  test('includes market pricing fields when provided', () => {
+    const formatted = formatSneaker(createSneakerRow(), {
+      price: 200,
+      pricedAt: new Date('2024-06-20T12:00:00.000Z'),
+      currency: 'USD',
+    });
+
+    expect(formatted.currentMarketPrice).toBe(200);
+    expect(formatted.pricedAt).toBe('2024-06-20T12:00:00.000Z');
+    expect(formatted.gainLoss).toBe(20);
   });
 });
 

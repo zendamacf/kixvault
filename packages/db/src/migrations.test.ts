@@ -51,7 +51,14 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       ORDER BY table_name
     `;
 
-    expect(tables.map((row) => row.table_name)).toEqual(['sessions', 'sneakers', 'users']);
+    expect(tables.map((row) => row.table_name)).toEqual([
+      'catalog_market_prices',
+      'catalog_product_cache',
+      'price_snapshots',
+      'sessions',
+      'sneakers',
+      'users',
+    ]);
   });
 
   test('creates catalog and full-text search columns on sneakers', async () => {
