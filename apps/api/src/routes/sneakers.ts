@@ -11,6 +11,7 @@ import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { CatalogProductNotFoundError, CatalogSearchError } from '../lib/catalog';
 import { db } from '../lib/db';
+import { enqueueImageFetches } from '../lib/image-fetch-queue';
 import { isKicksdbConfigured } from '../lib/kicksdb';
 import {
   getCatalogProductWithPrices,
@@ -112,7 +113,8 @@ export const sneakerRoutes = new Hono<ApiEnv>()
           .returning();
 
         if (catalogProduct.imageUrls.length > 0) {
-          await insertSneakerImages(row.id, catalogProduct.imageUrls);
+          const images = await insertSneakerImages(row.id, catalogProduct.imageUrls);
+          enqueueImageFetches(images.map((image) => image.id));
         }
 
         const matchedPrice = matchVariantPrice(input.size, variantPrices);
@@ -212,7 +214,8 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       .returning();
 
     if (input.images?.length) {
-      await insertSneakerImages(row.id, input.images);
+      const images = await insertSneakerImages(row.id, input.images);
+      enqueueImageFetches(images.map((image) => image.id));
     }
 
     return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
@@ -263,7 +266,8 @@ export const sneakerRoutes = new Hono<ApiEnv>()
         : [existing];
 
     if (shouldReplaceImages) {
-      await replaceSneakerImages(id, input.images ?? []);
+      const images = await replaceSneakerImages(id, input.images ?? []);
+      enqueueImageFetches(images.map((image) => image.id));
     }
 
     return c.json({ sneaker: await formatSneakerWithPricing(row) });
