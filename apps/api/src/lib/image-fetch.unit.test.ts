@@ -21,7 +21,9 @@ const TRANSPARENT_PNG = Buffer.from(
 describe('convertImageToWebp', () => {
   test('preserves alpha when converting transparent PNGs to WebP', async () => {
     const converted = await convertImageToWebp(TRANSPARENT_PNG);
-    const metadata = await import('sharp').then(({ default: sharp }) => sharp(converted).metadata());
+    const metadata = await import('sharp').then(({ default: sharp }) =>
+      sharp(converted).metadata(),
+    );
 
     expect(metadata.format).toBe('webp');
     expect(metadata.hasAlpha).toBe(true);
