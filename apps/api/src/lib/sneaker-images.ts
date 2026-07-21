@@ -1,6 +1,7 @@
 import { sneakerImages } from '@kixvault/db';
 import { asc, eq, inArray } from 'drizzle-orm';
 import { db } from './db';
+import { normalizeImageSourceUrl } from './image-source-url';
 import { buildSneakerImageStoragePath, getSneakerImageAbsolutePath } from './sneaker-image-paths';
 import { buildSneakerImagePublicUrl } from './sneaker-image-urls';
 
@@ -39,7 +40,7 @@ export function normalizeSneakerImageUrls(
       continue;
     }
 
-    const trimmed = url.trim();
+    const trimmed = normalizeImageSourceUrl(url.trim());
 
     if (!trimmed || seen.has(trimmed)) {
       continue;
