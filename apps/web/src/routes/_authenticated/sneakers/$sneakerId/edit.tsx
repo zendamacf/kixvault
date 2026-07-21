@@ -74,7 +74,7 @@ function EditSneakerPage() {
           {isCatalogLinked ? (
             <CollectionSneakerForm
               summary={{
-                imageUrl: sneaker.imageUrl,
+                imageUrls: sneaker.images.map((image) => image.url),
                 title: `${sneaker.brand} ${sneaker.model}`,
                 brand: sneaker.brand,
                 nickname: sneaker.nickname,

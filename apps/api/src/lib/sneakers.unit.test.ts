@@ -106,7 +106,6 @@ describe('formatSneaker', () => {
           sortOrder: 0,
         },
       ],
-      imageUrl: 'https://images.example.com/sneaker.png',
       catalogSource: 'kicksdb:stockx',
       catalogId: 'air-max-1',
       catalogUrl: 'https://stockx.com/air-max-1',

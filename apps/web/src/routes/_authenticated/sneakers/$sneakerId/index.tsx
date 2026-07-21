@@ -5,7 +5,7 @@ import { BackLink } from '@/components/layout/back-link';
 import { MarketValue } from '@/components/sneakers/market-value';
 import { PriceHistory } from '@/components/sneakers/price-history';
 import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
-import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
+import { SneakerImageCarousel } from '@/components/sneakers/sneaker-image-carousel';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -106,8 +106,8 @@ function SneakerDetailPage() {
         <CardHeader className="space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row items-center">
-              <SneakerThumbnail
-                imageUrl={sneaker.imageUrl}
+              <SneakerImageCarousel
+                images={sneaker.images}
                 alt={title}
                 className="h-64 w-full max-w-xs sm:h-72"
               />

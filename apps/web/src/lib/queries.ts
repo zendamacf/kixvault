@@ -14,7 +14,6 @@ export type Sneaker = {
   purchaseDate: string | null;
   notes: string | null;
   sku: string | null;
-  imageUrl: string | null;
   images: Array<{
     id: string;
     url: string;
