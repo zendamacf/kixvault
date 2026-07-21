@@ -106,10 +106,14 @@ describe.skipIf(!databaseUrl)('migrations', () => {
 
     expect(columns.map((row) => row.column_name)).toEqual([
       'created_at',
+      'fetch_error',
+      'fetch_status',
+      'fetched_at',
       'id',
       'sneaker_id',
       'sort_order',
-      'url',
+      'source_url',
+      'storage_path',
     ]);
   });
 

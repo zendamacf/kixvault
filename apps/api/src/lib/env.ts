@@ -15,6 +15,9 @@ export const env = {
   sentryRelease: process.env.SENTRY_RELEASE,
   jobSchedule: process.env.JOB_SCHEDULE ?? '0 3 * * 0',
   pricingRefreshDelayMs: Number(process.env.PRICING_REFRESH_DELAY_MS) || 500,
+  imageStoragePath: process.env.IMAGE_STORAGE_PATH ?? './data/images',
+  imagePublicBasePath: process.env.IMAGE_PUBLIC_BASE_PATH ?? '/api/images',
+  maxImageWidth: Number(process.env.IMAGE_MAX_WIDTH) || 1024,
 } as const;
 
 export function requireDatabaseUrl(): string {

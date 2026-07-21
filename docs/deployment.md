@@ -72,6 +72,10 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
       PORT: 3000
+      IMAGE_STORAGE_PATH: /data/images
+      IMAGE_PUBLIC_BASE_PATH: /api/images
+    volumes:
+      - kixvault_images:/data/images
     depends_on:
       db:
         condition: service_healthy
@@ -89,6 +93,9 @@ services:
       PRICING_REFRESH_DELAY_MS: ${PRICING_REFRESH_DELAY_MS:-500}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
+      IMAGE_STORAGE_PATH: /data/images
+    volumes:
+      - kixvault_images:/data/images
     entrypoint: ["bun", "apps/api/dist/jobs/run-scheduler.js"]
     depends_on:
       db:
@@ -133,6 +140,7 @@ services:
 
 volumes:
   kixvault_pgdata:
+  kixvault_images:
   kixvault_caddy_data:
   kixvault_caddy_config:
 ```
@@ -166,6 +174,11 @@ LOG_LEVEL=info
 # Scheduler (optional — weekly catalog price refresh)
 JOB_SCHEDULE=0 3 * * 0
 PRICING_REFRESH_DELAY_MS=500
+
+# Local sneaker image storage (Docker volume mounted at /data/images)
+IMAGE_STORAGE_PATH=/data/images
+IMAGE_PUBLIC_BASE_PATH=/api/images
+IMAGE_MAX_WIDTH=1024
 ```
 
 ### `Caddyfile`

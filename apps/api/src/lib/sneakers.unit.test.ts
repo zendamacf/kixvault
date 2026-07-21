@@ -6,6 +6,8 @@ mock.module('./env', () => ({
     kicksdbApiKey: 'KICKS-test-key',
     port: 3000,
     isProduction: false,
+    imagePublicBasePath: '/api/images',
+    imageStoragePath: './data/images',
   },
 }));
 
@@ -79,7 +81,11 @@ describe('formatSneaker', () => {
         {
           id: '22222222-2222-4222-8222-222222222222',
           sneakerId: '11111111-1111-4111-8111-111111111111',
-          url: 'https://images.example.com/sneaker.png',
+          sourceUrl: 'https://images.example.com/sneaker.png',
+          storagePath: null,
+          fetchStatus: 'pending' as const,
+          fetchError: null,
+          fetchedAt: null,
           sortOrder: 0,
           createdAt: new Date('2024-01-01T00:00:00.000Z'),
         },
@@ -163,7 +169,11 @@ describe('getCatalogLinkedModelFieldViolations', () => {
           {
             id: '22222222-2222-4222-8222-222222222222',
             sneakerId: existing.id,
-            url: 'https://images.example.com/sneaker.png',
+            sourceUrl: 'https://images.example.com/sneaker.png',
+            storagePath: null,
+            fetchStatus: 'pending' as const,
+            fetchError: null,
+            fetchedAt: null,
             sortOrder: 0,
             createdAt: new Date('2024-01-01T00:00:00.000Z'),
           },

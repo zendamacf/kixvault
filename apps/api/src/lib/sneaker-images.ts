@@ -1,19 +1,27 @@
 import { sneakerImages } from '@kixvault/db';
 import { asc, eq, inArray } from 'drizzle-orm';
 import { db } from './db';
+import { buildSneakerImageStoragePath, getSneakerImageAbsolutePath } from './sneaker-image-paths';
+import { buildSneakerImagePublicUrl } from './sneaker-image-urls';
 
 export type SneakerImageRow = typeof sneakerImages.$inferSelect;
+
+export { buildSneakerImageStoragePath, getSneakerImageAbsolutePath };
 
 export function formatSneakerImage(row: SneakerImageRow) {
   return {
     id: row.id,
-    url: row.url,
+    url: buildSneakerImagePublicUrl(row),
     sortOrder: row.sortOrder,
   };
 }
 
 export function getPrimaryImageUrl(images: SneakerImageRow[]): string | null {
-  return images[0]?.url ?? null;
+  if (images.length === 0) {
+    return null;
+  }
+
+  return buildSneakerImagePublicUrl(images[0]);
 }
 
 export function normalizeSneakerImageUrls(
@@ -68,6 +76,18 @@ export async function getImagesForSneakerIds(
   return imagesBySneakerId;
 }
 
+export async function getSneakerImageByKey(
+  sneakerId: string,
+  sortOrder: number,
+): Promise<SneakerImageRow | null> {
+  const images = await db
+    .select()
+    .from(sneakerImages)
+    .where(eq(sneakerImages.sneakerId, sneakerId));
+
+  return images.find((image) => image.sortOrder === sortOrder) ?? null;
+}
+
 export async function insertSneakerImages(
   sneakerId: string,
   urls: string[],
@@ -81,9 +101,9 @@ export async function insertSneakerImages(
   return db
     .insert(sneakerImages)
     .values(
-      normalizedUrls.map((url, index) => ({
+      normalizedUrls.map((sourceUrl, index) => ({
         sneakerId,
-        url,
+        sourceUrl,
         sortOrder: index,
       })),
     )
@@ -106,7 +126,7 @@ export function haveSneakerImagesChanged(
     return false;
   }
 
-  const existingUrls = existingImages.map((image) => image.url);
+  const existingUrls = existingImages.map((image) => image.sourceUrl);
   const normalizedInputUrls = normalizeSneakerImageUrls(inputUrls);
 
   if (existingUrls.length !== normalizedInputUrls.length) {

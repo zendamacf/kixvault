@@ -5,6 +5,7 @@ import { env } from './lib/env';
 import { requestLogMiddleware } from './middleware/request-log';
 import { authRoutes } from './routes/auth';
 import { catalogRoutes } from './routes/catalog';
+import { imageRoutes } from './routes/images';
 import { sneakerRoutes } from './routes/sneakers';
 import { statsRoutes } from './routes/stats';
 import type { ApiEnv } from './types';
@@ -28,6 +29,7 @@ export const app = withSentry
   .get('/api/health', (c) => c.json({ status: 'ok', app: APP_NAME }))
   .route('/api/auth', authRoutes)
   .route('/api/catalog', catalogRoutes)
+  .route('/api/images', imageRoutes)
   .route('/api/sneakers', sneakerRoutes)
   .route('/api/stats', statsRoutes);
 
