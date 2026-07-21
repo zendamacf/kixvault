@@ -169,6 +169,32 @@ describe('fetchCatalogProduct', () => {
     expect(second).toEqual(first);
     expect(mockGetStockxProduct).toHaveBeenCalledTimes(1);
   });
+
+  test('returns a product from the search cache without calling KicksDB', async () => {
+    mockGetStockxProducts.mockImplementation(() =>
+      Promise.resolve({
+        data: { data: [stockxProduct] },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const { searchCatalog, fetchCatalogProduct } = await import('./catalog');
+
+    await searchCatalog('jordan 1', 10, 'stockx');
+    const result = await fetchCatalogProduct('kicksdb:stockx', 'air-jordan-1-chicago');
+
+    expect(result.catalogId).toBe('air-jordan-1-chicago');
+    expect(mockGetStockxProduct).not.toHaveBeenCalled();
+  });
+});
+
+describe('normalizeCatalogSearchQuery', () => {
+  test('collapses internal whitespace and lowercases', async () => {
+    const { normalizeCatalogSearchQuery } = await import('./catalog');
+
+    expect(normalizeCatalogSearchQuery('  Jordan   1  ')).toBe('jordan 1');
+  });
 });
 
 describe('searchCatalog', () => {
@@ -231,6 +257,45 @@ describe('searchCatalog', () => {
 
     await expect(searchCatalog('broken query', 10, 'stockx')).rejects.toBeInstanceOf(
       CatalogSearchError,
+    );
+  });
+
+  test('reuses cache across queries that differ only by whitespace', async () => {
+    mockGetStockxProducts.mockImplementation(() =>
+      Promise.resolve({
+        data: { data: [stockxProduct] },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const { searchCatalog } = await import('./catalog');
+
+    await searchCatalog('jordan  1', 10, 'stockx');
+    await searchCatalog('  JORDAN 1  ', 10, 'stockx');
+
+    expect(mockGetStockxProducts).toHaveBeenCalledTimes(1);
+  });
+
+  test('reuses cache across different result limits', async () => {
+    mockGetStockxProducts.mockImplementation(() =>
+      Promise.resolve({
+        data: { data: [stockxProduct] },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const { searchCatalog } = await import('./catalog');
+
+    await searchCatalog('jordan 1', 5, 'stockx');
+    await searchCatalog('jordan 1', 10, 'stockx');
+
+    expect(mockGetStockxProducts).toHaveBeenCalledTimes(1);
+    expect(mockGetStockxProducts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({ limit: 20n }),
+      }),
     );
   });
 });
