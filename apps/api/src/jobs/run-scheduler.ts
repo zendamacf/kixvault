@@ -6,6 +6,7 @@ console.log(`Pricing scheduler started (schedule: ${env.jobSchedule})`);
 
 new Cron(env.jobSchedule, async () => {
   try {
+    console.log('Running pricing refresh');
     const result = await runPricingRefresh();
     console.log(JSON.stringify(result));
   } catch (error) {

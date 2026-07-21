@@ -3,8 +3,6 @@ import { computeGainLoss, getMarketPriceForSneaker, type MarketPriceRecord } fro
 
 type SneakerRow = typeof sneakersTable.$inferSelect;
 
-const priceableConditions = new Set(['deadstock', 'lightly_worn']);
-
 export type CollectionMarketStats = {
   totalMarketValue: number | null;
   totalGainLoss: number | null;
@@ -20,10 +18,6 @@ export function computeCollectionMarketStats(
   let hasGainLoss = false;
 
   for (const row of rows) {
-    if (!priceableConditions.has(row.condition)) {
-      continue;
-    }
-
     const marketPrice = getMarketPriceForSneaker(row, prices);
 
     if (!marketPrice) {
