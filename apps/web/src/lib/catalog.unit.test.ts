@@ -53,3 +53,45 @@ describe('catalogSearchQueryOptions', () => {
     });
   });
 });
+
+describe('catalogProductQueryOptions', () => {
+  test('loads catalog product detail with variant prices', async () => {
+    installFetchMock({
+      catalogProduct: async (url) => {
+        expect(url.pathname).toBe('/api/catalog/products/stockx/air-jordan-1');
+
+        return createJsonResponse({
+          product: {
+            catalogSource: 'kicksdb:stockx',
+            catalogId: 'air-jordan-1',
+            title: 'Air Jordan 1',
+            brand: 'Jordan',
+            model: 'Air Jordan 1',
+            colorway: 'Chicago',
+            nickname: 'Chicago',
+            sku: 'DZ5485-612',
+            imageUrl: null,
+            releaseDate: null,
+            description: null,
+          },
+          variantPrices: [
+            {
+              size: '10',
+              sizeType: 'us m',
+              price: 300,
+              variantId: 'variant-10',
+            },
+          ],
+        });
+      },
+    });
+
+    const { catalogProductQueryOptions } = await import('./catalog');
+    const client = new QueryClient();
+
+    const result = await client.fetchQuery(catalogProductQueryOptions('stockx', 'air-jordan-1'));
+
+    expect(result.variantPrices).toHaveLength(1);
+    expect(result.variantPrices[0]?.price).toBe(300);
+  });
+});

@@ -17,6 +17,24 @@ export function formatCurrency(value: number | null | undefined) {
   }).format(value);
 }
 
+export function formatGainLoss(value: number | null | undefined) {
+  if (value == null) {
+    return '—';
+  }
+
+  const formatted = formatCurrency(Math.abs(value));
+
+  if (value > 0) {
+    return `+${formatted}`;
+  }
+
+  if (value < 0) {
+    return `-${formatted}`;
+  }
+
+  return formatted;
+}
+
 export function formatCondition(condition: string) {
   return condition
     .split('_')

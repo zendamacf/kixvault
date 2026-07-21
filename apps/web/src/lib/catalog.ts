@@ -1,9 +1,18 @@
-import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
+import {
+  type CatalogMarketplace,
+  type CatalogProductDetail,
+  type CatalogSearchResult,
+  catalogProductDetailSchema,
+} from '@kixvault/shared';
 import { queryOptions } from '@tanstack/react-query';
 import { api, parseApiError } from './api';
 
 export type CatalogSearchResponse = {
   results: CatalogSearchResult[];
+  unavailable?: boolean;
+};
+
+export type CatalogProductResponse = CatalogProductDetail & {
   unavailable?: boolean;
 };
 
@@ -27,6 +36,46 @@ export function catalogSearchQueryOptions(query: string, marketplace: CatalogMar
       return 'results' in data ? data : { results: [] };
     },
     enabled: query.length >= 3,
+    staleTime: 24 * 60 * 60 * 1000,
+  });
+}
+
+export function catalogProductQueryOptions(marketplace: CatalogMarketplace, catalogId: string) {
+  return queryOptions({
+    queryKey: ['catalog', 'product', marketplace, catalogId],
+    queryFn: async (): Promise<CatalogProductResponse> => {
+      const response = await api.api.catalog.products[':marketplace'][':catalogId'].$get({
+        param: { marketplace, catalogId },
+      });
+
+      if (response.status === 503) {
+        return {
+          product: {
+            catalogSource: marketplace === 'goat' ? 'kicksdb:goat' : 'kicksdb:stockx',
+            catalogId,
+            title: '',
+            brand: '',
+            model: '',
+            colorway: null,
+            nickname: null,
+            sku: '',
+            imageUrl: null,
+            releaseDate: null,
+            description: null,
+          },
+          variantPrices: [],
+          unavailable: true,
+        };
+      }
+
+      if (!response.ok) {
+        throw new Error(await parseApiError(response, 'Failed to load catalog product'));
+      }
+
+      const data = await response.json();
+      return catalogProductDetailSchema.parse(data);
+    },
+    enabled: catalogId.length > 0,
     staleTime: 24 * 60 * 60 * 1000,
   });
 }
