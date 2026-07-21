@@ -159,10 +159,11 @@ flowchart TD
         I --> J[Insert sneaker + price record + snapshot]
     end
 
-    subgraph refresh [Weekly refresh job]
-        K[Dedupe by catalog_source + catalog_id] --> L["get*Product per unique product"]
-        L --> M[Match sizes for all linked sneakers]
-        M --> N[Upsert current price + weekly snapshot]
+    subgraph refresh [Weekly refresh — scheduler service]
+        K[scheduler container triggers pricing-refresh] --> L[Dedupe by catalog_source + catalog_id]
+        L --> M["get*Product per unique product"]
+        M --> N[Match sizes for all linked sneakers]
+        N --> O[Upsert current price + weekly snapshot]
     end
 ```
 
@@ -293,19 +294,86 @@ Extract the `standard` lowest ask per variant and build the `variant_prices` arr
 
 ### Weekly refresh
 
-1. Select all priceable sneakers; dedupe by `(catalog_source, catalog_id)`.
-2. For each unique product, call the single-product endpoint.
-3. Update `catalog_product_cache`.
-4. For each sneaker sharing that product, match `size` → price.
-5. Upsert `catalog_market_prices`.
-6. Insert `price_snapshots` if the week has no snapshot yet (or if price changed).
+Invoked by the **scheduler service** (see below). The job logic lives in `apps/api/src/jobs/pricing-refresh.ts` and is exported for direct invocation — no HTTP round-trip.
 
-### Background job (new infrastructure)
+1. Check idempotency — skip if a refresh is already in progress or completed this week (see Job state).
+2. Select all priceable sneakers; dedupe by `(catalog_source, catalog_id)`.
+3. For each unique product, call the single-product endpoint (stagger calls to respect rate limits).
+4. Update `catalog_product_cache`.
+5. For each sneaker sharing that product, match `size` → price.
+6. Upsert `catalog_market_prices`.
+7. Insert `price_snapshots` if the week has no snapshot yet (or if price changed).
 
-No scheduler exists today. Options:
+### Scheduler service (Docker Compose)
 
-- External cron hitting a protected internal route (`POST /api/internal/pricing/refresh`) on a weekly schedule.
-- Platform cron (Railway, Fly, GitHub Actions).
+Weekly pricing updates run via a **dedicated scheduler container** that reuses the API image with a different entrypoint. This keeps job logic in the same codebase as the API without coupling it to the HTTP server.
+
+```yaml
+# Addition to docker-compose.yml (production)
+scheduler:
+  image: ghcr.io/zendamacf/kixvault-api:${API_VERSION:-latest}
+  restart: unless-stopped
+  environment:
+    DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
+    KICKSDB_API_KEY: ${KICKSDB_API_KEY}
+    JOB_SCHEDULE: "0 3 * * 0"   # Sunday 03:00 UTC
+    LOG_LEVEL: ${LOG_LEVEL:-info}
+    NODE_ENV: production
+  entrypoint: ["bun", "run", "apps/api/dist/jobs/run-scheduler.js"]
+  depends_on:
+    db:
+      condition: service_healthy
+```
+
+**Why this approach:**
+
+| Benefit | Detail |
+|---------|--------|
+| Code reuse | Same image, deps, and `pricing.ts` logic as the API — no duplication |
+| Long-running friendly | Job runs in-process; no HTTP timeouts for multi-minute KicksDB refresh |
+| Self-contained | `docker compose up -d` starts everything; no host crontab required |
+| Scale-safe | Single scheduler replica avoids duplicate weekly runs (unlike in-process API cron) |
+| Isolated | Scheduler does not serve HTTP; API container is unaffected by job failures |
+
+**Job modules:**
+
+```
+apps/api/src/jobs/
+  pricing-refresh.ts    # refresh logic (exported, unit-testable)
+  run-scheduler.ts      # reads JOB_SCHEDULE env, runs croner loop
+```
+
+`run-scheduler.ts` uses an in-process cron library (e.g. `croner`) to invoke `pricingRefresh()` on schedule. The scheduler entrypoint **skips database migrations** — only the `api` service runs those via `docker-entrypoint.sh`.
+
+**Manual trigger** (testing or ad-hoc refresh):
+
+```sh
+docker compose exec scheduler bun run apps/api/dist/jobs/pricing-refresh.js
+```
+
+Or as a one-off without the long-running scheduler:
+
+```sh
+docker compose run --rm --no-deps scheduler bun run apps/api/dist/jobs/pricing-refresh.js
+```
+
+**Job state / idempotency:**
+
+Record refresh status in the database (e.g. a `pricing_refresh_runs` table or a row in a `job_state` table):
+
+| Field | Purpose |
+|-------|---------|
+| `started_at` | Detect in-progress runs (skip or warn if stale) |
+| `completed_at` | Know when last successful refresh finished |
+| `status` | `running` / `completed` / `failed` |
+| `products_refreshed` | Observability |
+
+Skip starting a new run if one completed within the current week, or if a run has been `running` for less than a configured timeout.
+
+**Observability:**
+
+- Log start, end, product count, and errors at `LOG_LEVEL`.
+- Report failures to Sentry (same `@sentry/bun` setup as the API).
 
 ---
 
@@ -331,9 +399,15 @@ A new endpoint such as `GET /api/catalog/products/:source/:id` (or fetching on s
 | Enrich `GET /api/sneakers` and sneaker detail with `currentMarketPrice`, `pricedAt`, `gainLoss` | Collection and detail views |
 | Extend `GET /api/stats` with `totalMarketValue`, `totalGainLoss` | Dashboard |
 | `GET /api/sneakers/:id/price-history` | Price snapshots over time |
-| `POST /api/internal/pricing/refresh` | Weekly cron-triggered refresh |
 
-All read endpoints serve cached database values. KicksDB is only called during catalog product selection, sneaker creation (cache miss fallback), and the weekly refresh job.
+All read endpoints serve cached database values. KicksDB is only called during catalog product selection, sneaker creation (cache miss fallback), and the weekly scheduler job. There is no HTTP endpoint for triggering refresh — the scheduler invokes job logic directly.
+
+**Compose / deployment changes:**
+
+| File | Change |
+|------|--------|
+| `docker-compose.yml` (VPS) | Add `scheduler` service (documented in `docs/deployment.md`) |
+| `docs/deployment.md` | Document scheduler service, `JOB_SCHEDULE` env var, manual trigger commands |
 
 ---
 
@@ -377,7 +451,7 @@ The in-memory catalog search cache does not dedupe across API replicas. `catalog
 
 ### Rate limits
 
-With per-product fetches, deduplication is critical. The weekly job should stagger requests if KicksDB rate limits apply (e.g. small delay between calls, or process in batches over the week).
+With per-product fetches, deduplication is critical. The scheduler job should stagger requests if KicksDB rate limits apply (e.g. a configurable delay between product fetches in `pricing-refresh.ts`).
 
 ---
 
@@ -386,7 +460,7 @@ With per-product fetches, deduplication is critical. The weekly job should stagg
 | Phase | Scope | API impact |
 |-------|-------|------------|
 | **1** | DB schema + `catalog_product_cache` + product fetch on selection + price on create | 1 product call per new catalog product selected |
-| **2** | Weekly refresh job + `price_snapshots` + current price on cards/detail/stats | 1 call per unique catalog product per week |
+| **2** | Scheduler service + `pricing-refresh` job + `price_snapshots` + current price on cards/detail/stats | 1 call per unique catalog product per week |
 | **3** | Price history UI (collection value over time from snapshots) | None |
 | **4** | On-demand market trend charts (`*SalesDaily`) | 1 call per chart view (24h cache) |
 
@@ -399,9 +473,10 @@ With per-product fetches, deduplication is critical. The weekly job should stagg
 | Schema | `packages/db/src/schema.ts`, new Drizzle migration |
 | Shared types | `packages/shared/src/schemas/sneaker.ts`, `packages/shared/src/schemas/catalog.ts`, new `pricing.ts` schema |
 | Catalog + pricing | `apps/api/src/lib/catalog.ts`, new `apps/api/src/lib/pricing.ts` |
+| Jobs + scheduler | `apps/api/src/jobs/pricing-refresh.ts`, `apps/api/src/jobs/run-scheduler.ts` |
 | KicksDB wiring | `apps/api/src/lib/kicksdb.ts`, `apps/api/src/test/mocks/kicksdb.ts` |
-| Routes | `apps/api/src/routes/catalog.ts`, `apps/api/src/routes/sneakers.ts`, `apps/api/src/routes/stats.ts`, new internal pricing route |
-| Scheduler | New script or internal route + deployment config |
+| Routes | `apps/api/src/routes/catalog.ts`, `apps/api/src/routes/sneakers.ts`, `apps/api/src/routes/stats.ts` |
+| Deployment | `docs/deployment.md` — add `scheduler` service to production `docker-compose.yml` example |
 | UI | `catalog-search-picker.tsx`, `catalog-sneaker-form.tsx`, `sneaker-card.tsx`, detail page, `stats-cards.tsx` |
 | Queries | `apps/web/src/lib/catalog.ts`, `apps/web/src/lib/queries.ts` |
 
@@ -410,10 +485,10 @@ With per-product fetches, deduplication is critical. The weekly job should stagg
 ## Open Questions
 
 1. **Condition handling** — Skip vs disclaimer for non-deadstock pairs?
-2. **Refresh trigger** — External cron vs platform cron for the weekly job?
-3. **Cache TTL** — How long should `catalog_product_cache` entries remain valid before a create-time re-fetch?
-4. **Currency** — US market only (current `MARKET = 'US'` in catalog.ts) or multi-market support later?
-5. **Rate limit handling** — Stagger weekly refresh calls or spread across the week?
+2. **Cache TTL** — How long should `catalog_product_cache` entries remain valid before a create-time re-fetch?
+3. **Currency** — US market only (current `MARKET = 'US'` in catalog.ts) or multi-market support later?
+4. **Rate limit delay** — Default stagger between product fetches in the scheduler job?
+5. **Job schedule** — Is `0 3 * * 0` (Sunday 03:00 UTC) the right default for `JOB_SCHEDULE`?
 
 ---
 
@@ -424,7 +499,7 @@ Most catalog identity work is already in place. The main gaps are:
 1. Persisted price storage (`catalog_product_cache`, `catalog_market_prices`, `price_snapshots`).
 2. Product fetch with variant prices at catalog **selection** time, cached in the database.
 3. Price resolution and storage at sneaker **creation** time (cache read, not a new API call).
-4. A **weekly** refresh job that dedupes by `(catalog_source, catalog_id)`.
+4. A **scheduler service** (same API image, separate Compose container) running a weekly `pricing-refresh` job that dedupes by `(catalog_source, catalog_id)`.
 5. Size matching, condition rules, and UI to show current value vs paid.
 
-Both StockX and GOAT use the same per-product pricing model. The highest-leverage decisions for minimal API usage: **cache product prices at selection**, **dedupe by catalog product identity**, and **refresh weekly** rather than on every read.
+Both StockX and GOAT use the same per-product pricing model. The highest-leverage decisions for minimal API usage: **cache product prices at selection**, **dedupe by catalog product identity**, **refresh weekly via a dedicated scheduler container**, and serve all reads from the database.
