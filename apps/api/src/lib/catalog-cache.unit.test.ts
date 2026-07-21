@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, test } from 'bun:test';
 import type { CatalogSearchResult } from '@kixvault/shared';
 import {
+  type CatalogSearchCache,
   getCatalogSearchCache,
   resetCatalogSearchCacheForTests,
-  type CatalogSearchCache,
 } from './catalog-cache';
 
 const sampleResult: CatalogSearchResult = {

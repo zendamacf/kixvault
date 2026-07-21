@@ -1,5 +1,5 @@
-import Redis from 'ioredis';
 import type { CatalogSearchResult } from '@kixvault/shared';
+import Redis from 'ioredis';
 import { env } from './env';
 
 const CACHE_KEY_PREFIX = 'catalog:search:';
@@ -11,7 +11,10 @@ export type CatalogSearchCache = {
 };
 
 class InMemoryCatalogSearchCache implements CatalogSearchCache {
-  private readonly entries = new Map<string, { results: CatalogSearchResult[]; expiresAt: number }>();
+  private readonly entries = new Map<
+    string,
+    { results: CatalogSearchResult[]; expiresAt: number }
+  >();
 
   async get(key: string): Promise<CatalogSearchResult[] | null> {
     const entry = this.entries.get(key);
