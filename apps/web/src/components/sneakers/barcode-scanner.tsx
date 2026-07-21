@@ -9,6 +9,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  getCameraErrorMessage,
+  selectVideoInputDeviceId,
+  waitForVideoElement,
+} from '@/lib/barcode-scanner';
 
 type BarcodeScannerProps = {
   open: boolean;
@@ -16,18 +21,28 @@ type BarcodeScannerProps = {
   onScan: (value: string) => void;
 };
 
-function getCameraErrorMessage(error: unknown): string {
-  if (error instanceof DOMException) {
-    if (error.name === 'NotAllowedError') {
-      return 'Camera access was denied. Allow camera permissions and try again.';
+async function startBarcodeScanner(
+  reader: BrowserMultiFormatReader,
+  videoElement: HTMLVideoElement,
+  onResult: (value: string) => void,
+): Promise<IScannerControls> {
+  const devices = await BrowserMultiFormatReader.listVideoInputDevices();
+  const deviceId = selectVideoInputDeviceId(devices);
+
+  const onDecode = (result: { getText: () => string } | undefined) => {
+    if (!result) {
+      return;
     }
 
-    if (error.name === 'NotFoundError') {
-      return 'No camera was found on this device.';
-    }
+    onResult(result.getText());
+  };
+
+  if (deviceId) {
+    return reader.decodeFromVideoDevice(deviceId, videoElement, onDecode);
   }
 
-  return 'Unable to access the camera. Try typing the barcode instead.';
+  // ZXing defaults to facingMode: "environment", which laptops do not have.
+  return reader.decodeFromConstraints({ video: true }, videoElement, onDecode);
 }
 
 /** Camera modal that decodes sneaker box UPC/EAN barcodes. */
@@ -35,9 +50,14 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
+  const onScanRef = useRef(onScan);
+  const onOpenChangeRef = useRef(onOpenChange);
   const [error, setError] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
   const videoDescriptionId = useId();
+
+  onScanRef.current = onScan;
+  onOpenChangeRef.current = onOpenChange;
 
   useEffect(() => {
     if (!open) {
@@ -63,19 +83,15 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
       setError(null);
 
       try {
-        const videoElement = videoRef.current;
+        const videoElement = await waitForVideoElement(() => videoRef.current);
 
-        if (!videoElement) {
-          throw new Error('Video element is not available');
+        if (cancelled) {
+          return;
         }
 
-        const controls = await reader.decodeFromVideoDevice(undefined, videoElement, (result) => {
-          if (!result) {
-            return;
-          }
-
-          onScan(result.getText());
-          onOpenChange(false);
+        const controls = await startBarcodeScanner(reader, videoElement, (value) => {
+          onScanRef.current(value);
+          onOpenChangeRef.current(false);
         });
 
         if (cancelled) {
@@ -103,7 +119,7 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
       controlsRef.current = null;
       readerRef.current = null;
     };
-  }, [open, onOpenChange, onScan]);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -120,6 +136,7 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
             <video
               ref={videoRef}
               className="aspect-[4/3] w-full object-cover"
+              autoPlay
               muted
               playsInline
               aria-describedby={videoDescriptionId}

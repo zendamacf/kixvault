@@ -1,6 +1,5 @@
 # TODO
 
- - Value snapshots
  - OAuth?
  - File storage for API images?
  - Branding.
