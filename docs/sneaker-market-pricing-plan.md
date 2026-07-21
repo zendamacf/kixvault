@@ -14,9 +14,9 @@ This document describes what is needed to track **current market value** and **p
 ## Non-Goals (v1)
 
 - Real-time pricing (KicksDB Real-Time API is rate-limited and paid).
+- Batch pricing (`getStockxPrices`) — requires a paid KicksDB plan and is out of scope.
 - Market value for non-catalog or manually entered sneakers without `catalogSource` / `catalogId`.
 - Pricing for heavily worn pairs beyond a clear deadstock-price disclaimer.
-- GOAT batch pricing (no batch endpoint exists today).
 
 ---
 
@@ -61,16 +61,79 @@ There is no cron, worker, or queue. All KicksDB calls are on-demand (user search
 
 ---
 
-## KicksDB Capabilities (Available but Unused)
+## KicksDB Pricing Endpoints
+
+Both StockX and GOAT pricing use the **single-product** endpoint. Batch pricing (`POST /v3/stockx/prices`) is only available on a paid KicksDB plan and is **not** in scope.
+
+| Marketplace | Endpoint | SDK function | Pricing query params |
+|-------------|----------|--------------|---------------------|
+| StockX | [`GET /v3/stockx/products/{id}`](https://api.kicks.dev/docs#tag/stockx/GET/v3/stockx/products/{id}) | `getStockxProduct` | `display[variants]=true`, `display[prices]=true` |
+| GOAT | [`GET /v3/goat/products/{id}`](https://api.kicks.dev/docs#tag/goat/GET/v3/goat/products/{id}) | `getGoatProduct` | `display[variants]=true`, `display[prices]=true` |
+
+With `display[prices]=true`, each variant includes a `prices` array with the lowest ask per delivery type (`standard`, `express_standard`, `express_expedited`). Use the `standard` price for collection value.
+
+Other useful endpoints (not required for v1 current price):
 
 | Need | StockX | GOAT |
 |------|--------|------|
-| **Current price (batch)** | `getStockxPrices` — up to **50 SKUs per request**, `show_sizes: true` | No batch API; `getGoatProduct` with `display[prices]` is per-product |
-| **Current price (single)** | `getStockxProduct` + `display[prices]` + `display[variants]` | `getGoatProduct` + `display[prices]` |
-| **Historical trend** | `getStockxProductSalesDaily` (daily avg + volume) | `getGoatProductSalesDaily` |
+| **Historical trend** | `getStockxProductSalesDaily` | `getGoatProductSalesDaily` |
 | **Real-time** | Real-time endpoints (rate-limited, paid) | Same |
 
 KicksDB's Standard API is refreshed daily — sufficient for collection value tracking without real-time scraping.
+
+---
+
+## When Prices Are Stored
+
+Prices are written at exactly two points. All other reads come from the database.
+
+### 1. On catalog sneaker creation
+
+When a user adds a sneaker from the catalog, their **size is known at creation time**. The price for that `(catalog_source, catalog_id, size)` should be stored immediately — no extra KicksDB call on the create path.
+
+To avoid a redundant fetch at create time, **variant pricing must be cached when the product is first loaded during search/selection**. The typical flow:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant API
+    participant Cache as catalog_product_cache (DB)
+    participant KicksDB
+
+    User->>API: Search catalog
+    API->>KicksDB: getStockxProducts / getGoatProducts
+    KicksDB-->>API: Product list (metadata only)
+    API-->>User: Search results
+
+    User->>API: Select product (or preview)
+    API->>Cache: Lookup catalog_id
+    alt Cache miss or stale
+        API->>KicksDB: getStockxProduct / getGoatProduct (display[variants], display[prices])
+        KicksDB-->>API: Full product with variant prices
+        API->>Cache: Persist variant prices + expires_at
+    end
+    API-->>User: Product detail with sizes/prices
+
+    User->>API: POST /from-catalog (catalogId, size, ...)
+    API->>Cache: Read cached variant prices for catalog_id
+    API->>API: Match size → price
+    API->>API: Insert sneaker + store price snapshot
+    API-->>User: Sneaker with currentMarketPrice
+```
+
+The create handler (`POST /api/sneakers/from-catalog`) should **not** make a separate KicksDB call if a fresh cached product with prices already exists. The existing `fetchCatalogProduct()` call should be extended (or replaced) to use the cache populated during selection.
+
+### 2. On a weekly schedule
+
+A background job refreshes prices for all catalog-linked sneakers in the collection:
+
+1. Select all priceable sneakers (`catalog_source`, `catalog_id`, `sku` all set).
+2. Dedupe by `(catalog_source, catalog_id)` — one API call per unique product, not per sneaker row.
+3. Fetch each product via the single-product endpoint with `display[variants]` and `display[prices]`.
+4. Match each sneaker's `size` to the returned variant price.
+5. Upsert current price and append a weekly snapshot.
+
+**Weekly cadence** keeps API usage predictable. With deduplication, a collection of 50 sneakers across 30 unique catalog products costs **30 API calls per week**, not 50.
 
 ---
 
@@ -80,35 +143,70 @@ KicksDB's Standard API is refreshed daily — sufficient for collection value tr
 
 ```mermaid
 flowchart TD
-    subgraph refresh [Daily refresh job]
-        A[Query all priceable sneakers] --> B[Dedupe by catalogSource + sku]
-        B --> C{Source}
-        C -->|StockX| D["getStockxPrices (50 SKUs/request)"]
-        C -->|GOAT| E["getGoatProduct per unique catalogId"]
-        D --> F[Match variant to sneaker.size]
-        E --> F
-        F --> G[Upsert current price]
-        G --> H[Append daily snapshot if changed]
+    subgraph search [Catalog search / selection]
+        A[User searches catalog] --> B[Return metadata results]
+        B --> C[User selects product]
+        C --> D{Product cache hit?}
+        D -->|No| E["get*Product (variants + prices)"]
+        D -->|Yes| F[Read cached variant prices]
+        E --> G[Persist to catalog_product_cache]
+        G --> F
     end
 
-    subgraph ondemand [On-demand, lazy]
-        I[User opens price chart] --> J["get*ProductSalesDaily (cache 24h)"]
+    subgraph create [Sneaker creation]
+        F --> H[User submits size + collection fields]
+        H --> I[Match size to cached variant price]
+        I --> J[Insert sneaker + price record + snapshot]
+    end
+
+    subgraph refresh [Weekly refresh job]
+        K[Dedupe by catalog_source + catalog_id] --> L["get*Product per unique product"]
+        L --> M[Match sizes for all linked sneakers]
+        M --> N[Upsert current price + weekly snapshot]
     end
 ```
 
-### Core principle: dedupe by catalog identity, not by sneaker row
+### Core principles
 
-Many users may own the same SKU. One StockX batch call should price all matching sneakers. Cache at the **catalog SKU + size** level rather than per sneaker row.
+1. **One API call per unique catalog product** — dedupe across sneakers and users by `(catalog_source, catalog_id)`.
+2. **Cache product prices at selection time** — so creation is a cache read, not another KicksDB call.
+3. **Persist cache in the database** — the in-memory search `Map` is per-process and does not survive restarts or span replicas.
+4. **Weekly refresh** — not daily; aligns with collection-tracking use case and limits API volume.
 
-**API budget example:** 200 catalog-linked sneakers across 80 unique StockX SKUs → **2 batch calls/day**, not 200.
+### API budget examples
+
+| Scenario | Calls |
+|----------|-------|
+| User searches, selects 1 product, creates 1 sneaker | 1 search call + 1 product call (cached for create) |
+| User creates 3 sneakers same product, different sizes | 1 product call (cache reused for all 3 creates) |
+| Collection of 50 sneakers, 30 unique products, weekly refresh | 30 calls/week |
+| 10 users each add a new sneaker for the same product in one week | 1 product call (shared cache) + 0 on subsequent creates |
 
 ---
 
 ## Database Schema
 
-### Option A — catalog-level cache (preferred)
+### `catalog_product_cache`
 
-Stores one price per catalog identity; all sneakers with the same `(catalog_source, sku, size)` share it.
+Persists full product data (including variant prices) fetched during catalog selection. Shared across users and creation events.
+
+```sql
+catalog_product_cache (
+  catalog_source  text NOT NULL,
+  catalog_id      text NOT NULL,
+  sku             text NOT NULL,
+  variant_prices  jsonb NOT NULL,  -- array of { size, size_type, price, variant_id }
+  fetched_at      timestamptz NOT NULL,
+  expires_at      timestamptz NOT NULL,
+  PRIMARY KEY (catalog_source, catalog_id)
+)
+```
+
+`variant_prices` stores all size-level prices from the product response so any size can be resolved without re-fetching. TTL should be long enough to cover the search → create flow (e.g. 24h) but short enough that stale prices are refreshed by the weekly job.
+
+### `catalog_market_prices`
+
+Current resolved price per catalog identity + size. Updated on create and weekly refresh.
 
 ```sql
 catalog_market_prices (
@@ -121,7 +219,15 @@ catalog_market_prices (
   variant_id      text,
   PRIMARY KEY (catalog_source, sku, size)
 )
+```
 
+Join to `sneakers` on `(catalog_source, sku, size)` for display.
+
+### `price_snapshots`
+
+Historical record for collection value over time.
+
+```sql
 price_snapshots (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   catalog_source  text NOT NULL,
@@ -134,13 +240,7 @@ price_snapshots (
 )
 ```
 
-Join to `sneakers` on `(catalog_source, sku, size)` for display.
-
-### Option B — sneaker-level (simpler, more redundant)
-
-Add columns to `sneakers` (`current_market_price`, `priced_at`) plus a `sneaker_price_snapshots` table keyed by `sneaker_id`. Easier to implement but duplicates data when multiple users own the same SKU.
-
-**Recommendation:** Option A for multi-user efficiency; Option B is acceptable for a single-tenant deployment.
+Written on sneaker creation (first data point) and on each weekly refresh (one snapshot per week per `(catalog_source, sku, size)`).
 
 ---
 
@@ -156,29 +256,70 @@ A sneaker is priceable when all of the following are set:
 - `catalog_id IS NOT NULL`
 - `sku IS NOT NULL`
 
-### Refresh algorithm
+### Product fetch (shared by cache, create, and refresh)
 
-1. Select all priceable sneakers across all users.
-2. Dedupe by `(catalog_source, sku)` for API calls; retain size per row for variant matching.
-3. **StockX:** chunk unique SKUs into batches of 50 → `getStockxPrices({ body: { skus, market: 'US', show_sizes: true } })`.
-4. **GOAT:** one `getGoatProduct` per unique `catalog_id` with `display[prices]` and `display[variants]`.
-5. Match `sneakers.size` to the returned variant (see Size Matching below).
-6. Upsert `catalog_market_prices`.
-7. Insert into `price_snapshots` once per day per `(catalog_source, sku, size)` if the price changed.
+```typescript
+// StockX
+getStockxProduct({
+  path: { id: catalogId },
+  query: {
+    market: 'US',
+    'display[variants]': true,
+    'display[prices]': true,
+  },
+});
 
-### Refresh cadence
+// GOAT
+getGoatProduct({
+  path: { id: catalogId },
+  query: {
+    market: 'US',
+    'display[variants]': true,
+    'display[prices]': true,
+  },
+});
+```
 
-- **Daily** — aligns with KicksDB Standard API refresh; predictable cost.
-- Triggered by a scheduled job, not by user page loads.
-- Optional manual refresh endpoint, rate-limited.
+Extract the `standard` lowest ask per variant and build the `variant_prices` array for caching.
+
+### On create
+
+1. Read `catalog_product_cache` for `(catalog_source, catalog_id)`.
+2. If cache miss or expired, fetch product (this is the fallback — normally the cache is warm from selection).
+3. Match `size` to variant price.
+4. Insert sneaker.
+5. Upsert `catalog_market_prices`.
+6. Insert `price_snapshots` row for today.
+
+### Weekly refresh
+
+1. Select all priceable sneakers; dedupe by `(catalog_source, catalog_id)`.
+2. For each unique product, call the single-product endpoint.
+3. Update `catalog_product_cache`.
+4. For each sneaker sharing that product, match `size` → price.
+5. Upsert `catalog_market_prices`.
+6. Insert `price_snapshots` if the week has no snapshot yet (or if price changed).
 
 ### Background job (new infrastructure)
 
 No scheduler exists today. Options:
 
-- External cron hitting a protected internal route (`POST /api/internal/pricing/refresh`).
-- A small worker process (e.g. BullMQ).
+- External cron hitting a protected internal route (`POST /api/internal/pricing/refresh`) on a weekly schedule.
 - Platform cron (Railway, Fly, GitHub Actions).
+
+---
+
+## Catalog Search Changes
+
+The search flow needs to be extended so prices are available before create:
+
+| Step | Current | Planned |
+|------|---------|---------|
+| Search | `getStockxProducts` / `getGoatProducts` — metadata only | Unchanged (list endpoints do not return per-size prices) |
+| Product selection | No server call until create | New endpoint or expanded flow: fetch single product with prices and cache |
+| Create | `fetchCatalogProduct()` — traits only, no prices | Read from `catalog_product_cache`; store matched size price |
+
+A new endpoint such as `GET /api/catalog/products/:source/:id` (or fetching on selection in the existing picker) should call the single-product endpoint, persist to `catalog_product_cache`, and return variant prices to the frontend so the user can see pricing while choosing a size.
 
 ---
 
@@ -186,25 +327,24 @@ No scheduler exists today. Options:
 
 | Change | Purpose |
 |--------|---------|
+| `GET /api/catalog/products/:source/:id` | Fetch + cache product with variant prices on selection |
 | Enrich `GET /api/sneakers` and sneaker detail with `currentMarketPrice`, `pricedAt`, `gainLoss` | Collection and detail views |
 | Extend `GET /api/stats` with `totalMarketValue`, `totalGainLoss` | Dashboard |
-| `GET /api/sneakers/:id/price-history` | Lazy-load chart data |
-| `POST /api/internal/pricing/refresh` (optional) | Manual or cron-triggered refresh |
+| `GET /api/sneakers/:id/price-history` | Price snapshots over time |
+| `POST /api/internal/pricing/refresh` | Weekly cron-triggered refresh |
 
-All read endpoints serve cached database values. KicksDB is only called from the refresh job or lazy chart endpoints.
+All read endpoints serve cached database values. KicksDB is only called during catalog product selection, sneaker creation (cache miss fallback), and the weekly refresh job.
 
 ---
 
 ## Price History Strategy
 
-Two tiers, fetched at different times:
+| Tier | Source | When written | Extra API cost |
+|------|--------|--------------|----------------|
+| **Collection history** | `price_snapshots` table | On create + weekly refresh | None (piggybacks on existing product fetches) |
+| **Market trend chart** | `getStockxProductSalesDaily` / `getGoatProductSalesDaily` | Only when user opens detail chart (future) | 1 call per product, cache 24h |
 
-| Tier | Source | When to fetch | Extra API cost |
-|------|--------|---------------|----------------|
-| **Owned history** | Daily snapshots from refresh job | Written during daily refresh | None |
-| **Market trend chart** | `getStockxProductSalesDaily` / `getGoatProductSalesDaily` | Only when user opens detail chart | 1 call per product, cache 24h |
-
-For v1, daily snapshots from the refresh job may be sufficient for "my collection value over time." Platform sales-daily data is better for "market trend for this model" but costs an extra call per chart view.
+For v1, snapshots from create + weekly refresh are sufficient for "my collection value over time."
 
 ---
 
@@ -223,9 +363,9 @@ Market APIs return deadstock lowest-ask prices. For `lightly_worn`, `worn`, and 
 
 Recommend: show deadstock price with disclaimer for `lightly_worn`; skip for `worn` / `beat`.
 
-### Catalog source split
+### Cache freshness between selection and create
 
-StockX is cheap to refresh (batch). GOAT requires one call per unique product. Prioritize StockX in Phase 1; add GOAT in Phase 3.
+The user may search, leave, and return later to create. The `catalog_product_cache` TTL (e.g. 24h) must cover typical flows. If expired at create time, fall back to a single product fetch.
 
 ### Manual entries with SKU
 
@@ -233,11 +373,11 @@ Catalog-linked immutability is keyed off `sku` alone. Manual entries may have a 
 
 ### Multi-instance deployment
 
-The in-memory catalog cache does not dedupe across API replicas. Price data must live in Postgres, not in-memory `Map`s.
+The in-memory catalog search cache does not dedupe across API replicas. `catalog_product_cache` and price tables must live in Postgres.
 
-### KicksDB plan limits
+### Rate limits
 
-Confirm the KicksDB tier's rate limits and whether GOAT pricing / sales-daily endpoints are included before implementation.
+With per-product fetches, deduplication is critical. The weekly job should stagger requests if KicksDB rate limits apply (e.g. small delay between calls, or process in batches over the week).
 
 ---
 
@@ -245,10 +385,10 @@ Confirm the KicksDB tier's rate limits and whether GOAT pricing / sales-daily en
 
 | Phase | Scope | API impact |
 |-------|-------|------------|
-| **1** | DB schema + StockX batch refresh + current price on cards/detail | `ceil(unique_skus / 50)` calls/day |
-| **2** | Daily snapshots → collection value over time + stats aggregates | Same refresh job, no extra calls |
-| **3** | GOAT current pricing | +1 call per unique GOAT `catalog_id`/day |
-| **4** | On-demand sales-daily charts on detail page | +1 call per chart view (24h cache) |
+| **1** | DB schema + `catalog_product_cache` + product fetch on selection + price on create | 1 product call per new catalog product selected |
+| **2** | Weekly refresh job + `price_snapshots` + current price on cards/detail/stats | 1 call per unique catalog product per week |
+| **3** | Price history UI (collection value over time from snapshots) | None |
+| **4** | On-demand market trend charts (`*SalesDaily`) | 1 call per chart view (24h cache) |
 
 ---
 
@@ -257,23 +397,23 @@ Confirm the KicksDB tier's rate limits and whether GOAT pricing / sales-daily en
 | Area | Files |
 |------|-------|
 | Schema | `packages/db/src/schema.ts`, new Drizzle migration |
-| Shared types | `packages/shared/src/schemas/sneaker.ts`, new `pricing.ts` schema |
-| Pricing logic | New `apps/api/src/lib/pricing.ts` |
+| Shared types | `packages/shared/src/schemas/sneaker.ts`, `packages/shared/src/schemas/catalog.ts`, new `pricing.ts` schema |
+| Catalog + pricing | `apps/api/src/lib/catalog.ts`, new `apps/api/src/lib/pricing.ts` |
 | KicksDB wiring | `apps/api/src/lib/kicksdb.ts`, `apps/api/src/test/mocks/kicksdb.ts` |
-| Routes | `apps/api/src/routes/sneakers.ts`, `apps/api/src/routes/stats.ts`, new pricing/internal route |
+| Routes | `apps/api/src/routes/catalog.ts`, `apps/api/src/routes/sneakers.ts`, `apps/api/src/routes/stats.ts`, new internal pricing route |
 | Scheduler | New script or internal route + deployment config |
-| UI | `apps/web/src/components/sneakers/sneaker-card.tsx`, detail page, `apps/web/src/components/collection/stats-cards.tsx` |
-| Queries | `apps/web/src/lib/queries.ts` |
+| UI | `catalog-search-picker.tsx`, `catalog-sneaker-form.tsx`, `sneaker-card.tsx`, detail page, `stats-cards.tsx` |
+| Queries | `apps/web/src/lib/catalog.ts`, `apps/web/src/lib/queries.ts` |
 
 ---
 
 ## Open Questions
 
-1. **Catalog-level vs sneaker-level storage** — Option A is more efficient at scale; Option B is simpler. Which fits the deployment model?
-2. **Condition handling** — Skip vs disclaimer for non-deadstock pairs?
-3. **Refresh trigger** — External cron vs in-process scheduler vs platform cron?
+1. **Condition handling** — Skip vs disclaimer for non-deadstock pairs?
+2. **Refresh trigger** — External cron vs platform cron for the weekly job?
+3. **Cache TTL** — How long should `catalog_product_cache` entries remain valid before a create-time re-fetch?
 4. **Currency** — US market only (current `MARKET = 'US'` in catalog.ts) or multi-market support later?
-5. **KicksDB tier** — Confirm batch limits and GOAT endpoint access on the current plan.
+5. **Rate limit handling** — Stagger weekly refresh calls or spread across the week?
 
 ---
 
@@ -281,10 +421,10 @@ Confirm the KicksDB tier's rate limits and whether GOAT pricing / sales-daily en
 
 Most catalog identity work is already in place. The main gaps are:
 
-1. Persisted price storage (current value + snapshots).
-2. A pricing service that batches by SKU (StockX) instead of per-sneaker.
-3. A daily refresh job so reads never hit KicksDB.
-4. Size matching and condition rules.
-5. UI to show current value vs paid, and optional history.
+1. Persisted price storage (`catalog_product_cache`, `catalog_market_prices`, `price_snapshots`).
+2. Product fetch with variant prices at catalog **selection** time, cached in the database.
+3. Price resolution and storage at sneaker **creation** time (cache read, not a new API call).
+4. A **weekly** refresh job that dedupes by `(catalog_source, catalog_id)`.
+5. Size matching, condition rules, and UI to show current value vs paid.
 
-The highest-leverage decision for minimal API usage: **dedupe and cache at the catalog SKU + size level**, refresh once per day, and lazy-load historical chart data only on detail views.
+Both StockX and GOAT use the same per-product pricing model. The highest-leverage decisions for minimal API usage: **cache product prices at selection**, **dedupe by catalog product identity**, and **refresh weekly** rather than on every read.
