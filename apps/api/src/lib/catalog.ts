@@ -7,6 +7,7 @@ import {
   type StockXProduct,
 } from '@kicksdb/sdk';
 import type { CatalogMarketplace, CatalogSearchResult, CatalogSource } from '@kixvault/shared';
+import { getBarcodeLookupVariants, isValidBarcode } from '@kixvault/shared';
 import { getCatalogSearchCache, resetCatalogSearchCacheForTests } from './catalog-cache';
 import { ensureKicksdbClient } from './kicksdb';
 
@@ -188,7 +189,74 @@ export async function searchCatalog(
   return results.slice(0, limit);
 }
 
+function buildBarcodeFilter(barcode: string): string {
+  return `barcodes = "${barcode}" AND product_type = "sneakers"`;
+}
+
+async function searchCatalogByBarcodeFilter(
+  barcode: string,
+  limit: number,
+  marketplace: CatalogMarketplace,
+): Promise<CatalogSearchResult[]> {
+  const variants = getBarcodeLookupVariants(barcode);
+
+  for (const variant of variants) {
+    const results =
+      marketplace === 'goat'
+        ? await searchGoatCatalogByBarcode(variant, limit)
+        : await searchStockxCatalogByBarcode(variant, limit);
+
+    if (results.length > 0) {
+      return results;
+    }
+  }
+
+  return [];
+}
+
+async function searchStockxCatalogByBarcode(
+  barcode: string,
+  limit: number,
+): Promise<CatalogSearchResult[]> {
+  const { data, error, response } = await getStockxProducts({
+    query: {
+      filters: buildBarcodeFilter(barcode),
+      limit: BigInt(limit),
+      market: MARKET,
+    },
+  });
+
+  if (error) {
+    throw new CatalogSearchError('KicksDB request failed', response.status);
+  }
+
+  return (data?.data ?? []).map(normalizeStockxProduct);
+}
+
+async function searchGoatCatalogByBarcode(
+  barcode: string,
+  limit: number,
+): Promise<CatalogSearchResult[]> {
+  const { data, error, response } = await getGoatProducts({
+    query: {
+      filters: buildBarcodeFilter(barcode),
+      limit: BigInt(limit),
+      market: MARKET,
+    },
+  });
+
+  if (error) {
+    throw new CatalogSearchError('KicksDB request failed', response.status);
+  }
+
+  return (data?.data ?? []).map(normalizeGoatProduct);
+}
+
 async function searchStockxCatalog(query: string, limit: number): Promise<CatalogSearchResult[]> {
+  if (isValidBarcode(query)) {
+    return searchCatalogByBarcodeFilter(query, limit, 'stockx');
+  }
+
   const { data, error, response } = await getStockxProducts({
     query: {
       query,
@@ -206,6 +274,10 @@ async function searchStockxCatalog(query: string, limit: number): Promise<Catalo
 }
 
 async function searchGoatCatalog(query: string, limit: number): Promise<CatalogSearchResult[]> {
+  if (isValidBarcode(query)) {
+    return searchCatalogByBarcodeFilter(query, limit, 'goat');
+  }
+
   const { data, error, response } = await getGoatProducts({
     query: {
       query,

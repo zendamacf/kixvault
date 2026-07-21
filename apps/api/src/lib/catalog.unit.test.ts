@@ -317,4 +317,81 @@ describe('searchCatalog', () => {
       }),
     );
   });
+
+  test('searches StockX by barcode filter instead of text query', async () => {
+    mockGetStockxProducts.mockImplementation(() =>
+      Promise.resolve({
+        data: { data: [stockxProduct] },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const { searchCatalog } = await import('./catalog');
+    const results = await searchCatalog('197863114996', 10, 'stockx');
+
+    expect(results).toHaveLength(1);
+    expect(mockGetStockxProducts).toHaveBeenCalledTimes(1);
+    expect(mockGetStockxProducts).toHaveBeenCalledWith({
+      query: {
+        filters: 'barcodes = "197863114996" AND product_type = "sneakers"',
+        limit: 20n,
+        market: 'US',
+      },
+    });
+  });
+
+  test('searches GOAT by barcode filter instead of text query', async () => {
+    mockGetGoatProducts.mockImplementation(() =>
+      Promise.resolve({
+        data: { data: [goatProduct] },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const { searchCatalog } = await import('./catalog');
+    const results = await searchCatalog('197863114996', 10, 'goat');
+
+    expect(results).toHaveLength(1);
+    expect(mockGetGoatProducts).toHaveBeenCalledTimes(1);
+    expect(mockGetGoatProducts).toHaveBeenCalledWith({
+      query: {
+        filters: 'barcodes = "197863114996" AND product_type = "sneakers"',
+        limit: 20n,
+        market: 'US',
+      },
+    });
+  });
+
+  test('tries alternate EAN barcode forms when the first filter has no results', async () => {
+    mockGetStockxProducts
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          data: { data: [] },
+          error: null,
+          response: { status: 200 },
+        }),
+      )
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          data: { data: [stockxProduct] },
+          error: null,
+          response: { status: 200 },
+        }),
+      );
+
+    const { searchCatalog } = await import('./catalog');
+    const results = await searchCatalog('197863114996', 10, 'stockx');
+
+    expect(results).toHaveLength(1);
+    expect(mockGetStockxProducts).toHaveBeenCalledTimes(2);
+    expect(mockGetStockxProducts.mock.calls[1]?.[0]).toEqual({
+      query: {
+        filters: 'barcodes = "0197863114996" AND product_type = "sneakers"',
+        limit: 20n,
+        market: 'US',
+      },
+    });
+  });
 });
