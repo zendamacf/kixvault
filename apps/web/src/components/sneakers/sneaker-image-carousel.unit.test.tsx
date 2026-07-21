@@ -41,4 +41,23 @@ describe('SneakerImageCarousel', () => {
     expect(screen.getByRole('button', { name: 'Next slide' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Previous slide' })).toBeTruthy();
   });
+
+  test('lazy-renders only the active slide and its neighbor', () => {
+    const { container } = render(
+      <SneakerImageCarousel
+        images={[
+          { url: 'https://images.example.com/sneaker-1.png' },
+          { url: 'https://images.example.com/sneaker-2.png' },
+          { url: 'https://images.example.com/sneaker-3.png' },
+        ]}
+        alt="Nike Air Max 1"
+        className="h-24 w-24"
+      />,
+    );
+
+    const images = container.querySelectorAll('img');
+    expect(images.length).toBe(2);
+    expect(images[0]?.getAttribute('src')).toBe('https://images.example.com/sneaker-1.png');
+    expect(images[1]?.getAttribute('src')).toBe('https://images.example.com/sneaker-2.png');
+  });
 });
