@@ -89,9 +89,7 @@ describe('catalogProductQueryOptions', () => {
     const { catalogProductQueryOptions } = await import('./catalog');
     const client = new QueryClient();
 
-    const result = await client.fetchQuery(
-      catalogProductQueryOptions('stockx', 'air-jordan-1'),
-    );
+    const result = await client.fetchQuery(catalogProductQueryOptions('stockx', 'air-jordan-1'));
 
     expect(result.variantPrices).toHaveLength(1);
     expect(result.variantPrices[0]?.price).toBe(300);

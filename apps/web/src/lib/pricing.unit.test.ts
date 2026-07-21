@@ -1,9 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import {
-  isMarketValueApplicable,
-  matchVariantPrice,
-  normalizeSizeValue,
-} from './pricing';
+import { isMarketValueApplicable, matchVariantPrice, normalizeSizeValue } from './pricing';
 
 describe('pricing helpers', () => {
   test('normalizes sizes for matching', () => {

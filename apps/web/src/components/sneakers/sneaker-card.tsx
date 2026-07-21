@@ -3,8 +3,8 @@ import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Sneaker } from '@/lib/queries';
 import { isMarketValueApplicable } from '@/lib/pricing';
+import type { Sneaker } from '@/lib/queries';
 import { formatCondition, formatCurrency, formatDate, formatGainLoss } from '@/lib/utils';
 
 type SneakerCardProps = {
@@ -46,7 +46,10 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
           {showMarketValue ? (
             <div className="flex items-center justify-between gap-2">
               <p>
-                Value <span className="font-medium text-foreground">{formatCurrency(sneaker.currentMarketPrice)}</span>
+                Value{' '}
+                <span className="font-medium text-foreground">
+                  {formatCurrency(sneaker.currentMarketPrice)}
+                </span>
               </p>
               {sneaker.gainLoss != null ? (
                 <p

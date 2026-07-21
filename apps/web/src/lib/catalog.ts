@@ -1,4 +1,8 @@
-import type { CatalogMarketplace, CatalogProductDetail, CatalogSearchResult } from '@kixvault/shared';
+import type {
+  CatalogMarketplace,
+  CatalogProductDetail,
+  CatalogSearchResult,
+} from '@kixvault/shared';
 import { queryOptions } from '@tanstack/react-query';
 import { api, parseApiError } from './api';
 
@@ -35,10 +39,7 @@ export function catalogSearchQueryOptions(query: string, marketplace: CatalogMar
   });
 }
 
-export function catalogProductQueryOptions(
-  marketplace: CatalogMarketplace,
-  catalogId: string,
-) {
+export function catalogProductQueryOptions(marketplace: CatalogMarketplace, catalogId: string) {
   return queryOptions({
     queryKey: ['catalog', 'product', marketplace, catalogId],
     queryFn: async (): Promise<CatalogProductResponse> => {

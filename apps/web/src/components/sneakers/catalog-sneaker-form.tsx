@@ -27,7 +27,11 @@ export function CatalogSneakerForm({
   const [query, setQuery] = useState('');
   const [marketplace, setMarketplace] = useState<CatalogMarketplace>('goat');
 
-  const { data: catalogProduct, isLoading, error } = useQuery({
+  const {
+    data: catalogProduct,
+    isLoading,
+    error,
+  } = useQuery({
     ...catalogProductQueryOptions(marketplace, selectedResult?.catalogId ?? ''),
     enabled: selectedResult != null,
   });
@@ -67,8 +71,8 @@ export function CatalogSneakerForm({
 
           {catalogProduct?.unavailable ? (
             <p className="text-sm text-muted-foreground">
-              Catalog pricing is unavailable. You can still add this pair, but market value will
-              not be stored.
+              Catalog pricing is unavailable. You can still add this pair, but market value will not
+              be stored.
             </p>
           ) : null}
 

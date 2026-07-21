@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { VariantPrice } from '@kixvault/shared';
 import { createSneakerFromCatalogSchema, type SneakerCondition } from '@kixvault/shared';
 import type { Control, FieldErrors, UseFormRegister } from 'react-hook-form';
 import { useForm, useWatch } from 'react-hook-form';
@@ -10,7 +11,6 @@ import {
 import { CatalogMarketPricePreview } from '@/components/sneakers/market-value';
 import { SneakerCollectionFields } from '@/components/sneakers/sneaker-collection-fields';
 import { Button } from '@/components/ui/button';
-import type { VariantPrice } from '@kixvault/shared';
 
 const collectionSneakerFormSchema = createSneakerFromCatalogSchema
   .omit({ catalogSource: true, catalogId: true })

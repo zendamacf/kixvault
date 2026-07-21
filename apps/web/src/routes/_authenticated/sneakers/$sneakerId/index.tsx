@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { BackLink } from '@/components/layout/back-link';
+import { MarketValue } from '@/components/sneakers/market-value';
 import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import {
@@ -23,7 +24,6 @@ import { api, parseApiError } from '@/lib/api';
 import { isMarketValueApplicable } from '@/lib/pricing';
 import { sneakerQueryOptions } from '@/lib/queries';
 import { formatCondition, formatCurrency, formatDate, getCatalogSourceLabel } from '@/lib/utils';
-import { MarketValue } from '@/components/sneakers/market-value';
 
 export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
   component: SneakerDetailPage,
