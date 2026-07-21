@@ -14,6 +14,7 @@ import { db } from '../lib/db';
 import { isKicksdbConfigured } from '../lib/kicksdb';
 import {
   getCatalogProductWithPrices,
+  getPriceSnapshotsForSneaker,
   matchVariantPrice,
   storeMarketPriceAndSnapshot,
 } from '../lib/pricing';
@@ -137,6 +138,27 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       }
     },
   )
+  .get('/:id/price-history', async (c) => {
+    const user = c.get('user');
+    const id = parseSneakerId(c.req.param('id'));
+
+    if (!id) {
+      return c.json({ error: 'Invalid sneaker id' }, 400);
+    }
+
+    const [row] = await db
+      .select()
+      .from(sneakers)
+      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? '')));
+
+    if (!row) {
+      return c.json({ error: 'Sneaker not found' }, 404);
+    }
+
+    const history = await getPriceSnapshotsForSneaker(row);
+
+    return c.json({ history });
+  })
   .get('/:id', async (c) => {
     const user = c.get('user');
     const id = parseSneakerId(c.req.param('id'));

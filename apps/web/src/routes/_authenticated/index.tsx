@@ -70,6 +70,8 @@ function CollectionPage() {
         count={statsData?.stats.count}
         totalSpend={statsData?.stats.totalSpend}
         avgSpend={statsData?.stats.avgSpend}
+        totalMarketValue={statsData?.stats.totalMarketValue}
+        totalGainLoss={statsData?.stats.totalGainLoss}
         isLoading={statsLoading}
       />
 
