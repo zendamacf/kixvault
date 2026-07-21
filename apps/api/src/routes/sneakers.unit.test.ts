@@ -103,7 +103,7 @@ describe('sneaker routes', () => {
         nickname: 'Big Bubble',
         sku: 'TEST-SKU-001',
         imageUrl: null,
-    imageUrls: [],
+        imageUrls: [],
         releaseDate: '2015-04-25',
         description: 'The original Air Max with visible Air cushioning.',
       },

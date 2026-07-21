@@ -86,10 +86,7 @@ describe('catalog normalization', () => {
       nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.goat.com/chicago.png',
-      imageUrls: [
-        'https://images.goat.com/chicago.png',
-        'https://images.goat.com/chicago-alt.png',
-      ],
+      imageUrls: ['https://images.goat.com/chicago.png', 'https://images.goat.com/chicago-alt.png'],
       releaseDate: '2016-12-13',
       description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
     });
@@ -101,7 +98,10 @@ describe('catalog normalization', () => {
     expect(
       extractStockxImageUrls({
         ...stockxProduct,
-        gallery: ['https://images.stockx.com/chicago.png', 'https://images.stockx.com/chicago-alt.png'],
+        gallery: [
+          'https://images.stockx.com/chicago.png',
+          'https://images.stockx.com/chicago-alt.png',
+        ],
       } as StockXProduct),
     ).toEqual([
       'https://images.stockx.com/chicago.png',

@@ -10,10 +10,7 @@ const mockFetchCatalogProduct = mock(async () => ({
   nickname: 'Big Bubble',
   sku: 'TEST-SKU-001',
   imageUrl: 'https://images.example.com/primary.png',
-  imageUrls: [
-    'https://images.example.com/primary.png',
-    'https://images.example.com/gallery.png',
-  ],
+  imageUrls: ['https://images.example.com/primary.png', 'https://images.example.com/gallery.png'],
   releaseDate: '2015-04-25',
   description: 'The original Air Max with visible Air cushioning.',
 }));
