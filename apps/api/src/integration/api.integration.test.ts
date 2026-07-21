@@ -343,34 +343,6 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     const updated = (await updateResponse.json()) as { sneaker: { notes: string | null } };
     expect(updated.sneaker.notes).toBe('Worn once');
 
-    const imageUpdateResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Cookie: cookie,
-      },
-      body: JSON.stringify({
-        images: ['https://images.example.com/updated.png'],
-      }),
-    });
-
-    expect(imageUpdateResponse.status).toBe(200);
-
-    const imageUpdated = (await imageUpdateResponse.json()) as {
-      sneaker: {
-        imageUrl: string | null;
-        images: Array<{ url: string; sortOrder: number }>;
-      };
-    };
-    expect(imageUpdated.sneaker.imageUrl).toBe('https://images.example.com/updated.png');
-    expect(imageUpdated.sneaker.images).toEqual([
-      {
-        id: expect.any(String),
-        url: 'https://images.example.com/updated.png',
-        sortOrder: 0,
-      },
-    ]);
-
     const statsResponse = await app.request('/api/stats', {
       headers: { Cookie: cookie },
     });
@@ -403,6 +375,52 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     });
 
     expect(missingDeleteResponse.status).toBe(404);
+  });
+
+  test('PATCH /api/sneakers/:id updates images for manual sneakers', async () => {
+    const email = `manual-images-${crypto.randomUUID()}@example.com`;
+    const { cookie } = await registerTestUser(app, email);
+
+    const createResponse = await app.request('/api/sneakers/custom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({
+        brand: 'Nike',
+        model: 'Air Max 1',
+        size: 10,
+        condition: 'deadstock',
+        images: ['https://images.example.com/original.png'],
+      }),
+    });
+
+    expect(createResponse.status).toBe(201);
+
+    const created = (await createResponse.json()) as { sneaker: { id: string } };
+
+    const updateResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({
+        images: ['https://images.example.com/updated.png'],
+      }),
+    });
+
+    expect(updateResponse.status).toBe(200);
+
+    const updated = (await updateResponse.json()) as {
+      sneaker: {
+        imageUrl: string | null;
+        images: Array<{ url: string; sortOrder: number }>;
+      };
+    };
+    expect(updated.sneaker.imageUrl).toBe('https://images.example.com/updated.png');
+    expect(updated.sneaker.images).toEqual([
+      {
+        id: expect.any(String),
+        url: 'https://images.example.com/updated.png',
+        sortOrder: 0,
+      },
+    ]);
   });
 
   test('POST /api/sneakers/from-catalog returns 503 when KicksDB is not configured', async () => {
