@@ -1,5 +1,33 @@
 # @kixvault/web
 
+## 0.0.4
+
+### Patch Changes
+
+- e852fac: Increase catalog search debounce to 2 seconds and require at least 3 characters before searching.
+- e20824f: Updated @happy-dom/global-registrator from 17.6.3 to 20.10.6, lucide-react from 1.17.0 to 1.20.0 (version-update:semver-major).
+- 76ea3f8: Pass `SENTRY_AUTH_TOKEN` as a Docker BuildKit secret during image builds instead of a build arg.
+- 76ea3f8: Fixed web Docker source map uploads by installing CA certificates, setting an explicit Sentry release name, and removing map files after upload. Removed the unnecessary `SENTRY_RELEASE` override from deployment documentation.
+- 02c04c0: Associate Sentry releases with the Git commit that produced each Docker image build.
+- 88c5a8d: Attach authenticated user IDs to Sentry events in the API and web apps.
+- 0df3308: Added `SIGNUPS_ENABLED` environment variable to allowing new users to sign themselves up.
+- 76ea3f8: Added root route error handling with a fallback UI and Sentry reporting for TanStack Router errors.
+- Updated dependencies [740e68f]
+- Updated dependencies [76ea3f8]
+- Updated dependencies [acb7c3a]
+- Updated dependencies [c597b91]
+- Updated dependencies [839e39e]
+- Updated dependencies [fb804cc]
+- Updated dependencies [5116010]
+- Updated dependencies [e852fac]
+- Updated dependencies [76ea3f8]
+- Updated dependencies [6dd821b]
+- Updated dependencies [02c04c0]
+- Updated dependencies [88c5a8d]
+- Updated dependencies [0df3308]
+  - @kixvault/api@0.0.4
+  - @kixvault/shared@0.0.2
+
 ## 0.0.3
 
 ### Patch Changes
