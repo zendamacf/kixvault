@@ -31,6 +31,7 @@ describe('pricing schemas', () => {
           nickname: 'Chicago',
           sku: 'DZ5485-612',
           imageUrl: null,
+          imageUrls: [],
           releaseDate: null,
           description: null,
         },

@@ -9,6 +9,7 @@ import {
 import type { CatalogMarketplace, CatalogSearchResult, CatalogSource } from '@kixvault/shared';
 import { getCatalogSearchCache, resetCatalogSearchCacheForTests } from './catalog-cache';
 import { ensureKicksdbClient } from './kicksdb';
+import { normalizeSneakerImageUrls } from './sneaker-images';
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const MARKET = 'US'; // Other markets require paid plan
@@ -127,7 +128,17 @@ function getStockxReleaseDate(product: StockXProduct): string | null {
   return releaseDateTrait ? parseCatalogReleaseDate(releaseDateTrait.value) : null;
 }
 
+export function extractStockxImageUrls(product: StockXProduct): string[] {
+  return normalizeSneakerImageUrls([product.image, ...(product.gallery ?? [])]);
+}
+
+export function extractGoatImageUrls(product: GoatProduct): string[] {
+  return normalizeSneakerImageUrls([product.image_url, ...(product.images ?? [])]);
+}
+
 export function normalizeStockxProduct(product: StockXProduct): CatalogSearchResult {
+  const imageUrls = extractStockxImageUrls(product);
+
   return {
     catalogSource: 'kicksdb:stockx',
     catalogId: product.slug,
@@ -137,13 +148,16 @@ export function normalizeStockxProduct(product: StockXProduct): CatalogSearchRes
     colorway: product.secondary_title || null,
     nickname: product.secondary_title || null,
     sku: product.sku,
-    imageUrl: product.image || product.gallery?.[0] || null,
+    imageUrl: imageUrls[0] ?? null,
+    imageUrls,
     releaseDate: getStockxReleaseDate(product),
     description: normalizeDescription(product.description),
   };
 }
 
 export function normalizeGoatProduct(product: GoatProduct): CatalogSearchResult {
+  const imageUrls = extractGoatImageUrls(product);
+
   return {
     catalogSource: 'kicksdb:goat',
     catalogId: product.slug,
@@ -153,7 +167,8 @@ export function normalizeGoatProduct(product: GoatProduct): CatalogSearchResult 
     colorway: product.colorway || null,
     nickname: product.nickname || null,
     sku: product.sku,
-    imageUrl: product.image_url || product.images?.[0] || null,
+    imageUrl: imageUrls[0] ?? null,
+    imageUrls,
     releaseDate: parseCatalogReleaseDate(product.release_date),
     description: normalizeDescription(product.description),
   };

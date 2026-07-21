@@ -60,6 +60,7 @@ export function catalogProductQueryOptions(marketplace: CatalogMarketplace, cata
             nickname: null,
             sku: '',
             imageUrl: null,
+            imageUrls: [],
             releaseDate: null,
             description: null,
           },
