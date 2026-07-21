@@ -2,6 +2,12 @@ import { sneakers as sneakersTable } from '@kixvault/db';
 import type { CatalogSource, UpdateSneakerInput } from '@kixvault/shared';
 import { buildCatalogUrl } from '@kixvault/shared';
 import { or, type SQL, sql } from 'drizzle-orm';
+import {
+  computeGainLoss,
+  getMarketPriceForSneaker,
+  getMarketPricesForSneakers,
+  type MarketPriceRecord,
+} from './pricing';
 
 type SneakerRow = typeof sneakersTable.$inferSelect;
 
@@ -149,7 +155,11 @@ export function formatPurchaseDate(value: Date | null): string | null {
   return value.toISOString().slice(0, 10);
 }
 
-export function formatSneaker(row: SneakerRow) {
+export function formatSneaker(row: SneakerRow, marketPrice?: MarketPriceRecord | null) {
+  const currentMarketPrice = marketPrice?.price ?? null;
+  const pricedAt = marketPrice?.pricedAt.toISOString() ?? null;
+  const gainLoss = computeGainLoss(row.purchasePrice, currentMarketPrice);
+
   return {
     id: row.id,
     userId: row.userId,
@@ -172,7 +182,21 @@ export function formatSneaker(row: SneakerRow) {
       row.catalogSource && row.catalogId
         ? buildCatalogUrl(row.catalogSource as CatalogSource, row.catalogId)
         : null,
+    currentMarketPrice,
+    pricedAt,
+    gainLoss,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
+}
+
+export async function formatSneakersWithPricing(rows: SneakerRow[]) {
+  const marketPrices = await getMarketPricesForSneakers(rows);
+
+  return rows.map((row) => formatSneaker(row, getMarketPriceForSneaker(row, marketPrices)));
+}
+
+export async function formatSneakerWithPricing(row: SneakerRow) {
+  const [formatted] = await formatSneakersWithPricing([row]);
+  return formatted;
 }

@@ -9,17 +9,19 @@ import {
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
-import {
-  CatalogProductNotFoundError,
-  CatalogSearchError,
-  fetchCatalogProduct,
-} from '../lib/catalog';
+import { CatalogProductNotFoundError, CatalogSearchError } from '../lib/catalog';
 import { db } from '../lib/db';
 import { isKicksdbConfigured } from '../lib/kicksdb';
 import {
+  getCatalogProductWithPrices,
+  matchVariantPrice,
+  storeMarketPriceAndSnapshot,
+} from '../lib/pricing';
+import {
   buildSneakerSearchCondition,
   buildSneakerUpdate,
-  formatSneaker,
+  formatSneakersWithPricing,
+  formatSneakerWithPricing,
   getCatalogLinkedModelFieldViolations,
   parsePurchaseDate,
   parseSneakerId,
@@ -62,7 +64,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       .where(and(...filters))
       .orderBy(orderBy);
 
-    return c.json({ sneakers: rows.map(formatSneaker) });
+    return c.json({ sneakers: await formatSneakersWithPricing(rows) });
   })
   .post(
     '/from-catalog',
@@ -77,7 +79,10 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       const input = c.req.valid('json');
 
       try {
-        const catalogProduct = await fetchCatalogProduct(input.catalogSource, input.catalogId);
+        const { product: catalogProduct, variantPrices } = await getCatalogProductWithPrices(
+          input.catalogSource,
+          input.catalogId,
+        );
 
         const [row] = await db
           .insert(sneakers)
@@ -101,7 +106,19 @@ export const sneakerRoutes = new Hono<ApiEnv>()
           })
           .returning();
 
-        return c.json({ sneaker: formatSneaker(row) }, 201);
+        const matchedPrice = matchVariantPrice(input.size, variantPrices);
+
+        if (matchedPrice) {
+          await storeMarketPriceAndSnapshot({
+            catalogSource: catalogProduct.catalogSource,
+            sku: catalogProduct.sku,
+            size: input.size,
+            price: matchedPrice.price,
+            variantId: matchedPrice.variantId,
+          });
+        }
+
+        return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
       } catch (error) {
         if (error instanceof CatalogProductNotFoundError) {
           return c.json({ error: error.message }, 404);
@@ -137,7 +154,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       return c.json({ error: 'Sneaker not found' }, 404);
     }
 
-    return c.json({ sneaker: formatSneaker(row) });
+    return c.json({ sneaker: await formatSneakerWithPricing(row) });
   })
   .post('/custom', zValidator('json', createSneakerSchema), async (c) => {
     const user = c.get('user');
@@ -165,7 +182,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       })
       .returning();
 
-    return c.json({ sneaker: formatSneaker(row) }, 201);
+    return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
   })
   .patch('/:id', zValidator('json', updateSneakerSchema), async (c) => {
     const user = c.get('user');
@@ -199,12 +216,12 @@ export const sneakerRoutes = new Hono<ApiEnv>()
     const updates = buildSneakerUpdate(existing, input);
 
     if (Object.keys(updates).length === 0) {
-      return c.json({ sneaker: formatSneaker(existing) });
+      return c.json({ sneaker: await formatSneakerWithPricing(existing) });
     }
 
     const [row] = await db.update(sneakers).set(updates).where(eq(sneakers.id, id)).returning();
 
-    return c.json({ sneaker: formatSneaker(row) });
+    return c.json({ sneaker: await formatSneakerWithPricing(row) });
   })
   .delete('/:id', async (c) => {
     const user = c.get('user');
