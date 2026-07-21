@@ -152,6 +152,24 @@ describe('fetchCatalogProduct', () => {
     );
   });
 
+  test('caches product lookups for repeated requests', async () => {
+    mockGetStockxProduct.mockImplementation(() =>
+      Promise.resolve({
+        data: { data: stockxProduct },
+        error: null,
+        response: { status: 200 },
+      }),
+    );
+
+    const { fetchCatalogProduct } = await import('./catalog');
+
+    const first = await fetchCatalogProduct('kicksdb:stockx', 'air-jordan-1-chicago');
+    const second = await fetchCatalogProduct('kicksdb:stockx', 'air-jordan-1-chicago');
+
+    expect(second).toEqual(first);
+    expect(mockGetStockxProduct).toHaveBeenCalledTimes(1);
+  });
+
   test('returns a product from the search cache without calling KicksDB', async () => {
     mockGetStockxProducts.mockImplementation(() =>
       Promise.resolve({
@@ -161,10 +179,7 @@ describe('fetchCatalogProduct', () => {
       }),
     );
 
-    const { searchCatalog, fetchCatalogProduct, resetCatalogCacheForTests } = await import(
-      './catalog'
-    );
-    resetCatalogCacheForTests();
+    const { searchCatalog, fetchCatalogProduct } = await import('./catalog');
 
     await searchCatalog('jordan 1', 10, 'stockx');
     const result = await fetchCatalogProduct('kicksdb:stockx', 'air-jordan-1-chicago');
