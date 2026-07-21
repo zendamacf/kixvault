@@ -16,6 +16,7 @@ const goatResult: CatalogSearchResult = {
   nickname: 'Chicago',
   sku: 'DZ5485-612',
   imageUrl: 'https://images.goat.com/chicago.png',
+  imageUrls: ['https://images.goat.com/chicago.png'],
   releaseDate: '2015-04-25',
   description: 'Released in 1985, the Air Jordan 1 changed basketball forever.',
 };

@@ -16,6 +16,7 @@ const sampleResult: CatalogSearchResult = {
   nickname: 'Chicago',
   sku: 'DZ5485-612',
   imageUrl: 'https://images.stockx.com/example.png',
+  imageUrls: ['https://images.stockx.com/example.png'],
   releaseDate: '2015-04-25',
   description: 'Classic sneaker.',
 };

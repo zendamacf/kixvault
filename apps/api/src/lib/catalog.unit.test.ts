@@ -64,6 +64,10 @@ describe('catalog normalization', () => {
       nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.stockx.com/chicago.png',
+      imageUrls: [
+        'https://images.stockx.com/chicago.png',
+        'https://images.stockx.com/chicago-alt.png',
+      ],
       releaseDate: '2015-04-25',
       description: 'Released in 1985, the Air Jordan 1 changed basketball forever.',
     });
@@ -82,9 +86,27 @@ describe('catalog normalization', () => {
       nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.goat.com/chicago.png',
+      imageUrls: ['https://images.goat.com/chicago.png', 'https://images.goat.com/chicago-alt.png'],
       releaseDate: '2016-12-13',
       description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
     });
+  });
+
+  test('extractStockxImageUrls deduplicates the primary image from gallery URLs', async () => {
+    const { extractStockxImageUrls } = await import('./catalog');
+
+    expect(
+      extractStockxImageUrls({
+        ...stockxProduct,
+        gallery: [
+          'https://images.stockx.com/chicago.png',
+          'https://images.stockx.com/chicago-alt.png',
+        ],
+      } as StockXProduct),
+    ).toEqual([
+      'https://images.stockx.com/chicago.png',
+      'https://images.stockx.com/chicago-alt.png',
+    ]);
   });
 });
 

@@ -55,6 +55,7 @@ describe('catalogSearchResultSchema', () => {
       nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.stockx.com/example.png',
+      imageUrls: ['https://images.stockx.com/example.png'],
       releaseDate: '2015-04-25',
       description: 'Released in 1985, the Air Jordan 1 changed basketball forever.',
       catalogUrl: 'https://stockx.com/air-jordan-1-chicago',
@@ -74,6 +75,7 @@ describe('catalogSearchResultSchema', () => {
       nickname: null,
       sku: 'DZ5485-612',
       imageUrl: null,
+      imageUrls: [],
       catalogUrl: null,
     });
 

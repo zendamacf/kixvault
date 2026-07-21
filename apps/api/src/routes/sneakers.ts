@@ -111,8 +111,8 @@ export const sneakerRoutes = new Hono<ApiEnv>()
           })
           .returning();
 
-        if (catalogProduct.imageUrl) {
-          await insertSneakerImages(row.id, [catalogProduct.imageUrl]);
+        if (catalogProduct.imageUrls.length > 0) {
+          await insertSneakerImages(row.id, catalogProduct.imageUrls);
         }
 
         const matchedPrice = matchVariantPrice(input.size, variantPrices);
