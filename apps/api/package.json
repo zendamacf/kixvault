@@ -27,6 +27,7 @@
     "test:integration": "bun --env-file=../../.env test --isolate src/integration",
     "db:test:prepare": "bun run --env-file ../../.env src/test/prepare-test-db.ts",
     "backfill:sneaker-images": "bun run --env-file ../../.env src/scripts/backfill-sneaker-images.ts",
+    "backfill:image-storage": "bun run --env-file ../../.env src/scripts/backfill-image-storage.ts",
     "test:coverage:unit": "bun test --isolate src/lib src/middleware src/routes --coverage && mkdir -p coverage && mv coverage/lcov.info coverage/unit.lcov.info",
     "test:coverage:integration": "bun test --isolate src/integration --coverage && mkdir -p coverage && mv coverage/lcov.info coverage/integration.lcov.info",
     "test:coverage": "bun run test:coverage:unit && bun run test:coverage:integration && bun scripts/merge-lcov.ts coverage/lcov.info coverage/unit.lcov.info coverage/integration.lcov.info",
