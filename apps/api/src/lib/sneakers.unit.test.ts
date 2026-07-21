@@ -152,6 +152,26 @@ describe('getCatalogLinkedModelFieldViolations', () => {
       }),
     ).toEqual(['brand']);
   });
+
+  test('flags catalog-linked image changes', () => {
+    const existing = createSneakerRow();
+
+    expect(
+      getCatalogLinkedModelFieldViolations(
+        existing,
+        { images: ['https://images.example.com/replacement.png'] },
+        [
+          {
+            id: '22222222-2222-4222-8222-222222222222',
+            sneakerId: existing.id,
+            url: 'https://images.example.com/sneaker.png',
+            sortOrder: 0,
+            createdAt: new Date('2024-01-01T00:00:00.000Z'),
+          },
+        ],
+      ),
+    ).toEqual(['images']);
+  });
 });
 
 describe('buildSneakerUpdate', () => {

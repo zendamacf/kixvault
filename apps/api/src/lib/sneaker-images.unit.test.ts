@@ -4,7 +4,12 @@ mock.module('./db', () => ({
   db: {},
 }));
 
-const { haveSneakerImagesChanged, normalizeSneakerImageUrls } = await import('./sneaker-images');
+const {
+  haveSneakerImagesChanged,
+  normalizeSneakerImageUrls,
+  formatSneakerImage,
+  getPrimaryImageUrl,
+} = await import('./sneaker-images');
 
 describe('normalizeSneakerImageUrls', () => {
   test('removes empty values and duplicates while preserving order', () => {
@@ -21,6 +26,44 @@ describe('normalizeSneakerImageUrls', () => {
   test('returns an empty array for missing input', () => {
     expect(normalizeSneakerImageUrls(undefined)).toEqual([]);
     expect(normalizeSneakerImageUrls([])).toEqual([]);
+  });
+});
+
+describe('formatSneakerImage', () => {
+  test('maps database rows to API image objects', () => {
+    expect(
+      formatSneakerImage({
+        id: '22222222-2222-4222-8222-222222222222',
+        sneakerId: '11111111-1111-4111-8111-111111111111',
+        url: 'https://images.example.com/sneaker.png',
+        sortOrder: 0,
+        createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      }),
+    ).toEqual({
+      id: '22222222-2222-4222-8222-222222222222',
+      url: 'https://images.example.com/sneaker.png',
+      sortOrder: 0,
+    });
+  });
+});
+
+describe('getPrimaryImageUrl', () => {
+  test('returns the first image URL when present', () => {
+    expect(
+      getPrimaryImageUrl([
+        {
+          id: 'img-1',
+          sneakerId: 'sneaker-1',
+          url: 'https://images.example.com/1.png',
+          sortOrder: 0,
+          createdAt: new Date(),
+        },
+      ]),
+    ).toBe('https://images.example.com/1.png');
+  });
+
+  test('returns null when no images exist', () => {
+    expect(getPrimaryImageUrl([])).toBeNull();
   });
 });
 
