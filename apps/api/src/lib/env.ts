@@ -13,6 +13,8 @@ export const env = {
   sentryDsn:
     'https://ae34349ec1f0ef631fa6878064cfa57d@o4509541345591296.ingest.de.sentry.io/4511732877164624',
   sentryRelease: process.env.SENTRY_RELEASE,
+  jobSchedule: process.env.JOB_SCHEDULE ?? '0 3 * * 0',
+  pricingRefreshDelayMs: Number(process.env.PRICING_REFRESH_DELAY_MS) || 500,
 } as const;
 
 export function requireDatabaseUrl(): string {

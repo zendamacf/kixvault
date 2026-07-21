@@ -250,6 +250,15 @@ export async function fetchAndCacheCatalogProductWithPrices(
   return getCatalogProductWithPrices(catalogSource, catalogId);
 }
 
+export async function refreshCatalogProductWithPrices(
+  catalogSource: CatalogSource,
+  catalogId: string,
+): Promise<CatalogProductWithPrices> {
+  const fetched = await fetchProductWithPricesFromApi(catalogSource, catalogId);
+  await upsertCatalogProductCache(fetched.product, fetched.variantPrices);
+  return fetched;
+}
+
 export async function upsertCatalogProductCache(
   product: CatalogSearchResult,
   variantPrices: VariantPrice[],

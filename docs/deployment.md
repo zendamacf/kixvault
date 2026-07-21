@@ -79,6 +79,21 @@ services:
         condition: service_healthy
         required: false
 
+  scheduler:
+    image: ghcr.io/zendamacf/kixvault-api:${API_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
+      KICKSDB_API_KEY: ${KICKSDB_API_KEY}
+      JOB_SCHEDULE: ${JOB_SCHEDULE:-0 3 * * 0}
+      PRICING_REFRESH_DELAY_MS: ${PRICING_REFRESH_DELAY_MS:-500}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV: production
+    entrypoint: ["bun", "apps/api/dist/jobs/run-scheduler.js"]
+    depends_on:
+      db:
+        condition: service_healthy
+
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -147,6 +162,10 @@ SIGNUPS_ENABLED=true
 
 # API logging (silent disables request logs)
 LOG_LEVEL=info
+
+# Scheduler (optional — weekly catalog price refresh)
+JOB_SCHEDULE=0 3 * * 0
+PRICING_REFRESH_DELAY_MS=500
 ```
 
 ### `Caddyfile`
@@ -179,7 +198,7 @@ To deploy a new release:
 
 ```sh
 # Pull latest images
-docker compose pull api web
+docker compose pull api web scheduler
 
 # Recreate with new images
 docker compose up -d
@@ -188,5 +207,17 @@ docker compose up -d
 To pin specific versions, update `API_VERSION` and/or `WEB_VERSION` in `.env` and run:
 
 ```sh
-docker compose pull api web && docker compose up -d
+docker compose pull api web scheduler && docker compose up -d
+```
+
+## Scheduler
+
+The `scheduler` service reuses the API image and runs the weekly pricing refresh job via `croner`. It does not run database migrations — only the `api` service does that on startup.
+
+Default schedule: Sunday 03:00 UTC (`JOB_SCHEDULE=0 3 * * 0`).
+
+Run a one-off refresh manually:
+
+```sh
+docker compose run --rm --entrypoint bun scheduler apps/api/dist/jobs/pricing-refresh.js
 ```

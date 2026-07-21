@@ -2,6 +2,7 @@ import { relations, type SQL, sql } from 'drizzle-orm';
 import {
   date,
   index,
+  integer,
   jsonb,
   numeric,
   pgEnum,
@@ -149,3 +150,16 @@ export const priceSnapshots = pgTable(
     ),
   ],
 );
+
+export const pricingRefreshStatuses = ['running', 'completed', 'failed'] as const;
+export type PricingRefreshStatus = (typeof pricingRefreshStatuses)[number];
+
+export const pricingRefreshStatusEnum = pgEnum('pricing_refresh_status', pricingRefreshStatuses);
+
+export const pricingRefreshRuns = pgTable('pricing_refresh_runs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }).notNull(),
+  completedAt: timestamp('completed_at', { withTimezone: true, mode: 'date' }),
+  status: pricingRefreshStatusEnum('status').notNull(),
+  productsRefreshed: integer('products_refreshed'),
+});

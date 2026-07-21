@@ -55,6 +55,7 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       'catalog_market_prices',
       'catalog_product_cache',
       'price_snapshots',
+      'pricing_refresh_runs',
       'sessions',
       'sneakers',
       'users',
