@@ -1,7 +1,8 @@
-import type {
-  CatalogMarketplace,
-  CatalogProductDetail,
-  CatalogSearchResult,
+import {
+  type CatalogMarketplace,
+  type CatalogProductDetail,
+  type CatalogSearchResult,
+  catalogProductDetailSchema,
 } from '@kixvault/shared';
 import { queryOptions } from '@tanstack/react-query';
 import { api, parseApiError } from './api';
@@ -71,7 +72,8 @@ export function catalogProductQueryOptions(marketplace: CatalogMarketplace, cata
         throw new Error(await parseApiError(response, 'Failed to load catalog product'));
       }
 
-      return response.json();
+      const data = await response.json();
+      return catalogProductDetailSchema.parse(data);
     },
     enabled: catalogId.length > 0,
     staleTime: 24 * 60 * 60 * 1000,

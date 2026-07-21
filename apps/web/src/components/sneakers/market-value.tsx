@@ -1,4 +1,4 @@
-import type { SneakerCondition } from '@kixvault/shared';
+import type { SneakerCondition, VariantPrice } from '@kixvault/shared';
 import {
   getMarketValueDisclaimer,
   isMarketValueApplicable,
@@ -69,7 +69,7 @@ export function MarketValue({
 type CatalogMarketPricePreviewProps = {
   size?: number;
   condition: SneakerCondition | string;
-  variantPrices: Array<{ size: string; price: number }>;
+  variantPrices: VariantPrice[];
   purchasePrice?: number | null;
 };
 
