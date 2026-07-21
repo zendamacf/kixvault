@@ -36,8 +36,8 @@ describe('catalogSearchQuerySchema', () => {
     }
   });
 
-  test('rejects queries shorter than 2 characters', () => {
-    const result = catalogSearchQuerySchema.safeParse({ q: 'a' });
+  test('rejects queries shorter than 3 characters', () => {
+    const result = catalogSearchQuerySchema.safeParse({ q: 'ab' });
 
     expect(result.success).toBe(false);
   });

@@ -70,6 +70,21 @@ describe('CatalogSneakerForm', () => {
   test('submits catalog id and collection details after selecting a result', async () => {
     installFetchMock({
       catalogSearch: async () => createJsonResponse({ results: [catalogResult] }),
+      catalogProduct: async (url) => {
+        expect(url.pathname).toBe('/api/catalog/products/goat/air-jordan-1-chicago');
+
+        return createJsonResponse({
+          product: catalogResult,
+          variantPrices: [
+            {
+              size: '10',
+              sizeType: 'us m',
+              price: 220,
+              variantId: 'variant-10',
+            },
+          ],
+        });
+      },
     });
     const onSubmit = mock(async () => {});
 
@@ -85,6 +100,10 @@ describe('CatalogSneakerForm', () => {
     expect(screen.queryByLabelText('Find a sneaker')).toBeNull();
 
     fireEvent.change(screen.getByLabelText('Size'), { target: { value: '10' } });
+
+    expect(await screen.findByText('Market preview')).toBeTruthy();
+    expect(screen.getByText('$220')).toBeTruthy();
+
     fireEvent.click(screen.getByRole('button', { name: 'Add to collection' }));
 
     await waitFor(() => {
@@ -105,6 +124,11 @@ describe('CatalogSneakerForm', () => {
   test('returns to search when back is clicked', async () => {
     installFetchMock({
       catalogSearch: async () => createJsonResponse({ results: [catalogResult] }),
+      catalogProduct: async () =>
+        createJsonResponse({
+          product: catalogResult,
+          variantPrices: [],
+        }),
     });
 
     renderForm(mock(async () => {}));

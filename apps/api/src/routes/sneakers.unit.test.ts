@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test';
+import { resetRateLimitersForTests } from '../middleware/catalog-rate-limit';
 
 class CatalogProductNotFoundError extends Error {
   constructor(message = 'Catalog product not found') {
@@ -17,19 +18,31 @@ class CatalogSearchError extends Error {
   }
 }
 
-const mockFetchCatalogProduct = mock(async () => ({
-  catalogSource: 'kicksdb:stockx' as const,
-  catalogId: 'air-max-1',
-  title: 'Nike Air Max 1',
-  brand: 'Nike',
-  model: 'Air Max 1',
-  colorway: 'Anniversary Red',
-  nickname: 'Big Bubble',
-  sku: 'TEST-SKU-001',
-  imageUrl: null,
-  releaseDate: '2015-04-25',
-  description: 'The original Air Max with visible Air cushioning.',
+const mockGetCatalogProductWithPrices = mock(async () => ({
+  product: {
+    catalogSource: 'kicksdb:stockx' as const,
+    catalogId: 'air-max-1',
+    title: 'Nike Air Max 1',
+    brand: 'Nike',
+    model: 'Air Max 1',
+    colorway: 'Anniversary Red',
+    nickname: 'Big Bubble',
+    sku: 'TEST-SKU-001',
+    imageUrl: null,
+    releaseDate: '2015-04-25',
+    description: 'The original Air Max with visible Air cushioning.',
+  },
+  variantPrices: [
+    {
+      size: '10',
+      sizeType: 'us m',
+      price: 220,
+      variantId: 'variant-10',
+    },
+  ],
 }));
+
+const mockStoreMarketPriceAndSnapshot = mock(async () => {});
 
 const mockEnv = {
   kicksdbApiKey: 'KICKS-test-key' as string | undefined,
@@ -43,9 +56,19 @@ mock.module('../lib/env', () => ({
 }));
 
 mock.module('../lib/catalog', () => ({
-  fetchCatalogProduct: mockFetchCatalogProduct,
   CatalogProductNotFoundError,
   CatalogSearchError,
+}));
+
+mock.module('../lib/pricing', () => ({
+  getCatalogProductWithPrices: mockGetCatalogProductWithPrices,
+  matchVariantPrice: (size: number, variantPrices: Array<{ size: string; price: number }>) =>
+    variantPrices.find((variant) => variant.size === String(size)) ?? null,
+  storeMarketPriceAndSnapshot: mockStoreMarketPriceAndSnapshot,
+  getMarketPricesForSneakers: mock(async () => new Map()),
+  getMarketPriceForSneaker: () => null,
+  getPriceSnapshotsForSneaker: mock(async () => []),
+  computeGainLoss: () => null,
 }));
 
 mock.module('../middleware/session', () => ({
@@ -64,20 +87,32 @@ const { sneakerRoutes } = await import('./sneakers');
 
 describe('sneaker routes', () => {
   beforeEach(() => {
+    resetRateLimitersForTests();
     mockEnv.kicksdbApiKey = 'KICKS-test-key';
-    mockFetchCatalogProduct.mockClear();
-    mockFetchCatalogProduct.mockImplementation(async () => ({
-      catalogSource: 'kicksdb:stockx' as const,
-      catalogId: 'air-max-1',
-      title: 'Nike Air Max 1',
-      brand: 'Nike',
-      model: 'Air Max 1',
-      colorway: 'Anniversary Red',
-      nickname: 'Big Bubble',
-      sku: 'TEST-SKU-001',
-      imageUrl: null,
-      releaseDate: '2015-04-25',
-      description: 'The original Air Max with visible Air cushioning.',
+    mockGetCatalogProductWithPrices.mockClear();
+    mockStoreMarketPriceAndSnapshot.mockClear();
+    mockGetCatalogProductWithPrices.mockImplementation(async () => ({
+      product: {
+        catalogSource: 'kicksdb:stockx' as const,
+        catalogId: 'air-max-1',
+        title: 'Nike Air Max 1',
+        brand: 'Nike',
+        model: 'Air Max 1',
+        colorway: 'Anniversary Red',
+        nickname: 'Big Bubble',
+        sku: 'TEST-SKU-001',
+        imageUrl: null,
+        releaseDate: '2015-04-25',
+        description: 'The original Air Max with visible Air cushioning.',
+      },
+      variantPrices: [
+        {
+          size: '10',
+          sizeType: 'us m',
+          price: 220,
+          variantId: 'variant-10',
+        },
+      ],
     }));
   });
 
@@ -100,7 +135,7 @@ describe('sneaker routes', () => {
   });
 
   test('POST /from-catalog returns 404 when the catalog product is missing', async () => {
-    mockFetchCatalogProduct.mockImplementationOnce(async () => {
+    mockGetCatalogProductWithPrices.mockImplementationOnce(async () => {
       throw new CatalogProductNotFoundError();
     });
 
@@ -120,7 +155,7 @@ describe('sneaker routes', () => {
   });
 
   test('POST /from-catalog maps catalog search failures to API errors', async () => {
-    mockFetchCatalogProduct.mockImplementationOnce(async () => {
+    mockGetCatalogProductWithPrices.mockImplementationOnce(async () => {
       throw new CatalogSearchError('KicksDB request failed', 502);
     });
 

@@ -20,6 +20,9 @@ export type Sneaker = {
   catalogUrl: string | null;
   releaseDate: string | null;
   description: string | null;
+  currentMarketPrice: number | null;
+  pricedAt: string | null;
+  gainLoss: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -117,5 +120,23 @@ export function sneakerQueryOptions(id: string) {
 
       return response.json();
     },
+  });
+}
+
+export function sneakerPriceHistoryQueryOptions(id: string) {
+  return queryOptions({
+    queryKey: ['sneakers', id, 'price-history'],
+    queryFn: async () => {
+      const response = await api.api.sneakers[':id']['price-history'].$get({
+        param: { id },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load price history');
+      }
+
+      return response.json();
+    },
+    enabled: id.length > 0,
   });
 }

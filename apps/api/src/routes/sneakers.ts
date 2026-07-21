@@ -9,21 +9,25 @@ import {
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
-import {
-  CatalogProductNotFoundError,
-  CatalogSearchError,
-  fetchCatalogProduct,
-} from '../lib/catalog';
+import { CatalogProductNotFoundError, CatalogSearchError } from '../lib/catalog';
 import { db } from '../lib/db';
 import { isKicksdbConfigured } from '../lib/kicksdb';
 import {
+  getCatalogProductWithPrices,
+  getPriceSnapshotsForSneaker,
+  matchVariantPrice,
+  storeMarketPriceAndSnapshot,
+} from '../lib/pricing';
+import {
   buildSneakerSearchCondition,
   buildSneakerUpdate,
-  formatSneaker,
+  formatSneakersWithPricing,
+  formatSneakerWithPricing,
   getCatalogLinkedModelFieldViolations,
   parsePurchaseDate,
   parseSneakerId,
 } from '../lib/sneakers';
+import { catalogFromCatalogRateLimit } from '../middleware/catalog-rate-limit';
 import { requireAuth, sessionMiddleware } from '../middleware/session';
 import type { ApiEnv } from '../types';
 
@@ -61,56 +65,99 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       .where(and(...filters))
       .orderBy(orderBy);
 
-    return c.json({ sneakers: rows.map(formatSneaker) });
+    return c.json({ sneakers: await formatSneakersWithPricing(rows) });
   })
-  .post('/from-catalog', zValidator('json', createSneakerFromCatalogSchema), async (c) => {
-    if (!isKicksdbConfigured()) {
-      return c.json({ error: 'Catalog is not configured' }, 503);
-    }
+  .post(
+    '/from-catalog',
+    catalogFromCatalogRateLimit,
+    zValidator('json', createSneakerFromCatalogSchema),
+    async (c) => {
+      if (!isKicksdbConfigured()) {
+        return c.json({ error: 'Catalog is not configured' }, 503);
+      }
 
+      const user = c.get('user');
+      const input = c.req.valid('json');
+
+      try {
+        const { product: catalogProduct, variantPrices } = await getCatalogProductWithPrices(
+          input.catalogSource,
+          input.catalogId,
+        );
+
+        const [row] = await db
+          .insert(sneakers)
+          .values({
+            userId: user?.id ?? '',
+            brand: catalogProduct.brand,
+            model: catalogProduct.model,
+            colorway: catalogProduct.colorway,
+            nickname: catalogProduct.nickname,
+            size: input.size.toString(),
+            condition: input.condition,
+            purchasePrice: input.purchasePrice?.toString() ?? null,
+            purchaseDate: parsePurchaseDate(input.purchaseDate),
+            notes: input.notes ?? null,
+            sku: catalogProduct.sku,
+            imageUrl: catalogProduct.imageUrl,
+            catalogSource: catalogProduct.catalogSource,
+            catalogId: catalogProduct.catalogId,
+            releaseDate: parsePurchaseDate(catalogProduct.releaseDate),
+            description: catalogProduct.description,
+          })
+          .returning();
+
+        const matchedPrice = matchVariantPrice(input.size, variantPrices);
+
+        if (matchedPrice) {
+          await storeMarketPriceAndSnapshot({
+            catalogSource: catalogProduct.catalogSource,
+            sku: catalogProduct.sku,
+            size: input.size,
+            price: matchedPrice.price,
+            variantId: matchedPrice.variantId,
+          });
+        }
+
+        return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
+      } catch (error) {
+        if (error instanceof CatalogProductNotFoundError) {
+          return c.json({ error: error.message }, 404);
+        }
+
+        if (error instanceof CatalogSearchError) {
+          const status =
+            error.status >= 400 && error.status < 600
+              ? (error.status as ContentfulStatusCode)
+              : 502;
+
+          return c.json({ error: 'Failed to fetch catalog product' }, status);
+        }
+
+        throw error;
+      }
+    },
+  )
+  .get('/:id/price-history', async (c) => {
     const user = c.get('user');
-    const input = c.req.valid('json');
+    const id = parseSneakerId(c.req.param('id'));
 
-    try {
-      const catalogProduct = await fetchCatalogProduct(input.catalogSource, input.catalogId);
-
-      const [row] = await db
-        .insert(sneakers)
-        .values({
-          userId: user?.id ?? '',
-          brand: catalogProduct.brand,
-          model: catalogProduct.model,
-          colorway: catalogProduct.colorway,
-          nickname: catalogProduct.nickname,
-          size: input.size.toString(),
-          condition: input.condition,
-          purchasePrice: input.purchasePrice?.toString() ?? null,
-          purchaseDate: parsePurchaseDate(input.purchaseDate),
-          notes: input.notes ?? null,
-          sku: catalogProduct.sku,
-          imageUrl: catalogProduct.imageUrl,
-          catalogSource: catalogProduct.catalogSource,
-          catalogId: catalogProduct.catalogId,
-          releaseDate: parsePurchaseDate(catalogProduct.releaseDate),
-          description: catalogProduct.description,
-        })
-        .returning();
-
-      return c.json({ sneaker: formatSneaker(row) }, 201);
-    } catch (error) {
-      if (error instanceof CatalogProductNotFoundError) {
-        return c.json({ error: error.message }, 404);
-      }
-
-      if (error instanceof CatalogSearchError) {
-        const status =
-          error.status >= 400 && error.status < 600 ? (error.status as ContentfulStatusCode) : 502;
-
-        return c.json({ error: 'Failed to fetch catalog product' }, status);
-      }
-
-      throw error;
+    if (!id) {
+      return c.json({ error: 'Invalid sneaker id' }, 400);
     }
+
+    const [row] = await db
+      .select()
+      .from(sneakers)
+      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? '')));
+
+    if (!row) {
+      return c.json({ error: 'Sneaker not found' }, 404);
+    }
+
+    const history = await getPriceSnapshotsForSneaker(row);
+
+    return c.json({ history });
   })
   .get('/:id', async (c) => {
     const user = c.get('user');
@@ -129,7 +176,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       return c.json({ error: 'Sneaker not found' }, 404);
     }
 
-    return c.json({ sneaker: formatSneaker(row) });
+    return c.json({ sneaker: await formatSneakerWithPricing(row) });
   })
   .post('/custom', zValidator('json', createSneakerSchema), async (c) => {
     const user = c.get('user');
@@ -157,7 +204,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       })
       .returning();
 
-    return c.json({ sneaker: formatSneaker(row) }, 201);
+    return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
   })
   .patch('/:id', zValidator('json', updateSneakerSchema), async (c) => {
     const user = c.get('user');
@@ -191,12 +238,12 @@ export const sneakerRoutes = new Hono<ApiEnv>()
     const updates = buildSneakerUpdate(existing, input);
 
     if (Object.keys(updates).length === 0) {
-      return c.json({ sneaker: formatSneaker(existing) });
+      return c.json({ sneaker: await formatSneakerWithPricing(existing) });
     }
 
     const [row] = await db.update(sneakers).set(updates).where(eq(sneakers.id, id)).returning();
 
-    return c.json({ sneaker: formatSneaker(row) });
+    return c.json({ sneaker: await formatSneakerWithPricing(row) });
   })
   .delete('/:id', async (c) => {
     const user = c.get('user');

@@ -1,5 +1,18 @@
 import { relations, type SQL, sql } from 'drizzle-orm';
-import { date, index, numeric, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  date,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { tsvector } from './custom-types';
 
 export const sneakerConditions = ['deadstock', 'lightly_worn', 'worn', 'beat'] as const;
@@ -82,3 +95,71 @@ export const sneakersRelations = relations(sneakers, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export type CatalogVariantPrice = {
+  size: string;
+  sizeType: string | null;
+  price: number;
+  variantId: string | null;
+};
+
+export const catalogProductCache = pgTable(
+  'catalog_product_cache',
+  {
+    catalogSource: text('catalog_source').notNull(),
+    catalogId: text('catalog_id').notNull(),
+    sku: text('sku').notNull(),
+    variantPrices: jsonb('variant_prices').$type<CatalogVariantPrice[]>().notNull(),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true, mode: 'date' }).notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.catalogSource, table.catalogId] })],
+);
+
+export const catalogMarketPrices = pgTable(
+  'catalog_market_prices',
+  {
+    catalogSource: text('catalog_source').notNull(),
+    sku: text('sku').notNull(),
+    size: numeric('size', { precision: 4, scale: 1 }).notNull(),
+    price: numeric('price', { precision: 10, scale: 2 }).notNull(),
+    currency: text('currency').notNull().default('USD'),
+    pricedAt: timestamp('priced_at', { withTimezone: true, mode: 'date' }).notNull(),
+    variantId: text('variant_id'),
+  },
+  (table) => [primaryKey({ columns: [table.catalogSource, table.sku, table.size] })],
+);
+
+export const priceSnapshots = pgTable(
+  'price_snapshots',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    catalogSource: text('catalog_source').notNull(),
+    sku: text('sku').notNull(),
+    size: numeric('size', { precision: 4, scale: 1 }).notNull(),
+    snapshotDate: date('snapshot_date', { mode: 'date' }).notNull(),
+    price: numeric('price', { precision: 10, scale: 2 }).notNull(),
+    currency: text('currency').notNull().default('USD'),
+  },
+  (table) => [
+    unique('price_snapshots_catalog_source_sku_size_snapshot_date_unique').on(
+      table.catalogSource,
+      table.sku,
+      table.size,
+      table.snapshotDate,
+    ),
+  ],
+);
+
+export const pricingRefreshStatuses = ['running', 'completed', 'failed'] as const;
+export type PricingRefreshStatus = (typeof pricingRefreshStatuses)[number];
+
+export const pricingRefreshStatusEnum = pgEnum('pricing_refresh_status', pricingRefreshStatuses);
+
+export const pricingRefreshRuns = pgTable('pricing_refresh_runs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }).notNull(),
+  completedAt: timestamp('completed_at', { withTimezone: true, mode: 'date' }),
+  status: pricingRefreshStatusEnum('status').notNull(),
+  productsRefreshed: integer('products_refreshed'),
+});

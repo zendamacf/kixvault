@@ -116,6 +116,14 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
             image: null,
             gallery: [],
             traits: [],
+            variants: [
+              {
+                id: 'variant-10',
+                size: '10',
+                size_type: 'us m',
+                prices: [{ price: 220, type: 'standard' }],
+              },
+            ],
           },
         },
         error: null,
@@ -142,9 +150,16 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(response.status).toBe(201);
 
     const created = (await response.json()) as {
-      sneaker: { id: string; brand: string; sku: string; nickname: string | null };
+      sneaker: {
+        id: string;
+        brand: string;
+        sku: string;
+        nickname: string | null;
+        currentMarketPrice: number | null;
+      };
     };
     expect(created.sneaker.nickname).toBe('Big Bubble');
+    expect(created.sneaker.currentMarketPrice).toBe(220);
   });
 
   test('POST /api/sneakers/from-catalog returns 400 for invalid catalog product', async () => {

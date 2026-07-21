@@ -51,6 +51,28 @@ function createApp() {
   return app;
 }
 
+const REQUEST_LOG_PATTERN =
+  /^(?<method>\S+) (?<path>\S+) (?<status>\d+) \d+ms requestId=(?<requestId>\S+)(?: user=(?<user>\S+))?$/;
+
+function expectRequestLog(
+  logLine: string,
+  expected: { method: string; path: string; status: number; requestId: string; user?: string },
+) {
+  const match = logLine.match(REQUEST_LOG_PATTERN);
+
+  expect(match).not.toBeNull();
+  expect(match?.groups?.method).toBe(expected.method);
+  expect(match?.groups?.path).toBe(expected.path);
+  expect(Number(match?.groups?.status)).toBe(expected.status);
+  expect(match?.groups?.requestId).toBe(expected.requestId);
+
+  if (expected.user) {
+    expect(match?.groups?.user).toBe(expected.user);
+  } else {
+    expect(match?.groups?.user).toBeUndefined();
+  }
+}
+
 describe('requestLogMiddleware', () => {
   afterEach(() => {
     if (originalLogLevel === undefined) {
@@ -98,7 +120,12 @@ describe('requestLogMiddleware', () => {
 
       expect(response.status).toBe(200);
       expect(logSpy).toHaveBeenCalledTimes(1);
-      expect(logSpy.mock.calls[0]?.[0]).toBe('GET /api/example 200 0ms requestId=req-123');
+      expectRequestLog(String(logSpy.mock.calls[0]?.[0]), {
+        method: 'GET',
+        path: '/api/example',
+        status: 200,
+        requestId: 'req-123',
+      });
     } finally {
       console.log = originalLog;
     }
@@ -122,9 +149,13 @@ describe('requestLogMiddleware', () => {
 
       expect(response.status).toBe(200);
       expect(logSpy).toHaveBeenCalledTimes(1);
-      expect(logSpy.mock.calls[0]?.[0]).toBe(
-        'GET /api/authenticated 200 0ms requestId=req-456 user=user-1',
-      );
+      expectRequestLog(String(logSpy.mock.calls[0]?.[0]), {
+        method: 'GET',
+        path: '/api/authenticated',
+        status: 200,
+        requestId: 'req-456',
+        user: 'user-1',
+      });
     } finally {
       console.log = originalLog;
     }

@@ -135,14 +135,14 @@ describe('CatalogSearchPicker', () => {
     expect(resultButton.className).toContain('border-primary');
   });
 
-  test('does not search until the query has at least 2 characters', async () => {
+  test('does not search until the query has at least 3 characters', async () => {
     const catalogSearch = mock(async () => createJsonResponse({ results: [] }));
     installFetchMock({ catalogSearch });
 
     renderPicker();
-    searchFor('j');
+    searchFor('jo');
 
-    expect(await screen.findByText('Type at least 2 characters to search.')).toBeTruthy();
+    expect(await screen.findByText('Type at least 3 characters to search.')).toBeTruthy();
     expect(catalogSearch).not.toHaveBeenCalled();
   });
 
