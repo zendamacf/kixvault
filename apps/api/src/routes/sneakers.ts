@@ -19,6 +19,11 @@ import {
   storeMarketPriceAndSnapshot,
 } from '../lib/pricing';
 import {
+  getImagesForSneakerIds,
+  insertSneakerImages,
+  replaceSneakerImages,
+} from '../lib/sneaker-images';
+import {
   buildSneakerSearchCondition,
   buildSneakerUpdate,
   formatSneakersWithPricing,
@@ -27,11 +32,6 @@ import {
   parsePurchaseDate,
   parseSneakerId,
 } from '../lib/sneakers';
-import {
-  getImagesForSneakerIds,
-  insertSneakerImages,
-  replaceSneakerImages,
-} from '../lib/sneaker-images';
 import { catalogFromCatalogRateLimit } from '../middleware/catalog-rate-limit';
 import { requireAuth, sessionMiddleware } from '../middleware/session';
 import type { ApiEnv } from '../types';
