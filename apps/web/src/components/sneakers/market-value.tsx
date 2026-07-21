@@ -1,9 +1,5 @@
 import type { SneakerCondition, VariantPrice } from '@kixvault/shared';
-import {
-  getMarketValueDisclaimer,
-  isMarketValueApplicable,
-  matchVariantPrice,
-} from '@/lib/pricing';
+import { getMarketValueDisclaimer, matchVariantPrice } from '@/lib/pricing';
 import { cn, formatCurrency, formatGainLoss } from '@/lib/utils';
 
 type MarketValueProps = {
@@ -15,27 +11,8 @@ type MarketValueProps = {
 };
 
 /** Displays market value and optional gain/loss for a sneaker. */
-export function MarketValue({
-  price,
-  gainLoss,
-  condition,
-  className,
-  showUnavailable,
-}: MarketValueProps) {
-  const applicable = condition == null || isMarketValueApplicable(condition);
+export function MarketValue({ price, gainLoss, condition, className }: MarketValueProps) {
   const disclaimer = condition ? getMarketValueDisclaimer(condition) : null;
-
-  if (!applicable) {
-    if (!showUnavailable) {
-      return null;
-    }
-
-    return (
-      <p className={cn('text-sm text-muted-foreground', className)}>
-        Market value not shown for this condition.
-      </p>
-    );
-  }
 
   if (price == null) {
     return (
@@ -80,10 +57,6 @@ export function CatalogMarketPricePreview({
   variantPrices,
   purchasePrice,
 }: CatalogMarketPricePreviewProps) {
-  if (!isMarketValueApplicable(condition)) {
-    return null;
-  }
-
   if (size == null || Number.isNaN(size)) {
     return (
       <p className="text-sm text-muted-foreground">

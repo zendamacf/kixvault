@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { isMarketValueApplicable, matchVariantPrice, normalizeSizeValue } from './pricing';
+import { matchVariantPrice, normalizeSizeValue } from './pricing';
 
 describe('pricing helpers', () => {
   test('normalizes sizes for matching', () => {
@@ -13,11 +13,5 @@ describe('pricing helpers', () => {
     ]);
 
     expect(matched?.price).toBe(220);
-  });
-
-  test('limits market value to deadstock and lightly worn', () => {
-    expect(isMarketValueApplicable('deadstock')).toBe(true);
-    expect(isMarketValueApplicable('lightly_worn')).toBe(true);
-    expect(isMarketValueApplicable('worn')).toBe(false);
   });
 });

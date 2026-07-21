@@ -29,12 +29,8 @@ export function matchVariantPrice(
   );
 }
 
-export function isMarketValueApplicable(condition: SneakerCondition | string): boolean {
-  return condition === 'deadstock' || condition === 'lightly_worn';
-}
-
 export function getMarketValueDisclaimer(condition: SneakerCondition | string): string | null {
-  if (condition === 'lightly_worn') {
+  if (condition !== 'deadstock') {
     return 'Market value reflects deadstock pricing.';
   }
 

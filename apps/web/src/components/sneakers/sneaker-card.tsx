@@ -3,7 +3,6 @@ import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { isMarketValueApplicable } from '@/lib/pricing';
 import type { Sneaker } from '@/lib/queries';
 import { formatCondition, formatCurrency, formatDate, formatGainLoss } from '@/lib/utils';
 
@@ -15,8 +14,6 @@ type SneakerCardProps = {
 export function SneakerCard({ sneaker }: SneakerCardProps) {
   const title = `${sneaker.brand} ${sneaker.model}`;
   const subtitle = sneaker.nickname ? `"${sneaker.nickname}"` : sneaker.colorway || 'No colorway';
-  const showMarketValue =
-    isMarketValueApplicable(sneaker.condition) && sneaker.currentMarketPrice != null;
 
   return (
     <Link to="/sneakers/$sneakerId" params={{ sneakerId: sneaker.id }} className="block h-full">
@@ -43,29 +40,27 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
             <p>Paid {formatCurrency(sneaker.purchasePrice)}</p>
             {sneaker.purchaseDate ? <p>{formatDate(sneaker.purchaseDate)}</p> : null}
           </div>
-          {showMarketValue ? (
-            <div className="flex items-center justify-between gap-2">
-              <p>
-                Value{' '}
-                <span className="font-medium text-foreground">
-                  {formatCurrency(sneaker.currentMarketPrice)}
-                </span>
+          <div className="flex items-center justify-between gap-2">
+            <p>
+              Value{' '}
+              <span className="font-medium text-foreground">
+                {formatCurrency(sneaker.currentMarketPrice)}
+              </span>
+            </p>
+            {sneaker.gainLoss != null ? (
+              <p
+                className={
+                  sneaker.gainLoss > 0
+                    ? 'font-medium text-emerald-600 dark:text-emerald-400'
+                    : sneaker.gainLoss < 0
+                      ? 'font-medium text-destructive'
+                      : undefined
+                }
+              >
+                {formatGainLoss(sneaker.gainLoss)}
               </p>
-              {sneaker.gainLoss != null ? (
-                <p
-                  className={
-                    sneaker.gainLoss > 0
-                      ? 'font-medium text-emerald-600 dark:text-emerald-400'
-                      : sneaker.gainLoss < 0
-                        ? 'font-medium text-destructive'
-                        : undefined
-                  }
-                >
-                  {formatGainLoss(sneaker.gainLoss)}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </CardContent>
       </Card>
     </Link>

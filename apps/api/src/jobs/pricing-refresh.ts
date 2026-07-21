@@ -1,6 +1,6 @@
 import { pricingRefreshRuns, sneakers } from '@kixvault/db';
 import type { CatalogSource } from '@kixvault/shared';
-import { and, desc, eq, gte, inArray, isNotNull } from 'drizzle-orm';
+import { and, desc, eq, gte, isNotNull } from 'drizzle-orm';
 import { db } from '../lib/db';
 import { env } from '../lib/env';
 import { isKicksdbConfigured } from '../lib/kicksdb';
@@ -22,8 +22,6 @@ export {
   getWeekStartUtc,
   hasCompletedRefreshThisWeek,
 } from './pricing-refresh-helpers';
-
-const priceableConditions = ['deadstock', 'lightly_worn'] as const;
 
 export type PricingRefreshResult =
   | { status: 'skipped'; reason: 'already_completed' | 'kicksdb_not_configured' | 'no_sneakers' }
@@ -49,7 +47,6 @@ async function loadPriceableSneakers(): Promise<PriceableSneakerRow[]> {
         isNotNull(sneakers.catalogSource),
         isNotNull(sneakers.catalogId),
         isNotNull(sneakers.sku),
-        inArray(sneakers.condition, [...priceableConditions]),
       ),
     );
 
