@@ -234,3 +234,39 @@ Run a one-off refresh manually:
 ```sh
 docker compose run --rm --entrypoint bun scheduler apps/api/dist/jobs/pricing-refresh.js
 ```
+
+## Image worker
+
+The optional `image-worker` service downloads pending sneaker images, converts them to WebP with sharp, and stores them on the `kixvault_images` Docker volume. This keeps image fetching outside request paths and retries failed downloads.
+
+```yaml
+  image-worker:
+    image: ghcr.io/zendamacf/kixvault-api:${API_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
+      IMAGE_STORAGE_PATH: /data/images
+      IMAGE_PUBLIC_BASE_PATH: /api/images
+      IMAGE_MAX_WIDTH: ${IMAGE_MAX_WIDTH:-1024}
+      IMAGE_WORKER_POLL_MS: ${IMAGE_WORKER_POLL_MS:-30000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV: production
+    volumes:
+      - kixvault_images:/data/images
+    entrypoint: ["bun", "apps/api/dist/jobs/run-image-worker.js"]
+    depends_on:
+      db:
+        condition: service_healthy
+```
+
+Run a one-off image backfill manually:
+
+```sh
+docker compose run --rm --entrypoint bun api apps/api/dist/scripts/backfill-image-storage.js
+```
+
+Or locally:
+
+```sh
+bun run --cwd apps/api backfill:image-storage
+```
