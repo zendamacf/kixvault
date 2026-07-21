@@ -147,6 +147,11 @@ describe('authRoutes login', () => {
 });
 
 describe('authRoutes verify-email', () => {
+  beforeEach(() => {
+    mockVerifyEmailToken.mockReset();
+    mockVerifyEmailToken.mockResolvedValue({ success: true });
+  });
+
   test('verifies a valid token', async () => {
     const response = await authRoutes.request('/verify-email', {
       method: 'POST',
@@ -157,9 +162,32 @@ describe('authRoutes verify-email', () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ message: 'Email verified successfully' });
   });
+
+  test('returns 400 when verification fails', async () => {
+    mockVerifyEmailToken.mockResolvedValueOnce({
+      success: false,
+      error: 'Invalid or expired verification link',
+    });
+
+    const response = await authRoutes.request('/verify-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: 'bad-token' }),
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: 'Invalid or expired verification link',
+    });
+  });
 });
 
 describe('authRoutes resend-verification', () => {
+  beforeEach(() => {
+    mockResendVerificationEmail.mockReset();
+    mockResendVerificationEmail.mockResolvedValue({ sent: true, rateLimited: false });
+  });
+
   test('returns generic success message', async () => {
     const response = await authRoutes.request('/resend-verification', {
       method: 'POST',
@@ -170,6 +198,21 @@ describe('authRoutes resend-verification', () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
       message: 'If an account exists and is unverified, a verification email has been sent',
+    });
+  });
+
+  test('returns 429 when resend is rate limited', async () => {
+    mockResendVerificationEmail.mockResolvedValueOnce({ sent: false, rateLimited: true });
+
+    const response = await authRoutes.request('/resend-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'user@example.com' }),
+    });
+
+    expect(response.status).toBe(429);
+    await expect(response.json()).resolves.toEqual({
+      error: 'Please wait before requesting another verification email',
     });
   });
 });
