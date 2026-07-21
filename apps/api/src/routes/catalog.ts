@@ -4,12 +4,14 @@ import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { CatalogSearchError, searchCatalog } from '../lib/catalog';
 import { isKicksdbConfigured } from '../lib/kicksdb';
+import { catalogSearchRateLimit } from '../middleware/catalog-rate-limit';
 import { requireAuth, sessionMiddleware } from '../middleware/session';
 import type { ApiEnv } from '../types';
 
 export const catalogRoutes = new Hono<ApiEnv>()
   .use(sessionMiddleware)
   .use(requireAuth)
+  .use(catalogSearchRateLimit)
   .get('/search', zValidator('query', catalogSearchQuerySchema), async (c) => {
     if (!isKicksdbConfigured()) {
       return c.json({ error: 'Catalog search is not configured' }, 503);

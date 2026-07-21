@@ -24,6 +24,7 @@ import {
   parsePurchaseDate,
   parseSneakerId,
 } from '../lib/sneakers';
+import { catalogFromCatalogRateLimit } from '../middleware/catalog-rate-limit';
 import { requireAuth, sessionMiddleware } from '../middleware/session';
 import type { ApiEnv } from '../types';
 
@@ -63,55 +64,62 @@ export const sneakerRoutes = new Hono<ApiEnv>()
 
     return c.json({ sneakers: rows.map(formatSneaker) });
   })
-  .post('/from-catalog', zValidator('json', createSneakerFromCatalogSchema), async (c) => {
-    if (!isKicksdbConfigured()) {
-      return c.json({ error: 'Catalog is not configured' }, 503);
-    }
-
-    const user = c.get('user');
-    const input = c.req.valid('json');
-
-    try {
-      const catalogProduct = await fetchCatalogProduct(input.catalogSource, input.catalogId);
-
-      const [row] = await db
-        .insert(sneakers)
-        .values({
-          userId: user?.id ?? '',
-          brand: catalogProduct.brand,
-          model: catalogProduct.model,
-          colorway: catalogProduct.colorway,
-          nickname: catalogProduct.nickname,
-          size: input.size.toString(),
-          condition: input.condition,
-          purchasePrice: input.purchasePrice?.toString() ?? null,
-          purchaseDate: parsePurchaseDate(input.purchaseDate),
-          notes: input.notes ?? null,
-          sku: catalogProduct.sku,
-          imageUrl: catalogProduct.imageUrl,
-          catalogSource: catalogProduct.catalogSource,
-          catalogId: catalogProduct.catalogId,
-          releaseDate: parsePurchaseDate(catalogProduct.releaseDate),
-          description: catalogProduct.description,
-        })
-        .returning();
-
-      return c.json({ sneaker: formatSneaker(row) }, 201);
-    } catch (error) {
-      if (error instanceof CatalogProductNotFoundError) {
-        return c.json({ error: error.message }, 404);
+  .post(
+    '/from-catalog',
+    catalogFromCatalogRateLimit,
+    zValidator('json', createSneakerFromCatalogSchema),
+    async (c) => {
+      if (!isKicksdbConfigured()) {
+        return c.json({ error: 'Catalog is not configured' }, 503);
       }
 
-      if (error instanceof CatalogSearchError) {
-        const status =
-          error.status >= 400 && error.status < 600 ? (error.status as ContentfulStatusCode) : 502;
+      const user = c.get('user');
+      const input = c.req.valid('json');
 
-        return c.json({ error: 'Failed to fetch catalog product' }, status);
+      try {
+        const catalogProduct = await fetchCatalogProduct(input.catalogSource, input.catalogId);
+
+        const [row] = await db
+          .insert(sneakers)
+          .values({
+            userId: user?.id ?? '',
+            brand: catalogProduct.brand,
+            model: catalogProduct.model,
+            colorway: catalogProduct.colorway,
+            nickname: catalogProduct.nickname,
+            size: input.size.toString(),
+            condition: input.condition,
+            purchasePrice: input.purchasePrice?.toString() ?? null,
+            purchaseDate: parsePurchaseDate(input.purchaseDate),
+            notes: input.notes ?? null,
+            sku: catalogProduct.sku,
+            imageUrl: catalogProduct.imageUrl,
+            catalogSource: catalogProduct.catalogSource,
+            catalogId: catalogProduct.catalogId,
+            releaseDate: parsePurchaseDate(catalogProduct.releaseDate),
+            description: catalogProduct.description,
+          })
+          .returning();
+
+        return c.json({ sneaker: formatSneaker(row) }, 201);
+      } catch (error) {
+        if (error instanceof CatalogProductNotFoundError) {
+          return c.json({ error: error.message }, 404);
+        }
+
+        if (error instanceof CatalogSearchError) {
+          const status =
+            error.status >= 400 && error.status < 600
+              ? (error.status as ContentfulStatusCode)
+              : 502;
+
+          return c.json({ error: 'Failed to fetch catalog product' }, status);
+        }
+
+        throw error;
       }
-
-      throw error;
-    }
-  })
+    },
+  )
   .get('/:id', async (c) => {
     const user = c.get('user');
     const id = parseSneakerId(c.req.param('id'));
