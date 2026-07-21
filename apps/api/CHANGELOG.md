@@ -1,5 +1,25 @@
 # @kixvault/api
 
+## 0.0.4
+
+### Patch Changes
+
+- 740e68f: Added plain-text API request logging with `X-Request-Id` propagation, authenticated user IDs, and `LOG_LEVEL` control.
+- 76ea3f8: Delete API source map files from the production image after they are uploaded to Sentry.
+- acb7c3a: Normalize catalog search cache keys and share cached result sets across different limits.
+- c597b91: Cache catalog product fetches for 24 hours to reduce repeat KicksDB API calls.
+- 839e39e: Add per-user rate limits on catalog search and from-catalog endpoints.
+- fb804cc: Add optional Redis-backed shared cache for catalog search via `REDIS_URL`.
+- 5116010: Reuse cached catalog search results when fetching a product before calling KicksDB.
+- e852fac: Increase catalog search debounce to 2 seconds and require at least 3 characters before searching.
+- 76ea3f8: Pass `SENTRY_AUTH_TOKEN` as a Docker BuildKit secret during image builds instead of a build arg.
+- 6dd821b: Gate API Sentry initialization on production so local development does not report to Sentry.
+- 02c04c0: Associate Sentry releases with the Git commit that produced each Docker image build.
+- 88c5a8d: Attach authenticated user IDs to Sentry events in the API and web apps.
+- 0df3308: Added `SIGNUPS_ENABLED` environment variable to allowing new users to sign themselves up.
+- Updated dependencies [e852fac]
+  - @kixvault/shared@0.0.2
+
 ## 0.0.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @kixvault/shared
 
+## 0.0.2
+
+### Patch Changes
+
+- e852fac: Increase catalog search debounce to 2 seconds and require at least 3 characters before searching.
+
 ## 0.0.1
 
 ### Patch Changes
