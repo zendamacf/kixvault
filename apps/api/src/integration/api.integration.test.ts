@@ -156,13 +156,11 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
         sku: string;
         nickname: string | null;
         currentMarketPrice: number | null;
-        imageUrl: string | null;
         images: Array<{ id: string; url: string; sortOrder: number }>;
       };
     };
     expect(created.sneaker.nickname).toBe('Big Bubble');
     expect(created.sneaker.currentMarketPrice).toBe(220);
-    expect(created.sneaker.imageUrl).toBe('https://images.stockx.com/example.png');
     expect(created.sneaker.images).toEqual([
       {
         id: expect.any(String),
@@ -215,12 +213,10 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
         brand: string;
         sku: string | null;
         nickname: string | null;
-        imageUrl: string | null;
         images: Array<{ id: string; url: string; sortOrder: number }>;
       };
     };
     expect(created.sneaker.nickname).toBe('Big Bubble');
-    expect(created.sneaker.imageUrl).toBe('https://images.example.com/air-force-1.png');
     expect(created.sneaker.images).toEqual([
       {
         id: expect.any(String),
@@ -409,11 +405,9 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
     const updated = (await updateResponse.json()) as {
       sneaker: {
-        imageUrl: string | null;
         images: Array<{ url: string; sortOrder: number }>;
       };
     };
-    expect(updated.sneaker.imageUrl).toBe('https://images.example.com/updated.png');
     expect(updated.sneaker.images).toEqual([
       {
         id: expect.any(String),

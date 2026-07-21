@@ -37,7 +37,6 @@ const sneaker: Sneaker = {
   purchaseDate: '2024-06-15',
   notes: null,
   sku: null,
-  imageUrl: null,
   images: [],
   catalogSource: null,
   catalogId: null,

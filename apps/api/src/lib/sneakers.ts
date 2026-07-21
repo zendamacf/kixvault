@@ -11,7 +11,6 @@ import {
 import {
   formatSneakerImage,
   getImagesForSneakerIds,
-  getPrimaryImageUrl,
   haveSneakerImagesChanged,
   type SneakerImageRow,
 } from './sneaker-images';
@@ -189,7 +188,6 @@ export function formatSneaker(
     notes: row.notes,
     sku: row.sku,
     images: formattedImages,
-    imageUrl: getPrimaryImageUrl(options.images ?? []),
     catalogSource: row.catalogSource as CatalogSource | null,
     catalogId: row.catalogId,
     releaseDate: formatPurchaseDate(row.releaseDate),
