@@ -67,6 +67,7 @@ mock.module('../lib/pricing', () => ({
   storeMarketPriceAndSnapshot: mockStoreMarketPriceAndSnapshot,
   getMarketPricesForSneakers: mock(async () => new Map()),
   getMarketPriceForSneaker: () => null,
+  getPriceSnapshotsForSneaker: mock(async () => []),
   computeGainLoss: () => null,
 }));
 

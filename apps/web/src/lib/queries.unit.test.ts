@@ -27,7 +27,13 @@ describe('statsQueryOptions', () => {
     installFetchMock({
       stats: async () =>
         createJsonResponse({
-          stats: { count: 2, totalSpend: 360, avgSpend: 180 },
+          stats: {
+            count: 2,
+            totalSpend: 360,
+            avgSpend: 180,
+            totalMarketValue: 400,
+            totalGainLoss: 40,
+          },
         }),
     });
 
@@ -37,7 +43,13 @@ describe('statsQueryOptions', () => {
     const result = await client.fetchQuery(statsQueryOptions);
 
     expect(result).toEqual({
-      stats: { count: 2, totalSpend: 360, avgSpend: 180 },
+      stats: {
+        count: 2,
+        totalSpend: 360,
+        avgSpend: 180,
+        totalMarketValue: 400,
+        totalGainLoss: 40,
+      },
     });
   });
 });
@@ -90,6 +102,30 @@ describe('sneakersQueryOptions', () => {
 
     expect(result.sneakers).toHaveLength(1);
     expect(result.sneakers[0]?.brand).toBe('Nike');
+  });
+});
+
+describe('sneakerPriceHistoryQueryOptions', () => {
+  test('loads price history for a sneaker', async () => {
+    installFetchMock({
+      sneakers: async (url) => {
+        if (url.pathname.endsWith('/price-history')) {
+          return createJsonResponse({
+            history: [{ snapshotDate: '2026-07-20', price: 250, currency: 'USD' }],
+          });
+        }
+
+        return createJsonResponse({ error: 'Unhandled sneaker route' }, 404);
+      },
+    });
+
+    const { sneakerPriceHistoryQueryOptions } = await import('./queries');
+    const client = new QueryClient();
+
+    const result = await client.fetchQuery(sneakerPriceHistoryQueryOptions('sneaker-1'));
+
+    expect(result.history).toHaveLength(1);
+    expect(result.history[0]?.price).toBe(250);
   });
 });
 

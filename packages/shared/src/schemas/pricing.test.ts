@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { catalogProductDetailSchema, variantPriceSchema } from './pricing';
+import { catalogProductDetailSchema, collectionStatsSchema, variantPriceSchema } from './pricing';
 
 describe('pricing schemas', () => {
   test('parses variant prices', () => {
@@ -44,5 +44,23 @@ describe('pricing schemas', () => {
         ],
       }),
     ).toBeDefined();
+  });
+
+  test('parses collection stats', () => {
+    expect(
+      collectionStatsSchema.parse({
+        count: 2,
+        totalSpend: 300,
+        avgSpend: 150,
+        totalMarketValue: 250,
+        totalGainLoss: 50,
+      }),
+    ).toEqual({
+      count: 2,
+      totalSpend: 300,
+      avgSpend: 150,
+      totalMarketValue: 250,
+      totalGainLoss: 50,
+    });
   });
 });

@@ -12,7 +12,7 @@ import {
   type sneakers as sneakersTable,
 } from '@kixvault/db';
 import type { CatalogSearchResult, CatalogSource, VariantPrice } from '@kixvault/shared';
-import { and, eq, or } from 'drizzle-orm';
+import { and, desc, eq, or } from 'drizzle-orm';
 import {
   CatalogProductNotFoundError,
   CatalogSearchError,
@@ -421,4 +421,38 @@ export function computeGainLoss(
   }
 
   return marketPrice - Number(purchasePrice);
+}
+
+export type PriceSnapshotEntry = {
+  snapshotDate: string;
+  price: number;
+  currency: string;
+};
+
+export async function getPriceSnapshotsForSneaker(row: SneakerRow): Promise<PriceSnapshotEntry[]> {
+  if (!row.catalogSource || !row.sku) {
+    return [];
+  }
+
+  const snapshots = await db
+    .select({
+      snapshotDate: priceSnapshots.snapshotDate,
+      price: priceSnapshots.price,
+      currency: priceSnapshots.currency,
+    })
+    .from(priceSnapshots)
+    .where(
+      and(
+        eq(priceSnapshots.catalogSource, row.catalogSource),
+        eq(priceSnapshots.sku, row.sku),
+        eq(priceSnapshots.size, row.size),
+      ),
+    )
+    .orderBy(desc(priceSnapshots.snapshotDate));
+
+  return snapshots.map((snapshot) => ({
+    snapshotDate: snapshot.snapshotDate.toISOString().slice(0, 10),
+    price: Number(snapshot.price),
+    currency: snapshot.currency,
+  }));
 }
