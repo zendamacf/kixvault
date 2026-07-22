@@ -164,7 +164,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(created.sneaker.images).toEqual([
       {
         id: expect.any(String),
-        url: 'https://images.stockx.com/example.png',
+        url: 'https://images.stockx.com/example.png?bg-remove=true',
         sortOrder: 0,
       },
     ]);
