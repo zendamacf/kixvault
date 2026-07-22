@@ -12,7 +12,7 @@ export function isAllowedImageSourceUrl(sourceUrl: string): boolean {
   }
 }
 
-/** Remove StockX CDN params that composite sneakers onto an opaque background. */
+/** Normalize StockX CDN URLs so downloaded images keep a transparent background. */
 export function normalizeImageSourceUrl(sourceUrl: string): string {
   let url: URL;
 
@@ -35,6 +35,10 @@ export function normalizeImageSourceUrl(sourceUrl: string): string {
   if (fit && STOCKX_OPAQUE_FIT_MODES.has(fit)) {
     url.searchParams.delete('fit');
   }
+
+  // StockX uses imgix; many catalog URLs omit bg/fit but still return opaque JPEGs/WebPs.
+  // bg-remove requests imgix background removal (cached after first request).
+  url.searchParams.set('bg-remove', 'true');
 
   return url.toString();
 }

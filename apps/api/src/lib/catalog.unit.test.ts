@@ -63,10 +63,10 @@ describe('catalog normalization', () => {
       colorway: 'Chicago',
       nickname: 'Chicago',
       sku: 'DZ5485-612',
-      imageUrl: 'https://images.stockx.com/chicago.png',
+      imageUrl: 'https://images.stockx.com/chicago.png?bg-remove=true',
       imageUrls: [
-        'https://images.stockx.com/chicago.png',
-        'https://images.stockx.com/chicago-alt.png',
+        'https://images.stockx.com/chicago.png?bg-remove=true',
+        'https://images.stockx.com/chicago-alt.png?bg-remove=true',
       ],
       releaseDate: '2015-04-25',
       description: 'Released in 1985, the Air Jordan 1 changed basketball forever.',
@@ -104,8 +104,8 @@ describe('catalog normalization', () => {
         ],
       } as StockXProduct),
     ).toEqual([
-      'https://images.stockx.com/chicago.png',
-      'https://images.stockx.com/chicago-alt.png',
+      'https://images.stockx.com/chicago.png?bg-remove=true',
+      'https://images.stockx.com/chicago-alt.png?bg-remove=true',
     ]);
   });
 });

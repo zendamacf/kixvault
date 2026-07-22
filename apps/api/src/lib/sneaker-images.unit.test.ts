@@ -65,7 +65,7 @@ describe('normalizeSneakerImageUrls', () => {
       normalizeSneakerImageUrls([
         'https://images.stockx.com/images/Air-Jordan-1.jpg?fit=fill&bg=FFFFFF&w=700',
       ]),
-    ).toEqual(['https://images.stockx.com/images/Air-Jordan-1.jpg?w=700']);
+    ).toEqual(['https://images.stockx.com/images/Air-Jordan-1.jpg?w=700&bg-remove=true']);
   });
 });
 
