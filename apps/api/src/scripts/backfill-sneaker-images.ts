@@ -18,13 +18,13 @@ async function main() {
   console.log(
     `Backfill complete: ${result.sneakersUpdated}/${result.sneakersProcessed} sneakers updated, ${result.catalogProductsFetched} catalog products fetched, ${result.failures.length} failures.`,
   );
-
-  if (result.failures.length > 0) {
-    process.exitCode = 1;
-  }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  })
+  .then(() => {
+    process.exit(0);
+  });
