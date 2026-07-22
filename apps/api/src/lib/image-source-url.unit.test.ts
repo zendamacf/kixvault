@@ -14,12 +14,24 @@ describe('isAllowedImageSourceUrl', () => {
 });
 
 describe('normalizeImageSourceUrl', () => {
-  test('strips StockX background and opaque fit params', () => {
+  test('strips StockX background and opaque fit params and requests bg removal', () => {
     expect(
       normalizeImageSourceUrl(
         'https://images.stockx.com/images/Air-Jordan-1.jpg?fit=fill&bg=FFFFFF&w=700&fm=webp&trim=color',
       ),
-    ).toBe('https://images.stockx.com/images/Air-Jordan-1.jpg?w=700&fm=webp&trim=color');
+    ).toBe(
+      'https://images.stockx.com/images/Air-Jordan-1.jpg?w=700&fm=webp&trim=color&bg-remove=true',
+    );
+  });
+
+  test('adds bg-remove for StockX URLs without background compositing params', () => {
+    expect(
+      normalizeImageSourceUrl(
+        'https://images.stockx.com/images/Hummel-Power-Play-I-Scream-Ice-Cream-Pink.png?w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1645585459',
+      ),
+    ).toBe(
+      'https://images.stockx.com/images/Hummel-Power-Play-I-Scream-Ice-Cream-Pink.png?w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color&updated_at=1645585459&bg-remove=true',
+    );
   });
 
   test('leaves GOAT URLs unchanged', () => {
