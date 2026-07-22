@@ -1,9 +1,4 @@
-import {
-  type GoatProduct,
-  getGoatProduct,
-  getStockxProduct,
-  type StockXProduct,
-} from '@kicksdb/sdk';
+import { getStockxProduct, type StockXProduct } from '@kicksdb/sdk';
 import {
   type CatalogVariantPrice,
   catalogMarketPrices,
@@ -17,7 +12,6 @@ import {
   CatalogProductNotFoundError,
   CatalogSearchError,
   fetchCatalogProduct,
-  normalizeGoatProduct,
   normalizeStockxProduct,
 } from './catalog';
 import { db } from './db';
@@ -48,8 +42,8 @@ export type MarketPriceRecord = {
   currency: string;
 };
 
-export function marketplaceToCatalogSource(marketplace: 'stockx' | 'goat'): CatalogSource {
-  return marketplace === 'goat' ? 'kicksdb:goat' : 'kicksdb:stockx';
+export function marketplaceToCatalogSource(_marketplace: 'stockx'): CatalogSource {
+  return 'kicksdb:stockx';
 }
 
 export function normalizeSizeValue(size: number | string): string {
@@ -80,8 +74,8 @@ function getStandardVariantPrice(variant: PricedVariant): number | null {
   return null;
 }
 
-export function extractVariantPrices(product: StockXProduct | GoatProduct): VariantPrice[] {
-  const variants = (product as StockXProduct & GoatProduct).variants ?? [];
+export function extractVariantPrices(product: StockXProduct): VariantPrice[] {
+  const variants = product.variants ?? [];
   const prices: VariantPrice[] = [];
 
   for (const variant of variants as PricedVariant[]) {
@@ -140,38 +134,6 @@ async function fetchProductWithPricesFromApi(
   catalogId: string,
 ): Promise<CatalogProductWithPrices> {
   ensureKicksdbClient();
-
-  if (catalogSource === 'kicksdb:goat') {
-    const { data, error, response } = await getGoatProduct({
-      path: { id: catalogId },
-      query: {
-        market: MARKET,
-        'display[variants]': true,
-        'display[prices]': true,
-      } as {
-        market?: 'US' | 'UK' | 'IT' | 'NL';
-        'display[variants]'?: boolean;
-        'display[prices]'?: boolean;
-      },
-    });
-
-    if (error) {
-      if (response.status === 404) {
-        throw new CatalogProductNotFoundError();
-      }
-
-      throw new CatalogSearchError('KicksDB request failed', response.status);
-    }
-
-    if (!data?.data) {
-      throw new CatalogProductNotFoundError();
-    }
-
-    return {
-      product: normalizeGoatProduct(data.data),
-      variantPrices: extractVariantPrices(data.data),
-    };
-  }
 
   if (catalogSource === 'kicksdb:stockx') {
     const { data, error, response } = await getStockxProduct({

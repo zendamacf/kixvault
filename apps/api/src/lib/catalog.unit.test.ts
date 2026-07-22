@@ -1,8 +1,6 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test';
-import type { GoatProduct, StockXProduct } from '@kicksdb/sdk';
+import type { StockXProduct } from '@kicksdb/sdk';
 import {
-  mockGetGoatProduct,
-  mockGetGoatProducts,
   mockGetStockxProduct,
   mockGetStockxProducts,
   mockKicksdbSdk,
@@ -35,21 +33,6 @@ const stockxProduct = {
   traits: [{ trait: 'Release Date', value: '2015-04-25' }],
 } as StockXProduct;
 
-const goatProduct = {
-  slug: 'air-jordan-1-chicago-goat',
-  name: 'Air Jordan 1 Retro High OG Chicago',
-  brand: 'Jordan',
-  model: 'Air Jordan 1',
-  colorway: 'White/Black-Varsity Red',
-  nickname: 'Chicago',
-  sku: 'DZ5485-612',
-  image_url: 'https://images.goat.com/chicago.png',
-  images: ['https://images.goat.com/chicago-alt.png'],
-  link: 'https://www.goat.com/sneakers/air-jordan-1-chicago-goat',
-  description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
-  release_date: '2016-12-13T23:59:59.999Z',
-} as GoatProduct;
-
 describe('catalog normalization', () => {
   test('normalizeStockxProduct maps StockX fields', async () => {
     const { normalizeStockxProduct } = await import('./catalog');
@@ -70,25 +53,6 @@ describe('catalog normalization', () => {
       ],
       releaseDate: '2015-04-25',
       description: 'Released in 1985, the Air Jordan 1 changed basketball forever.',
-    });
-  });
-
-  test('normalizeGoatProduct maps GOAT fields', async () => {
-    const { normalizeGoatProduct } = await import('./catalog');
-
-    expect(normalizeGoatProduct(goatProduct)).toEqual({
-      catalogSource: 'kicksdb:goat',
-      catalogId: 'air-jordan-1-chicago-goat',
-      title: 'Air Jordan 1 Retro High OG Chicago',
-      brand: 'Jordan',
-      model: 'Air Jordan 1',
-      colorway: 'White/Black-Varsity Red',
-      nickname: 'Chicago',
-      sku: 'DZ5485-612',
-      imageUrl: 'https://images.goat.com/chicago.png',
-      imageUrls: ['https://images.goat.com/chicago.png', 'https://images.goat.com/chicago-alt.png'],
-      releaseDate: '2016-12-13',
-      description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
     });
   });
 
@@ -122,24 +86,6 @@ describe('fetchCatalogProduct', () => {
     catalog.resetCatalogCacheForTests();
   });
 
-  test('fetches and normalizes a GOAT product by slug', async () => {
-    mockGetGoatProduct.mockImplementation(() =>
-      Promise.resolve({
-        data: { data: goatProduct },
-        error: null,
-        response: { status: 200 },
-      }),
-    );
-
-    const { fetchCatalogProduct } = await import('./catalog');
-    const result = await fetchCatalogProduct('kicksdb:goat', 'air-jordan-1-chicago-goat');
-
-    expect(result.catalogSource).toBe('kicksdb:goat');
-    expect(result.catalogId).toBe('air-jordan-1-chicago-goat');
-    expect(result.releaseDate).toBe('2016-12-13');
-    expect(mockGetGoatProduct).toHaveBeenCalledTimes(1);
-  });
-
   test('fetches and normalizes a StockX product by slug', async () => {
     mockGetStockxProduct.mockImplementation(() =>
       Promise.resolve({
@@ -158,8 +104,16 @@ describe('fetchCatalogProduct', () => {
     expect(mockGetStockxProduct).toHaveBeenCalledTimes(1);
   });
 
+  test('rejects detached GOAT catalog sources', async () => {
+    const { fetchCatalogProduct, CatalogSearchError } = await import('./catalog');
+
+    await expect(fetchCatalogProduct('kicksdb:goat', 'missing-slug')).rejects.toBeInstanceOf(
+      CatalogSearchError,
+    );
+  });
+
   test('throws CatalogProductNotFoundError when the product is missing', async () => {
-    mockGetGoatProduct.mockImplementation(() =>
+    mockGetStockxProduct.mockImplementation(() =>
       Promise.resolve({
         data: null,
         error: { message: 'not found' },
@@ -169,7 +123,7 @@ describe('fetchCatalogProduct', () => {
 
     const { fetchCatalogProduct, CatalogProductNotFoundError } = await import('./catalog');
 
-    await expect(fetchCatalogProduct('kicksdb:goat', 'missing-slug')).rejects.toBeInstanceOf(
+    await expect(fetchCatalogProduct('kicksdb:stockx', 'missing-slug')).rejects.toBeInstanceOf(
       CatalogProductNotFoundError,
     );
   });
@@ -248,22 +202,6 @@ describe('searchCatalog', () => {
     expect(first).toHaveLength(1);
     expect(second).toEqual(first);
     expect(mockGetStockxProducts).toHaveBeenCalledTimes(1);
-  });
-
-  test('searches GOAT when marketplace is goat', async () => {
-    mockGetGoatProducts.mockImplementation(() =>
-      Promise.resolve({
-        data: { data: [goatProduct] },
-        error: null,
-        response: { status: 200 },
-      }),
-    );
-
-    const { searchCatalog } = await import('./catalog');
-    const results = await searchCatalog('jordan 1', 5, 'goat');
-
-    expect(results[0]?.catalogSource).toBe('kicksdb:goat');
-    expect(mockGetGoatProducts).toHaveBeenCalledTimes(1);
   });
 
   test('throws CatalogSearchError when the SDK returns an error', async () => {

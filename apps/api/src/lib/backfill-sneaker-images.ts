@@ -47,6 +47,11 @@ export async function backfillSneakerImages(
   for (const row of rows) {
     const catalogSource = row.catalogSource as CatalogSource;
     const catalogId = row.catalogId as string;
+
+    if (catalogSource === 'kicksdb:goat') {
+      continue;
+    }
+
     const catalogKey = `${catalogSource}:${catalogId}`;
 
     try {

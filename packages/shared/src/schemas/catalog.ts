@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-export const catalogMarketplaces = ['stockx', 'goat'] as const;
+export const catalogMarketplaces = ['stockx'] as const;
 export const catalogSources = ['kicksdb:stockx', 'kicksdb:goat'] as const;
+export const activeCatalogSources = ['kicksdb:stockx'] as const;
 
 export const catalogSearchQuerySchema = z.object({
   q: z.string().trim().min(3).max(100),
@@ -25,6 +26,7 @@ export const catalogSearchResultSchema = z.object({
 });
 
 export type CatalogMarketplace = (typeof catalogMarketplaces)[number];
+export type ActiveCatalogSource = (typeof activeCatalogSources)[number];
 export type CatalogSearchQuery = z.infer<typeof catalogSearchQuerySchema>;
 export type CatalogSearchResult = z.infer<typeof catalogSearchResultSchema>;
 export type CatalogSource = (typeof catalogSources)[number];

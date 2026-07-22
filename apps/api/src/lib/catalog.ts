@@ -1,11 +1,4 @@
-import {
-  type GoatProduct,
-  getGoatProduct,
-  getGoatProducts,
-  getStockxProduct,
-  getStockxProducts,
-  type StockXProduct,
-} from '@kicksdb/sdk';
+import { getStockxProduct, getStockxProducts, type StockXProduct } from '@kicksdb/sdk';
 import type { CatalogMarketplace, CatalogSearchResult, CatalogSource } from '@kixvault/shared';
 import { getCatalogSearchCache, resetCatalogSearchCacheForTests } from './catalog-cache';
 import { ensureKicksdbClient } from './kicksdb';
@@ -66,8 +59,8 @@ export function normalizeCatalogSearchQuery(searchQuery: string): string {
   return searchQuery.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
-function buildSearchCacheKey(marketplace: CatalogMarketplace, searchQuery: string): string {
-  return `${marketplace}:${normalizeCatalogSearchQuery(searchQuery)}`;
+function buildSearchCacheKey(searchQuery: string): string {
+  return `stockx:${normalizeCatalogSearchQuery(searchQuery)}`;
 }
 
 export function resetCatalogCacheForTests(): void {
@@ -132,10 +125,6 @@ export function extractStockxImageUrls(product: StockXProduct): string[] {
   return normalizeSneakerImageUrls([product.image, ...(product.gallery ?? [])]);
 }
 
-export function extractGoatImageUrls(product: GoatProduct): string[] {
-  return normalizeSneakerImageUrls([product.image_url, ...(product.images ?? [])]);
-}
-
 export function normalizeStockxProduct(product: StockXProduct): CatalogSearchResult {
   const imageUrls = extractStockxImageUrls(product);
 
@@ -155,32 +144,13 @@ export function normalizeStockxProduct(product: StockXProduct): CatalogSearchRes
   };
 }
 
-export function normalizeGoatProduct(product: GoatProduct): CatalogSearchResult {
-  const imageUrls = extractGoatImageUrls(product);
-
-  return {
-    catalogSource: 'kicksdb:goat',
-    catalogId: product.slug,
-    title: product.name,
-    brand: product.brand,
-    model: product.model,
-    colorway: product.colorway || null,
-    nickname: product.nickname || null,
-    sku: product.sku,
-    imageUrl: imageUrls[0] ?? null,
-    imageUrls,
-    releaseDate: parseCatalogReleaseDate(product.release_date),
-    description: normalizeDescription(product.description),
-  };
-}
-
 export async function searchCatalog(
   searchQuery: string,
   limit: number,
-  marketplace: CatalogMarketplace = 'stockx',
+  _marketplace: CatalogMarketplace = 'stockx',
 ): Promise<CatalogSearchResult[]> {
   const query = searchQuery.trim();
-  const cacheKey = buildSearchCacheKey(marketplace, query);
+  const cacheKey = buildSearchCacheKey(query);
   const searchCache = getCatalogSearchCache();
   const cached = await searchCache.get(cacheKey);
 
@@ -190,11 +160,7 @@ export async function searchCatalog(
 
   ensureKicksdbClient();
 
-  const results =
-    marketplace === 'goat'
-      ? await searchGoatCatalog(query, MAX_SEARCH_LIMIT)
-      : await searchStockxCatalog(query, MAX_SEARCH_LIMIT);
-
+  const results = await searchStockxCatalog(query, MAX_SEARCH_LIMIT);
   const expiresAt = Date.now() + CACHE_TTL_MS;
 
   await searchCache.set(cacheKey, results, CACHE_TTL_MS);
@@ -220,27 +186,14 @@ async function searchStockxCatalog(query: string, limit: number): Promise<Catalo
   return (data?.data ?? []).map(normalizeStockxProduct);
 }
 
-async function searchGoatCatalog(query: string, limit: number): Promise<CatalogSearchResult[]> {
-  const { data, error, response } = await getGoatProducts({
-    query: {
-      query,
-      filters: 'product_type=sneakers',
-      limit: BigInt(limit),
-      market: MARKET,
-    },
-  });
-
-  if (error) {
-    throw new CatalogSearchError('KicksDB request failed', response.status);
-  }
-
-  return (data?.data ?? []).map(normalizeGoatProduct);
-}
-
 export async function fetchCatalogProduct(
   catalogSource: CatalogSource,
   catalogId: string,
 ): Promise<CatalogSearchResult> {
+  if (catalogSource === 'kicksdb:goat') {
+    throw new CatalogSearchError('Unsupported catalog source', 400);
+  }
+
   const cachedResult = getIndexedSearchResult(catalogSource, catalogId);
 
   if (cachedResult) {
@@ -256,52 +209,31 @@ export async function fetchCatalogProduct(
 
   ensureKicksdbClient();
 
-  let product: CatalogSearchResult;
-
-  if (catalogSource === 'kicksdb:goat') {
-    const { data, error, response } = await getGoatProduct({
-      path: { id: catalogId },
-      query: { market: MARKET },
-    });
-
-    if (error) {
-      if (response.status === 404) {
-        throw new CatalogProductNotFoundError();
-      }
-
-      throw new CatalogSearchError('KicksDB request failed', response.status);
-    }
-
-    if (!data?.data) {
-      throw new CatalogProductNotFoundError();
-    }
-
-    product = normalizeGoatProduct(data.data);
-  } else if (catalogSource === 'kicksdb:stockx') {
-    const { data, error, response } = await getStockxProduct({
-      path: { id: catalogId },
-      query: {
-        market: MARKET,
-        'display[traits]': true,
-      },
-    });
-
-    if (error) {
-      if (response.status === 404) {
-        throw new CatalogProductNotFoundError();
-      }
-
-      throw new CatalogSearchError('KicksDB request failed', response.status);
-    }
-
-    if (!data?.data) {
-      throw new CatalogProductNotFoundError();
-    }
-
-    product = normalizeStockxProduct(data.data);
-  } else {
+  if (catalogSource !== 'kicksdb:stockx') {
     throw new CatalogSearchError('Unsupported catalog source', 400);
   }
+
+  const { data, error, response } = await getStockxProduct({
+    path: { id: catalogId },
+    query: {
+      market: MARKET,
+      'display[traits]': true,
+    },
+  });
+
+  if (error) {
+    if (response.status === 404) {
+      throw new CatalogProductNotFoundError();
+    }
+
+    throw new CatalogSearchError('KicksDB request failed', response.status);
+  }
+
+  if (!data?.data) {
+    throw new CatalogProductNotFoundError();
+  }
+
+  const product = normalizeStockxProduct(data.data);
 
   productCache.set(productCacheKey, {
     result: product,

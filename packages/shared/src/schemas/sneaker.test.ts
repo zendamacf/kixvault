@@ -96,7 +96,7 @@ describe('updateSneakerSchema', () => {
 describe('createSneakerFromCatalogSchema', () => {
   test('accepts catalog-linked sneaker input', () => {
     const result = createSneakerFromCatalogSchema.safeParse({
-      catalogSource: 'kicksdb:goat',
+      catalogSource: 'kicksdb:stockx',
       catalogId: 'air-jordan-1-chicago',
       size: 10,
       condition: 'deadstock',
@@ -106,6 +106,17 @@ describe('createSneakerFromCatalogSchema', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  test('rejects detached GOAT catalog source', () => {
+    const result = createSneakerFromCatalogSchema.safeParse({
+      catalogSource: 'kicksdb:goat',
+      catalogId: 'air-jordan-1-chicago',
+      size: 10,
+      condition: 'deadstock',
+    });
+
+    expect(result.success).toBe(false);
   });
 
   test('requires catalog source and id', () => {
