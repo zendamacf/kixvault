@@ -1,5 +1,10 @@
 import { getStockxProduct, getStockxProducts, type StockXProduct } from '@kicksdb/sdk';
-import { catalogSources, type CatalogMarketplace, type CatalogSearchResult, type CatalogSource } from '@kixvault/shared';
+import {
+  type CatalogMarketplace,
+  type CatalogSearchResult,
+  type CatalogSource,
+  catalogSources,
+} from '@kixvault/shared';
 import { getCatalogSearchCache, resetCatalogSearchCacheForTests } from './catalog-cache';
 import { ensureKicksdbClient } from './kicksdb';
 import { normalizeSneakerImageUrls } from './sneaker-images';
