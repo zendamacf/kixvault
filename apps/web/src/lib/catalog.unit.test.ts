@@ -46,7 +46,7 @@ describe('catalogSearchQueryOptions', () => {
     const { catalogSearchQueryOptions } = await import('./catalog');
     const client = new QueryClient();
 
-    const result = await client.fetchQuery(catalogSearchQueryOptions('jordan', 'goat'));
+    const result = await client.fetchQuery(catalogSearchQueryOptions('jordan', 'stockx'));
 
     expect(result).toEqual({
       results: [],

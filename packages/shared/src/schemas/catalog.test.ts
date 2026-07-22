@@ -24,16 +24,13 @@ describe('catalogSearchQuerySchema', () => {
     }
   });
 
-  test('accepts goat marketplace', () => {
+  test('rejects goat marketplace', () => {
     const result = catalogSearchQuerySchema.safeParse({
       q: 'yeezy',
       marketplace: 'goat',
     });
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.marketplace).toBe('goat');
-    }
+    expect(result.success).toBe(false);
   });
 
   test('rejects queries shorter than 3 characters', () => {

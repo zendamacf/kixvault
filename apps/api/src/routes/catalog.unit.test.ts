@@ -67,8 +67,7 @@ const mockFetchAndCacheCatalogProductWithPrices = mock(async () => ({
 
 mock.module('../lib/pricing', () => ({
   fetchAndCacheCatalogProductWithPrices: mockFetchAndCacheCatalogProductWithPrices,
-  marketplaceToCatalogSource: (marketplace: 'stockx' | 'goat') =>
-    marketplace === 'goat' ? 'kicksdb:goat' : 'kicksdb:stockx',
+  marketplaceToCatalogSource: () => 'kicksdb:stockx' as const,
 }));
 
 mock.module('../lib/env', () => ({
@@ -78,6 +77,11 @@ mock.module('../lib/env', () => ({
     port: 3000,
     isProduction: false,
   },
+}));
+
+mock.module('../lib/kicksdb', () => ({
+  isKicksdbConfigured: () => true,
+  ensureKicksdbClient: () => {},
 }));
 
 mock.module('../middleware/session', () => ({

@@ -1,5 +1,5 @@
 import { sneakers } from '@kixvault/db';
-import type { CatalogSource } from '@kixvault/shared';
+import { type CatalogSource, catalogSources } from '@kixvault/shared';
 import { and, isNotNull } from 'drizzle-orm';
 import { fetchCatalogProduct } from './catalog';
 import { db } from './db';
@@ -47,6 +47,11 @@ export async function backfillSneakerImages(
   for (const row of rows) {
     const catalogSource = row.catalogSource as CatalogSource;
     const catalogId = row.catalogId as string;
+
+    if (!catalogSources.includes(catalogSource)) {
+      continue;
+    }
+
     const catalogKey = `${catalogSource}:${catalogId}`;
 
     try {
