@@ -2,12 +2,11 @@ import { afterEach, describe, expect, mock, test } from 'bun:test';
 import type { CatalogSearchResult } from '@kixvault/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { ReactNode } from 'react';
 import { CatalogSneakerForm } from '@/components/sneakers/catalog-sneaker-form';
 import { createJsonResponse, installFetchMock } from '@/test/mocks/api';
 
 const catalogResult: CatalogSearchResult = {
-  catalogSource: 'kicksdb:goat',
+  catalogSource: 'kicksdb:stockx',
   catalogId: 'air-jordan-1-chicago',
   title: 'Air Jordan 1 Retro High OG Chicago',
   brand: 'Jordan',
@@ -15,40 +14,14 @@ const catalogResult: CatalogSearchResult = {
   colorway: 'White/Black-Varsity Red',
   nickname: 'Chicago',
   sku: 'DZ5485-612',
-  imageUrl: 'https://images.goat.com/chicago.png',
-  imageUrls: ['https://images.goat.com/chicago.png'],
+  imageUrl: 'https://images.stockx.com/chicago.png',
+  imageUrls: ['https://images.stockx.com/chicago.png'],
   releaseDate: '2016-12-13',
   description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
 };
 
 mock.module('@/lib/hooks', () => ({
   useDebouncedValue: <T,>(value: T) => value,
-}));
-
-mock.module('@/components/ui/select', () => ({
-  Select: ({
-    children,
-    value,
-    onValueChange,
-  }: {
-    children: ReactNode;
-    value: string;
-    onValueChange: (value: string) => void;
-  }) => (
-    <select
-      aria-label="Marketplace"
-      value={value}
-      onChange={(event) => onValueChange(event.target.value)}
-    >
-      {children}
-    </select>
-  ),
-  SelectContent: ({ children }: { children: ReactNode }) => <>{children}</>,
-  SelectItem: ({ children, value }: { children: ReactNode; value: string }) => (
-    <option value={value}>{children}</option>
-  ),
-  SelectTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
-  SelectValue: () => null,
 }));
 
 afterEach(() => {
@@ -72,7 +45,7 @@ describe('CatalogSneakerForm', () => {
     installFetchMock({
       catalogSearch: async () => createJsonResponse({ results: [catalogResult] }),
       catalogProduct: async (url) => {
-        expect(url.pathname).toBe('/api/catalog/products/goat/air-jordan-1-chicago');
+        expect(url.pathname).toBe('/api/catalog/products/stockx/air-jordan-1-chicago');
 
         return createJsonResponse({
           product: catalogResult,
@@ -112,7 +85,7 @@ describe('CatalogSneakerForm', () => {
     });
 
     expect(onSubmit).toHaveBeenCalledWith({
-      catalogSource: 'kicksdb:goat',
+      catalogSource: 'kicksdb:stockx',
       catalogId: 'air-jordan-1-chicago',
       size: 10,
       condition: 'deadstock',

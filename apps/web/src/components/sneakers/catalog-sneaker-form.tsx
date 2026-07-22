@@ -1,5 +1,4 @@
 import type {
-  CatalogMarketplace,
   CatalogSearchResult,
   CreateSneakerFromCatalogInput,
   VariantPrice,
@@ -25,14 +24,13 @@ export function CatalogSneakerForm({
 }: CatalogSneakerFormProps) {
   const [selectedResult, setSelectedResult] = useState<CatalogSearchResult | null>(null);
   const [query, setQuery] = useState('');
-  const [marketplace, setMarketplace] = useState<CatalogMarketplace>('goat');
 
   const {
     data: catalogProduct,
     isLoading,
     error,
   } = useQuery({
-    ...catalogProductQueryOptions(marketplace, selectedResult?.catalogId ?? ''),
+    ...catalogProductQueryOptions('stockx', selectedResult?.catalogId ?? ''),
     enabled: selectedResult != null,
   });
 
@@ -42,13 +40,7 @@ export function CatalogSneakerForm({
   return (
     <div className="grid gap-5">
       {!selectedResult ? (
-        <CatalogSearchPicker
-          query={query}
-          onQueryChange={setQuery}
-          marketplace={marketplace}
-          onMarketplaceChange={setMarketplace}
-          onSelect={setSelectedResult}
-        />
+        <CatalogSearchPicker query={query} onQueryChange={setQuery} onSelect={setSelectedResult} />
       ) : (
         <>
           <button

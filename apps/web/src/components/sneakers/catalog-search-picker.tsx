@@ -1,15 +1,8 @@
-import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
+import type { CatalogSearchResult } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { catalogSearchQueryOptions } from '@/lib/catalog';
 import { useDebouncedValue } from '@/lib/hooks';
@@ -23,18 +16,14 @@ const RESULT_THUMBNAIL_CLASS = 'h-32 w-32 shrink-0';
 type CatalogSearchPickerProps = {
   query: string;
   onQueryChange: (query: string) => void;
-  marketplace: CatalogMarketplace;
-  onMarketplaceChange: (marketplace: CatalogMarketplace) => void;
   onSelect: (result: CatalogSearchResult) => void;
   selectedCatalogId?: string | null;
 };
 
-/** GOAT/StockX catalog search input, marketplace selector, and result list. */
+/** StockX catalog search input and result list. */
 export function CatalogSearchPicker({
   query,
   onQueryChange,
-  marketplace,
-  onMarketplaceChange,
   onSelect,
   selectedCatalogId,
 }: CatalogSearchPickerProps) {
@@ -42,46 +31,24 @@ export function CatalogSearchPicker({
   const canSearch = debouncedQuery.length >= 3;
 
   const { data, isLoading, isFetching, error } = useQuery({
-    ...catalogSearchQueryOptions(debouncedQuery, marketplace),
+    ...catalogSearchQueryOptions(debouncedQuery, 'stockx'),
     enabled: canSearch,
   });
 
   const results = data?.results ?? [];
   const unavailable = data?.unavailable ?? false;
-  const marketplaceLabel = marketplace === 'stockx' ? 'StockX' : 'GOAT';
 
   return (
     <div className="min-w-0 space-y-3 rounded-lg border border-dashed p-4">
       <div className="space-y-2">
         <Label htmlFor="catalog-search">Find a sneaker</Label>
-        <div className="flex gap-2">
-          <Input
-            id="catalog-search"
-            className="min-w-0 flex-1"
-            placeholder="Search by name or SKU (e.g. Air Jordan 1 Chicago, DZ5485-100)"
-            value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
-          />
-          <Select
-            value={marketplace}
-            onValueChange={(value) => onMarketplaceChange(value as CatalogMarketplace)}
-          >
-            <SelectTrigger
-              id="catalog-marketplace"
-              aria-label="Marketplace"
-              className="w-28 shrink-0"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="stockx">StockX</SelectItem>
-              <SelectItem value="goat">GOAT</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Search {marketplaceLabel} to find your pair.
-        </p>
+        <Input
+          id="catalog-search"
+          placeholder="Search by name or SKU (e.g. Air Jordan 1 Chicago, DZ5485-100)"
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+        />
+        <p className="text-xs text-muted-foreground">Search StockX to find your pair.</p>
       </div>
 
       {!canSearch && query.trim().length > 0 ? (
@@ -117,7 +84,7 @@ export function CatalogSearchPicker({
 
       {canSearch && !isLoading && !isFetching && !error && !unavailable && results.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No sneakers found on {marketplaceLabel} for &ldquo;{debouncedQuery}&rdquo;.
+          No sneakers found on StockX for &ldquo;{debouncedQuery}&rdquo;.
         </p>
       ) : null}
 
