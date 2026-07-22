@@ -1,10 +1,5 @@
 import { getStockxProduct, getStockxProducts, type StockXProduct } from '@kicksdb/sdk';
-import {
-  type CatalogMarketplace,
-  type CatalogSearchResult,
-  type CatalogSource,
-  catalogSources,
-} from '@kixvault/shared';
+import { type CatalogSearchResult, type CatalogSource, catalogSources } from '@kixvault/shared';
 import { getCatalogSearchCache, resetCatalogSearchCacheForTests } from './catalog-cache';
 import { ensureKicksdbClient } from './kicksdb';
 import { normalizeSneakerImageUrls } from './sneaker-images';
@@ -152,7 +147,6 @@ export function normalizeStockxProduct(product: StockXProduct): CatalogSearchRes
 export async function searchCatalog(
   searchQuery: string,
   limit: number,
-  _marketplace: CatalogMarketplace = 'stockx',
 ): Promise<CatalogSearchResult[]> {
   const query = searchQuery.trim();
   const cacheKey = buildSearchCacheKey(query);

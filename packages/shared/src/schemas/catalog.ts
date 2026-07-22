@@ -1,12 +1,10 @@
 import { z } from 'zod';
 
-export const catalogMarketplaces = ['stockx'] as const;
 export const catalogSources = ['kicksdb:stockx'] as const;
 
 export const catalogSearchQuerySchema = z.object({
   q: z.string().trim().min(3).max(100),
   limit: z.coerce.number().int().min(1).max(20).default(10),
-  marketplace: z.enum(catalogMarketplaces).default('stockx'),
 });
 
 export const catalogSearchResultSchema = z.object({
@@ -24,7 +22,6 @@ export const catalogSearchResultSchema = z.object({
   description: z.string().nullable(),
 });
 
-export type CatalogMarketplace = (typeof catalogMarketplaces)[number];
 export type CatalogSearchQuery = z.infer<typeof catalogSearchQuerySchema>;
 export type CatalogSearchResult = z.infer<typeof catalogSearchResultSchema>;
 export type CatalogSource = (typeof catalogSources)[number];

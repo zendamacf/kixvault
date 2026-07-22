@@ -31,7 +31,7 @@ export function CatalogSearchPicker({
   const canSearch = debouncedQuery.length >= 3;
 
   const { data, isLoading, isFetching, error } = useQuery({
-    ...catalogSearchQueryOptions(debouncedQuery, 'stockx'),
+    ...catalogSearchQueryOptions(debouncedQuery),
     enabled: canSearch,
   });
 

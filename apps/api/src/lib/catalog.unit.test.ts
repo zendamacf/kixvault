@@ -157,7 +157,7 @@ describe('fetchCatalogProduct', () => {
 
     const { searchCatalog, fetchCatalogProduct } = await import('./catalog');
 
-    await searchCatalog('jordan 1', 10, 'stockx');
+    await searchCatalog('jordan 1', 10);
     const result = await fetchCatalogProduct('kicksdb:stockx', 'air-jordan-1-chicago');
 
     expect(result.catalogId).toBe('air-jordan-1-chicago');
@@ -196,8 +196,8 @@ describe('searchCatalog', () => {
 
     const { searchCatalog } = await import('./catalog');
 
-    const first = await searchCatalog('jordan 1', 10, 'stockx');
-    const second = await searchCatalog('jordan 1', 10, 'stockx');
+    const first = await searchCatalog('jordan 1', 10);
+    const second = await searchCatalog('jordan 1', 10);
 
     expect(first).toHaveLength(1);
     expect(second).toEqual(first);
@@ -215,9 +215,7 @@ describe('searchCatalog', () => {
 
     const { searchCatalog, CatalogSearchError } = await import('./catalog');
 
-    await expect(searchCatalog('broken query', 10, 'stockx')).rejects.toBeInstanceOf(
-      CatalogSearchError,
-    );
+    await expect(searchCatalog('broken query', 10)).rejects.toBeInstanceOf(CatalogSearchError);
   });
 
   test('caches empty search results', async () => {
@@ -231,8 +229,8 @@ describe('searchCatalog', () => {
 
     const { searchCatalog } = await import('./catalog');
 
-    const first = await searchCatalog('nonexistent shoe', 10, 'stockx');
-    const second = await searchCatalog('nonexistent shoe', 10, 'stockx');
+    const first = await searchCatalog('nonexistent shoe', 10);
+    const second = await searchCatalog('nonexistent shoe', 10);
 
     expect(first).toEqual([]);
     expect(second).toEqual([]);
@@ -250,8 +248,8 @@ describe('searchCatalog', () => {
 
     const { searchCatalog } = await import('./catalog');
 
-    await searchCatalog('jordan  1', 10, 'stockx');
-    await searchCatalog('  JORDAN 1  ', 10, 'stockx');
+    await searchCatalog('jordan  1', 10);
+    await searchCatalog('  JORDAN 1  ', 10);
 
     expect(mockGetStockxProducts).toHaveBeenCalledTimes(1);
   });
@@ -267,8 +265,8 @@ describe('searchCatalog', () => {
 
     const { searchCatalog } = await import('./catalog');
 
-    await searchCatalog('jordan 1', 5, 'stockx');
-    await searchCatalog('jordan 1', 10, 'stockx');
+    await searchCatalog('jordan 1', 5);
+    await searchCatalog('jordan 1', 10);
 
     expect(mockGetStockxProducts).toHaveBeenCalledTimes(1);
     expect(mockGetStockxProducts).toHaveBeenCalledWith(

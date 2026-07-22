@@ -592,7 +592,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     const email = `catalog-${crypto.randomUUID()}@example.com`;
     const { cookie } = await registerTestUser(app, email);
 
-    const response = await app.request('/api/catalog/search?q=jordan&limit=10&marketplace=stockx', {
+    const response = await app.request('/api/catalog/search?q=jordan&limit=10', {
       headers: { Cookie: cookie },
     });
 

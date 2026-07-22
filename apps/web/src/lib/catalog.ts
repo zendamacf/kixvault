@@ -1,9 +1,5 @@
-import {
-  type CatalogMarketplace,
-  type CatalogProductDetail,
-  type CatalogSearchResult,
-  catalogProductDetailSchema,
-} from '@kixvault/shared';
+import type { CatalogProductDetail, CatalogSearchResult } from '@kixvault/shared';
+import { catalogProductDetailSchema } from '@kixvault/shared';
 import { queryOptions } from '@tanstack/react-query';
 import { api, parseApiError } from './api';
 
@@ -16,12 +12,12 @@ export type CatalogProductResponse = CatalogProductDetail & {
   unavailable?: boolean;
 };
 
-export function catalogSearchQueryOptions(query: string, marketplace: CatalogMarketplace) {
+export function catalogSearchQueryOptions(query: string) {
   return queryOptions({
-    queryKey: ['catalog', 'search', marketplace, query],
+    queryKey: ['catalog', 'search', query],
     queryFn: async (): Promise<CatalogSearchResponse> => {
       const response = await api.api.catalog.search.$get({
-        query: { q: query, limit: '10', marketplace },
+        query: { q: query, limit: '10' },
       });
 
       if (response.status === 503) {
@@ -40,12 +36,12 @@ export function catalogSearchQueryOptions(query: string, marketplace: CatalogMar
   });
 }
 
-export function catalogProductQueryOptions(marketplace: CatalogMarketplace, catalogId: string) {
+export function catalogProductQueryOptions(catalogId: string) {
   return queryOptions({
-    queryKey: ['catalog', 'product', marketplace, catalogId],
+    queryKey: ['catalog', 'product', catalogId],
     queryFn: async (): Promise<CatalogProductResponse> => {
-      const response = await api.api.catalog.products[':marketplace'][':catalogId'].$get({
-        param: { marketplace, catalogId },
+      const response = await api.api.catalog.products[':catalogId'].$get({
+        param: { catalogId },
       });
 
       if (response.status === 503) {

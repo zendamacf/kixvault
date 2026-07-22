@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { catalogMarketplaces, catalogSearchResultSchema } from './catalog';
+import { catalogSearchResultSchema } from './catalog';
 
 export const variantPriceSchema = z.object({
   size: z.string(),
@@ -9,7 +9,6 @@ export const variantPriceSchema = z.object({
 });
 
 export const catalogProductParamsSchema = z.object({
-  marketplace: z.enum(catalogMarketplaces),
   catalogId: z.string().trim().min(1).max(200),
 });
 

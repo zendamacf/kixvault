@@ -67,7 +67,6 @@ const mockFetchAndCacheCatalogProductWithPrices = mock(async () => ({
 
 mock.module('../lib/pricing', () => ({
   fetchAndCacheCatalogProductWithPrices: mockFetchAndCacheCatalogProductWithPrices,
-  marketplaceToCatalogSource: () => 'kicksdb:stockx' as const,
 }));
 
 mock.module('../lib/env', () => ({
@@ -106,7 +105,7 @@ describe('catalog routes', () => {
   });
 
   test('returns search results when KicksDB is configured', async () => {
-    const response = await catalogRoutes.request('/search?q=jordan&limit=10&marketplace=stockx');
+    const response = await catalogRoutes.request('/search?q=jordan&limit=10');
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
@@ -126,11 +125,11 @@ describe('catalog routes', () => {
         },
       ],
     });
-    expect(mockSearchCatalog).toHaveBeenCalledWith('jordan', 10, 'stockx');
+    expect(mockSearchCatalog).toHaveBeenCalledWith('jordan', 10);
   });
 
   test('returns catalog product detail with variant prices', async () => {
-    const response = await catalogRoutes.request('/products/stockx/air-jordan-1');
+    const response = await catalogRoutes.request('/products/air-jordan-1');
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
@@ -168,7 +167,7 @@ describe('catalog routes', () => {
       throw new CatalogSearchError('KicksDB request failed', 502);
     });
 
-    const response = await catalogRoutes.request('/search?q=jordan&limit=10&marketplace=stockx');
+    const response = await catalogRoutes.request('/search?q=jordan&limit=10');
 
     expect(response.status).toBe(502);
     await expect(response.json()).resolves.toEqual({ error: 'Catalog search failed' });
@@ -179,7 +178,7 @@ describe('catalog routes', () => {
       throw new CatalogSearchError('KicksDB request failed', 502);
     });
 
-    const response = await catalogRoutes.request('/products/stockx/air-jordan-1');
+    const response = await catalogRoutes.request('/products/air-jordan-1');
 
     expect(response.status).toBe(502);
     await expect(response.json()).resolves.toEqual({ error: 'Failed to fetch catalog product' });
