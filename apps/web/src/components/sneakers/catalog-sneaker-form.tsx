@@ -30,7 +30,7 @@ export function CatalogSneakerForm({
     isLoading,
     error,
   } = useQuery({
-    ...catalogProductQueryOptions('stockx', selectedResult?.catalogId ?? ''),
+    ...catalogProductQueryOptions(selectedResult?.catalogId ?? ''),
     enabled: selectedResult != null,
   });
 
@@ -83,7 +83,7 @@ export function CatalogSneakerForm({
               isSubmitting={isSubmitting || isLoading}
               onSubmit={async (values) => {
                 await onSubmit({
-                  catalogSource: selectedResult.catalogSource,
+                  catalogSource: 'kicksdb:stockx',
                   catalogId: selectedResult.catalogId,
                   ...values,
                 });

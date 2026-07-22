@@ -103,11 +103,10 @@ describe('CatalogSearchPicker', () => {
     expect(catalogSearch).not.toHaveBeenCalled();
   });
 
-  test('searches StockX by default', async () => {
-    const requestedMarketplaces: Array<string | null> = [];
+  test('searches StockX', async () => {
     installFetchMock({
       catalogSearch: async (url) => {
-        requestedMarketplaces.push(url.searchParams.get('marketplace'));
+        expect(url.searchParams.has('marketplace')).toBe(false);
         return createJsonResponse({ results: [] });
       },
     });
@@ -116,7 +115,7 @@ describe('CatalogSearchPicker', () => {
     searchFor('jordan');
 
     await waitFor(() => {
-      expect(requestedMarketplaces).toContain('stockx');
+      expect(screen.getByText(/No sneakers found on StockX for/)).toBeTruthy();
     });
   });
 

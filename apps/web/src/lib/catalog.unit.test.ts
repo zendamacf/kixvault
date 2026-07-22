@@ -7,7 +7,7 @@ describe('catalogSearchQueryOptions', () => {
     installFetchMock({
       catalogSearch: async (url) => {
         expect(url.searchParams.get('q')).toBe('jordan');
-        expect(url.searchParams.get('marketplace')).toBe('stockx');
+        expect(url.searchParams.has('marketplace')).toBe(false);
 
         return createJsonResponse({
           results: [
@@ -32,7 +32,7 @@ describe('catalogSearchQueryOptions', () => {
     const { catalogSearchQueryOptions } = await import('./catalog');
     const client = new QueryClient();
 
-    const result = await client.fetchQuery(catalogSearchQueryOptions('jordan', 'stockx'));
+    const result = await client.fetchQuery(catalogSearchQueryOptions('jordan'));
 
     expect(result.results).toHaveLength(1);
     expect(result.unavailable).toBeUndefined();
@@ -46,7 +46,7 @@ describe('catalogSearchQueryOptions', () => {
     const { catalogSearchQueryOptions } = await import('./catalog');
     const client = new QueryClient();
 
-    const result = await client.fetchQuery(catalogSearchQueryOptions('jordan', 'stockx'));
+    const result = await client.fetchQuery(catalogSearchQueryOptions('jordan'));
 
     expect(result).toEqual({
       results: [],
@@ -59,7 +59,7 @@ describe('catalogProductQueryOptions', () => {
   test('loads catalog product detail with variant prices', async () => {
     installFetchMock({
       catalogProduct: async (url) => {
-        expect(url.pathname).toBe('/api/catalog/products/stockx/air-jordan-1');
+        expect(url.pathname).toBe('/api/catalog/products/air-jordan-1');
 
         return createJsonResponse({
           product: {
@@ -91,7 +91,7 @@ describe('catalogProductQueryOptions', () => {
     const { catalogProductQueryOptions } = await import('./catalog');
     const client = new QueryClient();
 
-    const result = await client.fetchQuery(catalogProductQueryOptions('stockx', 'air-jordan-1'));
+    const result = await client.fetchQuery(catalogProductQueryOptions('air-jordan-1'));
 
     expect(result.variantPrices).toHaveLength(1);
     expect(result.variantPrices[0]?.price).toBe(300);

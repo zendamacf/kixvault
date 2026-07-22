@@ -45,7 +45,7 @@ describe('CatalogSneakerForm', () => {
     installFetchMock({
       catalogSearch: async () => createJsonResponse({ results: [catalogResult] }),
       catalogProduct: async (url) => {
-        expect(url.pathname).toBe('/api/catalog/products/stockx/air-jordan-1-chicago');
+        expect(url.pathname).toBe('/api/catalog/products/air-jordan-1-chicago');
 
         return createJsonResponse({
           product: catalogResult,

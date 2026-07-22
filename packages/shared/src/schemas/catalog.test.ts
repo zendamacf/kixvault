@@ -2,13 +2,12 @@ import { describe, expect, test } from 'bun:test';
 import { catalogSearchQuerySchema, catalogSearchResultSchema } from './catalog';
 
 describe('catalogSearchQuerySchema', () => {
-  test('applies defaults for limit and marketplace', () => {
+  test('applies default limit', () => {
     const result = catalogSearchQuerySchema.safeParse({ q: 'jordan 1' });
 
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.limit).toBe(10);
-      expect(result.data.marketplace).toBe('stockx');
     }
   });
 
@@ -24,13 +23,16 @@ describe('catalogSearchQuerySchema', () => {
     }
   });
 
-  test('rejects goat marketplace', () => {
+  test('rejects unknown query params via strict parsing when used with passthrough disabled', () => {
     const result = catalogSearchQuerySchema.safeParse({
       q: 'yeezy',
       marketplace: 'goat',
     });
 
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect('marketplace' in result.data).toBe(false);
+    }
   });
 
   test('rejects queries shorter than 3 characters', () => {

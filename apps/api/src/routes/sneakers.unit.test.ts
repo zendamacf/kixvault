@@ -56,6 +56,11 @@ mock.module('../lib/env', () => ({
   env: mockEnv,
 }));
 
+mock.module('../lib/kicksdb', () => ({
+  isKicksdbConfigured: () => !!mockEnv.kicksdbApiKey,
+  ensureKicksdbClient: () => {},
+}));
+
 mock.module('../lib/catalog', () => ({
   CatalogProductNotFoundError,
   CatalogSearchError,

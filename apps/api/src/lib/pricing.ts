@@ -42,10 +42,6 @@ export type MarketPriceRecord = {
   currency: string;
 };
 
-export function marketplaceToCatalogSource(_marketplace: 'stockx'): CatalogSource {
-  return 'kicksdb:stockx';
-}
-
 export function normalizeSizeValue(size: number | string): string {
   const numericSize = typeof size === 'number' ? size : Number(size);
 
