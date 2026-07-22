@@ -1,22 +1,22 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
-import type { CatalogMarketplace, CatalogSearchResult } from '@kixvault/shared';
+import type { CatalogSearchResult } from '@kixvault/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { type ReactNode, useState } from 'react';
+import { useState } from 'react';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { createJsonResponse, installFetchMock } from '@/test/mocks/api';
 
-const goatResult: CatalogSearchResult = {
-  catalogSource: 'kicksdb:goat',
-  catalogId: 'air-jordan-1-chicago-goat',
+const stockxResult: CatalogSearchResult = {
+  catalogSource: 'kicksdb:stockx',
+  catalogId: 'air-jordan-1-chicago',
   title: 'Air Jordan 1 Retro High OG Chicago',
   brand: 'Jordan',
   model: 'Air Jordan 1',
   colorway: 'White/Black-Varsity Red',
   nickname: 'Chicago',
   sku: 'DZ5485-612',
-  imageUrl: 'https://images.goat.com/chicago.png',
-  imageUrls: ['https://images.goat.com/chicago.png'],
+  imageUrl: 'https://images.stockx.com/chicago.png',
+  imageUrls: ['https://images.stockx.com/chicago.png'],
   releaseDate: '2015-04-25',
   description: 'Released in 1985, the Air Jordan 1 changed basketball forever.',
 };
@@ -26,43 +26,12 @@ mock.module('@/lib/hooks', () => ({
   useDebouncedValue: <T,>(value: T) => value,
 }));
 
-mock.module('@/components/ui/select', () => ({
-  Select: ({
-    children,
-    value,
-    onValueChange,
-  }: {
-    children: ReactNode;
-    value: string;
-    onValueChange: (value: string) => void;
-  }) => (
-    <select
-      aria-label="Marketplace"
-      value={value}
-      onChange={(event) => onValueChange(event.target.value)}
-    >
-      {children}
-    </select>
-  ),
-  SelectContent: ({ children }: { children: ReactNode }) => <>{children}</>,
-  SelectItem: ({ children, value }: { children: ReactNode; value: string }) => (
-    <option value={value}>{children}</option>
-  ),
-  SelectTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
-  SelectValue: () => null,
-}));
-
 afterEach(() => {
   cleanup();
 });
 
-function StatefulPicker({
-  onMarketplaceChange,
-  onSelect,
-  ...props
-}: Partial<Parameters<typeof CatalogSearchPicker>[0]> = {}) {
+function StatefulPicker(props: Partial<Parameters<typeof CatalogSearchPicker>[0]> = {}) {
   const [query, setQuery] = useState('');
-  const [marketplace, setMarketplace] = useState<CatalogMarketplace>('goat');
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -72,12 +41,7 @@ function StatefulPicker({
       <CatalogSearchPicker
         query={query}
         onQueryChange={setQuery}
-        marketplace={marketplace}
-        onMarketplaceChange={(value) => {
-          setMarketplace(value);
-          onMarketplaceChange?.(value);
-        }}
-        onSelect={onSelect ?? mock()}
+        onSelect={props.onSelect ?? mock()}
         {...props}
       />
     </QueryClientProvider>
@@ -94,7 +58,7 @@ function searchFor(query: string) {
 
 describe('CatalogSearchPicker', () => {
   test('renders results and calls onSelect when a result is clicked', async () => {
-    const catalogSearch = mock(async () => createJsonResponse({ results: [goatResult] }));
+    const catalogSearch = mock(async () => createJsonResponse({ results: [stockxResult] }));
     installFetchMock({ catalogSearch });
     const onSelect = mock();
 
@@ -110,15 +74,15 @@ describe('CatalogSearchPicker', () => {
 
     fireEvent.click(resultButton);
 
-    expect(onSelect).toHaveBeenCalledWith(goatResult);
+    expect(onSelect).toHaveBeenCalledWith(stockxResult);
   });
 
   test('highlights the selected result', async () => {
     installFetchMock({
-      catalogSearch: async () => createJsonResponse({ results: [goatResult] }),
+      catalogSearch: async () => createJsonResponse({ results: [stockxResult] }),
     });
 
-    renderPicker({ selectedCatalogId: goatResult.catalogId });
+    renderPicker({ selectedCatalogId: stockxResult.catalogId });
     searchFor('jordan');
 
     const resultButton = await screen.findByRole('button', {
@@ -139,7 +103,7 @@ describe('CatalogSearchPicker', () => {
     expect(catalogSearch).not.toHaveBeenCalled();
   });
 
-  test('searches GOAT by default and StockX after switching marketplaces', async () => {
+  test('searches StockX by default', async () => {
     const requestedMarketplaces: Array<string | null> = [];
     installFetchMock({
       catalogSearch: async (url) => {
@@ -147,18 +111,10 @@ describe('CatalogSearchPicker', () => {
         return createJsonResponse({ results: [] });
       },
     });
-    const onMarketplaceChange = mock();
 
-    renderPicker({ onMarketplaceChange });
+    renderPicker();
     searchFor('jordan');
 
-    await waitFor(() => {
-      expect(requestedMarketplaces).toContain('goat');
-    });
-
-    fireEvent.change(screen.getByLabelText('Marketplace'), { target: { value: 'stockx' } });
-
-    expect(onMarketplaceChange).toHaveBeenCalledTimes(1);
     await waitFor(() => {
       expect(requestedMarketplaces).toContain('stockx');
     });
@@ -172,7 +128,7 @@ describe('CatalogSearchPicker', () => {
     renderPicker();
     searchFor('nonexistent shoe');
 
-    expect(await screen.findByText(/No sneakers found on GOAT for/)).toBeTruthy();
+    expect(await screen.findByText(/No sneakers found on StockX for/)).toBeTruthy();
   });
 
   test('shows an unavailable message when the API returns 503', async () => {
