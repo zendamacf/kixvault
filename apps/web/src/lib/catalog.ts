@@ -51,7 +51,7 @@ export function catalogProductQueryOptions(marketplace: CatalogMarketplace, cata
       if (response.status === 503) {
         return {
           product: {
-            catalogSource: marketplace === 'goat' ? 'kicksdb:goat' : 'kicksdb:stockx',
+            catalogSource: 'kicksdb:stockx',
             catalogId,
             title: '',
             brand: '',

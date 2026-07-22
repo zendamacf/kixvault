@@ -1,5 +1,5 @@
 import { getStockxProduct, getStockxProducts, type StockXProduct } from '@kicksdb/sdk';
-import type { CatalogMarketplace, CatalogSearchResult, CatalogSource } from '@kixvault/shared';
+import { catalogSources, type CatalogMarketplace, type CatalogSearchResult, type CatalogSource } from '@kixvault/shared';
 import { getCatalogSearchCache, resetCatalogSearchCacheForTests } from './catalog-cache';
 import { ensureKicksdbClient } from './kicksdb';
 import { normalizeSneakerImageUrls } from './sneaker-images';
@@ -190,7 +190,7 @@ export async function fetchCatalogProduct(
   catalogSource: CatalogSource,
   catalogId: string,
 ): Promise<CatalogSearchResult> {
-  if (catalogSource === 'kicksdb:goat') {
+  if (!catalogSources.includes(catalogSource)) {
     throw new CatalogSearchError('Unsupported catalog source', 400);
   }
 
@@ -208,10 +208,6 @@ export async function fetchCatalogProduct(
   }
 
   ensureKicksdbClient();
-
-  if (catalogSource !== 'kicksdb:stockx') {
-    throw new CatalogSearchError('Unsupported catalog source', 400);
-  }
 
   const { data, error, response } = await getStockxProduct({
     path: { id: catalogId },

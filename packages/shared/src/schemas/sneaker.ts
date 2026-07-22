@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { sneakerConditions } from '../types';
-import { activeCatalogSources, catalogSources } from './catalog';
+import { catalogSources } from './catalog';
 
 export const sneakerImageUrlSchema = z.string().trim().url().max(2000);
 
@@ -49,7 +49,7 @@ export const createSneakerSchema = z.object({
 export const updateSneakerSchema = createSneakerSchema.partial();
 
 export const createSneakerFromCatalogSchema = z.object({
-  catalogSource: z.enum(activeCatalogSources),
+  catalogSource: z.enum(catalogSources),
   catalogId: z.string().trim().min(1).max(200),
   size: z.coerce.number().positive().max(99),
   condition: z.enum(sneakerConditions),

@@ -1,7 +1,7 @@
 # TODO
 
- - Value snapshots
  - OAuth?
  - Branding.
- - Barcode scanning.
  - Email verification before signing up.
+ - Investigate multiple images not being fetched from StockX.
+ 
