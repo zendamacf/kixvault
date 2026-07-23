@@ -422,7 +422,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
   test('PATCH /api/sneakers/:id updates primary image for manual sneakers', async () => {
     const email = `manual-images-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const createResponse = await app.request('/api/sneakers/custom', {
       method: 'POST',
@@ -577,7 +577,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     );
 
     const email = `catalog-images-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const createResponse = await app.request('/api/sneakers/from-catalog', {
       method: 'POST',
