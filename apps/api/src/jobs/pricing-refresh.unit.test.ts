@@ -48,7 +48,7 @@ describe('dedupeCatalogProducts', () => {
         size: '11',
       },
       {
-        catalogSource: 'kicksdb:goat' as CatalogSource,
+        catalogSource: 'kicksdb:stockx' as CatalogSource,
         catalogId: 'nike-dunk',
         sku: 'DD1391-100',
         size: '9',
@@ -59,7 +59,7 @@ describe('dedupeCatalogProducts', () => {
 
     expect(products.size).toBe(2);
     expect(products.get('kicksdb:stockx:air-jordan-1')?.size).toBe('10');
-    expect(products.get('kicksdb:goat:nike-dunk')?.size).toBe('9');
+    expect(products.get('kicksdb:stockx:nike-dunk')?.size).toBe('9');
   });
 });
 

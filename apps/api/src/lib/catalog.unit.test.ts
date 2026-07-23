@@ -121,12 +121,13 @@ describe('fetchCatalogProduct', () => {
     expect(mockGetStockxProduct).toHaveBeenCalledTimes(1);
   });
 
-  test('rejects detached GOAT catalog sources', async () => {
+  test('rejects unsupported catalog sources', async () => {
     const { fetchCatalogProduct, CatalogSearchError } = await import('./catalog');
 
-    await expect(fetchCatalogProduct('kicksdb:goat', 'missing-slug')).rejects.toBeInstanceOf(
-      CatalogSearchError,
-    );
+    await expect(
+      // @ts-expect-error - unsupported historic source
+      fetchCatalogProduct('kicksdb:goat', 'missing-slug'),
+    ).rejects.toBeInstanceOf(CatalogSearchError);
   });
 
   test('throws CatalogProductNotFoundError when the product is missing', async () => {

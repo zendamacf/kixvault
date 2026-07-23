@@ -1,6 +1,6 @@
 import { pricingRefreshRuns, sneakers } from '@kixvault/db';
 import type { CatalogSource } from '@kixvault/shared';
-import { and, desc, eq, gte, isNotNull, ne } from 'drizzle-orm';
+import { and, desc, eq, gte, isNotNull } from 'drizzle-orm';
 import { db } from '../lib/db';
 import { env } from '../lib/env';
 import { isKicksdbConfigured } from '../lib/kicksdb';
@@ -47,7 +47,6 @@ async function loadPriceableSneakers(): Promise<PriceableSneakerRow[]> {
         isNotNull(sneakers.catalogSource),
         isNotNull(sneakers.catalogId),
         isNotNull(sneakers.sku),
-        ne(sneakers.catalogSource, 'kicksdb:goat'),
       ),
     );
 

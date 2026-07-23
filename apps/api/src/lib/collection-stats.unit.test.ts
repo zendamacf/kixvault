@@ -36,7 +36,7 @@ describe('computeCollectionMarketStats', () => {
         purchasePrice: '100.00',
       },
       {
-        catalogSource: 'kicksdb:goat',
+        catalogSource: null,
         sku: 'SKU-3',
         size: '12',
         condition: 'worn',

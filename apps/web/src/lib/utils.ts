@@ -61,10 +61,6 @@ export function getCatalogSourceLabel(catalogSource: string | null | undefined) 
     return 'StockX';
   }
 
-  if (catalogSource === 'kicksdb:goat') {
-    return 'GOAT';
-  }
-
   return null;
 }
 

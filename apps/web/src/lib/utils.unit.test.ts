@@ -37,7 +37,6 @@ describe('formatDate', () => {
 describe('getCatalogSourceLabel', () => {
   test('maps catalog sources to marketplace labels', () => {
     expect(getCatalogSourceLabel('kicksdb:stockx')).toBe('StockX');
-    expect(getCatalogSourceLabel('kicksdb:goat')).toBe('GOAT');
     expect(getCatalogSourceLabel(null)).toBeNull();
   });
 });
