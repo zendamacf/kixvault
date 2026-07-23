@@ -1,5 +1,42 @@
 # @kixvault/api
 
+## 0.1.0
+
+### Minor Changes
+
+- e2ddce9: Fetch sneaker images asynchronously after create/update, resize them with sharp, and store WebP files on the local image volume.
+- c35d5f9: Add catalog market pricing foundation: product price cache, price storage on catalog sneaker creation, and enriched sneaker API responses.
+- e8d5218: Add weekly pricing refresh scheduler: pricing refresh job, run tracking table, and dedicated Compose scheduler service.
+- b497fc7: Add collection market value stats and per-sneaker price history from stored snapshots.
+- 5cfb12d: Store catalog primary and gallery images when adding sneakers from StockX or GOAT, and add a backfill script for existing catalog-linked pairs.
+- a3d34dc: Expose stored 360 gallery frames on sneaker API responses and via dedicated image routes.
+- 4ab068a: Add an image storage backfill script and optional image worker service for processing pending sneaker image downloads.
+- 37932c1: Add local sneaker image storage with a database schema, Docker volume support, and an image serve route that falls back to remote source URLs.
+- cae80f0: Enforce a single primary image per sneaker (360 gallery frames remain separate), return `primaryImage` from the API instead of an `images` array, and serve stored primary images at `/api/images/:sneakerId`.
+- 00d0a3a: Add a `sneaker_images` table and API support for storing multiple sneaker image URLs per pair.
+- 0d58a95: Store StockX primary images as a one-to-one sneaker relationship and persist 360 gallery frames in a separate table for future animation support.
+
+### Patch Changes
+
+- d2b33aa: Preserve transparent backgrounds when fetching sneaker images by stripping StockX background CDN params, requesting imgix background removal, and retaining alpha during WebP conversion.
+- 8fbfaad: Remove GOAT catalog search, product fetch, and pricing refresh paths while keeping existing GOAT-linked sneakers readable in the database.
+- 8709445: Simplify catalog APIs and clients to StockX-only routes by removing marketplace parameters and GOAT CDN preconnect hints.
+- 4f4deef: Updated market prices to display for all wear conditions.
+- 9bb478a: Add lazy-loaded image carousels across the collection and sneaker views, and remove the deprecated sneaker `imageUrl` field from API responses.
+- b572e5f: Fixed StockX fetching opaque URLs.
+- Updated dependencies [c35d5f9]
+- Updated dependencies [e8d5218]
+- Updated dependencies [b497fc7]
+- Updated dependencies [5cfb12d]
+- Updated dependencies [37932c1]
+- Updated dependencies [cae80f0]
+- Updated dependencies [8fbfaad]
+- Updated dependencies [8709445]
+- Updated dependencies [00d0a3a]
+- Updated dependencies [0d58a95]
+  - @kixvault/db@0.1.0
+  - @kixvault/shared@0.1.0
+
 ## 0.0.4
 
 ### Patch Changes
