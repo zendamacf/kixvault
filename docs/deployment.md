@@ -1,6 +1,6 @@
 # Production Deployment
 
-KixVault is deployed as pre-built Docker images pulled from the GitHub Container Registry (GHCR). A `docker-compose.yml` on the VPS orchestrates the full stack: PostgreSQL, API, web frontend, and Caddy reverse proxy.
+KixVault is deployed as pre-built Docker images pulled from the GitHub Container Registry (GHCR). A `docker-compose.yml` on the VPS orchestrates the full stack: PostgreSQL, Redis, API, web frontend, and Caddy reverse proxy.
 
 ## Prerequisites
 
@@ -61,13 +61,22 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   api:
     image: ghcr.io/zendamacf/kixvault-api:${API_VERSION:-latest}
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
       KICKSDB_API_KEY: ${KICKSDB_API_KEY}
-      REDIS_URL: ${REDIS_URL:-}
+      REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
       SIGNUPS_ENABLED: ${SIGNUPS_ENABLED:-false}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
@@ -81,7 +90,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-        required: false
 
   scheduler:
     image: ghcr.io/zendamacf/kixvault-api:${API_VERSION:-latest}
@@ -101,16 +109,23 @@ services:
       db:
         condition: service_healthy
 
-  redis:
-    image: redis:7-alpine
+  image-worker:
+    image: ghcr.io/zendamacf/kixvault-api:${API_VERSION:-latest}
     restart: unless-stopped
-    profiles:
-      - redis
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
+      IMAGE_STORAGE_PATH: /data/images
+      IMAGE_PUBLIC_BASE_PATH: /api/images
+      IMAGE_MAX_WIDTH: ${IMAGE_MAX_WIDTH:-1024}
+      IMAGE_WORKER_POLL_MS: ${IMAGE_WORKER_POLL_MS:-30000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV: production
+    volumes:
+      - kixvault_images:/data/images
+    entrypoint: ["bun", "apps/api/dist/jobs/run-image-worker.js"]
+    depends_on:
+      db:
+        condition: service_healthy
 
   web:
     image: ghcr.io/zendamacf/kixvault-web:${WEB_VERSION:-latest}
@@ -163,10 +178,9 @@ POSTGRES_DB=kixvault
 
 # API
 KICKSDB_API_KEY=KICKS-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-# Optional — shared catalog search cache across API instances (start redis with: docker compose --profile redis up -d)
-REDIS_URL=redis://redis:6379
 
-SIGNUPS_ENABLED=true
+# Caching
+REDIS_URL=redis://redis:6379
 
 # API logging (silent disables request logs)
 LOG_LEVEL=info
@@ -179,6 +193,9 @@ PRICING_REFRESH_DELAY_MS=500
 IMAGE_STORAGE_PATH=/data/images
 IMAGE_PUBLIC_BASE_PATH=/api/images
 IMAGE_MAX_WIDTH=1024
+
+# Feature flags
+SIGNUPS_ENABLED=true
 ```
 
 ### `Caddyfile`
@@ -237,27 +254,7 @@ docker compose run --rm --entrypoint bun scheduler apps/api/dist/jobs/pricing-re
 
 ## Image worker
 
-The optional `image-worker` service downloads pending sneaker images, converts them to WebP with sharp, and stores them on the `kixvault_images` Docker volume. This keeps image fetching outside request paths and retries failed downloads.
-
-```yaml
-  image-worker:
-    image: ghcr.io/zendamacf/kixvault-api:${API_VERSION:-latest}
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
-      IMAGE_STORAGE_PATH: /data/images
-      IMAGE_PUBLIC_BASE_PATH: /api/images
-      IMAGE_MAX_WIDTH: ${IMAGE_MAX_WIDTH:-1024}
-      IMAGE_WORKER_POLL_MS: ${IMAGE_WORKER_POLL_MS:-30000}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-      NODE_ENV: production
-    volumes:
-      - kixvault_images:/data/images
-    entrypoint: ["bun", "apps/api/dist/jobs/run-image-worker.js"]
-    depends_on:
-      db:
-        condition: service_healthy
-```
+The `image-worker` service downloads pending sneaker images, converts them to WebP with sharp, and stores them on the `kixvault_images` Docker volume. This keeps image fetching outside request paths and retries failed downloads.
 
 Run a one-off image backfill manually:
 

@@ -70,7 +70,7 @@ describe('CatalogSneakerForm', () => {
       await screen.findByRole('button', { name: /Air Jordan 1 Retro High OG Chicago/ }),
     );
 
-    expect(screen.getByText('SKU DZ5485-612')).toBeTruthy();
+    expect(screen.getByText('DZ5485-612')).toBeTruthy();
     expect(screen.queryByLabelText('Find a sneaker')).toBeNull();
 
     fireEvent.change(screen.getByLabelText('Size'), { target: { value: '10' } });

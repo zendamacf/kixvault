@@ -11,8 +11,13 @@ mock.module('./env', () => ({
 
 import type { StockXProduct } from '@kicksdb/sdk';
 
-const { computeGainLoss, extractVariantPrices, matchVariantPrice, normalizeSizeValue } =
-  await import('./pricing');
+const {
+  computeGainLoss,
+  extractVariantPrices,
+  matchVariantPrice,
+  normalizeMarketPrice,
+  normalizeSizeValue,
+} = await import('./pricing');
 
 const stockxProductWithPrices = {
   slug: 'air-jordan-1-chicago',
@@ -30,6 +35,13 @@ const stockxProductWithPrices = {
       size_type: 'us m',
       prices: [{ price: 255, type: 'standard' }],
     },
+    {
+      id: 'variant-11',
+      size: '11',
+      size_type: 'us m',
+      prices: [{ price: 0, type: 'standard' }],
+      lowest_ask: 0,
+    },
   ],
 } as StockXProduct;
 
@@ -38,6 +50,15 @@ describe('normalizeSizeValue', () => {
     expect(normalizeSizeValue(10)).toBe('10');
     expect(normalizeSizeValue('10.0')).toBe('10');
     expect(normalizeSizeValue(10.5)).toBe('10.5');
+  });
+});
+
+describe('normalizeMarketPrice', () => {
+  test('treats zero and non-positive prices as missing', () => {
+    expect(normalizeMarketPrice(250)).toBe(250);
+    expect(normalizeMarketPrice(0)).toBeNull();
+    expect(normalizeMarketPrice(-1)).toBeNull();
+    expect(normalizeMarketPrice(null)).toBeNull();
   });
 });
 
@@ -57,6 +78,12 @@ describe('extractVariantPrices', () => {
         variantId: 'variant-10-5',
       },
     ]);
+  });
+
+  test('omits variants with a $0 StockX price', () => {
+    expect(
+      extractVariantPrices(stockxProductWithPrices).map((variant) => variant.size),
+    ).not.toContain('11');
   });
 });
 
