@@ -42,6 +42,7 @@ function createSneakerRow(overrides: Partial<SneakerRow> = {}): SneakerRow {
     nickname: 'Anniversary Red',
     releaseDate: new Date('2015-04-25T00:00:00.000Z'),
     description: 'The original Air Max with visible Air cushioning.',
+    primaryImageId: null,
     searchVector: "'air':1 'max':2 'nike':3",
     createdAt: new Date('2024-01-01T00:00:00.000Z'),
     updatedAt: new Date('2024-01-02T00:00:00.000Z'),
@@ -112,6 +113,7 @@ describe('formatSneaker', () => {
           sortOrder: 0,
         },
       ],
+      gallery360Images: [],
       catalogSource: 'kicksdb:stockx',
       catalogId: 'air-max-1',
       catalogUrl: 'https://stockx.com/air-max-1',
@@ -132,11 +134,31 @@ describe('formatSneaker', () => {
         pricedAt: new Date('2024-06-20T12:00:00.000Z'),
         currency: 'USD',
       },
+      gallery360Images: [
+        {
+          id: '33333333-3333-4333-8333-333333333333',
+          sneakerId: '11111111-1111-4111-8111-111111111111',
+          sourceUrl: 'https://images.stockx.com/360/frame-01.png',
+          storagePath: '11111111-1111-4111-8111-111111111111/360/0.webp',
+          fetchStatus: 'ready' as const,
+          fetchError: null,
+          fetchedAt: new Date('2024-01-01T00:00:00.000Z'),
+          sortOrder: 0,
+          createdAt: new Date('2024-01-01T00:00:00.000Z'),
+        },
+      ],
     });
 
     expect(formatted.currentMarketPrice).toBe(200);
     expect(formatted.pricedAt).toBe('2024-06-20T12:00:00.000Z');
     expect(formatted.gainLoss).toBe(20);
+    expect(formatted.gallery360Images).toEqual([
+      {
+        id: '33333333-3333-4333-8333-333333333333',
+        url: '/api/images/11111111-1111-4111-8111-111111111111/360/0',
+        sortOrder: 0,
+      },
+    ]);
   });
 });
 

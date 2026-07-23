@@ -1,9 +1,18 @@
 import { sneakerGallery360Images } from '@kixvault/db';
 import { asc, eq, inArray } from 'drizzle-orm';
 import { db } from './db';
+import { buildSneakerGallery360ImagePublicUrl } from './sneaker-image-urls';
 import { normalizeSneakerImageUrls } from './sneaker-images';
 
 export type SneakerGallery360ImageRow = typeof sneakerGallery360Images.$inferSelect;
+
+export function formatSneakerGallery360Image(row: SneakerGallery360ImageRow) {
+  return {
+    id: row.id,
+    url: buildSneakerGallery360ImagePublicUrl(row),
+    sortOrder: row.sortOrder,
+  };
+}
 
 export function normalizeSneakerGallery360ImageUrls(
   urls: Array<string | null | undefined> | null | undefined,
@@ -33,6 +42,18 @@ export async function getGallery360ImagesForSneakerIds(
   }
 
   return imagesBySneakerId;
+}
+
+export async function getSneakerGallery360ImageByKey(
+  sneakerId: string,
+  sortOrder: number,
+): Promise<SneakerGallery360ImageRow | null> {
+  const images = await db
+    .select()
+    .from(sneakerGallery360Images)
+    .where(eq(sneakerGallery360Images.sneakerId, sneakerId));
+
+  return images.find((image) => image.sortOrder === sortOrder) ?? null;
 }
 
 export async function insertSneakerGallery360Images(
