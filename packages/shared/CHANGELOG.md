@@ -1,5 +1,11 @@
 # @kixvault/shared
 
+## 0.1.1
+
+### Patch Changes
+
+- 2dfcbc8: Remove remaining GOAT catalog support, including historic DB links and pricing data.
+
 ## 0.1.0
 
 ### Minor Changes
