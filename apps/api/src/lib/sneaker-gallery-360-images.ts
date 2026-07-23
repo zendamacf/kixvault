@@ -61,8 +61,6 @@ export async function replaceSneakerGallery360Images(
   sneakerId: string,
   urls: string[],
 ): Promise<SneakerGallery360ImageRow[]> {
-  await db
-    .delete(sneakerGallery360Images)
-    .where(eq(sneakerGallery360Images.sneakerId, sneakerId));
+  await db.delete(sneakerGallery360Images).where(eq(sneakerGallery360Images.sneakerId, sneakerId));
   return insertSneakerGallery360Images(sneakerId, urls);
 }

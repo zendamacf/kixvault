@@ -81,10 +81,7 @@ describe('backfillSneakerImages', () => {
     );
     expect(mockReplaceSneakerGallery360Images).toHaveBeenCalledWith(
       '11111111-1111-4111-8111-111111111111',
-      [
-        'https://images.example.com/360-01.png',
-        'https://images.example.com/360-02.png',
-      ],
+      ['https://images.example.com/360-01.png', 'https://images.example.com/360-02.png'],
     );
   });
 });

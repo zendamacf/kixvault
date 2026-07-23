@@ -6,12 +6,12 @@ import sharp from 'sharp';
 import { db } from './db';
 import { env } from './env';
 import { isAllowedImageSourceUrl, normalizeImageSourceUrl } from './image-source-url';
+import type { SneakerGallery360ImageRow } from './sneaker-gallery-360-images';
 import {
   buildSneakerGallery360ImageStoragePath,
   buildSneakerImageStoragePath,
   getSneakerImageAbsolutePath,
 } from './sneaker-image-paths';
-import type { SneakerGallery360ImageRow } from './sneaker-gallery-360-images';
 import type { SneakerImageRow } from './sneaker-images';
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;

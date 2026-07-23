@@ -19,13 +19,13 @@ import {
   matchVariantPrice,
   storeMarketPriceAndSnapshot,
 } from '../lib/pricing';
+import { replaceSneakerGallery360Images } from '../lib/sneaker-gallery-360-images';
 import {
   getImagesForSneakerIds,
   insertSneakerImages,
   replaceSneakerImages,
   replaceSneakerPrimaryImage,
 } from '../lib/sneaker-images';
-import { replaceSneakerGallery360Images } from '../lib/sneaker-gallery-360-images';
 import {
   buildSneakerSearchCondition,
   buildSneakerUpdate,
