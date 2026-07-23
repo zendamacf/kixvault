@@ -4,10 +4,9 @@ import { catalogSources } from './catalog';
 
 export const sneakerImageUrlSchema = z.string().trim().url().max(2000);
 
-export const sneakerImageSchema = z.object({
+export const sneakerPrimaryImageSchema = z.object({
   id: z.string().uuid(),
   url: sneakerImageUrlSchema,
-  sortOrder: z.number().int().nonnegative(),
 });
 
 const dateField = z
@@ -21,7 +20,7 @@ const dateField = z
 
 const sneakerCatalogFields = {
   sku: z.string().trim().max(50).optional().nullable(),
-  images: z.array(sneakerImageUrlSchema).optional(),
+  primaryImage: sneakerImageUrlSchema.optional().nullable(),
   catalogSource: z.enum(catalogSources).optional().nullable(),
   catalogId: z.string().trim().max(200).optional().nullable(),
   nickname: z.string().trim().max(100).optional().nullable(),

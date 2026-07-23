@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { getSneakerGallery360ImageByKey } from '../lib/sneaker-gallery-360-images';
 import { createSneakerImageResponse } from '../lib/sneaker-image-response';
-import { getSneakerImageByKey } from '../lib/sneaker-images';
+import { getSneakerPrimaryImage } from '../lib/sneaker-images';
 import { parseSneakerId } from '../lib/sneakers';
 import type { ApiEnv } from '../types';
 
@@ -33,15 +33,14 @@ export const imageRoutes = new Hono<ApiEnv>()
 
     return response;
   })
-  .get('/:sneakerId/:sortOrder', async (c) => {
+  .get('/:sneakerId', async (c) => {
     const sneakerId = parseSneakerId(c.req.param('sneakerId'));
-    const sortOrder = parseSortOrder(c.req.param('sortOrder'));
 
-    if (!sneakerId || sortOrder === null) {
+    if (!sneakerId) {
       return c.json({ error: 'Invalid image path' }, 400);
     }
 
-    const image = await getSneakerImageByKey(sneakerId, sortOrder);
+    const image = await getSneakerPrimaryImage(sneakerId);
     const response = await createSneakerImageResponse(image);
 
     if (response.status === 404) {

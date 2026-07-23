@@ -115,12 +115,11 @@ export const sneakerImages = pgTable(
     fetchStatus: sneakerImageFetchStatusEnum('fetch_status').notNull().default('pending'),
     fetchError: text('fetch_error'),
     fetchedAt: timestamp('fetched_at', { withTimezone: true, mode: 'date' }),
-    sortOrder: integer('sort_order').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
     index('sneaker_images_sneaker_id_idx').on(table.sneakerId),
-    unique('sneaker_images_sneaker_id_sort_order_unique').on(table.sneakerId, table.sortOrder),
+    unique('sneaker_images_sneaker_id_unique').on(table.sneakerId),
   ],
 );
 
@@ -157,7 +156,6 @@ export const sneakersRelations = relations(sneakers, ({ one, many }) => ({
     fields: [sneakers.primaryImageId],
     references: [sneakerImages.id],
   }),
-  images: many(sneakerImages),
   gallery360Images: many(sneakerGallery360Images),
 }));
 

@@ -1,5 +1,5 @@
 import { sneakerImages, sneakers } from '@kixvault/db';
-import { asc, eq, inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from './db';
 import { normalizeImageSourceUrl } from './image-source-url';
 import { buildSneakerImageStoragePath, getSneakerImageAbsolutePath } from './sneaker-image-paths';
@@ -9,20 +9,11 @@ export type SneakerImageRow = typeof sneakerImages.$inferSelect;
 
 export { buildSneakerImageStoragePath, getSneakerImageAbsolutePath };
 
-export function formatSneakerImage(row: SneakerImageRow) {
+export function formatPrimaryImage(row: SneakerImageRow) {
   return {
     id: row.id,
     url: buildSneakerImagePublicUrl(row),
-    sortOrder: row.sortOrder,
   };
-}
-
-export function getPrimaryImageUrl(images: SneakerImageRow[]): string | null {
-  if (images.length === 0) {
-    return null;
-  }
-
-  return buildSneakerImagePublicUrl(images[0]);
 }
 
 export function normalizeSneakerImageUrls(
@@ -53,9 +44,9 @@ export function normalizeSneakerImageUrls(
   return normalized;
 }
 
-export async function getImagesForSneakerIds(
+export async function getPrimaryImagesForSneakerIds(
   sneakerIds: string[],
-): Promise<Map<string, SneakerImageRow[]>> {
+): Promise<Map<string, SneakerImageRow>> {
   if (sneakerIds.length === 0) {
     return new Map();
   }
@@ -63,30 +54,25 @@ export async function getImagesForSneakerIds(
   const rows = await db
     .select()
     .from(sneakerImages)
-    .where(inArray(sneakerImages.sneakerId, sneakerIds))
-    .orderBy(asc(sneakerImages.sortOrder));
+    .where(inArray(sneakerImages.sneakerId, sneakerIds));
 
-  const imagesBySneakerId = new Map<string, SneakerImageRow[]>();
+  const imagesBySneakerId = new Map<string, SneakerImageRow>();
 
   for (const row of rows) {
-    const existing = imagesBySneakerId.get(row.sneakerId) ?? [];
-    existing.push(row);
-    imagesBySneakerId.set(row.sneakerId, existing);
+    imagesBySneakerId.set(row.sneakerId, row);
   }
 
   return imagesBySneakerId;
 }
 
-export async function getSneakerImageByKey(
-  sneakerId: string,
-  sortOrder: number,
-): Promise<SneakerImageRow | null> {
-  const images = await db
+export async function getSneakerPrimaryImage(sneakerId: string): Promise<SneakerImageRow | null> {
+  const [row] = await db
     .select()
     .from(sneakerImages)
-    .where(eq(sneakerImages.sneakerId, sneakerId));
+    .where(eq(sneakerImages.sneakerId, sneakerId))
+    .limit(1);
 
-  return images.find((image) => image.sortOrder === sortOrder) ?? null;
+  return row ?? null;
 }
 
 export async function replaceSneakerPrimaryImage(
@@ -107,7 +93,6 @@ export async function replaceSneakerPrimaryImage(
     .values({
       sneakerId,
       sourceUrl: normalizedUrl,
-      sortOrder: 0,
     })
     .returning();
 
@@ -116,50 +101,16 @@ export async function replaceSneakerPrimaryImage(
   return image;
 }
 
-export async function insertSneakerImages(
-  sneakerId: string,
-  urls: string[],
-): Promise<SneakerImageRow[]> {
-  const normalizedUrls = normalizeSneakerImageUrls(urls);
-
-  if (normalizedUrls.length === 0) {
-    return [];
-  }
-
-  return db
-    .insert(sneakerImages)
-    .values(
-      normalizedUrls.map((sourceUrl, index) => ({
-        sneakerId,
-        sourceUrl,
-        sortOrder: index,
-      })),
-    )
-    .returning();
-}
-
-export async function replaceSneakerImages(
-  sneakerId: string,
-  urls: string[],
-): Promise<SneakerImageRow[]> {
-  await db.delete(sneakerImages).where(eq(sneakerImages.sneakerId, sneakerId));
-  return insertSneakerImages(sneakerId, urls);
-}
-
-export function haveSneakerImagesChanged(
-  existingImages: SneakerImageRow[],
-  inputUrls: string[] | undefined,
+export function hasPrimaryImageChanged(
+  existingImage: SneakerImageRow | null,
+  inputUrl: string | null | undefined,
 ): boolean {
-  if (inputUrls === undefined) {
+  if (inputUrl === undefined) {
     return false;
   }
 
-  const existingUrls = existingImages.map((image) => image.sourceUrl);
-  const normalizedInputUrls = normalizeSneakerImageUrls(inputUrls);
+  const normalizedInputUrl = normalizeSneakerImageUrls([inputUrl])[0] ?? null;
+  const existingUrl = existingImage?.sourceUrl ?? null;
 
-  if (existingUrls.length !== normalizedInputUrls.length) {
-    return true;
-  }
-
-  return existingUrls.some((url, index) => url !== normalizedInputUrls[index]);
+  return normalizedInputUrl !== existingUrl;
 }

@@ -14,9 +14,9 @@ import {
   type SneakerGallery360ImageRow,
 } from './sneaker-gallery-360-images';
 import {
-  formatSneakerImage,
-  getImagesForSneakerIds,
-  haveSneakerImagesChanged,
+  formatPrimaryImage,
+  getPrimaryImagesForSneakerIds,
+  hasPrimaryImageChanged,
   type SneakerImageRow,
 } from './sneaker-images';
 
@@ -28,7 +28,7 @@ const catalogLinkedModelFields = [
   'colorway',
   'nickname',
   'sku',
-  'images',
+  'primaryImage',
   'catalogSource',
   'catalogId',
   'releaseDate',
@@ -47,7 +47,7 @@ function nullableFieldChanged(
 export function getCatalogLinkedModelFieldViolations(
   existing: SneakerRow,
   input: UpdateSneakerInput,
-  existingImages: SneakerImageRow[] = [],
+  existingPrimaryImage: SneakerImageRow | null = null,
 ): CatalogLinkedModelField[] {
   if (!existing.sku) {
     return [];
@@ -75,8 +75,8 @@ export function getCatalogLinkedModelFieldViolations(
     violations.push('sku');
   }
 
-  if (haveSneakerImagesChanged(existingImages, input.images)) {
-    violations.push('images');
+  if (hasPrimaryImageChanged(existingPrimaryImage, input.primaryImage)) {
+    violations.push('primaryImage');
   }
 
   if (nullableFieldChanged(existing.catalogSource, input.catalogSource)) {
@@ -170,12 +170,14 @@ export function formatSneaker(
   row: SneakerRow,
   options: {
     marketPrice?: MarketPriceRecord | null;
-    images?: SneakerImageRow[];
+    primaryImage?: SneakerImageRow | null;
     gallery360Images?: SneakerGallery360ImageRow[];
   } = {},
 ) {
   const marketPrice = options.marketPrice;
-  const formattedImages = (options.images ?? []).map(formatSneakerImage);
+  const formattedPrimaryImage = options.primaryImage
+    ? formatPrimaryImage(options.primaryImage)
+    : null;
   const formattedGallery360Images = (options.gallery360Images ?? []).map(
     formatSneakerGallery360Image,
   );
@@ -196,7 +198,7 @@ export function formatSneaker(
     purchaseDate: formatPurchaseDate(row.purchaseDate),
     notes: row.notes,
     sku: row.sku,
-    images: formattedImages,
+    primaryImage: formattedPrimaryImage,
     gallery360Images: formattedGallery360Images,
     catalogSource: row.catalogSource as CatalogSource | null,
     catalogId: row.catalogId,
@@ -216,16 +218,16 @@ export function formatSneaker(
 
 export async function formatSneakersWithPricing(rows: SneakerRow[]) {
   const sneakerIds = rows.map((row) => row.id);
-  const [marketPrices, imagesBySneakerId, gallery360ImagesBySneakerId] = await Promise.all([
+  const [marketPrices, primaryImagesBySneakerId, gallery360ImagesBySneakerId] = await Promise.all([
     getMarketPricesForSneakers(rows),
-    getImagesForSneakerIds(sneakerIds),
+    getPrimaryImagesForSneakerIds(sneakerIds),
     getGallery360ImagesForSneakerIds(sneakerIds),
   ]);
 
   return rows.map((row) =>
     formatSneaker(row, {
       marketPrice: getMarketPriceForSneaker(row, marketPrices),
-      images: imagesBySneakerId.get(row.id) ?? [],
+      primaryImage: primaryImagesBySneakerId.get(row.id) ?? null,
       gallery360Images: gallery360ImagesBySneakerId.get(row.id) ?? [],
     }),
   );

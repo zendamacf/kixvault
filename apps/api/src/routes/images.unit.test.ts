@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from 'bun:test';
 
-const mockGetSneakerImageByKey = mock(
+const mockGetSneakerPrimaryImage = mock(
   async () =>
-    null as Awaited<ReturnType<typeof import('../lib/sneaker-images').getSneakerImageByKey>>,
+    null as Awaited<ReturnType<typeof import('../lib/sneaker-images').getSneakerPrimaryImage>>,
 );
 
 const mockGetSneakerGallery360ImageByKey = mock(
@@ -28,7 +28,7 @@ const actualSneakerGallery360Images = await import('../lib/sneaker-gallery-360-i
 
 mock.module('../lib/sneaker-images', () => ({
   ...actualSneakerImages,
-  getSneakerImageByKey: mockGetSneakerImageByKey,
+  getSneakerPrimaryImage: mockGetSneakerPrimaryImage,
 }));
 
 mock.module('../lib/sneaker-gallery-360-images', () => ({
@@ -48,7 +48,6 @@ const pendingImageRow = {
   fetchStatus: 'pending' as const,
   fetchError: null,
   fetchedAt: null,
-  sortOrder: 0,
   createdAt: new Date('2024-01-01T00:00:00.000Z'),
 };
 
@@ -65,33 +64,26 @@ const pendingGallery360Row = {
 };
 
 describe('imageRoutes', () => {
-  test('GET /:sneakerId/:sortOrder returns 400 for invalid ids', async () => {
-    const response = await imageRoutes.request('/not-a-uuid/0');
+  test('GET /:sneakerId returns 400 for invalid ids', async () => {
+    const response = await imageRoutes.request('/not-a-uuid');
 
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({ error: 'Invalid image path' });
   });
 
-  test('GET /:sneakerId/:sortOrder returns 400 for invalid sort orders', async () => {
-    const response = await imageRoutes.request(`/${sneakerId}/-1`);
+  test('GET /:sneakerId returns 404 when the image row is missing', async () => {
+    mockGetSneakerPrimaryImage.mockResolvedValueOnce(null);
 
-    expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({ error: 'Invalid image path' });
-  });
-
-  test('GET /:sneakerId/:sortOrder returns 404 when the image row is missing', async () => {
-    mockGetSneakerImageByKey.mockResolvedValueOnce(null);
-
-    const response = await imageRoutes.request(`/${sneakerId}/0`);
+    const response = await imageRoutes.request(`/${sneakerId}`);
 
     expect(response.status).toBe(404);
     await expect(response.json()).resolves.toEqual({ error: 'Image not found' });
   });
 
-  test('GET /:sneakerId/:sortOrder redirects to the source URL for pending images', async () => {
-    mockGetSneakerImageByKey.mockResolvedValueOnce(pendingImageRow);
+  test('GET /:sneakerId redirects to the source URL for pending images', async () => {
+    mockGetSneakerPrimaryImage.mockResolvedValueOnce(pendingImageRow);
 
-    const response = await imageRoutes.request(`/${sneakerId}/0`);
+    const response = await imageRoutes.request(`/${sneakerId}`);
 
     expect(response.status).toBe(302);
     expect(response.headers.get('location')).toBe('https://images.stockx.com/example.png');

@@ -107,7 +107,7 @@ function SneakerDetailPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row items-center">
               <SneakerThumbnail
-                imageUrl={sneaker.images[0]?.url ?? null}
+                imageUrl={sneaker.primaryImage?.url ?? null}
                 alt={title}
                 className="h-64 w-full max-w-xs sm:h-72"
               />

@@ -14,11 +14,10 @@ export type Sneaker = {
   purchaseDate: string | null;
   notes: string | null;
   sku: string | null;
-  images: Array<{
+  primaryImage: {
     id: string;
     url: string;
-    sortOrder: number;
-  }>;
+  } | null;
   catalogSource: string | null;
   catalogId: string | null;
   catalogUrl: string | null;

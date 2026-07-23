@@ -16,7 +16,7 @@ const validSneaker = {
   purchaseDate: '2024-06-15',
   notes: 'DS from SNKRS',
   sku: 'DZ5485-612',
-  images: ['https://images.stockx.com/example.png'],
+  primaryImage: 'https://images.stockx.com/example.png',
   catalogSource: 'kicksdb:stockx' as const,
   catalogId: 'air-jordan-1-chicago',
 };

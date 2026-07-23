@@ -11,12 +11,9 @@ mock.module('./db', () => ({
   db: {},
 }));
 
-const {
-  haveSneakerImagesChanged,
-  normalizeSneakerImageUrls,
-  formatSneakerImage,
-  getPrimaryImageUrl,
-} = await import('./sneaker-images');
+const { hasPrimaryImageChanged, normalizeSneakerImageUrls, formatPrimaryImage } = await import(
+  './sneaker-images'
+);
 
 const { buildSneakerImageStoragePath, buildSneakerGallery360ImageStoragePath } = await import(
   './sneaker-image-paths'
@@ -30,7 +27,6 @@ const baseImageRow = {
   fetchStatus: 'pending' as const,
   fetchError: null,
   fetchedAt: null,
-  sortOrder: 0,
   createdAt: new Date('2024-01-01T00:00:00.000Z'),
 };
 
@@ -71,44 +67,32 @@ describe('normalizeSneakerImageUrls', () => {
   });
 });
 
-describe('formatSneakerImage', () => {
+describe('formatPrimaryImage', () => {
   test('maps database rows to API image objects using the source URL by default', () => {
-    expect(formatSneakerImage(baseImageRow)).toEqual({
+    expect(formatPrimaryImage(baseImageRow)).toEqual({
       id: '22222222-2222-4222-8222-222222222222',
       url: 'https://images.example.com/sneaker.png',
-      sortOrder: 0,
     });
   });
 
   test('maps stored images to the local API path', () => {
     expect(
-      formatSneakerImage({
+      formatPrimaryImage({
         ...baseImageRow,
         storagePath: '11111111-1111-4111-8111-111111111111/0.webp',
         fetchStatus: 'ready',
       }),
     ).toEqual({
       id: '22222222-2222-4222-8222-222222222222',
-      url: '/api/images/11111111-1111-4111-8111-111111111111/0',
-      sortOrder: 0,
+      url: '/api/images/11111111-1111-4111-8111-111111111111',
     });
-  });
-});
-
-describe('getPrimaryImageUrl', () => {
-  test('returns the first image URL when present', () => {
-    expect(getPrimaryImageUrl([baseImageRow])).toBe('https://images.example.com/sneaker.png');
-  });
-
-  test('returns null when no images exist', () => {
-    expect(getPrimaryImageUrl([])).toBeNull();
   });
 });
 
 describe('buildSneakerImageStoragePath', () => {
   test('builds a deterministic relative storage path', () => {
-    expect(buildSneakerImageStoragePath('11111111-1111-4111-8111-111111111111', 2)).toBe(
-      '11111111-1111-4111-8111-111111111111/2.webp',
+    expect(buildSneakerImageStoragePath('11111111-1111-4111-8111-111111111111')).toBe(
+      '11111111-1111-4111-8111-111111111111/0.webp',
     );
   });
 });
@@ -121,30 +105,19 @@ describe('buildSneakerGallery360ImageStoragePath', () => {
   });
 });
 
-describe('haveSneakerImagesChanged', () => {
-  test('returns false when images are omitted from the update', () => {
-    expect(haveSneakerImagesChanged([baseImageRow], undefined)).toBe(false);
+describe('hasPrimaryImageChanged', () => {
+  test('returns false when primary image is omitted from the update', () => {
+    expect(hasPrimaryImageChanged(baseImageRow, undefined)).toBe(false);
   });
 
-  test('detects order and content changes', () => {
-    const existingImages = [
-      baseImageRow,
-      {
-        ...baseImageRow,
-        id: '33333333-3333-4333-8333-333333333333',
-        sourceUrl: 'https://images.example.com/2.png',
-        sortOrder: 1,
-      },
-    ];
-
-    expect(haveSneakerImagesChanged(existingImages, ['https://images.example.com/1.png'])).toBe(
+  test('detects content changes and clearing the image', () => {
+    expect(hasPrimaryImageChanged(baseImageRow, 'https://images.example.com/updated.png')).toBe(
       true,
     );
-    expect(
-      haveSneakerImagesChanged(existingImages, [
-        'https://images.example.com/sneaker.png',
-        'https://images.example.com/2.png',
-      ]),
-    ).toBe(false);
+    expect(hasPrimaryImageChanged(baseImageRow, 'https://images.example.com/sneaker.png')).toBe(
+      false,
+    );
+    expect(hasPrimaryImageChanged(baseImageRow, null)).toBe(true);
+    expect(hasPrimaryImageChanged(null, 'https://images.example.com/sneaker.png')).toBe(true);
   });
 });
