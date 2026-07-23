@@ -14,12 +14,6 @@ describe('buildCatalogUrl', () => {
     );
   });
 
-  test('builds GOAT URLs from slug', () => {
-    expect(buildCatalogUrl('kicksdb:goat', 'air-jordan-1-chicago-goat')).toBe(
-      'https://www.goat.com/sneakers/air-jordan-1-chicago-goat',
-    );
-  });
-
   test('returns null when slug is missing', () => {
     expect(buildCatalogUrl('kicksdb:stockx', '')).toBeNull();
   });

@@ -1,4 +1,4 @@
-const ALLOWED_IMAGE_HOSTS = new Set(['images.stockx.com', 'image.goat.com']);
+const ALLOWED_IMAGE_HOSTS = new Set(['images.stockx.com']);
 
 const STOCKX_BACKGROUND_PARAMS = ['bg', 'bg-color', 'background'] as const;
 const STOCKX_OPAQUE_FIT_MODES = new Set(['fill', 'pad']);

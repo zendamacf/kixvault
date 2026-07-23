@@ -23,10 +23,10 @@ describe('catalogSearchQuerySchema', () => {
     }
   });
 
-  test('rejects unknown query params via strict parsing when used with passthrough disabled', () => {
+  test('strips unknown query params', () => {
     const result = catalogSearchQuerySchema.safeParse({
       q: 'yeezy',
-      marketplace: 'goat',
+      marketplace: 'unused',
     });
 
     expect(result.success).toBe(true);

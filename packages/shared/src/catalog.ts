@@ -17,9 +17,5 @@ export function buildCatalogUrl(
     return `https://stockx.com/${catalogId}`;
   }
 
-  if (catalogSource === 'kicksdb:goat') {
-    return `https://www.goat.com/sneakers/${catalogId}`;
-  }
-
   return null;
 }

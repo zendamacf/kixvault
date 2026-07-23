@@ -2,12 +2,12 @@ import { describe, expect, test } from 'bun:test';
 import { isAllowedImageSourceUrl, normalizeImageSourceUrl } from './image-source-url';
 
 describe('isAllowedImageSourceUrl', () => {
-  test('allows StockX and GOAT image hosts', () => {
+  test('allows StockX image hosts', () => {
     expect(isAllowedImageSourceUrl('https://images.stockx.com/example.png')).toBe(true);
-    expect(isAllowedImageSourceUrl('https://image.goat.com/example.png')).toBe(true);
   });
 
   test('rejects unknown hosts and invalid URLs', () => {
+    expect(isAllowedImageSourceUrl('https://image.goat.com/example.png')).toBe(false);
     expect(isAllowedImageSourceUrl('https://evil.example.com/example.png')).toBe(false);
     expect(isAllowedImageSourceUrl('not-a-url')).toBe(false);
   });
@@ -34,10 +34,10 @@ describe('normalizeImageSourceUrl', () => {
     );
   });
 
-  test('leaves GOAT URLs unchanged', () => {
-    const goatUrl = 'https://image.goat.com/attachments/product_template_pictures/example.png';
+  test('leaves non-StockX URLs unchanged', () => {
+    const otherUrl = 'https://cdn.example.com/attachments/product_template_pictures/example.png';
 
-    expect(normalizeImageSourceUrl(goatUrl)).toBe(goatUrl);
+    expect(normalizeImageSourceUrl(otherUrl)).toBe(otherUrl);
   });
 
   test('returns invalid URLs unchanged', () => {

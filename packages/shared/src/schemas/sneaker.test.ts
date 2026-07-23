@@ -108,7 +108,7 @@ describe('createSneakerFromCatalogSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  test('rejects detached GOAT catalog source', () => {
+  test('rejects unsupported catalog source', () => {
     const result = createSneakerFromCatalogSchema.safeParse({
       catalogSource: 'kicksdb:goat',
       catalogId: 'air-jordan-1-chicago',
