@@ -32,6 +32,12 @@ const mockValues = mock(() => ({ returning: mockReturning }));
 const mockInsert = mock(() => ({ values: mockValues }));
 const mockDelete = mock(() => ({ where: mockWhere }));
 
+mock.module('./env', () => ({
+  env: {
+    imagePublicBasePath: '/api/images',
+  },
+}));
+
 mock.module('./db', () => ({
   db: {
     delete: mockDelete,
@@ -40,10 +46,27 @@ mock.module('./db', () => ({
 }));
 
 const {
+  formatSneakerGallery360Image,
   normalizeSneakerGallery360ImageUrls,
   replaceSneakerGallery360Images,
   insertSneakerGallery360Images,
 } = await import('./sneaker-gallery-360-images');
+
+describe('formatSneakerGallery360Image', () => {
+  test('maps stored 360 frames to API image objects', () => {
+    expect(
+      formatSneakerGallery360Image({
+        ...insertedFrames[0],
+        storagePath: '11111111-1111-4111-8111-111111111111/360/0.webp',
+        fetchStatus: 'ready',
+      }),
+    ).toEqual({
+      id: '33333333-3333-4333-8333-333333333333',
+      url: '/api/images/11111111-1111-4111-8111-111111111111/360/0',
+      sortOrder: 0,
+    });
+  });
+});
 
 describe('normalizeSneakerGallery360ImageUrls', () => {
   test('deduplicates and normalizes 360 frame URLs', () => {

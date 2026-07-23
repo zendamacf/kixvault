@@ -1,7 +1,13 @@
 import { getSneakerImageAbsolutePath } from './sneaker-image-paths';
-import type { SneakerImageRow } from './sneaker-images';
 
-export async function createSneakerImageResponse(image: SneakerImageRow | null): Promise<Response> {
+type StoredSneakerImage = {
+  sourceUrl: string;
+  storagePath: string | null;
+};
+
+export async function createSneakerImageResponse(
+  image: StoredSneakerImage | null,
+): Promise<Response> {
   if (!image) {
     return Response.json({ error: 'Image not found' }, { status: 404 });
   }

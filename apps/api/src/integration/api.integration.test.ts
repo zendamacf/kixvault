@@ -165,6 +165,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
         nickname: string | null;
         currentMarketPrice: number | null;
         images: Array<{ id: string; url: string; sortOrder: number }>;
+        gallery360Images: Array<{ id: string; url: string; sortOrder: number }>;
       };
     };
     expect(created.sneaker.nickname).toBe('Big Bubble');
@@ -174,6 +175,18 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
         id: expect.any(String),
         url: 'https://images.stockx.com/example.png?bg-remove=true',
         sortOrder: 0,
+      },
+    ]);
+    expect(created.sneaker.gallery360Images).toEqual([
+      {
+        id: expect.any(String),
+        url: 'https://images.stockx.com/360/example-01.png?bg-remove=true',
+        sortOrder: 0,
+      },
+      {
+        id: expect.any(String),
+        url: 'https://images.stockx.com/360/example-02.png?bg-remove=true',
+        sortOrder: 1,
       },
     ]);
 

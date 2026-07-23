@@ -9,6 +9,11 @@ import {
   type MarketPriceRecord,
 } from './pricing';
 import {
+  formatSneakerGallery360Image,
+  getGallery360ImagesForSneakerIds,
+  type SneakerGallery360ImageRow,
+} from './sneaker-gallery-360-images';
+import {
   formatSneakerImage,
   getImagesForSneakerIds,
   haveSneakerImagesChanged,
@@ -166,10 +171,14 @@ export function formatSneaker(
   options: {
     marketPrice?: MarketPriceRecord | null;
     images?: SneakerImageRow[];
+    gallery360Images?: SneakerGallery360ImageRow[];
   } = {},
 ) {
   const marketPrice = options.marketPrice;
   const formattedImages = (options.images ?? []).map(formatSneakerImage);
+  const formattedGallery360Images = (options.gallery360Images ?? []).map(
+    formatSneakerGallery360Image,
+  );
   const currentMarketPrice = marketPrice?.price ?? null;
   const pricedAt = marketPrice?.pricedAt.toISOString() ?? null;
   const gainLoss = computeGainLoss(row.purchasePrice, currentMarketPrice);
@@ -188,6 +197,7 @@ export function formatSneaker(
     notes: row.notes,
     sku: row.sku,
     images: formattedImages,
+    gallery360Images: formattedGallery360Images,
     catalogSource: row.catalogSource as CatalogSource | null,
     catalogId: row.catalogId,
     releaseDate: formatPurchaseDate(row.releaseDate),
@@ -205,15 +215,18 @@ export function formatSneaker(
 }
 
 export async function formatSneakersWithPricing(rows: SneakerRow[]) {
-  const [marketPrices, imagesBySneakerId] = await Promise.all([
+  const sneakerIds = rows.map((row) => row.id);
+  const [marketPrices, imagesBySneakerId, gallery360ImagesBySneakerId] = await Promise.all([
     getMarketPricesForSneakers(rows),
-    getImagesForSneakerIds(rows.map((row) => row.id)),
+    getImagesForSneakerIds(sneakerIds),
+    getGallery360ImagesForSneakerIds(sneakerIds),
   ]);
 
   return rows.map((row) =>
     formatSneaker(row, {
       marketPrice: getMarketPriceForSneaker(row, marketPrices),
       images: imagesBySneakerId.get(row.id) ?? [],
+      gallery360Images: gallery360ImagesBySneakerId.get(row.id) ?? [],
     }),
   );
 }
