@@ -1,7 +1,12 @@
-import { sneakerImages } from '@kixvault/db';
+import { sneakerGallery360Images, sneakerImages } from '@kixvault/db';
 import { inArray } from 'drizzle-orm';
 import { db } from './db';
-import { fetchAndStoreSneakerImage, getSneakerImageById } from './image-fetch';
+import {
+  fetchAndStoreSneakerGallery360Image,
+  fetchAndStoreSneakerImage,
+  getSneakerGallery360ImageById,
+  getSneakerImageById,
+} from './image-fetch';
 
 export type BackfillImageStorageOptions = {
   delayMs?: number;
@@ -28,7 +33,7 @@ export async function backfillImageStorage(
   const delayMs = options.delayMs ?? 500;
   const log = options.onProgress ?? (() => {});
 
-  const rows = await db
+  const primaryImageRows = await db
     .select({ id: sneakerImages.id })
     .from(sneakerImages)
     .where(
@@ -37,40 +42,76 @@ export async function backfillImageStorage(
         options.reprocess ? ['pending', 'failed', 'ready'] : ['pending', 'failed'],
       ),
     );
+  log(`Found ${primaryImageRows.length} primary images to process`);
 
   const failures: BackfillImageStorageResult['failures'] = [];
   let imagesReady = 0;
 
-  for (const row of rows) {
-    try {
-      await fetchAndStoreSneakerImage(row.id, { force: options.reprocess });
-      const image = await getSneakerImageById(row.id);
+  await Promise.all(
+    primaryImageRows.map(async (row) => {
+      try {
+        await fetchAndStoreSneakerImage(row.id, { force: options.reprocess });
+        const image = await getSneakerImageById(row.id);
 
-      if (image?.fetchStatus === 'ready') {
-        imagesReady += 1;
-        log(`Stored image ${row.id}`);
-      } else {
+        if (image?.fetchStatus === 'ready') {
+          imagesReady += 1;
+          log(`Stored primary image ${row.id}`);
+        } else {
+          failures.push({
+            imageId: row.id,
+            error: image?.fetchError ?? 'Primary image fetch did not complete',
+          });
+          log(`Failed to store primary image ${row.id}: ${failures.at(-1)?.error}`);
+        }
+      } catch (error) {
         failures.push({
           imageId: row.id,
-          error: image?.fetchError ?? 'Image fetch did not complete',
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
-        log(`Failed to store image ${row.id}: ${failures.at(-1)?.error}`);
+        log(`Failed to store primary image ${row.id}: ${failures.at(-1)?.error}`);
       }
-    } catch (error) {
-      failures.push({
-        imageId: row.id,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-      log(`Failed to store image ${row.id}: ${failures.at(-1)?.error}`);
-    }
+    }),
+  );
 
-    if (delayMs > 0) {
-      await sleep(delayMs);
-    }
-  }
+  const galleryImageRows = await db
+    .select({ id: sneakerGallery360Images.id })
+    .from(sneakerGallery360Images)
+    .where(
+      inArray(
+        sneakerGallery360Images.fetchStatus,
+        options.reprocess ? ['pending', 'failed', 'ready'] : ['pending', 'failed'],
+      ),
+    );
+  log(`Found ${galleryImageRows.length} gallery images to process`);
+
+  await Promise.all(
+    galleryImageRows.map(async (row) => {
+      try {
+        await fetchAndStoreSneakerGallery360Image(row.id, { force: options.reprocess });
+        const image = await getSneakerGallery360ImageById(row.id);
+
+        if (image?.fetchStatus === 'ready') {
+          imagesReady += 1;
+          log(`Stored gallery image ${row.id}`);
+        } else {
+          failures.push({
+            imageId: row.id,
+            error: image?.fetchError ?? 'Gallery image fetch did not complete',
+          });
+          log(`Failed to store gallery image ${row.id}: ${failures.at(-1)?.error}`);
+        }
+      } catch (error) {
+        failures.push({
+          imageId: row.id,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        log(`Failed to store gallery image ${row.id}: ${failures.at(-1)?.error}`);
+      }
+    }),
+  );
 
   return {
-    imagesProcessed: rows.length,
+    imagesProcessed: primaryImageRows.length + galleryImageRows.length,
     imagesReady,
     failures,
   };

@@ -1,3 +1,4 @@
+import type { SneakerCondition } from '@kixvault/shared';
 import { queryOptions } from '@tanstack/react-query';
 import { api } from './api';
 
@@ -9,7 +10,7 @@ export type Sneaker = {
   colorway: string | null;
   nickname: string | null;
   size: number;
-  condition: string;
+  condition: SneakerCondition;
   purchasePrice: number | null;
   purchaseDate: string | null;
   notes: string | null;
@@ -77,7 +78,7 @@ export const statsQueryOptions = queryOptions({
 
 export function sneakersQueryOptions(filters: {
   search?: string;
-  condition?: string;
+  condition?: SneakerCondition;
   sort?: string;
   order?: string;
 }) {
@@ -87,12 +88,7 @@ export function sneakersQueryOptions(filters: {
       const response = await api.api.sneakers.$get({
         query: {
           search: filters.search || undefined,
-          condition: filters.condition as
-            | 'deadstock'
-            | 'lightly_worn'
-            | 'worn'
-            | 'beat'
-            | undefined,
+          condition: filters.condition,
           sort:
             (filters.sort as 'created_at' | 'purchase_date' | 'purchase_price' | 'brand') ??
             'created_at',
