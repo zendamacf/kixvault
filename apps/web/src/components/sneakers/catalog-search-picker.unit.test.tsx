@@ -16,7 +16,7 @@ const stockxResult: CatalogSearchResult = {
   nickname: 'Chicago',
   sku: 'DZ5485-612',
   imageUrl: 'https://images.stockx.com/chicago.png',
-  imageUrls: ['https://images.stockx.com/chicago.png'],
+  gallery360Urls: ['https://images.stockx.com/chicago.png'],
   releaseDate: '2015-04-25',
   description: 'Released in 1985, the Air Jordan 1 changed basketball forever.',
 };

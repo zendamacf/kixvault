@@ -18,7 +18,9 @@ const {
   getPrimaryImageUrl,
 } = await import('./sneaker-images');
 
-const { buildSneakerImageStoragePath } = await import('./sneaker-image-paths');
+const { buildSneakerImageStoragePath, buildSneakerGallery360ImageStoragePath } = await import(
+  './sneaker-image-paths'
+);
 
 const baseImageRow = {
   id: '22222222-2222-4222-8222-222222222222',
@@ -107,6 +109,14 @@ describe('buildSneakerImageStoragePath', () => {
   test('builds a deterministic relative storage path', () => {
     expect(buildSneakerImageStoragePath('11111111-1111-4111-8111-111111111111', 2)).toBe(
       '11111111-1111-4111-8111-111111111111/2.webp',
+    );
+  });
+});
+
+describe('buildSneakerGallery360ImageStoragePath', () => {
+  test('stores 360 frames under a dedicated subdirectory', () => {
+    expect(buildSneakerGallery360ImageStoragePath('11111111-1111-4111-8111-111111111111', 3)).toBe(
+      '11111111-1111-4111-8111-111111111111/360/3.webp',
     );
   });
 });

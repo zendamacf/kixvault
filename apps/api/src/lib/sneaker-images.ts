@@ -1,4 +1,4 @@
-import { sneakerImages } from '@kixvault/db';
+import { sneakerImages, sneakers } from '@kixvault/db';
 import { asc, eq, inArray } from 'drizzle-orm';
 import { db } from './db';
 import { normalizeImageSourceUrl } from './image-source-url';
@@ -87,6 +87,33 @@ export async function getSneakerImageByKey(
     .where(eq(sneakerImages.sneakerId, sneakerId));
 
   return images.find((image) => image.sortOrder === sortOrder) ?? null;
+}
+
+export async function replaceSneakerPrimaryImage(
+  sneakerId: string,
+  url: string | null | undefined,
+): Promise<SneakerImageRow | null> {
+  await db.delete(sneakerImages).where(eq(sneakerImages.sneakerId, sneakerId));
+  await db.update(sneakers).set({ primaryImageId: null }).where(eq(sneakers.id, sneakerId));
+
+  const normalizedUrl = normalizeSneakerImageUrls([url])[0];
+
+  if (!normalizedUrl) {
+    return null;
+  }
+
+  const [image] = await db
+    .insert(sneakerImages)
+    .values({
+      sneakerId,
+      sourceUrl: normalizedUrl,
+      sortOrder: 0,
+    })
+    .returning();
+
+  await db.update(sneakers).set({ primaryImageId: image.id }).where(eq(sneakers.id, sneakerId));
+
+  return image;
 }
 
 export async function insertSneakerImages(

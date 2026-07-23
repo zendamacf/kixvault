@@ -1,5 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, mock, test } from 'bun:test';
+import { sneakerGallery360Images, sneakerImages, sneakers } from '@kixvault/db';
 import type { CreateSneakerFromCatalogInput, CreateSneakerInput } from '@kixvault/shared';
+import { eq } from 'drizzle-orm';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import type { app as AppType } from '../app';
 import {
   getSessionCookie,
@@ -114,7 +118,11 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
             secondary_title: 'Big Bubble',
             sku: '319986-171',
             image: 'https://images.stockx.com/example.png',
-            gallery: [],
+            gallery: ['https://images.stockx.com/example-gallery.png'],
+            gallery_360: [
+              'https://images.stockx.com/360/example-01.png',
+              'https://images.stockx.com/360/example-02.png',
+            ],
             traits: [],
             variants: [
               {
@@ -168,6 +176,44 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
         sortOrder: 0,
       },
     ]);
+
+    const client = postgres(connectionString, { max: 1 });
+    const db = drizzle(client);
+
+    try {
+      const [sneakerRow] = await db
+        .select({
+          primaryImageId: sneakers.primaryImageId,
+        })
+        .from(sneakers)
+        .where(eq(sneakers.id, created.sneaker.id));
+
+      const primaryImages = await db
+        .select()
+        .from(sneakerImages)
+        .where(eq(sneakerImages.sneakerId, created.sneaker.id));
+
+      const gallery360Images = await db
+        .select()
+        .from(sneakerGallery360Images)
+        .where(eq(sneakerGallery360Images.sneakerId, created.sneaker.id))
+        .orderBy(sneakerGallery360Images.sortOrder);
+
+      expect(sneakerRow?.primaryImageId).toBe(primaryImages[0]?.id);
+      expect(primaryImages).toHaveLength(1);
+      expect(gallery360Images).toEqual([
+        expect.objectContaining({
+          sortOrder: 0,
+          sourceUrl: 'https://images.stockx.com/360/example-01.png?bg-remove=true',
+        }),
+        expect.objectContaining({
+          sortOrder: 1,
+          sourceUrl: 'https://images.stockx.com/360/example-02.png?bg-remove=true',
+        }),
+      ]);
+    } finally {
+      await client.end({ timeout: 5 });
+    }
   });
 
   test('POST /api/sneakers/from-catalog returns 400 for invalid catalog product', async () => {
