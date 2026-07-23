@@ -56,18 +56,24 @@ export function normalizeSizeValue(size: number | string): string {
   return numericSize.toFixed(1);
 }
 
+/** StockX often reports $0 when there is no ask; treat those as missing. */
+export function normalizeMarketPrice(price: number | null | undefined): number | null {
+  if (typeof price !== 'number' || !Number.isFinite(price) || price <= 0) {
+    return null;
+  }
+
+  return price;
+}
+
 function getStandardVariantPrice(variant: PricedVariant): number | null {
   const standardPrice = variant.prices?.find((entry) => entry.type === 'standard')?.price;
+  const fromStandard = normalizeMarketPrice(standardPrice);
 
-  if (typeof standardPrice === 'number' && Number.isFinite(standardPrice)) {
-    return standardPrice;
+  if (fromStandard !== null) {
+    return fromStandard;
   }
 
-  if (typeof variant.lowest_ask === 'number' && Number.isFinite(variant.lowest_ask)) {
-    return variant.lowest_ask;
-  }
-
-  return null;
+  return normalizeMarketPrice(variant.lowest_ask);
 }
 
 export function extractVariantPrices(product: StockXProduct): VariantPrice[] {
@@ -256,6 +262,12 @@ export async function storeMarketPriceAndSnapshot(input: {
   variantId?: string | null;
   currency?: string;
 }): Promise<void> {
+  const price = normalizeMarketPrice(input.price);
+
+  if (price === null) {
+    return;
+  }
+
   const now = new Date();
   const sizeValue = input.size.toString();
   const currency = input.currency ?? 'USD';
@@ -266,7 +278,7 @@ export async function storeMarketPriceAndSnapshot(input: {
       catalogSource: input.catalogSource,
       sku: input.sku,
       size: sizeValue,
-      price: input.price.toString(),
+      price: price.toString(),
       currency,
       pricedAt: now,
       variantId: input.variantId ?? null,
@@ -278,7 +290,7 @@ export async function storeMarketPriceAndSnapshot(input: {
         catalogMarketPrices.size,
       ],
       set: {
-        price: input.price.toString(),
+        price: price.toString(),
         currency,
         pricedAt: now,
         variantId: input.variantId ?? null,
@@ -292,7 +304,7 @@ export async function storeMarketPriceAndSnapshot(input: {
       sku: input.sku,
       size: sizeValue,
       snapshotDate: getSnapshotDate(),
-      price: input.price.toString(),
+      price: price.toString(),
       currency,
     })
     .onConflictDoNothing();
@@ -346,9 +358,15 @@ export async function getMarketPricesForSneakers(
   const prices = new Map<string, MarketPriceRecord>();
 
   for (const row of priceRows) {
+    const price = normalizeMarketPrice(Number(row.price));
+
+    if (price === null) {
+      continue;
+    }
+
     const key = `${row.catalogSource}:${row.sku}:${normalizeSizeValue(row.size)}`;
     prices.set(key, {
-      price: Number(row.price),
+      price,
       pricedAt: row.pricedAt,
       currency: row.currency,
     });
@@ -374,11 +392,13 @@ export function computeGainLoss(
   purchasePrice: string | null,
   marketPrice: number | null,
 ): number | null {
-  if (marketPrice === null || !purchasePrice) {
+  const normalizedMarketPrice = normalizeMarketPrice(marketPrice);
+
+  if (normalizedMarketPrice === null || !purchasePrice) {
     return null;
   }
 
-  return marketPrice - Number(purchasePrice);
+  return normalizedMarketPrice - Number(purchasePrice);
 }
 
 export type PriceSnapshotEntry = {
@@ -408,9 +428,19 @@ export async function getPriceSnapshotsForSneaker(row: SneakerRow): Promise<Pric
     )
     .orderBy(desc(priceSnapshots.snapshotDate));
 
-  return snapshots.map((snapshot) => ({
-    snapshotDate: snapshot.snapshotDate.toISOString().slice(0, 10),
-    price: Number(snapshot.price),
-    currency: snapshot.currency,
-  }));
+  return snapshots.flatMap((snapshot) => {
+    const price = normalizeMarketPrice(Number(snapshot.price));
+
+    if (price === null) {
+      return [];
+    }
+
+    return [
+      {
+        snapshotDate: snapshot.snapshotDate.toISOString().slice(0, 10),
+        price,
+        currency: snapshot.currency,
+      },
+    ];
+  });
 }
