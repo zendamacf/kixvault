@@ -9,7 +9,6 @@ import {
 } from './image-fetch';
 
 export type BackfillImageStorageOptions = {
-  delayMs?: number;
   onProgress?: (message: string) => void;
   reprocess?: boolean;
 };
@@ -20,17 +19,10 @@ export type BackfillImageStorageResult = {
   failures: Array<{ imageId: string; error: string }>;
 };
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
 /** Download and convert pending or failed sneaker images to local WebP storage. */
 export async function backfillImageStorage(
   options: BackfillImageStorageOptions = {},
 ): Promise<BackfillImageStorageResult> {
-  const delayMs = options.delayMs ?? 500;
   const log = options.onProgress ?? (() => {});
 
   const primaryImageRows = await db

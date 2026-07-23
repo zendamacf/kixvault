@@ -37,7 +37,7 @@ describe('backfillImageStorage', () => {
     mockFetchAndStoreSneakerImage.mockClear();
     mockGetSneakerImageById.mockClear();
 
-    const result = await backfillImageStorage({ delayMs: 0 });
+    const result = await backfillImageStorage();
 
     expect(mockFetchAndStoreSneakerImage).toHaveBeenCalledWith('image-1', { force: undefined });
     expect(result).toEqual({
