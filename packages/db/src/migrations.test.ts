@@ -57,6 +57,7 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       'price_snapshots',
       'pricing_refresh_runs',
       'sessions',
+      'sneaker_gallery_360_images',
       'sneaker_images',
       'sneakers',
       'users',
@@ -84,6 +85,7 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       'model',
       'nickname',
       'notes',
+      'primary_image_id',
       'purchase_date',
       'purchase_price',
       'release_date',
@@ -101,6 +103,28 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       FROM information_schema.columns
       WHERE table_schema = 'public'
         AND table_name = 'sneaker_images'
+      ORDER BY column_name
+    `;
+
+    expect(columns.map((row) => row.column_name)).toEqual([
+      'created_at',
+      'fetch_error',
+      'fetch_status',
+      'fetched_at',
+      'id',
+      'sneaker_id',
+      'sort_order',
+      'source_url',
+      'storage_path',
+    ]);
+  });
+
+  test('creates sneaker_gallery_360_images table columns', async () => {
+    const columns = await client<{ column_name: string }[]>`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'sneaker_gallery_360_images'
       ORDER BY column_name
     `;
 

@@ -2,7 +2,7 @@ import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
 import { SneakerImageCarousel } from '@/components/sneakers/sneaker-image-carousel';
 
 export type CatalogSneakerSummaryData = {
-  imageUrls: string[];
+  imageUrl: string | null;
   title: string;
   brand: string;
   nickname?: string | null;
@@ -16,7 +16,7 @@ type CatalogSneakerSummaryProps = {
 
 /** Read-only product summary shown when adding or editing a catalog-linked sneaker. */
 export function CatalogSneakerSummary({ sneaker }: CatalogSneakerSummaryProps) {
-  const images = sneaker.imageUrls.map((url, index) => ({ id: `${url}-${index}`, url }));
+  const images = sneaker.imageUrl ? [{ id: sneaker.imageUrl, url: sneaker.imageUrl }] : [];
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border bg-background/60 p-4 sm:flex-row sm:items-center">

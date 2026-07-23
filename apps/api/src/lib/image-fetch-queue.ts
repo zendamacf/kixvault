@@ -1,13 +1,22 @@
-import { fetchAndStoreSneakerImage } from './image-fetch';
+import { fetchAndStoreSneakerImage, type SneakerImageKind } from './image-fetch';
 
 const MAX_CONCURRENCY = 3;
 const MAX_RETRIES = 3;
 const BASE_RETRY_DELAY_MS = 1_000;
 
-const queue: string[] = [];
-const queuedIds = new Set<string>();
-const inFlightIds = new Set<string>();
+type QueuedImageFetch = {
+  id: string;
+  kind: SneakerImageKind;
+};
+
+const queue: QueuedImageFetch[] = [];
+const queuedKeys = new Set<string>();
+const inFlightKeys = new Set<string>();
 let activeWorkers = 0;
+
+function getQueueKey(image: QueuedImageFetch): string {
+  return `${image.kind}:${image.id}`;
+}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -15,10 +24,10 @@ function sleep(ms: number): Promise<void> {
   });
 }
 
-async function runWithRetries(imageId: string): Promise<void> {
+async function runWithRetries(image: QueuedImageFetch): Promise<void> {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
     try {
-      await fetchAndStoreSneakerImage(imageId);
+      await fetchAndStoreSneakerImage(image.id, { kind: image.kind });
       return;
     } catch {
       if (attempt === MAX_RETRIES) {
@@ -32,18 +41,19 @@ async function runWithRetries(imageId: string): Promise<void> {
 
 function pumpQueue(): void {
   while (activeWorkers < MAX_CONCURRENCY && queue.length > 0) {
-    const imageId = queue.shift();
+    const image = queue.shift();
 
-    if (!imageId) {
+    if (!image) {
       return;
     }
 
-    queuedIds.delete(imageId);
-    inFlightIds.add(imageId);
+    const queueKey = getQueueKey(image);
+    queuedKeys.delete(queueKey);
+    inFlightKeys.add(queueKey);
     activeWorkers += 1;
 
-    void runWithRetries(imageId).finally(() => {
-      inFlightIds.delete(imageId);
+    void runWithRetries(image).finally(() => {
+      inFlightKeys.delete(queueKey);
       activeWorkers -= 1;
       pumpQueue();
     });
@@ -51,14 +61,22 @@ function pumpQueue(): void {
 }
 
 /** Queue sneaker images for asynchronous download and conversion. */
-export function enqueueImageFetches(imageIds: string[]): void {
+export function enqueueImageFetches(
+  imageIds: string[],
+  options: { kind?: SneakerImageKind } = {},
+): void {
+  const kind = options.kind ?? 'primary';
+
   for (const imageId of imageIds) {
-    if (queuedIds.has(imageId) || inFlightIds.has(imageId)) {
+    const queuedImage = { id: imageId, kind };
+    const queueKey = getQueueKey(queuedImage);
+
+    if (queuedKeys.has(queueKey) || inFlightKeys.has(queueKey)) {
       continue;
     }
 
-    queuedIds.add(imageId);
-    queue.push(imageId);
+    queuedKeys.add(queueKey);
+    queue.push(queuedImage);
   }
 
   pumpQueue();
@@ -67,7 +85,7 @@ export function enqueueImageFetches(imageIds: string[]): void {
 /** @internal Test helper */
 export function resetImageFetchQueueForTests(): void {
   queue.length = 0;
-  queuedIds.clear();
-  inFlightIds.clear();
+  queuedKeys.clear();
+  inFlightKeys.clear();
   activeWorkers = 0;
 }

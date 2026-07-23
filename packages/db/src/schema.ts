@@ -1,5 +1,6 @@
 import { relations, type SQL, sql } from 'drizzle-orm';
 import {
+  type AnyPgColumn,
   date,
   index,
   integer,
@@ -67,13 +68,19 @@ export const sneakers = pgTable(
               setweight(to_tsvector('simple', coalesce(${sneakers.sku}, '')), 'A') ||
               setweight(to_tsvector('english', coalesce(${sneakers.notes}, '')), 'C')`,
       ),
+    primaryImageId: uuid('primary_image_id').references((): AnyPgColumn => sneakerImages.id, {
+      onDelete: 'set null',
+    }),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (table) => [index('sneakers_search_vector_idx').using('gin', table.searchVector)],
+  (table) => [
+    index('sneakers_search_vector_idx').using('gin', table.searchVector),
+    unique('sneakers_primary_image_id_unique').on(table.primaryImageId),
+  ],
 );
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -117,17 +124,53 @@ export const sneakerImages = pgTable(
   ],
 );
 
+export const sneakerGallery360Images = pgTable(
+  'sneaker_gallery_360_images',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    sneakerId: uuid('sneaker_id')
+      .notNull()
+      .references(() => sneakers.id, { onDelete: 'cascade' }),
+    sourceUrl: text('source_url').notNull(),
+    storagePath: text('storage_path'),
+    fetchStatus: sneakerImageFetchStatusEnum('fetch_status').notNull().default('pending'),
+    fetchError: text('fetch_error'),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true, mode: 'date' }),
+    sortOrder: integer('sort_order').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('sneaker_gallery_360_images_sneaker_id_idx').on(table.sneakerId),
+    unique('sneaker_gallery_360_images_sneaker_id_sort_order_unique').on(
+      table.sneakerId,
+      table.sortOrder,
+    ),
+  ],
+);
+
 export const sneakersRelations = relations(sneakers, ({ one, many }) => ({
   user: one(users, {
     fields: [sneakers.userId],
     references: [users.id],
   }),
+  primaryImage: one(sneakerImages, {
+    fields: [sneakers.primaryImageId],
+    references: [sneakerImages.id],
+  }),
   images: many(sneakerImages),
+  gallery360Images: many(sneakerGallery360Images),
 }));
 
 export const sneakerImagesRelations = relations(sneakerImages, ({ one }) => ({
   sneaker: one(sneakers, {
     fields: [sneakerImages.sneakerId],
+    references: [sneakers.id],
+  }),
+}));
+
+export const sneakerGallery360ImagesRelations = relations(sneakerGallery360Images, ({ one }) => ({
+  sneaker: one(sneakers, {
+    fields: [sneakerGallery360Images.sneakerId],
     references: [sneakers.id],
   }),
 }));

@@ -3,7 +3,8 @@ import { type CatalogSource, catalogSources } from '@kixvault/shared';
 import { and, isNotNull } from 'drizzle-orm';
 import { fetchCatalogProduct } from './catalog';
 import { db } from './db';
-import { replaceSneakerImages } from './sneaker-images';
+import { replaceSneakerGallery360Images } from './sneaker-gallery-360-images';
+import { replaceSneakerPrimaryImage } from './sneaker-images';
 
 export type BackfillSneakerImagesOptions = {
   delayMs?: number;
@@ -17,13 +18,18 @@ export type BackfillSneakerImagesResult = {
   failures: Array<{ sneakerId: string; error: string }>;
 };
 
+type CatalogImages = {
+  imageUrl: string | null;
+  gallery360Urls: string[];
+};
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
 
-/** Re-fetch catalog gallery images for existing catalog-linked sneakers. */
+/** Re-fetch catalog primary and 360 gallery images for existing catalog-linked sneakers. */
 export async function backfillSneakerImages(
   options: BackfillSneakerImagesOptions = {},
 ): Promise<BackfillSneakerImagesResult> {
@@ -39,7 +45,7 @@ export async function backfillSneakerImages(
     .from(sneakers)
     .where(and(isNotNull(sneakers.catalogSource), isNotNull(sneakers.catalogId)));
 
-  const imageUrlsByCatalogKey = new Map<string, string[]>();
+  const imagesByCatalogKey = new Map<string, CatalogImages>();
   const failures: BackfillSneakerImagesResult['failures'] = [];
   let sneakersUpdated = 0;
   let catalogProductsFetched = 0;
@@ -55,12 +61,15 @@ export async function backfillSneakerImages(
     const catalogKey = `${catalogSource}:${catalogId}`;
 
     try {
-      let imageUrls = imageUrlsByCatalogKey.get(catalogKey);
+      let catalogImages = imagesByCatalogKey.get(catalogKey);
 
-      if (!imageUrls) {
+      if (!catalogImages) {
         const product = await fetchCatalogProduct(catalogSource, catalogId);
-        imageUrls = product.imageUrls;
-        imageUrlsByCatalogKey.set(catalogKey, imageUrls);
+        catalogImages = {
+          imageUrl: product.imageUrl,
+          gallery360Urls: product.gallery360Urls,
+        };
+        imagesByCatalogKey.set(catalogKey, catalogImages);
         catalogProductsFetched += 1;
         log(`Fetched ${catalogProductsFetched} catalog products (${catalogKey})`);
 
@@ -69,7 +78,8 @@ export async function backfillSneakerImages(
         }
       }
 
-      await replaceSneakerImages(row.id, imageUrls);
+      await replaceSneakerPrimaryImage(row.id, catalogImages.imageUrl);
+      await replaceSneakerGallery360Images(row.id, catalogImages.gallery360Urls);
       sneakersUpdated += 1;
     } catch (error) {
       failures.push({

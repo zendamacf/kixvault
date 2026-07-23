@@ -56,7 +56,7 @@ export function catalogProductQueryOptions(catalogId: string) {
             nickname: null,
             sku: '',
             imageUrl: null,
-            imageUrls: [],
+            gallery360Urls: [],
             releaseDate: null,
             description: null,
           },

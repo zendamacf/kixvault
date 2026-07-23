@@ -15,7 +15,7 @@ const catalogResult: CatalogSearchResult = {
   nickname: 'Chicago',
   sku: 'DZ5485-612',
   imageUrl: 'https://images.stockx.com/chicago.png',
-  imageUrls: ['https://images.stockx.com/chicago.png'],
+  gallery360Urls: ['https://images.stockx.com/chicago.png'],
   releaseDate: '2016-12-13',
   description: 'Released in December 2016, the Nike SB Dunk Low Pro OG QS.',
 };

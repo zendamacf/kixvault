@@ -28,6 +28,10 @@ const stockxProduct = {
   sku: 'DZ5485-612',
   image: 'https://images.stockx.com/chicago.png',
   gallery: ['https://images.stockx.com/chicago-alt.png'],
+  gallery_360: [
+    'https://images.stockx.com/360/chicago-01.png',
+    'https://images.stockx.com/360/chicago-02.png',
+  ],
   link: 'https://stockx.com/air-jordan-1-chicago',
   description: '<p>Released in 1985, the Air Jordan 1 changed basketball forever.</p>',
   traits: [{ trait: 'Release Date', value: '2015-04-25' }],
@@ -47,29 +51,42 @@ describe('catalog normalization', () => {
       nickname: 'Chicago',
       sku: 'DZ5485-612',
       imageUrl: 'https://images.stockx.com/chicago.png?bg-remove=true',
-      imageUrls: [
-        'https://images.stockx.com/chicago.png?bg-remove=true',
-        'https://images.stockx.com/chicago-alt.png?bg-remove=true',
+      gallery360Urls: [
+        'https://images.stockx.com/360/chicago-01.png?bg-remove=true',
+        'https://images.stockx.com/360/chicago-02.png?bg-remove=true',
       ],
       releaseDate: '2015-04-25',
       description: 'Released in 1985, the Air Jordan 1 changed basketball forever.',
     });
   });
 
-  test('extractStockxImageUrls deduplicates the primary image from gallery URLs', async () => {
-    const { extractStockxImageUrls } = await import('./catalog');
+  test('extractStockxPrimaryImageUrl uses only the primary image', async () => {
+    const { extractStockxPrimaryImageUrl } = await import('./catalog');
+
+    expect(extractStockxPrimaryImageUrl(stockxProduct)).toBe(
+      'https://images.stockx.com/chicago.png?bg-remove=true',
+    );
+  });
+
+  test('extractStockxGallery360Urls ignores the regular gallery', async () => {
+    const { extractStockxGallery360Urls } = await import('./catalog');
 
     expect(
-      extractStockxImageUrls({
+      extractStockxGallery360Urls({
         ...stockxProduct,
         gallery: [
           'https://images.stockx.com/chicago.png',
           'https://images.stockx.com/chicago-alt.png',
         ],
+        gallery_360: [
+          'https://images.stockx.com/360/chicago-01.png',
+          'https://images.stockx.com/360/chicago-01.png',
+          'https://images.stockx.com/360/chicago-02.png',
+        ],
       } as StockXProduct),
     ).toEqual([
-      'https://images.stockx.com/chicago.png?bg-remove=true',
-      'https://images.stockx.com/chicago-alt.png?bg-remove=true',
+      'https://images.stockx.com/360/chicago-01.png?bg-remove=true',
+      'https://images.stockx.com/360/chicago-02.png?bg-remove=true',
     ]);
   });
 });

@@ -23,7 +23,9 @@ import {
   getImagesForSneakerIds,
   insertSneakerImages,
   replaceSneakerImages,
+  replaceSneakerPrimaryImage,
 } from '../lib/sneaker-images';
+import { replaceSneakerGallery360Images } from '../lib/sneaker-gallery-360-images';
 import {
   buildSneakerSearchCondition,
   buildSneakerUpdate,
@@ -112,9 +114,28 @@ export const sneakerRoutes = new Hono<ApiEnv>()
           })
           .returning();
 
-        if (catalogProduct.imageUrls.length > 0) {
-          const images = await insertSneakerImages(row.id, catalogProduct.imageUrls);
-          enqueueImageFetches(images.map((image) => image.id));
+        const imageFetchIds: Array<{ id: string; kind: 'primary' | 'gallery360' }> = [];
+
+        if (catalogProduct.imageUrl) {
+          const primaryImage = await replaceSneakerPrimaryImage(row.id, catalogProduct.imageUrl);
+
+          if (primaryImage) {
+            imageFetchIds.push({ id: primaryImage.id, kind: 'primary' });
+          }
+        }
+
+        if (catalogProduct.gallery360Urls.length > 0) {
+          const gallery360Images = await replaceSneakerGallery360Images(
+            row.id,
+            catalogProduct.gallery360Urls,
+          );
+          imageFetchIds.push(
+            ...gallery360Images.map((image) => ({ id: image.id, kind: 'gallery360' as const })),
+          );
+        }
+
+        for (const imageFetch of imageFetchIds) {
+          enqueueImageFetches([imageFetch.id], { kind: imageFetch.kind });
         }
 
         const matchedPrice = matchVariantPrice(input.size, variantPrices);

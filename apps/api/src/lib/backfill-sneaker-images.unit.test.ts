@@ -10,19 +10,27 @@ const mockFetchCatalogProduct = mock(async () => ({
   nickname: 'Big Bubble',
   sku: 'TEST-SKU-001',
   imageUrl: 'https://images.example.com/primary.png',
-  imageUrls: ['https://images.example.com/primary.png', 'https://images.example.com/gallery.png'],
+  gallery360Urls: [
+    'https://images.example.com/360-01.png',
+    'https://images.example.com/360-02.png',
+  ],
   releaseDate: '2015-04-25',
   description: 'The original Air Max with visible Air cushioning.',
 }));
 
-const mockReplaceSneakerImages = mock(async () => []);
+const mockReplaceSneakerPrimaryImage = mock(async () => null);
+const mockReplaceSneakerGallery360Images = mock(async () => []);
 
 mock.module('./catalog', () => ({
   fetchCatalogProduct: mockFetchCatalogProduct,
 }));
 
 mock.module('./sneaker-images', () => ({
-  replaceSneakerImages: mockReplaceSneakerImages,
+  replaceSneakerPrimaryImage: mockReplaceSneakerPrimaryImage,
+}));
+
+mock.module('./sneaker-gallery-360-images', () => ({
+  replaceSneakerGallery360Images: mockReplaceSneakerGallery360Images,
 }));
 
 mock.module('./db', () => ({
@@ -51,7 +59,8 @@ const { backfillSneakerImages } = await import('./backfill-sneaker-images');
 describe('backfillSneakerImages', () => {
   beforeEach(() => {
     mockFetchCatalogProduct.mockClear();
-    mockReplaceSneakerImages.mockClear();
+    mockReplaceSneakerPrimaryImage.mockClear();
+    mockReplaceSneakerGallery360Images.mockClear();
   });
 
   test('reuses catalog fetches for sneakers with the same catalog product', async () => {
@@ -64,10 +73,18 @@ describe('backfillSneakerImages', () => {
       failures: [],
     });
     expect(mockFetchCatalogProduct).toHaveBeenCalledTimes(1);
-    expect(mockReplaceSneakerImages).toHaveBeenCalledTimes(2);
-    expect(mockReplaceSneakerImages).toHaveBeenCalledWith('11111111-1111-4111-8111-111111111111', [
+    expect(mockReplaceSneakerPrimaryImage).toHaveBeenCalledTimes(2);
+    expect(mockReplaceSneakerGallery360Images).toHaveBeenCalledTimes(2);
+    expect(mockReplaceSneakerPrimaryImage).toHaveBeenCalledWith(
+      '11111111-1111-4111-8111-111111111111',
       'https://images.example.com/primary.png',
-      'https://images.example.com/gallery.png',
-    ]);
+    );
+    expect(mockReplaceSneakerGallery360Images).toHaveBeenCalledWith(
+      '11111111-1111-4111-8111-111111111111',
+      [
+        'https://images.example.com/360-01.png',
+        'https://images.example.com/360-02.png',
+      ],
+    );
   });
 });

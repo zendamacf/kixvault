@@ -71,7 +71,7 @@ export function CatalogSneakerForm({
           {summary ? (
             <CollectionSneakerForm
               summary={{
-                imageUrls: summary.imageUrls,
+                imageUrl: summary.imageUrl,
                 title: summary.title,
                 brand: summary.brand,
                 nickname: summary.nickname,

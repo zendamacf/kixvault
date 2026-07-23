@@ -121,12 +121,17 @@ function getStockxReleaseDate(product: StockXProduct): string | null {
   return releaseDateTrait ? parseCatalogReleaseDate(releaseDateTrait.value) : null;
 }
 
-export function extractStockxImageUrls(product: StockXProduct): string[] {
-  return normalizeSneakerImageUrls([product.image, ...(product.gallery ?? [])]);
+export function extractStockxPrimaryImageUrl(product: StockXProduct): string | null {
+  return normalizeSneakerImageUrls([product.image])[0] ?? null;
+}
+
+export function extractStockxGallery360Urls(product: StockXProduct): string[] {
+  return normalizeSneakerImageUrls(product.gallery_360 ?? []);
 }
 
 export function normalizeStockxProduct(product: StockXProduct): CatalogSearchResult {
-  const imageUrls = extractStockxImageUrls(product);
+  const imageUrl = extractStockxPrimaryImageUrl(product);
+  const gallery360Urls = extractStockxGallery360Urls(product);
 
   return {
     catalogSource: 'kicksdb:stockx',
@@ -137,8 +142,8 @@ export function normalizeStockxProduct(product: StockXProduct): CatalogSearchRes
     colorway: product.secondary_title || null,
     nickname: product.secondary_title || null,
     sku: product.sku,
-    imageUrl: imageUrls[0] ?? null,
-    imageUrls,
+    imageUrl,
+    gallery360Urls,
     releaseDate: getStockxReleaseDate(product),
     description: normalizeDescription(product.description),
   };
