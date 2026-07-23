@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
-import { SneakerImageCarousel } from '@/components/sneakers/sneaker-image-carousel';
+import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Sneaker } from '@/lib/queries';
@@ -18,8 +18,8 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
   return (
     <Link to="/sneakers/$sneakerId" params={{ sneakerId: sneaker.id }} className="block h-full">
       <Card className="h-full overflow-hidden transition-colors hover:border-primary/40 hover:bg-accent/30">
-        <SneakerImageCarousel
-          images={sneaker.images}
+        <SneakerThumbnail
+          imageUrl={sneaker.images[0]?.url ?? null}
           alt={title}
           className="aspect-square w-full rounded-none p-2"
         />
