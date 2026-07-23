@@ -1,5 +1,17 @@
 # @kixvault/web
 
+## 0.1.1
+
+### Patch Changes
+
+- 73a847f: Removed labels from displayed SKU's.
+- 2dfcbc8: Remove remaining GOAT catalog support, including historic DB links and pricing data.
+- Updated dependencies [73a847f]
+- Updated dependencies [73a847f]
+- Updated dependencies [2dfcbc8]
+  - @kixvault/api@0.1.1
+  - @kixvault/shared@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes

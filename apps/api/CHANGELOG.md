@@ -1,5 +1,16 @@
 # @kixvault/api
 
+## 0.1.1
+
+### Patch Changes
+
+- 73a847f: Updated Redis to be required for deployment.
+- 73a847f: Updated $0 pricing data to be treated as unavailable.
+- 2dfcbc8: Remove remaining GOAT catalog support, including historic DB links and pricing data.
+- Updated dependencies [2dfcbc8]
+  - @kixvault/db@0.1.1
+  - @kixvault/shared@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
