@@ -1,10 +1,10 @@
 import { Link } from '@tanstack/react-router';
 import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
+import { SneakerConditionBadge } from '@/components/sneakers/sneaker-condition-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Sneaker } from '@/lib/queries';
-import { formatCondition, formatCurrency, formatDate, formatGainLoss } from '@/lib/utils';
+import { formatCurrency, formatDate, formatGainLoss } from '@/lib/utils';
 
 type SneakerCardProps = {
   sneaker: Sneaker;
@@ -23,19 +23,19 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
           alt={title}
           className="aspect-square w-full rounded-none p-2"
         />
-        <CardHeader className="pt-2 pb-2">
+        <CardHeader className="pt-2 pb-2 space-y-2">
           <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 space-y-2">
-              <SneakerBrandBadge brand={sneaker.brand} />
-              <CardTitle className="truncate text-base">{title}</CardTitle>
-              <p className="truncate text-sm text-muted-foreground">
-                {subtitle} · Size {sneaker.size}
-              </p>
-            </div>
-            <Badge className="shrink-0">{formatCondition(sneaker.condition)}</Badge>
+            <SneakerBrandBadge brand={sneaker.brand} />
+            <SneakerConditionBadge condition={sneaker.condition} />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <CardTitle className="truncate text-base">{title}</CardTitle>
+            <p className="truncate text-sm text-muted-foreground">
+              {subtitle} · Size {sneaker.size}
+            </p>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2 pt-0 text-sm text-muted-foreground">
+        <CardContent className="space-y-1 pt-0 text-sm text-muted-foreground">
           <div className="flex items-center justify-between gap-2">
             <p>Paid {formatCurrency(sneaker.purchasePrice)}</p>
             {sneaker.purchaseDate ? <p>{formatDate(sneaker.purchaseDate)}</p> : null}

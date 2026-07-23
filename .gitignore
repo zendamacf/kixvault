@@ -3,6 +3,7 @@ dist/
 .env
 .env.local
 data/images/
+apps/api/data/images/
 *.tsbuildinfo
 .DS_Store
 **/routeTree.gen.ts

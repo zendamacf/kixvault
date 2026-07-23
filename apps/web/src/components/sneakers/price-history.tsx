@@ -16,16 +16,26 @@ export function PriceHistory({ history }: PriceHistoryProps) {
   }
 
   return (
-    <ul className="space-y-2">
-      {history.map((entry) => (
-        <li
-          key={entry.snapshotDate}
-          className="flex items-center justify-between gap-4 rounded-md border border-border bg-background/60 px-3 py-2 text-sm"
-        >
-          <span className="text-muted-foreground">{formatDate(entry.snapshotDate)}</span>
-          <span className="font-medium">{formatCurrency(entry.price)}</span>
-        </li>
-      ))}
-    </ul>
+    <div className="overflow-hidden rounded-md">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border bg-muted/20 text-left text-muted-foreground">
+            <th className="px-3 py-2 font-medium">Date</th>
+            <th className="px-3 py-2 text-right font-medium">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {history.map((entry) => (
+            <tr
+              key={entry.snapshotDate}
+              className="border-b border-border last:border-b-0 odd:bg-background/60 even:bg-muted/30"
+            >
+              <td className="px-3 py-2 text-muted-foreground">{formatDate(entry.snapshotDate)}</td>
+              <td className="px-3 py-2 text-right font-medium">{formatCurrency(entry.price)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

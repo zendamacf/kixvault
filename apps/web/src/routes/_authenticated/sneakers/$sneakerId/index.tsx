@@ -5,6 +5,7 @@ import { BackLink } from '@/components/layout/back-link';
 import { MarketValue } from '@/components/sneakers/market-value';
 import { PriceHistory } from '@/components/sneakers/price-history';
 import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
+import { SneakerConditionBadge } from '@/components/sneakers/sneaker-condition-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import {
   AlertDialog,
@@ -17,13 +18,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api, parseApiError } from '@/lib/api';
 import { sneakerPriceHistoryQueryOptions, sneakerQueryOptions } from '@/lib/queries';
-import { formatCondition, formatCurrency, formatDate, getCatalogSourceLabel } from '@/lib/utils';
+import { formatCurrency, formatDate, getCatalogSourceLabel } from '@/lib/utils';
 
 export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
   component: SneakerDetailPage,
@@ -105,25 +105,27 @@ function SneakerDetailPage() {
       <Card>
         <CardHeader className="space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row items-center">
+            <div className="flex flex-col gap-8 sm:flex-row items-center">
               <SneakerThumbnail
                 imageUrl={sneaker.primaryImage?.url ?? null}
                 alt={title}
                 className="h-64 w-full max-w-xs sm:h-72"
               />
-              <div className="space-y-2">
-                <SneakerBrandBadge brand={sneaker.brand} />
-                <CardTitle className="text-2xl sm:text-3xl">{title}</CardTitle>
-                {sneaker.nickname ? (
-                  <p className="text-base font-medium text-foreground">{`"${sneaker.nickname}"`}</p>
-                ) : null}
-                <p className="text-muted-foreground">{sneaker.colorway || 'No colorway listed'}</p>
-                {sneaker.sku ? (
-                  <p className="text-sm text-muted-foreground">SKU {sneaker.sku}</p>
-                ) : null}
-                <div>
-                  <Badge>{formatCondition(sneaker.condition)}</Badge>
+              <div className="flex flex-col">
+                <div className="space-x-2 pb-2">
+                  <SneakerBrandBadge brand={sneaker.brand} />
+                  <SneakerConditionBadge condition={sneaker.condition} />
                 </div>
+                <CardTitle className="text-2xl sm:text-3xl pb-2">{title}</CardTitle>
+                {sneaker.nickname ? (
+                  <p className="text-base font-medium text-foreground pb-2">{`"${sneaker.nickname}"`}</p>
+                ) : null}
+                <p className="text-muted-foreground pb-1">
+                  {sneaker.colorway || 'No colorway listed'}
+                </p>
+                {sneaker.sku ? (
+                  <p className="text-sm text-muted-foreground pb-1">SKU {sneaker.sku}</p>
+                ) : null}
                 {sneaker.catalogUrl && catalogSourceLabel ? (
                   <a
                     href={sneaker.catalogUrl}
@@ -179,7 +181,7 @@ function SneakerDetailPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid gap-2">
           {sneaker.description ? (
             <div className="sm:col-span-2">
               <StaticDetailItem label="Description" value={sneaker.description} />
@@ -189,35 +191,39 @@ function SneakerDetailPage() {
             <StaticDetailItem label="Release date" value={formatDate(sneaker.releaseDate)} />
           ) : null}
           <StaticDetailItem label="Added" value={formatDate(sneaker.createdAt)} />
-          <DetailItem label="Size" value={String(sneaker.size)} />
-          <DetailItem label="Purchase price" value={formatCurrency(sneaker.purchasePrice)} />
-          <DetailItem label="Purchase date" value={formatDate(sneaker.purchaseDate)} />
-          <div className="rounded-lg border border-border bg-background/60 p-4">
-            <p className="text-sm font-medium text-muted-foreground">Market value</p>
-            <MarketValue
-              price={sneaker.currentMarketPrice}
-              gainLoss={sneaker.gainLoss}
-              condition={sneaker.condition}
-              className="mt-2"
-            />
-            {sneaker.pricedAt ? (
-              <p className="mt-2 text-xs text-muted-foreground">
-                Last updated {formatDate(sneaker.pricedAt)}
-              </p>
-            ) : null}
-          </div>
-          <div className="sm:col-span-2 rounded-lg border border-border bg-background/60 p-4">
-            <p className="text-sm font-medium text-muted-foreground">Price history</p>
-            <div className="mt-3">
-              {priceHistoryLoading ? (
-                <Skeleton className="h-20 w-full" />
-              ) : (
-                <PriceHistory history={priceHistoryData?.history ?? []} />
-              )}
-            </div>
-          </div>
+          <StaticDetailItem label="Size" value={String(sneaker.size)} />
+          <StaticDetailItem label="Purchase price" value={formatCurrency(sneaker.purchasePrice)} />
+          <StaticDetailItem label="Purchase date" value={formatDate(sneaker.purchaseDate)} />
           <div className="sm:col-span-2">
-            <DetailItem label="Notes" value={sneaker.notes || '—'} />
+            <StaticDetailItem label="Notes" value={sneaker.notes || '—'} />
+          </div>
+
+          <div className="sm:col-span-2 rounded-lg border border-border bg-background/60 p-4 space-y-8">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Market value</p>
+              <MarketValue
+                price={sneaker.currentMarketPrice}
+                gainLoss={sneaker.gainLoss}
+                condition={sneaker.condition}
+                className="mt-2"
+              />
+              {sneaker.pricedAt ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Last updated {formatDate(sneaker.pricedAt)}
+                </p>
+              ) : null}
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Price history</p>
+              <div className="mt-2">
+                {priceHistoryLoading ? (
+                  <Skeleton className="h-20 w-full" />
+                ) : (
+                  <PriceHistory history={priceHistoryData?.history ?? []} />
+                )}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -227,18 +233,9 @@ function SneakerDetailPage() {
   );
 }
 
-function DetailItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-background/60 p-4">
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <p className="mt-1 text-base">{value}</p>
-    </div>
-  );
-}
-
 function StaticDetailItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="p-4">
+    <div className="p-2">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
       <p className="mt-1 text-base">{value}</p>
     </div>

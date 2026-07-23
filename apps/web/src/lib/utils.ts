@@ -1,3 +1,4 @@
+import type { SneakerCondition } from '@kixvault/shared';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -35,7 +36,7 @@ export function formatGainLoss(value: number | null | undefined) {
   return formatted;
 }
 
-export function formatCondition(condition: string) {
+export function formatCondition(condition: SneakerCondition) {
   return condition
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))

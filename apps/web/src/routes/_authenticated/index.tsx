@@ -1,4 +1,4 @@
-import { sneakerConditions } from '@kixvault/shared';
+import { type SneakerCondition, sneakerConditions } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
@@ -28,7 +28,7 @@ export const Route = createFileRoute('/_authenticated/')({
 
 function CollectionPage() {
   const [search, setSearch] = useState('');
-  const [condition, setCondition] = useState('');
+  const [condition, setCondition] = useState<SneakerCondition | undefined>(undefined);
   const [sort, setSort] = useState('created_at');
   const [order, setOrder] = useState('desc');
 
@@ -59,7 +59,7 @@ function CollectionPage() {
 
   function clearFilters() {
     setSearch('');
-    setCondition('');
+    setCondition(undefined);
     setSort('created_at');
     setOrder('desc');
   }
@@ -114,14 +114,14 @@ function CollectionPage() {
             <div className="space-y-2">
               <Label htmlFor="condition-filter">Condition</Label>
               <Select
-                value={condition || 'all'}
-                onValueChange={(value) => setCondition(value === 'all' ? '' : value)}
+                value={condition}
+                onValueChange={(value: SneakerCondition | '') => setCondition(value || undefined)}
               >
                 <SelectTrigger id="condition-filter" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All conditions</SelectItem>
+                  <SelectItem value="">All conditions</SelectItem>
                   {sneakerConditions.map((value) => (
                     <SelectItem key={value} value={value}>
                       {formatCondition(value)}
