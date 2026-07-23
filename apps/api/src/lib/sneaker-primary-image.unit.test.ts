@@ -9,7 +9,6 @@ const insertedImage = {
   fetchStatus: 'pending' as const,
   fetchError: null,
   fetchedAt: null,
-  sortOrder: 0,
   createdAt: new Date('2024-01-01T00:00:00.000Z'),
 };
 
@@ -60,7 +59,6 @@ describe('replaceSneakerPrimaryImage', () => {
     expect(mockValues).toHaveBeenCalledWith({
       sneakerId,
       sourceUrl: 'https://images.stockx.com/primary.png?bg-remove=true',
-      sortOrder: 0,
     });
   });
 

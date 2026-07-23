@@ -19,7 +19,7 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
     <Link to="/sneakers/$sneakerId" params={{ sneakerId: sneaker.id }} className="block h-full">
       <Card className="h-full overflow-hidden transition-colors hover:border-primary/40 hover:bg-accent/30">
         <SneakerThumbnail
-          imageUrl={sneaker.images[0]?.url ?? null}
+          imageUrl={sneaker.primaryImage?.url ?? null}
           alt={title}
           className="aspect-square w-full rounded-none p-2"
         />

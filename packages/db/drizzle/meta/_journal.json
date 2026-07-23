@@ -78,6 +78,13 @@
       "when": 1785000000000,
       "tag": "0010_stockx_primary_and_gallery_360",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1785100000000,
+      "tag": "0011_single_primary_image",
+      "breakpoints": true
     }
   ]
 }

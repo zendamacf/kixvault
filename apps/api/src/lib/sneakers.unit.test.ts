@@ -78,19 +78,16 @@ describe('parsePurchaseDate', () => {
 describe('formatSneaker', () => {
   test('normalizes numeric and date fields', () => {
     const formatted = formatSneaker(createSneakerRow(), {
-      images: [
-        {
-          id: '22222222-2222-4222-8222-222222222222',
-          sneakerId: '11111111-1111-4111-8111-111111111111',
-          sourceUrl: 'https://images.example.com/sneaker.png',
-          storagePath: null,
-          fetchStatus: 'pending' as const,
-          fetchError: null,
-          fetchedAt: null,
-          sortOrder: 0,
-          createdAt: new Date('2024-01-01T00:00:00.000Z'),
-        },
-      ],
+      primaryImage: {
+        id: '22222222-2222-4222-8222-222222222222',
+        sneakerId: '11111111-1111-4111-8111-111111111111',
+        sourceUrl: 'https://images.example.com/sneaker.png',
+        storagePath: null,
+        fetchStatus: 'pending' as const,
+        fetchError: null,
+        fetchedAt: null,
+        createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      },
     });
 
     expect(formatted).toEqual({
@@ -106,13 +103,10 @@ describe('formatSneaker', () => {
       purchaseDate: '2024-06-15',
       notes: 'Deadstock pickup',
       sku: 'TEST-SKU-001',
-      images: [
-        {
-          id: '22222222-2222-4222-8222-222222222222',
-          url: 'https://images.example.com/sneaker.png',
-          sortOrder: 0,
-        },
-      ],
+      primaryImage: {
+        id: '22222222-2222-4222-8222-222222222222',
+        url: 'https://images.example.com/sneaker.png',
+      },
       gallery360Images: [],
       catalogSource: 'kicksdb:stockx',
       catalogId: 'air-max-1',
@@ -180,28 +174,25 @@ describe('getCatalogLinkedModelFieldViolations', () => {
     ).toEqual(['brand']);
   });
 
-  test('flags catalog-linked image changes', () => {
+  test('flags catalog-linked primary image changes', () => {
     const existing = createSneakerRow();
 
     expect(
       getCatalogLinkedModelFieldViolations(
         existing,
-        { images: ['https://images.example.com/replacement.png'] },
-        [
-          {
-            id: '22222222-2222-4222-8222-222222222222',
-            sneakerId: existing.id,
-            sourceUrl: 'https://images.example.com/sneaker.png',
-            storagePath: null,
-            fetchStatus: 'pending' as const,
-            fetchError: null,
-            fetchedAt: null,
-            sortOrder: 0,
-            createdAt: new Date('2024-01-01T00:00:00.000Z'),
-          },
-        ],
+        { primaryImage: 'https://images.example.com/replacement.png' },
+        {
+          id: '22222222-2222-4222-8222-222222222222',
+          sneakerId: existing.id,
+          sourceUrl: 'https://images.example.com/sneaker.png',
+          storagePath: null,
+          fetchStatus: 'pending' as const,
+          fetchError: null,
+          fetchedAt: null,
+          createdAt: new Date('2024-01-01T00:00:00.000Z'),
+        },
       ),
-    ).toEqual(['images']);
+    ).toEqual(['primaryImage']);
   });
 });
 

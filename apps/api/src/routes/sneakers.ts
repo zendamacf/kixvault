@@ -20,12 +20,7 @@ import {
   storeMarketPriceAndSnapshot,
 } from '../lib/pricing';
 import { replaceSneakerGallery360Images } from '../lib/sneaker-gallery-360-images';
-import {
-  getImagesForSneakerIds,
-  insertSneakerImages,
-  replaceSneakerImages,
-  replaceSneakerPrimaryImage,
-} from '../lib/sneaker-images';
+import { getPrimaryImagesForSneakerIds, replaceSneakerPrimaryImage } from '../lib/sneaker-images';
 import {
   buildSneakerSearchCondition,
   buildSneakerUpdate,
@@ -234,9 +229,12 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       })
       .returning();
 
-    if (input.images?.length) {
-      const images = await insertSneakerImages(row.id, input.images);
-      enqueueImageFetches(images.map((image) => image.id));
+    if (input.primaryImage) {
+      const primaryImage = await replaceSneakerPrimaryImage(row.id, input.primaryImage);
+
+      if (primaryImage) {
+        enqueueImageFetches([primaryImage.id]);
+      }
     }
 
     return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
@@ -259,10 +257,10 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       return c.json({ error: 'Sneaker not found' }, 404);
     }
 
-    const existingImagesBySneakerId = await getImagesForSneakerIds([existing.id]);
-    const existingImages = existingImagesBySneakerId.get(existing.id) ?? [];
+    const primaryImagesBySneakerId = await getPrimaryImagesForSneakerIds([existing.id]);
+    const existingPrimaryImage = primaryImagesBySneakerId.get(existing.id) ?? null;
 
-    const violations = getCatalogLinkedModelFieldViolations(existing, input, existingImages);
+    const violations = getCatalogLinkedModelFieldViolations(existing, input, existingPrimaryImage);
 
     if (violations.length > 0) {
       return c.json(
@@ -275,9 +273,9 @@ export const sneakerRoutes = new Hono<ApiEnv>()
 
     const updates = buildSneakerUpdate(existing, input);
     const isCatalogLinked = Boolean(existing.sku);
-    const shouldReplaceImages = !isCatalogLinked && input.images !== undefined;
+    const shouldReplacePrimaryImage = !isCatalogLinked && input.primaryImage !== undefined;
 
-    if (Object.keys(updates).length === 0 && !shouldReplaceImages) {
+    if (Object.keys(updates).length === 0 && !shouldReplacePrimaryImage) {
       return c.json({ sneaker: await formatSneakerWithPricing(existing) });
     }
 
@@ -286,9 +284,12 @@ export const sneakerRoutes = new Hono<ApiEnv>()
         ? await db.update(sneakers).set(updates).where(eq(sneakers.id, id)).returning()
         : [existing];
 
-    if (shouldReplaceImages) {
-      const images = await replaceSneakerImages(id, input.images ?? []);
-      enqueueImageFetches(images.map((image) => image.id));
+    if (shouldReplacePrimaryImage) {
+      const primaryImage = await replaceSneakerPrimaryImage(id, input.primaryImage);
+
+      if (primaryImage) {
+        enqueueImageFetches([primaryImage.id]);
+      }
     }
 
     return c.json({ sneaker: await formatSneakerWithPricing(row) });

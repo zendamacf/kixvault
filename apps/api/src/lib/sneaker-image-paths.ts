@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 import { env } from './env';
 
-export function buildSneakerImageStoragePath(sneakerId: string, sortOrder: number): string {
-  return join(sneakerId, `${sortOrder}.webp`);
+export function buildSneakerImageStoragePath(sneakerId: string): string {
+  return join(sneakerId, '0.webp');
 }
 
 export function buildSneakerGallery360ImageStoragePath(

@@ -113,7 +113,6 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       'fetched_at',
       'id',
       'sneaker_id',
-      'sort_order',
       'source_url',
       'storage_path',
     ]);

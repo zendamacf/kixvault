@@ -127,7 +127,7 @@ export async function fetchAndStoreSneakerImage(
     const downloadUrl = normalizeImageSourceUrl(image.sourceUrl);
     const downloaded = await downloadImage(downloadUrl);
     const converted = await convertImageToWebp(downloaded);
-    const storagePath = buildSneakerImageStoragePath(image.sneakerId, image.sortOrder);
+    const storagePath = buildSneakerImageStoragePath(image.sneakerId);
     const absolutePath = getSneakerImageAbsolutePath(storagePath);
 
     await mkdir(dirname(absolutePath), { recursive: true });
