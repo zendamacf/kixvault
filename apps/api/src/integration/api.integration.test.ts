@@ -9,8 +9,10 @@ import {
   getSessionCookie,
   getTestDatabaseUrl,
   prepareTestDatabase,
+  registerAndLoginTestUser,
   registerTestUser,
   resetDatabase,
+  verifyTestUserEmail,
 } from '../test/helpers';
 import {
   mockEnsureKicksdbClient,
@@ -69,15 +71,15 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     });
   });
 
-  test('POST /api/auth/register creates a user and session', async () => {
+  test('POST /api/auth/register creates a user without a session', async () => {
     const email = `user-${crypto.randomUUID()}@example.com`;
     const { response, cookie } = await registerTestUser(app, email);
 
     expect(response.status).toBe(201);
-    expect(cookie).toContain('auth_session=');
-
-    const body = (await response.json()) as { user: { email: string } };
-    expect(body.user.email).toBe(email);
+    expect(cookie).toBe('');
+    await expect(response.json()).resolves.toEqual({
+      message: 'Check your email to verify your account',
+    });
   });
 
   test('POST /api/auth/register rejects duplicate emails', async () => {
@@ -140,7 +142,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     );
 
     const email = `catalog-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const input: CreateSneakerFromCatalogInput = {
       catalogSource: 'kicksdb:stockx',
@@ -228,7 +230,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
   test('POST /api/sneakers/from-catalog returns 400 for invalid catalog product', async () => {
     const email = `catalog-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const response = await app.request('/api/sneakers/from-catalog', {
       method: 'POST',
@@ -240,7 +242,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
   test('POST /api/sneakers/custom creates a sneaker from custom input', async () => {
     const email = `custom-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const input: CreateSneakerInput = {
       brand: 'Nike',
@@ -278,7 +280,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
   test('POST /api/sneakers/custom returns 400 for invalid custom input', async () => {
     const email = `custom-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const response = await app.request('/api/sneakers/custom', {
       method: 'POST',
@@ -290,7 +292,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
   test('authenticated sneaker CRUD and search flow', async () => {
     const email = `collector-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const createResponse = await app.request('/api/sneakers/custom', {
       method: 'POST',
@@ -420,7 +422,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
   test('PATCH /api/sneakers/:id updates primary image for manual sneakers', async () => {
     const email = `manual-images-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const createResponse = await app.request('/api/sneakers/custom', {
       method: 'POST',
@@ -461,7 +463,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
   test('POST /api/sneakers/from-catalog returns 503 when KicksDB is not configured', async () => {
     const email = `catalog-503-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const response = await app.request('/api/sneakers/from-catalog', {
       method: 'POST',
@@ -480,7 +482,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
   test('returns 404 for unknown sneaker ids', async () => {
     const email = `missing-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
     const unknownId = '22222222-2222-4222-8222-222222222222';
 
     const detailResponse = await app.request(`/api/sneakers/${unknownId}`, {
@@ -522,7 +524,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     );
 
     const email = `catalog-edit-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const createResponse = await app.request('/api/sneakers/from-catalog', {
       method: 'POST',
@@ -575,7 +577,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     );
 
     const email = `catalog-images-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const createResponse = await app.request('/api/sneakers/from-catalog', {
       method: 'POST',
@@ -610,6 +612,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     const email = `login-${crypto.randomUUID()}@example.com`;
     const password = 'password123';
     await registerTestUser(app, email, password);
+    await verifyTestUserEmail(connectionString, email);
 
     const validLogin = await app.request('/api/auth/login', {
       method: 'POST',
@@ -630,9 +633,62 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     await expect(invalidLogin.json()).resolves.toEqual({ error: 'Invalid email or password' });
   });
 
+  test('POST /api/auth/login rejects unverified users', async () => {
+    const email = `unverified-${crypto.randomUUID()}@example.com`;
+    const password = 'password123';
+    await registerTestUser(app, email, password);
+
+    const response = await app.request('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({
+      error: 'Email not verified. Check your inbox or request a new verification link.',
+    });
+  });
+
+  test('POST /api/auth/verify-email verifies account and allows login', async () => {
+    const email = `verify-${crypto.randomUUID()}@example.com`;
+    const password = 'password123';
+    await registerTestUser(app, email, password);
+
+    const { users } = await import('@kixvault/db');
+    const { eq } = await import('drizzle-orm');
+    const { drizzle } = await import('drizzle-orm/postgres-js');
+    const postgres = (await import('postgres')).default;
+    const client = postgres(connectionString, { max: 1 });
+    const db = drizzle(client);
+
+    const [user] = await db.select({ id: users.id }).from(users).where(eq(users.email, email));
+    await client.end({ timeout: 5 });
+
+    const { createVerificationToken } = await import('../lib/verification');
+    const token = await createVerificationToken(user?.id ?? '');
+
+    const verifyResponse = await app.request('/api/auth/verify-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+
+    expect(verifyResponse.status).toBe(200);
+
+    const loginResponse = await app.request('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    expect(loginResponse.status).toBe(200);
+    expect(getSessionCookie(loginResponse)).toContain('auth_session=');
+  });
+
   test('GET /api/catalog/search returns 503 when KicksDB is not configured', async () => {
     const email = `catalog-${crypto.randomUUID()}@example.com`;
-    const { cookie } = await registerTestUser(app, email);
+    const { cookie } = await registerAndLoginTestUser(app, email, 'password123', connectionString);
 
     const response = await app.request('/api/catalog/search?q=jordan&limit=10', {
       headers: { Cookie: cookie },

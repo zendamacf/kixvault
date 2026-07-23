@@ -30,7 +30,10 @@ export function AppShell() {
   });
 
   const isAuthRoute =
-    routerState.location.pathname === '/login' || routerState.location.pathname === '/register';
+    routerState.location.pathname === '/login' ||
+    routerState.location.pathname === '/register' ||
+    routerState.location.pathname === '/verify-email' ||
+    routerState.location.pathname === '/verify-email-pending';
 
   if (isAuthRoute) {
     return (

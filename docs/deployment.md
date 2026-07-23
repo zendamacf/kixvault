@@ -78,6 +78,9 @@ services:
       KICKSDB_API_KEY: ${KICKSDB_API_KEY}
       REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
       SIGNUPS_ENABLED: ${SIGNUPS_ENABLED:-false}
+      RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required}
+      EMAIL_FROM: ${EMAIL_FROM:?EMAIL_FROM is required}
+      APP_URL: https://${DOMAIN}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
       PORT: 3000
@@ -181,6 +184,10 @@ KICKSDB_API_KEY=KICKS-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 # Caching
 REDIS_URL=redis://redis:6379
+
+# Email (Resend)
+RESEND_API_KEY=re_xxxxxxxx
+EMAIL_FROM=KixVault <noreply@example.com>
 
 # API logging (silent disables request logs)
 LOG_LEVEL=info

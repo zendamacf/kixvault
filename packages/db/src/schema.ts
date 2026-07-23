@@ -1,6 +1,7 @@
 import { relations, type SQL, sql } from 'drizzle-orm';
 import {
   type AnyPgColumn,
+  boolean,
   date,
   index,
   integer,
@@ -25,6 +26,18 @@ export const users = pgTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
+  emailVerified: boolean('email_verified').notNull().default(false),
+  emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const emailVerificationTokens = pgTable('email_verification_tokens', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  tokenHash: text('token_hash').notNull().unique(),
+  expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
@@ -86,6 +99,14 @@ export const sneakers = pgTable(
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   sneakers: many(sneakers),
+  emailVerificationTokens: many(emailVerificationTokens),
+}));
+
+export const emailVerificationTokensRelations = relations(emailVerificationTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [emailVerificationTokens.userId],
+    references: [users.id],
+  }),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({

@@ -13,6 +13,9 @@ export const env = {
   sentryDsn:
     'https://ae34349ec1f0ef631fa6878064cfa57d@o4509541345591296.ingest.de.sentry.io/4511732877164624',
   sentryRelease: process.env.SENTRY_RELEASE,
+  resendApiKey: process.env.RESEND_API_KEY,
+  emailFrom: process.env.EMAIL_FROM ?? 'KixVault <onboarding@resend.dev>',
+  appUrl: process.env.APP_URL ?? 'http://localhost:5173',
   jobSchedule: process.env.JOB_SCHEDULE ?? '0 3 * * 0',
   pricingRefreshDelayMs: Number(process.env.PRICING_REFRESH_DELAY_MS) || 500,
   imageStoragePath: process.env.IMAGE_STORAGE_PATH ?? './data/images',
