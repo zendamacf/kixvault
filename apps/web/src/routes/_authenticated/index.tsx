@@ -22,13 +22,15 @@ import { formatCondition } from '@/lib/utils';
 
 const DEBOUNCE_DELAY = 300;
 
+type SneakerConditionFilter = SneakerCondition | '';
+
 export const Route = createFileRoute('/_authenticated/')({
   component: CollectionPage,
 });
 
 function CollectionPage() {
   const [search, setSearch] = useState('');
-  const [condition, setCondition] = useState<SneakerCondition | undefined>(undefined);
+  const [condition, setCondition] = useState<SneakerConditionFilter>('');
   const [sort, setSort] = useState('created_at');
   const [order, setOrder] = useState('desc');
 
@@ -59,7 +61,7 @@ function CollectionPage() {
 
   function clearFilters() {
     setSearch('');
-    setCondition(undefined);
+    setCondition('');
     setSort('created_at');
     setOrder('desc');
   }
@@ -115,7 +117,7 @@ function CollectionPage() {
               <Label htmlFor="condition-filter">Condition</Label>
               <Select
                 value={condition}
-                onValueChange={(value: SneakerCondition | '') => setCondition(value || undefined)}
+                onValueChange={(value: SneakerConditionFilter) => setCondition(value)}
               >
                 <SelectTrigger id="condition-filter" className="w-full">
                   <SelectValue />

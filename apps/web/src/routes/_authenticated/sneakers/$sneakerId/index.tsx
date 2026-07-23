@@ -124,7 +124,7 @@ function SneakerDetailPage() {
                   {sneaker.colorway || 'No colorway listed'}
                 </p>
                 {sneaker.sku ? (
-                  <p className="text-sm text-muted-foreground pb-1">SKU {sneaker.sku}</p>
+                  <p className="text-sm text-muted-foreground pb-1">{sneaker.sku}</p>
                 ) : null}
                 {sneaker.catalogUrl && catalogSourceLabel ? (
                   <a
