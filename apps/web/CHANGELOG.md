@@ -1,5 +1,43 @@
 # @kixvault/web
 
+## 0.1.0
+
+### Minor Changes
+
+- b497fc7: Add collection market value stats and per-sneaker price history from stored snapshots.
+- b516b67: Show catalog market prices during sneaker selection and on collection cards and detail pages.
+- 9bb478a: Add lazy-loaded image carousels across the collection and sneaker views, and remove the deprecated sneaker `imageUrl` field from API responses.
+
+### Patch Changes
+
+- 0aa277d: Add CDN preconnect hints for StockX and GOAT image hosts to reduce first-image load latency.
+- b14eafe: Lazy-render sneaker image carousel slides so only the active slide and its neighbor mount image elements.
+- cae80f0: Enforce a single primary image per sneaker (360 gallery frames remain separate), return `primaryImage` from the API instead of an `images` array, and serve stored primary images at `/api/images/:sneakerId`.
+- c69205a: Show only the primary sneaker image in collection and detail views, and remove the unused carousel UI primitive.
+- 8709445: Simplify catalog APIs and clients to StockX-only routes by removing marketplace parameters and GOAT CDN preconnect hints.
+- 7a20ebf: Remove the GOAT marketplace selector from catalog search and default new sneaker lookups to StockX.
+- 4f4deef: Updated market prices to display for all wear conditions.
+- 333a82c: Fixed sneaker card condition badge overflowing, refactored condition badge into component, and updated layout of sneaker detail page.
+- Updated dependencies [e2ddce9]
+- Updated dependencies [c35d5f9]
+- Updated dependencies [e8d5218]
+- Updated dependencies [b497fc7]
+- Updated dependencies [5cfb12d]
+- Updated dependencies [a3d34dc]
+- Updated dependencies [4ab068a]
+- Updated dependencies [37932c1]
+- Updated dependencies [d2b33aa]
+- Updated dependencies [cae80f0]
+- Updated dependencies [8fbfaad]
+- Updated dependencies [8709445]
+- Updated dependencies [4f4deef]
+- Updated dependencies [9bb478a]
+- Updated dependencies [00d0a3a]
+- Updated dependencies [0d58a95]
+- Updated dependencies [b572e5f]
+  - @kixvault/api@0.1.0
+  - @kixvault/shared@0.1.0
+
 ## 0.0.4
 
 ### Patch Changes

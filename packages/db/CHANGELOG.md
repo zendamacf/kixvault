@@ -1,5 +1,16 @@
 # @kixvault/db
 
+## 0.1.0
+
+### Minor Changes
+
+- c35d5f9: Add catalog market pricing foundation: product price cache, price storage on catalog sneaker creation, and enriched sneaker API responses.
+- e8d5218: Add weekly pricing refresh scheduler: pricing refresh job, run tracking table, and dedicated Compose scheduler service.
+- 37932c1: Add local sneaker image storage with a database schema, Docker volume support, and an image serve route that falls back to remote source URLs.
+- cae80f0: Enforce a single primary image per sneaker (360 gallery frames remain separate), return `primaryImage` from the API instead of an `images` array, and serve stored primary images at `/api/images/:sneakerId`.
+- 00d0a3a: Add a `sneaker_images` table and API support for storing multiple sneaker image URLs per pair.
+- 0d58a95: Store StockX primary images as a one-to-one sneaker relationship and persist 360 gallery frames in a separate table for future animation support.
+
 ## 0.0.1
 
 ### Patch Changes
