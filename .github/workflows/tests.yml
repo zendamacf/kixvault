@@ -13,6 +13,8 @@ jobs:
   test:
     name: Test / ${{ matrix.package }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
