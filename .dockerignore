@@ -11,5 +11,3 @@ node_modules
 **/.cursor
 README.md
 docker-compose*.yml
-infra/caddy/data
-infra/caddy/config
