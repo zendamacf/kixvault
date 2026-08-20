@@ -1,5 +1,16 @@
 # @kixvault/web
 
+## 0.1.2
+
+### Patch Changes
+
+- 21324a9: Updated @biomejs/biome from 2.5.3 to 2.5.4, @changesets/cli from 2.31.0 to 2.31.1, @hono/zod-validator from 0.8.0 to 0.9.0, hono from 4.12.29 to 4.12.30, @tanstack/react-router from 1.170.17 to 1.170.18, lucide-react from 1.23.0 to 1.24.0, @tanstack/router-cli from 1.167.18 to 1.167.19, @tanstack/router-plugin from 1.168.19 to 1.168.20 (version-update:semver-minor).
+- 394d65b: Updated lucide-react from 1.21.0 to 1.23.0, vite from 8.1.0 to 8.1.3 (version-update:semver-minor).
+- 150ce09: Updated typescript from 6.0.3 to 7.0.2, vite from 8.1.3 to 8.1.4 (version-update:semver-major).
+- 3282b64: Updated @vitejs/plugin-react from 6.0.2 to 6.0.3, vite from 8.0.16 to 8.1.0 (version-update:semver-minor).
+- Updated dependencies [21324a9]
+  - @kixvault/api@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
