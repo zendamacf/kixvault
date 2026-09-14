@@ -1,5 +1,14 @@
 # @kixvault/api
 
+## 0.1.2
+
+### Patch Changes
+
+- ebfefff: Updated @biomejs/biome from 2.5.4 to 2.5.5, @sentry/bun from 10.65.0 to 10.67.0, @sentry/hono from 10.65.0 to 10.67.0, hono from 4.12.30 to 4.12.31, @sentry/cli from 3.6.0 to 3.6.2, @fontsource-variable/geist from 5.2.9 to 5.3.0, @sentry/react from 10.65.0 to 10.67.0, @tanstack/react-query from 5.101.2 to 5.101.4, lucide-react from 1.24.0 to 1.25.0, radix-ui from 1.6.2 to 1.6.5, react from 19.2.7 to 19.2.8, react-dom from 19.2.7 to 19.2.8, react-hook-form from 7.81.0 to 7.82.0, shadcn from 4.13.0 to 4.14.0, @happy-dom/global-registrator from 20.10.6 to 20.11.1, @tailwindcss/vite from 4.3.2 to 4.3.3, @tanstack/router-cli from 1.167.19 to 1.167.21, @tanstack/router-plugin from 1.168.20 to 1.168.23, @vitejs/plugin-react from 6.0.3 to 6.0.4, tailwindcss from 4.3.2 to 4.3.3, vite from 8.1.4 to 8.1.5 (version-update:semver-minor).
+- 4a84e74: Updated @biomejs/biome from 2.5.5 to 2.5.7, @sentry/bun from 10.67.0 to 10.69.0, @sentry/hono from 10.67.0 to 10.69.0, hono from 4.12.31 to 4.13.0, ioredis from 5.11.1 to 6.0.0, @hookform/resolvers from 5.4.0 to 5.7.1, @sentry/react from 10.67.0 to 10.69.0, @tanstack/react-router from 1.170.18 to 1.170.20, lucide-react from 1.25.0 to 1.28.0, radix-ui from 1.6.5 to 1.6.7, react-hook-form from 7.82.0 to 7.84.0, shadcn from 4.14.0 to 4.16.1, @tanstack/router-cli from 1.167.21 to 1.167.23, @tanstack/router-plugin from 1.168.23 to 1.168.25, @types/react from 19.2.17 to 19.2.18, @types/react-dom from 19.2.3 to 19.2.4, @vitejs/plugin-react from 6.0.4 to 6.0.5, vite from 8.1.5 to 8.2.0 (version-update:semver-major).
+- 21324a9: Updated @biomejs/biome from 2.5.3 to 2.5.4, @changesets/cli from 2.31.0 to 2.31.1, @hono/zod-validator from 0.8.0 to 0.9.0, hono from 4.12.29 to 4.12.30, @tanstack/react-router from 1.170.17 to 1.170.18, lucide-react from 1.23.0 to 1.24.0, @tanstack/router-cli from 1.167.18 to 1.167.19, @tanstack/router-plugin from 1.168.19 to 1.168.20 (version-update:semver-minor).
+- 47da7e8: Updated @biomejs/biome from 2.5.7 to 2.5.8, @changesets/cli from 2.31.1 to 3.0.0, @sentry/bun from 10.69.0 to 10.70.0, @sentry/hono from 10.69.0 to 10.70.0, hono from 4.13.0 to 4.13.1, @sentry/react from 10.69.0 to 10.70.0, @tanstack/react-router from 1.170.20 to 1.170.27, lucide-react from 1.28.0 to 1.31.0, react-hook-form from 7.84.0 to 7.85.0, shadcn from 4.16.1 to 4.17.0, sonner from 2.0.7 to 2.0.8, @happy-dom/global-registrator from 20.11.1 to 20.11.2, @tanstack/router-cli from 1.167.23 to 1.167.28, @tanstack/router-plugin from 1.168.25 to 1.168.30, vite from 8.2.0 to 8.2.1 (version-update:semver-major).
+
 ## 0.1.1
 
 ### Patch Changes
