@@ -31,15 +31,14 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - uses: changesets/action@v1
+      - uses: changesets/action@v2
         id: changesets
         with:
-          version: bun run changeset:version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version-script: bun run changeset:version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Detect version changes
-        if: steps.changesets.outputs.hasChangesets == 'false'
+        if: steps.changesets.outputs.has-changesets == 'false'
         id: changes
         run: |
           api_version=$(jq -r .version apps/api/package.json)
