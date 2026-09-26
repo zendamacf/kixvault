@@ -9,7 +9,8 @@ export const api = hc<AppType>('/', {
     }),
 });
 
-export async function parseApiError(response: Response, fallback: string) {
+// We only need to parse an error, don't need any other attributes from a response
+export async function parseApiError(response: { json(): Promise<unknown> }, fallback: string) {
   try {
     const data = (await response.json()) as { error?: string };
     return data.error ?? fallback;
