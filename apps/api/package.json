@@ -39,18 +39,18 @@
     "@kixvault/db": "workspace:*",
     "@kixvault/shared": "workspace:*",
     "@lucia-auth/adapter-drizzle": "^1.1.0",
-    "@sentry/bun": "^10.70.0",
-    "@sentry/hono": "^10.70.0",
+    "@sentry/bun": "^10.71.0",
+    "@sentry/hono": "^10.71.0",
     "croner": "^10.0.1",
     "drizzle-orm": "^0.45.2",
-    "hono": "^4.13.3",
+    "hono": "^4.13.5",
     "ioredis": "^6.0.0",
     "lucia": "^3.2.2",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.4"
   },
   "devDependencies": {
     "@sentry/cli": "^3.6.2",
-    "@types/bun": "^1.2.18",
+    "@types/bun": "^1.4.0",
     "postgres": "^3.4.7"
   }
 }
