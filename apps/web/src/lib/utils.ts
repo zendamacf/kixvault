@@ -1,6 +1,7 @@
 import type { SneakerCondition } from '@kixvault/shared';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { getActiveLocale } from '@/i18n';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -11,7 +12,7 @@ export function formatCurrency(value: number | null | undefined) {
     return '—';
   }
 
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat(getActiveLocale(), {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 0,
@@ -49,7 +50,7 @@ export function formatDate(value: string | Date | null | undefined) {
   }
 
   const date = typeof value === 'string' ? new Date(value) : value;
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(getActiveLocale(), {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

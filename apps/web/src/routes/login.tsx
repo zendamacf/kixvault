@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,7 @@ export const Route = createFileRoute('/login')({
 });
 
 function LoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { redirect: redirectTo } = Route.useSearch();
@@ -61,8 +63,8 @@ function LoginPage() {
     <div className="w-full max-w-md">
       <Card className="w-full shadow-sm">
         <CardHeader>
-          <CardTitle>Welcome back</CardTitle>
-          <CardDescription>Sign in to manage your sneaker collection.</CardDescription>
+          <CardTitle>{t('login.title')}</CardTitle>
+          <CardDescription>{t('login.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -73,7 +75,7 @@ function LoginPage() {
             })}
           >
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('login.emailLabel')}</Label>
               <Input id="email" type="email" autoComplete="email" {...register('email')} />
               {errors.email ? (
                 <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -81,7 +83,7 @@ function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('login.passwordLabel')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -96,20 +98,20 @@ function LoginPage() {
             {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
 
             <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
-              {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
+              {loginMutation.isPending ? t('login.submitPending') : t('login.submit')}
             </Button>
           </form>
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {authConfig?.signupsEnabled ? (
               <>
-                New here?{' '}
+                {t('login.signupPrompt')}{' '}
                 <Link to="/register" className="font-medium text-primary hover:underline">
-                  Create an account
+                  {t('login.signupLink')}
                 </Link>
               </>
             ) : (
-              'Contact an administrator to create an account.'
+              t('login.signupsDisabled')
             )}
           </p>
         </CardContent>
