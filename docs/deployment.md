@@ -171,3 +171,7 @@ Or locally:
 ```sh
 bun run --cwd apps/api backfill:image-storage
 ```
+
+## Sneaker images
+
+`/api/images/*` routes require a valid session cookie (same as other authenticated API routes). Serve the web app and API from the same site origin (or proxy `/api` through the web host) so browser `<img>` requests include the session cookie. Image responses may still use `Cache-Control: public, immutable` for stored files, but unauthenticated clients receive `401`/`403`.

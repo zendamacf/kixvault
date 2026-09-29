@@ -12,14 +12,39 @@ const mockGetSneakerGallery360ImageByKey = mock(
     >,
 );
 
+const mockWhere = mock(async () => [{ userId: 'user-1' }]);
+const mockFrom = mock(() => ({ where: mockWhere }));
+const mockSelect = mock(() => ({ from: mockFrom }));
+
 mock.module('../lib/db', () => ({
-  db: {},
+  db: {
+    select: mockSelect,
+  },
 }));
 
 mock.module('../lib/env', () => ({
   env: {
     imageStoragePath: './data/images',
     imagePublicBasePath: '/api/images',
+    isProduction: false,
+  },
+}));
+
+mock.module('../middleware/session', () => ({
+  sessionMiddleware: async (
+    c: { set: (key: 'user' | 'session', value: unknown) => void },
+    next: () => Promise<void>,
+  ) => {
+    c.set('user', { id: 'user-1', email: 'user@example.com' });
+    c.set('session', { id: 'session-1', fresh: false });
+    await next();
+  },
+  requireAuth: async (c: { get: (key: 'user') => unknown }, next: () => Promise<void>) => {
+    if (!c.get('user')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    }
+
+    await next();
   },
 }));
 
@@ -71,6 +96,15 @@ describe('imageRoutes', () => {
     await expect(response.json()).resolves.toEqual({ error: 'Invalid image path' });
   });
 
+  test('GET /:sneakerId returns 403 when the sneaker belongs to another user', async () => {
+    mockWhere.mockImplementationOnce(async () => [{ userId: 'other-user' }]);
+
+    const response = await imageRoutes.request(`/${sneakerId}`);
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({ error: 'Forbidden' });
+  });
+
   test('GET /:sneakerId returns 404 when the image row is missing', async () => {
     mockGetSneakerPrimaryImage.mockResolvedValueOnce(null);
 
@@ -87,6 +121,15 @@ describe('imageRoutes', () => {
 
     expect(response.status).toBe(302);
     expect(response.headers.get('location')).toBe('https://images.stockx.com/example.png');
+  });
+
+  test('GET /:sneakerId/360/:sortOrder returns 403 for another user', async () => {
+    mockWhere.mockImplementationOnce(async () => [{ userId: 'other-user' }]);
+
+    const response = await imageRoutes.request(`/${sneakerId}/360/0`);
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({ error: 'Forbidden' });
   });
 
   test('GET /:sneakerId/360/:sortOrder returns 404 when the 360 frame is missing', async () => {
