@@ -144,6 +144,10 @@ IMAGE_MAX_WIDTH=1024
 SIGNUPS_ENABLED=true
 ```
 
+## Web security headers
+
+The web container serves HTTP on port 80 and sets security headers in `apps/web/nginx.conf`. When TLS terminates at an upstream load balancer or ingress, configure `Strict-Transport-Security` there instead of in the container nginx config.
+
 ## Scheduler
 
 The `scheduler` service reuses the API image and runs the weekly pricing refresh job via `croner`. It does not run database migrations — only the `api` service does that on startup.
