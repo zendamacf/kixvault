@@ -19,7 +19,7 @@
     "rules": {
       "preset": "recommended",
       "a11y": {
-        "noLabelWithoutControl": "off"
+        "noLabelWithoutControl": "error"
       }
     }
   },
