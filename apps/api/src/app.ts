@@ -2,6 +2,7 @@ import { APP_NAME } from '@kixvault/shared';
 import { sentry } from '@sentry/hono/bun';
 import { Hono } from 'hono';
 import { env } from './lib/env';
+import { globalApiRateLimit } from './middleware/global-rate-limit';
 import { requestLogMiddleware } from './middleware/request-log';
 import { authRoutes } from './routes/auth';
 import { catalogRoutes } from './routes/catalog';
@@ -27,6 +28,13 @@ const withSentry = env.isProduction
 export const app = withSentry
   .use(requestLogMiddleware)
   .get('/api/health', (c) => c.json({ status: 'ok', app: APP_NAME }))
+  .use('/api/*', async (c, next) => {
+    if (c.req.path === '/api/health') {
+      return next();
+    }
+
+    return globalApiRateLimit(c, next);
+  })
   .route('/api/auth', authRoutes)
   .route('/api/catalog', catalogRoutes)
   .route('/api/images', imageRoutes)

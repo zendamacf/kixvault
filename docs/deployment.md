@@ -125,7 +125,7 @@ POSTGRES_DB=kixvault
 # API
 KICKSDB_API_KEY=KICKS-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
-# Caching
+# Caching and rate limiting (shared Redis state across API replicas)
 REDIS_URL=redis://redis:6379
 
 # API logging (silent disables request logs)
@@ -143,6 +143,10 @@ IMAGE_MAX_WIDTH=1024
 # Feature flags
 SIGNUPS_ENABLED=true
 ```
+
+## Rate limiting
+
+The API applies a per-IP baseline limit on all `/api/*` routes (except `/api/health`), stricter limits on `/api/auth/login` and `/api/auth/register`, and per-user limits on catalog routes. When `REDIS_URL` is set, rate-limit counters are stored in Redis so multiple API replicas share state; without Redis, limits are tracked in memory per process (suitable for local development and tests only).
 
 ## Scheduler
 

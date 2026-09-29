@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import type { app as AppType } from '../app';
+import { resetRateLimitStoreForTests } from '../lib/rate-limit-store';
 import {
   getSessionCookie,
   getTestDatabaseUrl,
@@ -50,6 +51,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
   beforeEach(async () => {
     resetKicksdbSdkMocks();
+    resetRateLimitStoreForTests();
     await resetDatabase(connectionString);
   });
 
@@ -628,6 +630,28 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
     expect(invalidLogin.status).toBe(401);
     await expect(invalidLogin.json()).resolves.toEqual({ error: 'Invalid email or password' });
+  });
+
+  test('POST /api/auth/login returns 429 when the auth rate limit is exceeded', async () => {
+    for (let index = 0; index < 20; index += 1) {
+      const response = await app.request('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'missing@example.com', password: 'wrong-password' }),
+      });
+
+      expect(response.status).toBe(401);
+    }
+
+    const blocked = await app.request('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'missing@example.com', password: 'wrong-password' }),
+    });
+
+    expect(blocked.status).toBe(429);
+    expect(blocked.headers.get('Retry-After')).toBeTruthy();
+    await expect(blocked.json()).resolves.toEqual({ error: 'Too many requests' });
   });
 
   test('GET /api/catalog/search returns 503 when KicksDB is not configured', async () => {
