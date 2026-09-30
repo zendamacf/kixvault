@@ -1,13 +1,13 @@
 import { useRouter } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { ensureUmamiScript, isUmamiEnabled, trackUmamiPageview } from '@/lib/umami';
+import { ensureUmamiScript, isUmamiConfigured, trackUmamiPageview } from '@/lib/umami';
 
 /** Loads Umami when configured and records pageviews on TanStack Router navigations. */
 export function UmamiAnalytics() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isUmamiEnabled()) {
+    if (!isUmamiConfigured()) {
       return;
     }
 

@@ -1,13 +1,19 @@
+import { getRuntimeConfig } from '@/lib/runtime-config';
+
 const UMAMI_SCRIPT_PATH = '/script.js';
 
+function getUmamiConfig() {
+  return getRuntimeConfig().umami ?? {};
+}
+
 export function getUmamiWebsiteId(): string | undefined {
-  const id = import.meta.env.VITE_UMAMI_WEBSITE_ID?.trim();
+  const id = getUmamiConfig().websiteId?.trim();
   return id ? id : undefined;
 }
 
 /** Full script URL when set; otherwise derived from {@link getUmamiDomain}. */
 export function getUmamiScriptUrl(): string | undefined {
-  const scriptUrl = import.meta.env.VITE_UMAMI_SCRIPT_URL?.trim();
+  const scriptUrl = getUmamiConfig().scriptUrl?.trim();
   if (scriptUrl) {
     return scriptUrl;
   }
@@ -22,7 +28,7 @@ export function getUmamiScriptUrl(): string | undefined {
 
 /** Self-hosted or cloud Umami origin (no trailing slash), e.g. `https://analytics.example.com`. */
 export function getUmamiDomain(): string | undefined {
-  const domain = import.meta.env.VITE_UMAMI_DOMAIN?.trim();
+  const domain = getUmamiConfig().domain?.trim();
   if (!domain) {
     return undefined;
   }
@@ -34,23 +40,8 @@ export function isUmamiConfigured(): boolean {
   return Boolean(getUmamiWebsiteId() && getUmamiScriptUrl());
 }
 
-export function shouldRespectDoNotTrack(): boolean {
-  if (typeof navigator === 'undefined') {
-    return false;
-  }
-
-  const dnt = navigator.doNotTrack;
-  const gpc = (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl;
-
-  return dnt === '1' || dnt === 'yes' || gpc === true;
-}
-
-export function isUmamiEnabled(): boolean {
-  return isUmamiConfigured() && !shouldRespectDoNotTrack();
-}
-
 export function trackUmamiPageview(): void {
-  if (!isUmamiEnabled() || typeof window === 'undefined') {
+  if (!isUmamiConfigured() || typeof window === 'undefined') {
     return;
   }
 
@@ -65,7 +56,7 @@ export function trackUmamiPageview(): void {
 let scriptLoadPromise: Promise<void> | null = null;
 
 export function ensureUmamiScript(): Promise<void> {
-  if (!isUmamiEnabled() || typeof document === 'undefined') {
+  if (!isUmamiConfigured() || typeof document === 'undefined') {
     return Promise.resolve();
   }
 

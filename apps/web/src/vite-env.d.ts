@@ -2,9 +2,6 @@
 
 interface ImportMetaEnv {
   readonly VITE_APP_VERSION: string;
-  readonly VITE_UMAMI_WEBSITE_ID?: string;
-  readonly VITE_UMAMI_DOMAIN?: string;
-  readonly VITE_UMAMI_SCRIPT_URL?: string;
 }
 
 interface ImportMeta {
@@ -12,6 +9,13 @@ interface ImportMeta {
 }
 
 interface Window {
+  __KIXVAULT_RUNTIME_CONFIG__?: {
+    umami?: {
+      websiteId?: string;
+      domain?: string;
+      scriptUrl?: string;
+    };
+  };
   umami?: {
     track: (event?: string | ((props: Record<string, unknown>) => Record<string, unknown>)) => void;
   };

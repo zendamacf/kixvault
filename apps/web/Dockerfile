@@ -26,16 +26,10 @@ RUN apt-get update \
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 ARG VITE_APP_VERSION
-ARG VITE_UMAMI_WEBSITE_ID
-ARG VITE_UMAMI_DOMAIN
-ARG VITE_UMAMI_SCRIPT_URL
 ARG SENTRY_COMMIT_SHA
 ARG SENTRY_REPO
 
 ENV VITE_APP_VERSION=${VITE_APP_VERSION}
-ENV VITE_UMAMI_WEBSITE_ID=${VITE_UMAMI_WEBSITE_ID}
-ENV VITE_UMAMI_DOMAIN=${VITE_UMAMI_DOMAIN}
-ENV VITE_UMAMI_SCRIPT_URL=${VITE_UMAMI_SCRIPT_URL}
 ENV SENTRY_COMMIT_SHA=${SENTRY_COMMIT_SHA}
 ENV SENTRY_REPO=${SENTRY_REPO}
 
@@ -47,6 +41,11 @@ RUN --mount=type=secret,id=sentry_auth_token \
 FROM nginx:1.27-alpine
 
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
+COPY apps/web/docker-entrypoint.sh /docker-entrypoint.sh
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 
+RUN chmod +x /docker-entrypoint.sh
+
 EXPOSE 80
+
+ENTRYPOINT ["/docker-entrypoint.sh"]

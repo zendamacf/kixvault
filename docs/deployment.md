@@ -100,6 +100,10 @@ services:
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-8080}:80"
+    environment:
+      UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-}
+      UMAMI_DOMAIN: ${UMAMI_DOMAIN:-}
+      UMAMI_SCRIPT_URL: ${UMAMI_SCRIPT_URL:-}
 
 volumes:
   kixvault_pgdata:
@@ -142,30 +146,26 @@ IMAGE_MAX_WIDTH=1024
 
 # Feature flags
 SIGNUPS_ENABLED=true
+
+# Umami analytics (optional — web container runtime env)
+UMAMI_WEBSITE_ID=
+UMAMI_DOMAIN=https://analytics.example.com
+UMAMI_SCRIPT_URL=
 ```
 
 ## Umami analytics (optional)
 
-The web app can send privacy-oriented pageview analytics to [Umami](https://umami.is/) (cloud or self-hosted). Values are baked into the static build at **image build time** (Vite `VITE_*` variables).
+The web container writes `/runtime-config.js` at startup from environment variables so operators can enable [Umami](https://umami.is/) without rebuilding the image.
 
 | Variable | Description |
 | --- | --- |
-| `VITE_UMAMI_WEBSITE_ID` | Website ID from your Umami dashboard (required to enable tracking). |
-| `VITE_UMAMI_DOMAIN` | Origin of your Umami instance, without a trailing slash (e.g. `https://analytics.example.com`). The tracker loads `{domain}/script.js`. |
-| `VITE_UMAMI_SCRIPT_URL` | Optional full script URL; use instead of `VITE_UMAMI_DOMAIN` when the script is not at `/script.js`. |
+| `UMAMI_WEBSITE_ID` | Website ID from your Umami dashboard (required to enable tracking). |
+| `UMAMI_DOMAIN` | Origin of your Umami instance, without a trailing slash (e.g. `https://analytics.example.com`). The tracker loads `{domain}/script.js`. |
+| `UMAMI_SCRIPT_URL` | Optional full script URL; use instead of `UMAMI_DOMAIN` when the script is not at `/script.js`. |
 
-When these variables are unset, no tracker is loaded (default for local development and CI). If the visitor has **Do Not Track** or **Global Privacy Control** enabled, the tracker is not loaded.
+When these variables are unset, no tracker is loaded. For local Vite dev, edit `apps/web/public/runtime-config.js`.
 
-**What is collected:** Umami records page URLs and basic visit metadata (referrer, browser/device class, country from IP on the Umami server). KixVault does not send custom events or user-identifying fields. Do not pass emails, usernames, or sneaker collection details into Umami.
-
-**Custom web image with analytics:**
-
-```sh
-docker build -f apps/web/Dockerfile \
-  --build-arg VITE_UMAMI_WEBSITE_ID=your-website-id \
-  --build-arg VITE_UMAMI_DOMAIN=https://analytics.example.com \
-  -t kixvault-web:local .
-```
+**What is collected:** Umami records page URLs and basic visit metadata (referrer, browser/device class, country from IP on the Umami server). KixVault does not send custom events or user-identifying fields.
 
 **Self-hosted Umami (optional)** — add a service alongside KixVault (see [Umami Docker docs](https://umami.is/docs/running-on-docker)):
 
