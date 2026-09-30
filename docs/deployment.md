@@ -125,7 +125,7 @@ POSTGRES_DB=kixvault
 # API
 KICKSDB_API_KEY=KICKS-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
-# Caching
+# Caching and rate limiting (shared Redis state across API replicas)
 REDIS_URL=redis://redis:6379
 
 # API logging (silent disables request logs)
@@ -143,10 +143,6 @@ IMAGE_MAX_WIDTH=1024
 # Feature flags
 SIGNUPS_ENABLED=true
 ```
-
-## Web security headers
-
-The web container serves HTTP on port 80 and sets security headers in `apps/web/nginx.conf`. When TLS terminates at an upstream load balancer or ingress, configure `Strict-Transport-Security` there instead of in the container nginx config.
 
 ## Scheduler
 
@@ -175,7 +171,3 @@ Or locally:
 ```sh
 bun run --cwd apps/api backfill:image-storage
 ```
-
-## Sneaker images
-
-`/api/images/*` routes require a valid session cookie (same as other authenticated API routes). Serve the web app and API from the same site origin (or proxy `/api` through the web host) so browser `<img>` requests include the session cookie. Image responses may still use `Cache-Control: public, immutable` for stored files, but unauthenticated clients receive `401`/`403`.
