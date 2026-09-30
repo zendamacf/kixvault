@@ -1,4 +1,5 @@
 import { getRuntimeConfig } from '@/lib/runtime-config';
+import type { UmamiEventData } from '@/lib/umami-events';
 
 const UMAMI_SCRIPT_PATH = '/script.js';
 
@@ -51,6 +52,24 @@ export function trackUmamiPageview(): void {
     ...props,
     url,
   }));
+}
+
+export function trackUmamiEvent(eventName: string, data?: UmamiEventData): void {
+  if (!isUmamiConfigured() || typeof window === 'undefined') {
+    return;
+  }
+
+  void ensureUmamiScript()
+    .then(() => {
+      if (data && Object.keys(data).length > 0) {
+        window.umami?.track(eventName, data);
+      } else {
+        window.umami?.track(eventName);
+      }
+    })
+    .catch(() => {
+      // Analytics must not affect app behavior.
+    });
 }
 
 let scriptLoadPromise: Promise<void> | null = null;

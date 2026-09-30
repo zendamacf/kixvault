@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, test } from 'bun:test';
-import { getUmamiDomain, getUmamiScriptUrl, getUmamiWebsiteId, isUmamiConfigured } from './umami';
+import {
+  getUmamiDomain,
+  getUmamiScriptUrl,
+  getUmamiWebsiteId,
+  isUmamiConfigured,
+  trackUmamiEvent,
+} from './umami';
+import { UmamiEvents } from './umami-events';
 
 function setUmamiConfig(umami: { websiteId?: string; domain?: string; scriptUrl?: string }) {
   window.__KIXVAULT_RUNTIME_CONFIG__ = { umami };
@@ -49,5 +56,34 @@ describe('isUmamiConfigured', () => {
       domain: 'https://cloud.umami.is',
     });
     expect(isUmamiConfigured()).toBe(true);
+  });
+});
+
+describe('trackUmamiEvent', () => {
+  test('sends custom events with optional data', async () => {
+    setUmamiConfig({
+      websiteId: 'site-id',
+      domain: 'https://analytics.example.com',
+    });
+
+    const script = document.createElement('script');
+    script.setAttribute('data-website-id', 'site-id');
+    document.head.appendChild(script);
+
+    const calls: Array<[string, Record<string, string> | undefined]> = [];
+    window.umami = {
+      track: (event, data) => {
+        if (typeof event === 'string') {
+          calls.push([event, data as Record<string, string> | undefined]);
+        }
+      },
+    };
+
+    trackUmamiEvent(UmamiEvents.sneakerCreate, { source: 'catalog' });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    script.remove();
+    delete window.umami;
+    expect(calls).toEqual([[UmamiEvents.sneakerCreate, { source: 'catalog' }]]);
   });
 });

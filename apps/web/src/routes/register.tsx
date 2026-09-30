@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api, parseApiError } from '@/lib/api';
 import { authConfigQueryOptions, sessionQueryOptions } from '@/lib/queries';
+import { trackUmamiEvent } from '@/lib/umami';
+import { UmamiEvents } from '@/lib/umami-events';
 
 export const Route = createFileRoute('/register')({
   beforeLoad: async ({ context }) => {
@@ -53,10 +55,12 @@ function RegisterPage() {
       return response.json();
     },
     onSuccess: async () => {
+      trackUmamiEvent(UmamiEvents.authRegister);
       await queryClient.invalidateQueries({ queryKey: ['auth'] });
       await navigate({ to: '/' });
     },
     onError: (error) => {
+      trackUmamiEvent(UmamiEvents.authRegisterFailed);
       setFormError(error.message);
     },
   });
