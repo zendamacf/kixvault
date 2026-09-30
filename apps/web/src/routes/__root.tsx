@@ -1,6 +1,7 @@
 import { type QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRootRouteWithContext } from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
+import { UmamiAnalytics } from '@/components/analytics/umami-analytics';
 import { RouteErrorFallback } from '@/components/errors/route-error-fallback';
 import { AppShell } from '@/components/layout/app-shell';
 import { Toaster } from '@/components/ui/sonner';
@@ -20,6 +21,7 @@ function RootComponent() {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="kixvault-theme">
       <QueryClientProvider client={queryClient}>
+        <UmamiAnalytics />
         <AppShell />
         <Toaster />
       </QueryClientProvider>

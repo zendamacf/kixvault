@@ -144,6 +144,45 @@ IMAGE_MAX_WIDTH=1024
 SIGNUPS_ENABLED=true
 ```
 
+## Umami analytics (optional)
+
+The web app can send privacy-oriented pageview analytics to [Umami](https://umami.is/) (cloud or self-hosted). Values are baked into the static build at **image build time** (Vite `VITE_*` variables).
+
+| Variable | Description |
+| --- | --- |
+| `VITE_UMAMI_WEBSITE_ID` | Website ID from your Umami dashboard (required to enable tracking). |
+| `VITE_UMAMI_DOMAIN` | Origin of your Umami instance, without a trailing slash (e.g. `https://analytics.example.com`). The tracker loads `{domain}/script.js`. |
+| `VITE_UMAMI_SCRIPT_URL` | Optional full script URL; use instead of `VITE_UMAMI_DOMAIN` when the script is not at `/script.js`. |
+
+When these variables are unset, no tracker is loaded (default for local development and CI). If the visitor has **Do Not Track** or **Global Privacy Control** enabled, the tracker is not loaded.
+
+**What is collected:** Umami records page URLs and basic visit metadata (referrer, browser/device class, country from IP on the Umami server). KixVault does not send custom events or user-identifying fields. Do not pass emails, usernames, or sneaker collection details into Umami.
+
+**Custom web image with analytics:**
+
+```sh
+docker build -f apps/web/Dockerfile \
+  --build-arg VITE_UMAMI_WEBSITE_ID=your-website-id \
+  --build-arg VITE_UMAMI_DOMAIN=https://analytics.example.com \
+  -t kixvault-web:local .
+```
+
+**Self-hosted Umami (optional)** — add a service alongside KixVault (see [Umami Docker docs](https://umami.is/docs/running-on-docker)):
+
+```yaml
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      APP_SECRET: change-me-to-a-long-random-string
+    depends_on:
+      db:
+        condition: service_healthy
+```
+
+Create a website in the Umami UI, then pass its ID and your public Umami URL via the build args above.
+
 ## Scheduler
 
 The `scheduler` service reuses the API image and runs the weekly pricing refresh job via `croner`. It does not run database migrations — only the `api` service does that on startup.
