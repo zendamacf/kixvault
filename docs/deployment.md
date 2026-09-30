@@ -144,10 +144,6 @@ IMAGE_MAX_WIDTH=1024
 SIGNUPS_ENABLED=true
 ```
 
-## Rate limiting
-
-The API applies a per-IP baseline limit on all `/api/*` routes (except `/api/health`), stricter limits on `/api/auth/login` and `/api/auth/register`, and per-user limits on catalog routes. When `REDIS_URL` is set, rate-limit counters are stored in Redis so multiple API replicas share state; without Redis, limits are tracked in memory per process (suitable for local development and tests only).
-
 ## Scheduler
 
 The `scheduler` service reuses the API image and runs the weekly pricing refresh job via `croner`. It does not run database migrations — only the `api` service does that on startup.

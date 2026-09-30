@@ -1,4 +1,5 @@
 import './instrument';
+import '@/i18n';
 
 import { reactErrorHandler } from '@sentry/react';
 import { RouterProvider } from '@tanstack/react-router';
