@@ -100,6 +100,10 @@ services:
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-8080}:80"
+    environment:
+      UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-}
+      UMAMI_DOMAIN: ${UMAMI_DOMAIN:-}
+      UMAMI_SCRIPT_URL: ${UMAMI_SCRIPT_URL:-}
 
 volumes:
   kixvault_pgdata:
@@ -143,6 +147,10 @@ IMAGE_MAX_WIDTH=1024
 # Feature flags
 SIGNUPS_ENABLED=true
 ```
+
+## Umami analytics (optional)
+
+Set `UMAMI_WEBSITE_ID` and `UMAMI_DOMAIN` on the `web` service to enable [Umami](https://umami.is/docs) pageviews. Use `UMAMI_SCRIPT_URL` only if your tracker is not at `{UMAMI_DOMAIN}/script.js`. Omit these variables to disable analytics.
 
 ## Scheduler
 

@@ -41,6 +41,11 @@ RUN --mount=type=secret,id=sentry_auth_token \
 FROM nginx:1.27-alpine
 
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
+COPY apps/web/docker-entrypoint.sh /docker-entrypoint.sh
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 
+RUN chmod +x /docker-entrypoint.sh
+
 EXPOSE 80
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
