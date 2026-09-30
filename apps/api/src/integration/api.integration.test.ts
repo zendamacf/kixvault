@@ -641,4 +641,40 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(response.status).toBe(503);
     await expect(response.json()).resolves.toEqual({ error: 'Catalog search is not configured' });
   });
+
+  test('GET /api/images/:sneakerId enforces authentication and ownership', async () => {
+    const ownerEmail = `image-owner-${crypto.randomUUID()}@example.com`;
+    const otherEmail = `image-other-${crypto.randomUUID()}@example.com`;
+    const { cookie: ownerCookie } = await registerTestUser(app, ownerEmail);
+    const { cookie: otherCookie } = await registerTestUser(app, otherEmail);
+
+    const createResponse = await app.request('/api/sneakers/custom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: ownerCookie },
+      body: JSON.stringify({
+        brand: 'Nike',
+        model: 'Air Max 1',
+        size: 10,
+        condition: 'deadstock',
+        primaryImage: 'https://images.example.com/owner.png',
+      }),
+    });
+
+    expect(createResponse.status).toBe(201);
+
+    const created = (await createResponse.json()) as { sneaker: { id: string } };
+
+    const unauthenticated = await app.request(`/api/images/${created.sneaker.id}`);
+    expect(unauthenticated.status).toBe(401);
+
+    const forbidden = await app.request(`/api/images/${created.sneaker.id}`, {
+      headers: { Cookie: otherCookie },
+    });
+    expect(forbidden.status).toBe(403);
+
+    const allowed = await app.request(`/api/images/${created.sneaker.id}`, {
+      headers: { Cookie: ownerCookie },
+    });
+    expect([200, 302]).toContain(allowed.status);
+  });
 });
