@@ -150,7 +150,7 @@ SIGNUPS_ENABLED=true
 
 ## Umami analytics (optional)
 
-Set `UMAMI_WEBSITE_ID` and `UMAMI_DOMAIN` on the `web` service to enable [Umami](https://umami.is/docs) pageviews. Use `UMAMI_SCRIPT_URL` only if your tracker is not at `{UMAMI_DOMAIN}/script.js`. Omit these variables to disable analytics.
+Set `UMAMI_WEBSITE_ID` and `UMAMI_DOMAIN` on the `web` service to enable [Umami](https://umami.is/docs) pageviews and product events. Use `UMAMI_SCRIPT_URL` only if your tracker is not at `{UMAMI_DOMAIN}/script.js`. Omit these variables to disable analytics.
 
 ## Scheduler
 

@@ -23,6 +23,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api, parseApiError } from '@/lib/api';
 import { sneakerPriceHistoryQueryOptions, sneakerQueryOptions } from '@/lib/queries';
+import { trackUmamiEvent } from '@/lib/umami';
+import { UmamiEvents } from '@/lib/umami-events';
 import { formatCurrency, formatDate, getCatalogSourceLabel } from '@/lib/utils';
 
 export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
@@ -51,6 +53,7 @@ function SneakerDetailPage() {
       }
     },
     onSuccess: async () => {
+      trackUmamiEvent(UmamiEvents.sneakerDelete);
       await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
       await queryClient.invalidateQueries({ queryKey: ['stats'] });
       await navigate({ to: '/' });

@@ -8,6 +8,8 @@ import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { api, parseApiError } from '@/lib/api';
+import { trackUmamiEvent } from '@/lib/umami';
+import { UmamiEvents } from '@/lib/umami-events';
 import { cn } from '@/lib/utils';
 
 type AddMode = 'catalog' | 'manual';
@@ -37,6 +39,7 @@ function NewSneakerPage() {
         return;
       }
 
+      trackUmamiEvent(UmamiEvents.sneakerCreate, { source: 'catalog' });
       await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
       await queryClient.invalidateQueries({ queryKey: ['stats'] });
       await navigate({ to: '/sneakers/$sneakerId', params: { sneakerId: data.sneaker.id } });
@@ -61,6 +64,7 @@ function NewSneakerPage() {
         return;
       }
 
+      trackUmamiEvent(UmamiEvents.sneakerCreate, { source: 'manual' });
       await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
       await queryClient.invalidateQueries({ queryKey: ['stats'] });
       await navigate({ to: '/sneakers/$sneakerId', params: { sneakerId: data.sneaker.id } });

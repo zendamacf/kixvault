@@ -17,6 +17,9 @@ interface Window {
     };
   };
   umami?: {
-    track: (event?: string | ((props: Record<string, unknown>) => Record<string, unknown>)) => void;
+    track: (
+      event?: string | ((props: Record<string, unknown>) => Record<string, unknown>),
+      data?: Record<string, string | number | boolean>,
+    ) => void;
   };
 }

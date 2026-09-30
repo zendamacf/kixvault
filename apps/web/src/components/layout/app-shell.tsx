@@ -6,6 +6,8 @@ import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { api, parseApiError } from '@/lib/api';
 import { sessionQueryOptions } from '@/lib/queries';
+import { trackUmamiEvent } from '@/lib/umami';
+import { UmamiEvents } from '@/lib/umami-events';
 
 /** Root layout with header, main content area, and auth vs. authenticated shells. */
 export function AppShell() {
@@ -23,6 +25,7 @@ export function AppShell() {
       }
     },
     onSuccess: async () => {
+      trackUmamiEvent(UmamiEvents.authLogout);
       await queryClient.invalidateQueries({ queryKey: ['auth'] });
       await queryClient.clear();
       window.location.href = '/login';

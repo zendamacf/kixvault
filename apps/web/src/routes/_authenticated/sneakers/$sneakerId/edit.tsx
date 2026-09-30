@@ -8,6 +8,8 @@ import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { api, parseApiError } from '@/lib/api';
 import { sneakerQueryOptions } from '@/lib/queries';
+import { trackUmamiEvent } from '@/lib/umami';
+import { UmamiEvents } from '@/lib/umami-events';
 
 export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/edit')({
   component: EditSneakerPage,
@@ -34,6 +36,7 @@ function EditSneakerPage() {
       return response.json();
     },
     onSuccess: async () => {
+      trackUmamiEvent(UmamiEvents.sneakerUpdate, { catalog_linked: Boolean(data?.sneaker?.sku) });
       await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
       await queryClient.invalidateQueries({ queryKey: ['stats'] });
       await queryClient.invalidateQueries({ queryKey: ['sneakers', sneakerId] });

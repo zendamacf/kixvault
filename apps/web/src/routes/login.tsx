@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api, parseApiError } from '@/lib/api';
 import { authConfigQueryOptions, sessionQueryOptions } from '@/lib/queries';
+import { trackUmamiEvent } from '@/lib/umami';
+import { UmamiEvents } from '@/lib/umami-events';
 
 export const Route = createFileRoute('/login')({
   validateSearch: loginSearchSchema,
@@ -51,10 +53,12 @@ function LoginPage() {
       return response.json();
     },
     onSuccess: async () => {
+      trackUmamiEvent(UmamiEvents.authLogin);
       await queryClient.invalidateQueries({ queryKey: ['auth'] });
       await navigate({ to: redirectTo || '/' });
     },
     onError: (error) => {
+      trackUmamiEvent(UmamiEvents.authLoginFailed);
       setFormError(error.message);
     },
   });
