@@ -146,42 +146,11 @@ IMAGE_MAX_WIDTH=1024
 
 # Feature flags
 SIGNUPS_ENABLED=true
-
-# Umami analytics (optional — web container runtime env)
-UMAMI_WEBSITE_ID=
-UMAMI_DOMAIN=https://analytics.example.com
-UMAMI_SCRIPT_URL=
 ```
 
 ## Umami analytics (optional)
 
-The web container writes `/runtime-config.js` at startup from environment variables so operators can enable [Umami](https://umami.is/) without rebuilding the image.
-
-| Variable | Description |
-| --- | --- |
-| `UMAMI_WEBSITE_ID` | Website ID from your Umami dashboard (required to enable tracking). |
-| `UMAMI_DOMAIN` | Origin of your Umami instance, without a trailing slash (e.g. `https://analytics.example.com`). The tracker loads `{domain}/script.js`. |
-| `UMAMI_SCRIPT_URL` | Optional full script URL; use instead of `UMAMI_DOMAIN` when the script is not at `/script.js`. |
-
-When these variables are unset, no tracker is loaded. For local Vite dev, edit `apps/web/public/runtime-config.js`.
-
-**What is collected:** Umami records page URLs and basic visit metadata (referrer, browser/device class, country from IP on the Umami server). KixVault does not send custom events or user-identifying fields.
-
-**Self-hosted Umami (optional)** — add a service alongside KixVault (see [Umami Docker docs](https://umami.is/docs/running-on-docker)):
-
-```yaml
-  umami:
-    image: ghcr.io/umami-software/umami:postgresql-latest
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://umami:umami@db:5432/umami
-      APP_SECRET: change-me-to-a-long-random-string
-    depends_on:
-      db:
-        condition: service_healthy
-```
-
-Create a website in the Umami UI, then pass its ID and your public Umami URL via the build args above.
+Set `UMAMI_WEBSITE_ID` and `UMAMI_DOMAIN` on the `web` service to enable [Umami](https://umami.is/docs) pageviews. Use `UMAMI_SCRIPT_URL` only if your tracker is not at `{UMAMI_DOMAIN}/script.js`. Omit these variables to disable analytics.
 
 ## Scheduler
 
