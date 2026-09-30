@@ -96,6 +96,15 @@ describe('imageRoutes', () => {
     await expect(response.json()).resolves.toEqual({ error: 'Invalid image path' });
   });
 
+  test('GET /:sneakerId returns 404 when the sneaker record is missing', async () => {
+    mockWhere.mockImplementationOnce(async () => []);
+
+    const response = await imageRoutes.request(`/${sneakerId}`);
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({ error: 'Image not found' });
+  });
+
   test('GET /:sneakerId returns 403 when the sneaker belongs to another user', async () => {
     mockWhere.mockImplementationOnce(async () => [{ userId: 'other-user' }]);
 

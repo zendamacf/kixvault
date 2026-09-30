@@ -20,16 +20,14 @@ describe('getSneakerOwnerId', () => {
   test('returns the owner id when the sneaker exists', async () => {
     mockWhere.mockImplementationOnce(async () => [{ userId: 'user-abc' }]);
 
-    await expect(
-      getSneakerOwnerId('11111111-1111-4111-8111-111111111111'),
-    ).resolves.toBe('user-abc');
+    await expect(getSneakerOwnerId('11111111-1111-4111-8111-111111111111')).resolves.toBe(
+      'user-abc',
+    );
   });
 
   test('returns null when the sneaker is missing', async () => {
     mockWhere.mockImplementationOnce(async () => []);
 
-    await expect(
-      getSneakerOwnerId('11111111-1111-4111-8111-111111111111'),
-    ).resolves.toBeNull();
+    await expect(getSneakerOwnerId('11111111-1111-4111-8111-111111111111')).resolves.toBeNull();
   });
 });
