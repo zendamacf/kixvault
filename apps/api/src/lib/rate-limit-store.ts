@@ -13,11 +13,7 @@ export interface RateLimitStore {
 
 const REDIS_KEY_PREFIX = 'ratelimit:';
 
-function computeRetryAfterSeconds(
-  timestamps: number[],
-  windowMs: number,
-  now: number,
-): number {
+function computeRetryAfterSeconds(timestamps: number[], windowMs: number, now: number): number {
   const oldestTimestamp = timestamps[0] ?? now;
   const retryAfterMs = oldestTimestamp + windowMs - now;
   return Math.max(1, Math.ceil(retryAfterMs / 1000));
@@ -69,11 +65,11 @@ export class RedisRateLimitStore implements RateLimitStore {
     const redisKey = this.toRedisKey(key);
     const member = `${now}:${Math.random().toString(36).slice(2)}`;
 
-    await this.client.zremrangebyscore(redisKey, 0, windowStart);
+    await this.client.zremrangebyscore(redisKey, '-inf', windowStart);
     const count = await this.client.zcard(redisKey);
 
     if (count >= maxRequests) {
-      const oldest = await this.client.zrange(redisKey, 0, 0, 'WITHSCORES');
+      const oldest = await this.client.zrange(redisKey, '0', '0', 'WITHSCORES');
       const oldestTimestamp = Number(oldest[1] ?? now);
 
       return {

@@ -5,7 +5,6 @@ import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import type { app as AppType } from '../app';
-import { resetRateLimitStoreForTests } from '../lib/rate-limit-store';
 import {
   getSessionCookie,
   getTestDatabaseUrl,
@@ -51,6 +50,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
   beforeEach(async () => {
     resetKicksdbSdkMocks();
+    const { resetRateLimitStoreForTests } = await import('../lib/rate-limit-store');
     resetRateLimitStoreForTests();
     await resetDatabase(connectionString);
   });

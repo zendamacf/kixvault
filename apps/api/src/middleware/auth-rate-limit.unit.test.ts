@@ -5,9 +5,7 @@ import type { ApiEnv } from '../types';
 import { authRateLimit } from './auth-rate-limit';
 
 function createTestApp() {
-  return new Hono<ApiEnv>()
-    .use(authRateLimit)
-    .post('/login', (c) => c.json({ ok: true }));
+  return new Hono<ApiEnv>().use(authRateLimit).post('/login', (c) => c.json({ ok: true }));
 }
 
 describe('authRateLimit', () => {

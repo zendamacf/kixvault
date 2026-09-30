@@ -1,5 +1,5 @@
-import { getConnInfo } from 'hono/bun';
 import type { Context } from 'hono';
+import { getConnInfo } from 'hono/bun';
 import type { ApiEnv } from '../types';
 
 export function getRequestClientIp(c: Context<ApiEnv>): string {
