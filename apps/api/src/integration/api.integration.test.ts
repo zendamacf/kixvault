@@ -825,6 +825,22 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(noopPatch.status).toBe(200);
     const noopBody = (await noopPatch.json()) as { item: { priority: string } };
     expect(noopBody.item.priority).toBe('high');
+
+    const getResponse = await app.request(`/api/wishlist/${created.item.id}`, {
+      headers: { Cookie: ownerCookie },
+    });
+    expect(getResponse.status).toBe(200);
+
+    const deleteResponse = await app.request(`/api/wishlist/${created.item.id}`, {
+      method: 'DELETE',
+      headers: { Cookie: ownerCookie },
+    });
+    expect(deleteResponse.status).toBe(200);
+
+    const missingGet = await app.request(`/api/wishlist/${created.item.id}`, {
+      headers: { Cookie: ownerCookie },
+    });
+    expect(missingGet.status).toBe(404);
   });
 
   test('GET /api/audit requires authentication', async () => {

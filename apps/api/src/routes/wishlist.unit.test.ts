@@ -17,6 +17,7 @@ const mockListWishlistItemsForUser = mock(async () => []);
 const mockGetWishlistItemForUser = mock(async () => null as typeof existingItem | null);
 const mockBuildWishlistUpdate = mock(() => ({}));
 const mockUpdateReturning = mock(async () => [] as Array<typeof existingItem>);
+const mockDeleteReturning = mock(async () => [] as Array<{ id: string }>);
 
 mock.module('../middleware/session', () => ({
   sessionMiddleware: async (
@@ -39,7 +40,10 @@ mock.module('../middleware/session', () => ({
 mock.module('../lib/wishlist', () => ({
   listWishlistItemsForUser: mockListWishlistItemsForUser,
   formatWishlistItem: (row: unknown) => row,
-  parseWishlistId: (value: string) => (/^[0-9a-f-]{36}$/i.test(value) ? value : null),
+  parseWishlistId: (value: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+      ? value
+      : null,
   getWishlistItemForUser: mockGetWishlistItemForUser,
   buildWishlistUpdate: mockBuildWishlistUpdate,
   moveWishlistItemToCollection: mock(async () => ({})),
@@ -59,7 +63,7 @@ mock.module('../lib/db', () => ({
         }),
       }),
     }),
-    delete: () => ({ where: () => ({ returning: async () => [] }) }),
+    delete: () => ({ where: () => ({ returning: mockDeleteReturning }) }),
   },
 }));
 
@@ -87,6 +91,7 @@ describe('wishlist routes', () => {
     mockGetWishlistItemForUser.mockClear();
     mockBuildWishlistUpdate.mockClear();
     mockUpdateReturning.mockClear();
+    mockDeleteReturning.mockClear();
   });
 
   test('GET / returns wishlist items', async () => {
@@ -165,5 +170,41 @@ describe('wishlist routes', () => {
       notes: 'Updated',
     });
     expect(mockUpdateReturning).toHaveBeenCalled();
+  });
+
+  test('GET /:id returns 404 when the item is missing', async () => {
+    mockGetWishlistItemForUser.mockResolvedValueOnce(null);
+
+    const response = await wishlistRoutes.request(`/${VALID_ID}`);
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({ error: 'Wishlist item not found' });
+  });
+
+  test('GET /:id returns the item when found', async () => {
+    mockGetWishlistItemForUser.mockResolvedValueOnce(existingItem);
+
+    const response = await wishlistRoutes.request(`/${VALID_ID}`);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ item: existingItem });
+  });
+
+  test('DELETE /:id returns 404 when the item is missing', async () => {
+    mockDeleteReturning.mockResolvedValueOnce([]);
+
+    const response = await wishlistRoutes.request(`/${VALID_ID}`, { method: 'DELETE' });
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({ error: 'Wishlist item not found' });
+  });
+
+  test('DELETE /:id removes the item', async () => {
+    mockDeleteReturning.mockResolvedValueOnce([{ id: VALID_ID }]);
+
+    const response = await wishlistRoutes.request(`/${VALID_ID}`, { method: 'DELETE' });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ success: true });
   });
 });
