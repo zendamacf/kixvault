@@ -10,6 +10,7 @@ import { catalogRoutes } from './routes/catalog';
 import { imageRoutes } from './routes/images';
 import { sneakerRoutes } from './routes/sneakers';
 import { statsRoutes } from './routes/stats';
+import { wishlistRoutes } from './routes/wishlist';
 import type { ApiEnv } from './types';
 
 const routes = new Hono<ApiEnv>();
@@ -41,6 +42,7 @@ export const app = withSentry
   .route('/api/catalog', catalogRoutes)
   .route('/api/images', imageRoutes)
   .route('/api/sneakers', sneakerRoutes)
-  .route('/api/stats', statsRoutes);
+  .route('/api/stats', statsRoutes)
+  .route('/api/wishlist', wishlistRoutes);
 
 export type AppType = typeof app;

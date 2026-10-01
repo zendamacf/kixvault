@@ -702,6 +702,69 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect([200, 302]).toContain(allowed.status);
   });
 
+  test('GET /api/wishlist requires authentication', async () => {
+    const response = await app.request('/api/wishlist');
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({ error: 'Unauthorized' });
+  });
+
+  test('wishlist custom item can move to collection', async () => {
+    const email = `wishlist-${crypto.randomUUID()}@example.com`;
+    const { cookie } = await registerTestUser(app, email);
+
+    const createResponse = await app.request('/api/wishlist/custom', {
+      method: 'POST',
+      headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        brand: 'Adidas',
+        model: 'Samba',
+        targetSize: 9,
+        priority: 'high',
+        notes: 'Classic white',
+      }),
+    });
+
+    expect(createResponse.status).toBe(201);
+    const created = (await createResponse.json()) as { item: { id: string; brand: string } };
+    expect(created.item.brand).toBe('Adidas');
+
+    const listResponse = await app.request('/api/wishlist', {
+      headers: { Cookie: cookie },
+    });
+    const listBody = (await listResponse.json()) as { items: Array<{ id: string }> };
+    expect(listBody.items).toHaveLength(1);
+
+    const moveResponse = await app.request(`/api/wishlist/${created.item.id}/move-to-collection`, {
+      method: 'POST',
+      headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        size: 9,
+        condition: 'deadstock',
+        purchasePrice: 120,
+      }),
+    });
+
+    expect(moveResponse.status).toBe(201);
+    const moved = (await moveResponse.json()) as { sneaker: { brand: string; size: number } };
+    expect(moved.sneaker.brand).toBe('Adidas');
+    expect(moved.sneaker.size).toBe(9);
+
+    const listAfterMove = await app.request('/api/wishlist', {
+      headers: { Cookie: cookie },
+    });
+    const afterBody = (await listAfterMove.json()) as { items: unknown[] };
+    expect(afterBody.items).toHaveLength(0);
+
+    const sneakersResponse = await app.request('/api/sneakers', {
+      headers: { Cookie: cookie },
+    });
+    const sneakersBody = (await sneakersResponse.json()) as {
+      sneakers: Array<{ brand: string }>;
+    };
+    expect(sneakersBody.sneakers.some((sneaker) => sneaker.brand === 'Adidas')).toBe(true);
+  });
+
   test('GET /api/audit requires authentication', async () => {
     const response = await app.request('/api/audit');
 

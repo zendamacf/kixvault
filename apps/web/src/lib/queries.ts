@@ -1,4 +1,4 @@
-import type { SneakerCondition } from '@kixvault/shared';
+import type { SneakerCondition, WishlistPriority } from '@kixvault/shared';
 import { queryOptions } from '@tanstack/react-query';
 import { api } from './api';
 
@@ -34,6 +34,27 @@ export type Sneaker = {
 export type AuthUser = {
   id: string;
   email: string;
+};
+
+export type WishlistItem = {
+  id: string;
+  userId: string;
+  brand: string;
+  model: string;
+  colorway: string | null;
+  targetSize: number | null;
+  priority: WishlistPriority;
+  notes: string | null;
+  sku: string | null;
+  catalogSource: string | null;
+  catalogId: string | null;
+  catalogUrl: string | null;
+  nickname: string | null;
+  releaseDate: string | null;
+  description: string | null;
+  imageUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export const sessionQueryOptions = queryOptions({
@@ -119,6 +140,37 @@ export function sneakerQueryOptions(id: string) {
 
       return response.json();
     },
+  });
+}
+
+export const wishlistQueryOptions = queryOptions({
+  queryKey: ['wishlist'],
+  queryFn: async () => {
+    const response = await api.api.wishlist.$get();
+
+    if (!response.ok) {
+      throw new Error('Failed to load grails');
+    }
+
+    return response.json();
+  },
+});
+
+export function wishlistItemQueryOptions(id: string) {
+  return queryOptions({
+    queryKey: ['wishlist', id],
+    queryFn: async () => {
+      const response = await api.api.wishlist[':id'].$get({
+        param: { id },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load grail');
+      }
+
+      return response.json();
+    },
+    enabled: id.length > 0,
   });
 }
 
