@@ -122,6 +122,21 @@ export function sneakerQueryOptions(id: string) {
   });
 }
 
+export const auditEventsQueryOptions = queryOptions({
+  queryKey: ['audit', 'events'],
+  queryFn: async () => {
+    const response = await api.api.audit.$get({
+      query: {},
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to load activity');
+    }
+
+    return response.json();
+  },
+});
+
 export function sneakerPriceHistoryQueryOptions(id: string) {
   return queryOptions({
     queryKey: ['sneakers', id, 'price-history'],

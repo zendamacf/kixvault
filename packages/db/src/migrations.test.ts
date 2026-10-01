@@ -52,6 +52,7 @@ describe.skipIf(!databaseUrl)('migrations', () => {
     `;
 
     expect(tables.map((row) => row.table_name)).toEqual([
+      'audit_events',
       'catalog_market_prices',
       'catalog_product_cache',
       'price_snapshots',

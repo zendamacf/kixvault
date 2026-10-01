@@ -9,7 +9,9 @@ import {
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
+import { formatSneakerAuditMetadata, recordAuditEvent } from '../lib/audit';
 import { CatalogProductNotFoundError, CatalogSearchError } from '../lib/catalog';
+import { getRequestClientIp } from '../lib/client-ip';
 import { db } from '../lib/db';
 import { enqueueImageFetches } from '../lib/image-fetch-queue';
 import { isKicksdbConfigured } from '../lib/kicksdb';
@@ -145,6 +147,15 @@ export const sneakerRoutes = new Hono<ApiEnv>()
           });
         }
 
+        await recordAuditEvent({
+          userId: user?.id ?? '',
+          action: 'sneaker.created',
+          resourceType: 'sneaker',
+          resourceId: row.id,
+          metadata: formatSneakerAuditMetadata(row),
+          ip: getRequestClientIp(c),
+        });
+
         return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
       } catch (error) {
         if (error instanceof CatalogProductNotFoundError) {
@@ -237,6 +248,15 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       }
     }
 
+    await recordAuditEvent({
+      userId: user?.id ?? '',
+      action: 'sneaker.created',
+      resourceType: 'sneaker',
+      resourceId: row.id,
+      metadata: formatSneakerAuditMetadata(row),
+      ip: getRequestClientIp(c),
+    });
+
     return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
   })
   .patch('/:id', zValidator('json', updateSneakerSchema), async (c) => {
@@ -292,6 +312,15 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       }
     }
 
+    await recordAuditEvent({
+      userId: user?.id ?? '',
+      action: 'sneaker.updated',
+      resourceType: 'sneaker',
+      resourceId: row.id,
+      metadata: formatSneakerAuditMetadata(row),
+      ip: getRequestClientIp(c),
+    });
+
     return c.json({ sneaker: await formatSneakerWithPricing(row) });
   })
   .delete('/:id', async (c) => {
@@ -305,11 +334,24 @@ export const sneakerRoutes = new Hono<ApiEnv>()
     const [row] = await db
       .delete(sneakers)
       .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? '')))
-      .returning({ id: sneakers.id });
+      .returning({
+        id: sneakers.id,
+        brand: sneakers.brand,
+        model: sneakers.model,
+      });
 
     if (!row) {
       return c.json({ error: 'Sneaker not found' }, 404);
     }
+
+    await recordAuditEvent({
+      userId: user?.id ?? '',
+      action: 'sneaker.deleted',
+      resourceType: 'sneaker',
+      resourceId: row.id,
+      metadata: formatSneakerAuditMetadata(row),
+      ip: getRequestClientIp(c),
+    });
 
     return c.json({ success: true });
   });

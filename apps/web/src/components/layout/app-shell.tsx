@@ -1,36 +1,16 @@
 import { APP_NAME } from '@kixvault/shared';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Link, Outlet, useRouterState } from '@tanstack/react-router';
-import { LogOut, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { UserMenu } from '@/components/layout/user-menu';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
-import { Button } from '@/components/ui/button';
-import { api, parseApiError } from '@/lib/api';
 import { sessionQueryOptions } from '@/lib/queries';
-import { trackUmamiEvent } from '@/lib/umami';
-import { UmamiEvents } from '@/lib/umami-events';
 
 /** Root layout with header, main content area, and auth vs. authenticated shells. */
 export function AppShell() {
   const routerState = useRouterState();
-  const queryClient = useQueryClient();
   const { data } = useQuery(sessionQueryOptions);
   const user = data?.user ?? null;
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const response = await api.api.auth.logout.$post();
-
-      if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to log out'));
-      }
-    },
-    onSuccess: async () => {
-      trackUmamiEvent(UmamiEvents.authLogout);
-      await queryClient.invalidateQueries({ queryKey: ['auth'] });
-      await queryClient.clear();
-      window.location.href = '/login';
-    },
-  });
 
   const isAuthRoute =
     routerState.location.pathname === '/login' || routerState.location.pathname === '/register';
@@ -53,9 +33,6 @@ export function AppShell() {
             <Link to="/" className="text-lg font-semibold tracking-tight">
               {APP_NAME}
             </Link>
-            {user ? (
-              <p className="truncate text-sm text-muted-foreground sm:max-w-xs">{user.email}</p>
-            ) : null}
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
@@ -69,16 +46,7 @@ export function AppShell() {
                   <Plus className="size-4" />
                   <span className="hidden sm:inline">Add pair</span>
                 </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => logoutMutation.mutate()}
-                  disabled={logoutMutation.isPending}
-                  aria-label="Log out"
-                >
-                  <LogOut className="size-4" />
-                  <span className="hidden sm:inline">Log out</span>
-                </Button>
+                <UserMenu user={user} />
               </>
             ) : null}
           </div>

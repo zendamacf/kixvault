@@ -701,4 +701,70 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     });
     expect([200, 302]).toContain(allowed.status);
   });
+
+  test('GET /api/audit requires authentication', async () => {
+    const response = await app.request('/api/audit');
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({ error: 'Unauthorized' });
+  });
+
+  test('GET /api/audit returns only the current user events', async () => {
+    const ownerEmail = `audit-owner-${crypto.randomUUID()}@example.com`;
+    const otherEmail = `audit-other-${crypto.randomUUID()}@example.com`;
+    const { cookie: ownerCookie } = await registerTestUser(app, ownerEmail);
+    const { cookie: otherCookie } = await registerTestUser(app, otherEmail);
+
+    const ownerAudit = await app.request('/api/audit', {
+      headers: { Cookie: ownerCookie },
+    });
+
+    expect(ownerAudit.status).toBe(200);
+    const ownerBody = (await ownerAudit.json()) as {
+      events: Array<{ action: string }>;
+      retentionDays: number;
+    };
+    expect(ownerBody.retentionDays).toBe(90);
+    expect(ownerBody.events.some((event) => event.action === 'auth.register')).toBe(true);
+
+    const otherAudit = await app.request('/api/audit', {
+      headers: { Cookie: otherCookie },
+    });
+    const otherBody = (await otherAudit.json()) as { events: Array<{ action: string }> };
+    expect(otherBody.events.some((event) => event.action === 'auth.register')).toBe(true);
+    expect(otherBody.events.length).toBe(1);
+
+    const createResponse = await app.request('/api/sneakers/custom', {
+      method: 'POST',
+      headers: { Cookie: ownerCookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        brand: 'Nike',
+        model: 'Dunk Low',
+        size: 10,
+        condition: 'deadstock',
+      }),
+    });
+
+    expect(createResponse.status).toBe(201);
+
+    const ownerAuditAfterCreate = await app.request('/api/audit', {
+      headers: { Cookie: ownerCookie },
+    });
+    const ownerAfterBody = (await ownerAuditAfterCreate.json()) as {
+      events: Array<{ action: string; metadata?: { brand?: string } }>;
+    };
+    expect(
+      ownerAfterBody.events.some(
+        (event) => event.action === 'sneaker.created' && event.metadata?.brand === 'Nike',
+      ),
+    ).toBe(true);
+
+    const otherAuditAfterOwnerCreate = await app.request('/api/audit', {
+      headers: { Cookie: otherCookie },
+    });
+    const otherAfterBody = (await otherAuditAfterOwnerCreate.json()) as {
+      events: Array<{ action: string }>;
+    };
+    expect(otherAfterBody.events.some((event) => event.action === 'sneaker.created')).toBe(false);
+  });
 });

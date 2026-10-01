@@ -41,6 +41,9 @@ mock.module('../middleware/session', () => ({
   sessionMiddleware: async (_c: unknown, next: () => Promise<void>) => {
     await next();
   },
+  requireAuth: async (_c: unknown, next: () => Promise<void>) => {
+    await next();
+  },
 }));
 
 mock.module('../lib/env', () => ({
