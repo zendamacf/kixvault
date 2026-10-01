@@ -13,6 +13,7 @@ type FetchHandlers = {
   sneakers?: (url: URL) => Response | Promise<Response>;
   catalogSearch?: (url: URL) => Response | Promise<Response>;
   catalogProduct?: (url: URL) => Response | Promise<Response>;
+  wishlist?: (url: URL) => Response | Promise<Response>;
 };
 
 export function installFetchMock(handlers: FetchHandlers = {}) {
@@ -38,6 +39,10 @@ export function installFetchMock(handlers: FetchHandlers = {}) {
 
     if (url.pathname.startsWith('/api/catalog/products/') && handlers.catalogProduct) {
       return handlers.catalogProduct(url);
+    }
+
+    if (url.pathname.startsWith('/api/wishlist') && handlers.wishlist) {
+      return handlers.wishlist(url);
     }
 
     return createJsonResponse({ error: `Unhandled fetch: ${url.pathname}` }, 404);

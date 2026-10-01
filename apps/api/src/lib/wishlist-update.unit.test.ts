@@ -54,4 +54,10 @@ describe('buildWishlistUpdate', () => {
   test('returns an empty object when input has no changes', () => {
     expect(buildWishlistUpdate(baseRow, {})).toEqual({});
   });
+
+  test('parses release dates for PATCH', () => {
+    expect(buildWishlistUpdate(baseRow, { releaseDate: '2024-06-15' })).toEqual({
+      releaseDate: new Date('2024-06-15T00:00:00.000Z'),
+    });
+  });
 });

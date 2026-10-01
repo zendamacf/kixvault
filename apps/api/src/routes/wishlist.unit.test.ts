@@ -33,6 +33,15 @@ const mockDeleteReturning = mock(async () => [] as Array<{ id: string }>);
 const mockInsertReturning = mock(async () => [] as Array<Record<string, unknown>>);
 const mockMoveToCollection = mock(async () => ({ id: 'sneaker-1', brand: 'Nike' }));
 
+class CatalogProductNotFoundError extends Error {
+  override name = 'CatalogProductNotFoundError';
+}
+
+class CatalogSearchError extends Error {
+  status = 404;
+  override name = 'CatalogSearchError';
+}
+
 mock.module('../middleware/session', () => ({
   sessionMiddleware: async (
     c: { set: (key: 'user' | 'session', value: unknown) => void },
@@ -61,10 +70,8 @@ mock.module('../lib/wishlist', () => ({
   getWishlistItemForUser: mockGetWishlistItemForUser,
   buildWishlistUpdate: mockBuildWishlistUpdate,
   moveWishlistItemToCollection: mockMoveToCollection,
-  CatalogProductNotFoundError: class extends Error {},
-  CatalogSearchError: class extends Error {
-    status = 502;
-  },
+  CatalogProductNotFoundError,
+  CatalogSearchError,
 }));
 
 mock.module('../lib/db', () => ({
@@ -295,5 +302,33 @@ describe('wishlist routes', () => {
     await expect(response.json()).resolves.toMatchObject({
       sneaker: { id: 'sneaker-1', brand: 'Nike' },
     });
+  });
+
+  test('POST /:id/move-to-collection maps catalog not found to 404', async () => {
+    mockGetWishlistItemForUser.mockResolvedValueOnce(existingItem);
+    mockMoveToCollection.mockRejectedValueOnce(new CatalogProductNotFoundError('missing product'));
+
+    const response = await wishlistRoutes.request(`/${VALID_ID}/move-to-collection`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ size: 10, condition: 'deadstock' }),
+    });
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({ error: 'missing product' });
+  });
+
+  test('POST /:id/move-to-collection maps catalog search errors', async () => {
+    mockGetWishlistItemForUser.mockResolvedValueOnce(existingItem);
+    mockMoveToCollection.mockRejectedValueOnce(new CatalogSearchError('catalog down'));
+
+    const response = await wishlistRoutes.request(`/${VALID_ID}/move-to-collection`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ size: 10, condition: 'deadstock' }),
+    });
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({ error: 'Failed to fetch catalog product' });
   });
 });
