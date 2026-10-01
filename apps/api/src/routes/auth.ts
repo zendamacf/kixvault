@@ -4,7 +4,9 @@ import { loginSchema, registerSchema } from '@kixvault/shared';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { generateIdFromEntropySize } from 'lucia';
+import { recordAuditEvent } from '../lib/audit';
 import { lucia } from '../lib/auth';
+import { getRequestClientIp } from '../lib/client-ip';
 import { db } from '../lib/db';
 import { env } from '../lib/env';
 import { authRateLimit } from '../middleware/auth-rate-limit';
@@ -42,6 +44,12 @@ export const authRoutes = new Hono<ApiEnv>()
     const session = await lucia.createSession(userId, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
 
+    await recordAuditEvent({
+      userId,
+      action: 'auth.register',
+      ip: getRequestClientIp(c),
+    });
+
     return c.json({ user: { id: userId, email } }, 201, {
       'Set-Cookie': sessionCookie.serialize(),
     });
@@ -64,12 +72,27 @@ export const authRoutes = new Hono<ApiEnv>()
     const session = await lucia.createSession(user.id, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
 
+    await recordAuditEvent({
+      userId: user.id,
+      action: 'auth.login',
+      ip: getRequestClientIp(c),
+    });
+
     return c.json({ user: { id: user.id, email: user.email } }, 200, {
       'Set-Cookie': sessionCookie.serialize(),
     });
   })
   .post('/logout', async (c) => {
     const session = c.get('session');
+    const user = c.get('user');
+
+    if (user) {
+      await recordAuditEvent({
+        userId: user.id,
+        action: 'auth.logout',
+        ip: getRequestClientIp(c),
+      });
+    }
 
     if (session) {
       await lucia.invalidateSession(session.id);

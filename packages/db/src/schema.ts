@@ -83,9 +83,34 @@ export const sneakers = pgTable(
   ],
 );
 
+export const auditEvents = pgTable(
+  'audit_events',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    action: text('action').notNull(),
+    resourceType: text('resource_type'),
+    resourceId: text('resource_id'),
+    metadata: jsonb('metadata').$type<Record<string, string | number | boolean | null>>(),
+    ip: text('ip'),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (table) => [index('audit_events_user_id_created_at_idx').on(table.userId, table.createdAt)],
+);
+
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   sneakers: many(sneakers),
+  auditEvents: many(auditEvents),
+}));
+
+export const auditEventsRelations = relations(auditEvents, ({ one }) => ({
+  user: one(users, {
+    fields: [auditEvents.userId],
+    references: [users.id],
+  }),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({

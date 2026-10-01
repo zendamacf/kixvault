@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { env } from './lib/env';
 import { globalApiRateLimit } from './middleware/global-rate-limit';
 import { requestLogMiddleware } from './middleware/request-log';
+import { auditRoutes } from './routes/audit';
 import { authRoutes } from './routes/auth';
 import { catalogRoutes } from './routes/catalog';
 import { imageRoutes } from './routes/images';
@@ -35,6 +36,7 @@ export const app = withSentry
 
     return globalApiRateLimit(c, next);
   })
+  .route('/api/audit', auditRoutes)
   .route('/api/auth', authRoutes)
   .route('/api/catalog', catalogRoutes)
   .route('/api/images', imageRoutes)
