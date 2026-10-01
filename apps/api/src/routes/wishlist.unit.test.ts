@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test';
+import { formatWishlistItem } from '../lib/wishlist-format';
 
 const VALID_ID = '11111111-1111-4111-8111-111111111111';
+
+const createdAt = new Date('2026-01-01T00:00:00.000Z');
 
 const existingItem = {
   id: VALID_ID,
@@ -8,9 +11,18 @@ const existingItem = {
   brand: 'Nike',
   model: 'Dunk Low',
   colorway: 'Panda',
-  targetSize: 10,
+  targetSize: '10',
   priority: 'medium' as const,
   notes: 'Original',
+  sku: null,
+  catalogSource: null,
+  catalogId: null,
+  nickname: null,
+  releaseDate: null,
+  description: null,
+  imageUrl: null,
+  createdAt,
+  updatedAt: createdAt,
 };
 
 const mockListWishlistItemsForUser = mock(async () => []);
@@ -18,6 +30,8 @@ const mockGetWishlistItemForUser = mock(async () => null as typeof existingItem 
 const mockBuildWishlistUpdate = mock(() => ({}));
 const mockUpdateReturning = mock(async () => [] as Array<typeof existingItem>);
 const mockDeleteReturning = mock(async () => [] as Array<{ id: string }>);
+const mockInsertReturning = mock(async () => [] as Array<Record<string, unknown>>);
+const mockMoveToCollection = mock(async () => ({ id: 'sneaker-1', brand: 'Nike' }));
 
 mock.module('../middleware/session', () => ({
   sessionMiddleware: async (
@@ -39,14 +53,14 @@ mock.module('../middleware/session', () => ({
 
 mock.module('../lib/wishlist', () => ({
   listWishlistItemsForUser: mockListWishlistItemsForUser,
-  formatWishlistItem: (row: unknown) => row,
+  formatWishlistItem,
   parseWishlistId: (value: string) =>
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
       ? value
       : null,
   getWishlistItemForUser: mockGetWishlistItemForUser,
   buildWishlistUpdate: mockBuildWishlistUpdate,
-  moveWishlistItemToCollection: mock(async () => ({})),
+  moveWishlistItemToCollection: mockMoveToCollection,
   CatalogProductNotFoundError: class extends Error {},
   CatalogSearchError: class extends Error {
     status = 502;
@@ -55,7 +69,7 @@ mock.module('../lib/wishlist', () => ({
 
 mock.module('../lib/db', () => ({
   db: {
-    insert: () => ({ values: () => ({ returning: async () => [] }) }),
+    insert: () => ({ values: () => ({ returning: mockInsertReturning }) }),
     update: () => ({
       set: () => ({
         where: () => ({
@@ -92,6 +106,8 @@ describe('wishlist routes', () => {
     mockBuildWishlistUpdate.mockClear();
     mockUpdateReturning.mockClear();
     mockDeleteReturning.mockClear();
+    mockInsertReturning.mockClear();
+    mockMoveToCollection.mockClear();
   });
 
   test('GET / returns wishlist items', async () => {
@@ -147,12 +163,17 @@ describe('wishlist routes', () => {
     });
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ item: existingItem });
+    const body = (await response.json()) as { item: { notes: string | null } };
+    expect(body.item.notes).toBe('Original');
     expect(mockUpdateReturning).not.toHaveBeenCalled();
   });
 
   test('PATCH /:id persists updates and returns the updated item', async () => {
-    const updatedItem = { ...existingItem, priority: 'high' as const, notes: 'Updated' };
+    const updatedItem = {
+      ...existingItem,
+      priority: 'high' as const,
+      notes: 'Updated',
+    };
     mockGetWishlistItemForUser.mockResolvedValueOnce(existingItem);
     mockBuildWishlistUpdate.mockReturnValueOnce({ priority: 'high', notes: 'Updated' });
     mockUpdateReturning.mockResolvedValueOnce([updatedItem]);
@@ -164,7 +185,9 @@ describe('wishlist routes', () => {
     });
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ item: updatedItem });
+    const body = (await response.json()) as { item: { priority: string; notes: string | null } };
+    expect(body.item.priority).toBe('high');
+    expect(body.item.notes).toBe('Updated');
     expect(mockBuildWishlistUpdate).toHaveBeenCalledWith(existingItem, {
       priority: 'high',
       notes: 'Updated',
@@ -187,7 +210,8 @@ describe('wishlist routes', () => {
     const response = await wishlistRoutes.request(`/${VALID_ID}`);
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ item: existingItem });
+    const body = (await response.json()) as { item: { brand: string } };
+    expect(body.item.brand).toBe('Nike');
   });
 
   test('DELETE /:id returns 404 when the item is missing', async () => {
@@ -206,5 +230,70 @@ describe('wishlist routes', () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ success: true });
+  });
+
+  test('POST /custom creates a wishlist item', async () => {
+    const createdAt = new Date('2026-01-01T00:00:00.000Z');
+    mockInsertReturning.mockResolvedValueOnce([
+      {
+        id: VALID_ID,
+        userId: 'user-1',
+        brand: 'Asics',
+        model: 'Gel Kayano',
+        colorway: null,
+        targetSize: '11',
+        priority: 'medium',
+        notes: null,
+        sku: null,
+        catalogSource: null,
+        catalogId: null,
+        nickname: null,
+        releaseDate: null,
+        description: null,
+        imageUrl: null,
+        createdAt,
+        updatedAt: createdAt,
+      },
+    ]);
+
+    const response = await wishlistRoutes.request('/custom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ brand: 'Asics', model: 'Gel Kayano' }),
+    });
+
+    expect(response.status).toBe(201);
+    const body = (await response.json()) as { item: { brand: string } };
+    expect(body.item.brand).toBe('Asics');
+  });
+
+  test('POST /from-catalog returns 503 when catalog is unavailable', async () => {
+    const response = await wishlistRoutes.request('/from-catalog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        catalogSource: 'kicksdb:stockx',
+        catalogId: 'air-max-1',
+      }),
+    });
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({ error: 'Catalog is not configured' });
+  });
+
+  test('POST /:id/move-to-collection returns the created sneaker', async () => {
+    mockGetWishlistItemForUser.mockResolvedValueOnce(existingItem);
+    mockMoveToCollection.mockResolvedValueOnce({ id: 'sneaker-1', brand: 'Nike', size: 10 });
+
+    const response = await wishlistRoutes.request(`/${VALID_ID}/move-to-collection`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ size: 10, condition: 'deadstock' }),
+    });
+
+    expect(response.status).toBe(201);
+    await expect(response.json()).resolves.toMatchObject({
+      sneaker: { id: 'sneaker-1', brand: 'Nike' },
+    });
   });
 });
