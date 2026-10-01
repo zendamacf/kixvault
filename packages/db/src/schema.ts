@@ -100,10 +100,52 @@ export const auditEvents = pgTable(
   (table) => [index('audit_events_user_id_created_at_idx').on(table.userId, table.createdAt)],
 );
 
+export const wishlistPriorities = ['low', 'medium', 'high'] as const;
+export type WishlistPriority = (typeof wishlistPriorities)[number];
+
+export const wishlistPriorityEnum = pgEnum('wishlist_priority', wishlistPriorities);
+
+export const wishlistItems = pgTable(
+  'wishlist_items',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    colorway: text('colorway'),
+    targetSize: numeric('target_size', { precision: 4, scale: 1 }),
+    priority: wishlistPriorityEnum('priority').notNull().default('medium'),
+    notes: text('notes'),
+    sku: text('sku'),
+    catalogSource: text('catalog_source'),
+    catalogId: text('catalog_id'),
+    nickname: text('nickname'),
+    releaseDate: date('release_date', { mode: 'date' }),
+    description: text('description'),
+    imageUrl: text('image_url'),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [index('wishlist_items_user_id_idx').on(table.userId)],
+);
+
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   sneakers: many(sneakers),
   auditEvents: many(auditEvents),
+  wishlistItems: many(wishlistItems),
+}));
+
+export const wishlistItemsRelations = relations(wishlistItems, ({ one }) => ({
+  user: one(users, {
+    fields: [wishlistItems.userId],
+    references: [users.id],
+  }),
 }));
 
 export const auditEventsRelations = relations(auditEvents, ({ one }) => ({

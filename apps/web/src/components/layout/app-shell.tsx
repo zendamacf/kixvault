@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { UserMenu } from '@/components/layout/user-menu';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { sessionQueryOptions } from '@/lib/queries';
+import { cn } from '@/lib/utils';
 
 /** Root layout with header, main content area, and auth vs. authenticated shells. */
 export function AppShell() {
@@ -12,8 +13,11 @@ export function AppShell() {
   const { data } = useQuery(sessionQueryOptions);
   const user = data?.user ?? null;
 
-  const isAuthRoute =
-    routerState.location.pathname === '/login' || routerState.location.pathname === '/register';
+  const pathname = routerState.location.pathname;
+
+  const isAuthRoute = pathname === '/login' || pathname === '/register';
+  const isGrailsRoute = pathname.startsWith('/grails');
+  const isCollectionRoute = pathname === '/' || pathname.startsWith('/sneakers');
 
   if (isAuthRoute) {
     return (
@@ -29,10 +33,34 @@ export function AppShell() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:py-4">
-          <div className="min-w-0">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
             <Link to="/" className="text-lg font-semibold tracking-tight">
               {APP_NAME}
             </Link>
+            {user ? (
+              <nav className="flex items-center gap-1 text-sm" aria-label="Main">
+                <Link
+                  to="/"
+                  className={cn(
+                    'rounded-md px-2.5 py-1 font-medium transition-colors hover:bg-accent',
+                    isCollectionRoute
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground',
+                  )}
+                >
+                  Collection
+                </Link>
+                <Link
+                  to="/grails"
+                  className={cn(
+                    'rounded-md px-2.5 py-1 font-medium transition-colors hover:bg-accent',
+                    isGrailsRoute ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
+                  )}
+                >
+                  Grails
+                </Link>
+              </nav>
+            ) : null}
           </div>
 
           <div className="flex shrink-0 items-center gap-2">

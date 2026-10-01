@@ -62,6 +62,7 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       'sneaker_images',
       'sneakers',
       'users',
+      'wishlist_items',
     ]);
   });
 

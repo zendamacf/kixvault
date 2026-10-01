@@ -129,6 +129,83 @@ describe('sneakerPriceHistoryQueryOptions', () => {
   });
 });
 
+describe('wishlistQueryOptions', () => {
+  test('loads grails for the signed-in user', async () => {
+    installFetchMock({
+      wishlist: async () =>
+        createJsonResponse({
+          items: [
+            {
+              id: '11111111-1111-4111-8111-111111111111',
+              userId: 'user-1',
+              brand: 'Nike',
+              model: 'Dunk Low',
+              colorway: null,
+              targetSize: 10,
+              priority: 'high',
+              notes: null,
+              sku: null,
+              catalogSource: null,
+              catalogId: null,
+              catalogUrl: null,
+              nickname: null,
+              releaseDate: null,
+              description: null,
+              imageUrl: null,
+              createdAt: '2026-01-01T00:00:00.000Z',
+              updatedAt: '2026-01-01T00:00:00.000Z',
+            },
+          ],
+        }),
+    });
+
+    const { wishlistQueryOptions } = await import('./queries');
+    const client = new QueryClient();
+    const result = await client.fetchQuery(wishlistQueryOptions);
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.priority).toBe('high');
+  });
+});
+
+describe('wishlistItemQueryOptions', () => {
+  test('loads a single grail by id', async () => {
+    installFetchMock({
+      wishlist: async (url) =>
+        createJsonResponse({
+          item: {
+            id: url.pathname.split('/').at(-1),
+            userId: 'user-1',
+            brand: 'Asics',
+            model: 'Kayano',
+            colorway: null,
+            targetSize: null,
+            priority: 'medium',
+            notes: null,
+            sku: null,
+            catalogSource: null,
+            catalogId: null,
+            catalogUrl: null,
+            nickname: null,
+            releaseDate: null,
+            description: null,
+            imageUrl: null,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        }),
+    });
+
+    const { wishlistItemQueryOptions } = await import('./queries');
+    const client = new QueryClient();
+    const result = await client.fetchQuery(
+      wishlistItemQueryOptions('11111111-1111-4111-8111-111111111111'),
+    );
+
+    expect(result.item.brand).toBe('Asics');
+  });
+});
+
 describe('sneakerQueryOptions', () => {
   test('loads a single sneaker by id', async () => {
     installFetchMock({
