@@ -1,4 +1,22 @@
-import { describe, expect, mock, test } from 'bun:test';
+import { beforeEach, describe, expect, mock, test } from 'bun:test';
+
+const VALID_ID = '11111111-1111-4111-8111-111111111111';
+
+const existingItem = {
+  id: VALID_ID,
+  userId: 'user-1',
+  brand: 'Nike',
+  model: 'Dunk Low',
+  colorway: 'Panda',
+  targetSize: 10,
+  priority: 'medium' as const,
+  notes: 'Original',
+};
+
+const mockListWishlistItemsForUser = mock(async () => []);
+const mockGetWishlistItemForUser = mock(async () => null as typeof existingItem | null);
+const mockBuildWishlistUpdate = mock(() => ({}));
+const mockUpdateReturning = mock(async () => [] as Array<typeof existingItem>);
 
 mock.module('../middleware/session', () => ({
   sessionMiddleware: async (
@@ -18,14 +36,12 @@ mock.module('../middleware/session', () => ({
   },
 }));
 
-const mockListWishlistItemsForUser = mock(async () => []);
-
 mock.module('../lib/wishlist', () => ({
   listWishlistItemsForUser: mockListWishlistItemsForUser,
   formatWishlistItem: (row: unknown) => row,
   parseWishlistId: (value: string) => (/^[0-9a-f-]{36}$/i.test(value) ? value : null),
-  getWishlistItemForUser: mock(async () => null),
-  buildWishlistUpdate: () => ({}),
+  getWishlistItemForUser: mockGetWishlistItemForUser,
+  buildWishlistUpdate: mockBuildWishlistUpdate,
   moveWishlistItemToCollection: mock(async () => ({})),
   CatalogProductNotFoundError: class extends Error {},
   CatalogSearchError: class extends Error {
@@ -36,7 +52,13 @@ mock.module('../lib/wishlist', () => ({
 mock.module('../lib/db', () => ({
   db: {
     insert: () => ({ values: () => ({ returning: async () => [] }) }),
-    update: () => ({ set: () => ({ where: () => ({ returning: async () => [] }) }) }),
+    update: () => ({
+      set: () => ({
+        where: () => ({
+          returning: mockUpdateReturning,
+        }),
+      }),
+    }),
     delete: () => ({ where: () => ({ returning: async () => [] }) }),
   },
 }));
@@ -61,6 +83,12 @@ mock.module('../middleware/catalog-rate-limit', () => ({
 const { wishlistRoutes } = await import('./wishlist');
 
 describe('wishlist routes', () => {
+  beforeEach(() => {
+    mockGetWishlistItemForUser.mockClear();
+    mockBuildWishlistUpdate.mockClear();
+    mockUpdateReturning.mockClear();
+  });
+
   test('GET / returns wishlist items', async () => {
     mockListWishlistItemsForUser.mockResolvedValueOnce([]);
 
@@ -75,5 +103,67 @@ describe('wishlist routes', () => {
 
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({ error: 'Invalid wishlist item id' });
+  });
+
+  test('PATCH /:id returns 400 for invalid ids', async () => {
+    const response = await wishlistRoutes.request('/not-a-uuid', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priority: 'high' }),
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: 'Invalid wishlist item id' });
+    expect(mockGetWishlistItemForUser).not.toHaveBeenCalled();
+  });
+
+  test('PATCH /:id returns 404 when the item is missing', async () => {
+    mockGetWishlistItemForUser.mockResolvedValueOnce(null);
+
+    const response = await wishlistRoutes.request(`/${VALID_ID}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priority: 'high' }),
+    });
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({ error: 'Wishlist item not found' });
+    expect(mockGetWishlistItemForUser).toHaveBeenCalledWith('user-1', VALID_ID);
+  });
+
+  test('PATCH /:id returns the existing item when there are no updates', async () => {
+    mockGetWishlistItemForUser.mockResolvedValueOnce(existingItem);
+    mockBuildWishlistUpdate.mockReturnValueOnce({});
+
+    const response = await wishlistRoutes.request(`/${VALID_ID}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ item: existingItem });
+    expect(mockUpdateReturning).not.toHaveBeenCalled();
+  });
+
+  test('PATCH /:id persists updates and returns the updated item', async () => {
+    const updatedItem = { ...existingItem, priority: 'high' as const, notes: 'Updated' };
+    mockGetWishlistItemForUser.mockResolvedValueOnce(existingItem);
+    mockBuildWishlistUpdate.mockReturnValueOnce({ priority: 'high', notes: 'Updated' });
+    mockUpdateReturning.mockResolvedValueOnce([updatedItem]);
+
+    const response = await wishlistRoutes.request(`/${VALID_ID}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priority: 'high', notes: 'Updated' }),
+    });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ item: updatedItem });
+    expect(mockBuildWishlistUpdate).toHaveBeenCalledWith(existingItem, {
+      priority: 'high',
+      notes: 'Updated',
+    });
+    expect(mockUpdateReturning).toHaveBeenCalled();
   });
 });

@@ -1,9 +1,5 @@
 import { sneakers, wishlistItems } from '@kixvault/db';
-import type {
-  CatalogSource,
-  MoveWishlistToCollectionInput,
-  UpdateWishlistItemInput,
-} from '@kixvault/shared';
+import type { CatalogSource, MoveWishlistToCollectionInput } from '@kixvault/shared';
 import { buildCatalogUrl } from '@kixvault/shared';
 import { and, desc, eq } from 'drizzle-orm';
 import { CatalogProductNotFoundError, CatalogSearchError } from './catalog';
@@ -55,63 +51,7 @@ export function formatWishlistItem(row: WishlistRow) {
   };
 }
 
-export function buildWishlistUpdate(existing: WishlistRow, input: UpdateWishlistItemInput) {
-  const updates: Partial<typeof wishlistItems.$inferInsert> = {};
-
-  if (input.brand !== undefined) {
-    updates.brand = input.brand;
-  }
-
-  if (input.model !== undefined) {
-    updates.model = input.model;
-  }
-
-  if (input.colorway !== undefined) {
-    updates.colorway = input.colorway ?? null;
-  }
-
-  if (input.targetSize !== undefined) {
-    updates.targetSize = input.targetSize == null ? null : input.targetSize.toString();
-  }
-
-  if (input.priority !== undefined) {
-    updates.priority = input.priority;
-  }
-
-  if (input.notes !== undefined) {
-    updates.notes = input.notes ?? null;
-  }
-
-  if (input.sku !== undefined) {
-    updates.sku = input.sku ?? null;
-  }
-
-  if (input.catalogSource !== undefined) {
-    updates.catalogSource = input.catalogSource ?? null;
-  }
-
-  if (input.catalogId !== undefined) {
-    updates.catalogId = input.catalogId ?? null;
-  }
-
-  if (input.nickname !== undefined) {
-    updates.nickname = input.nickname ?? null;
-  }
-
-  if (input.releaseDate !== undefined) {
-    updates.releaseDate = parsePurchaseDate(input.releaseDate);
-  }
-
-  if (input.description !== undefined) {
-    updates.description = input.description ?? null;
-  }
-
-  if (input.imageUrl !== undefined) {
-    updates.imageUrl = input.imageUrl ?? null;
-  }
-
-  return updates;
-}
+export { buildWishlistUpdate } from './wishlist-update';
 
 export async function moveWishlistItemToCollection(
   userId: string,

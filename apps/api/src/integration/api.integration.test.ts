@@ -765,6 +765,68 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(sneakersBody.sneakers.some((sneaker) => sneaker.brand === 'Adidas')).toBe(true);
   });
 
+  test('PATCH /api/wishlist/:id updates grail fields for the owner', async () => {
+    const ownerEmail = `wishlist-patch-${crypto.randomUUID()}@example.com`;
+    const otherEmail = `wishlist-patch-other-${crypto.randomUUID()}@example.com`;
+    const { cookie: ownerCookie } = await registerTestUser(app, ownerEmail);
+    const { cookie: otherCookie } = await registerTestUser(app, otherEmail);
+
+    const createResponse = await app.request('/api/wishlist/custom', {
+      method: 'POST',
+      headers: { Cookie: ownerCookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        brand: 'New Balance',
+        model: '550',
+        priority: 'medium',
+        notes: 'Before edit',
+      }),
+    });
+
+    expect(createResponse.status).toBe(201);
+    const created = (await createResponse.json()) as { item: { id: string } };
+
+    const invalidPatch = await app.request('/api/wishlist/not-a-uuid', {
+      method: 'PATCH',
+      headers: { Cookie: ownerCookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priority: 'high' }),
+    });
+    expect(invalidPatch.status).toBe(400);
+
+    const forbiddenPatch = await app.request(`/api/wishlist/${created.item.id}`, {
+      method: 'PATCH',
+      headers: { Cookie: otherCookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priority: 'high' }),
+    });
+    expect(forbiddenPatch.status).toBe(404);
+
+    const patchResponse = await app.request(`/api/wishlist/${created.item.id}`, {
+      method: 'PATCH',
+      headers: { Cookie: ownerCookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        priority: 'high',
+        notes: 'After edit',
+        targetSize: 10,
+      }),
+    });
+
+    expect(patchResponse.status).toBe(200);
+    const patched = (await patchResponse.json()) as {
+      item: { priority: string; notes: string | null; targetSize: number | null };
+    };
+    expect(patched.item.priority).toBe('high');
+    expect(patched.item.notes).toBe('After edit');
+    expect(patched.item.targetSize).toBe(10);
+
+    const noopPatch = await app.request(`/api/wishlist/${created.item.id}`, {
+      method: 'PATCH',
+      headers: { Cookie: ownerCookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    expect(noopPatch.status).toBe(200);
+    const noopBody = (await noopPatch.json()) as { item: { priority: string } };
+    expect(noopBody.item.priority).toBe('high');
+  });
+
   test('GET /api/audit requires authentication', async () => {
     const response = await app.request('/api/audit');
 

@@ -3,6 +3,7 @@ import {
   createWishlistFromCatalogSchema,
   createWishlistItemSchema,
   moveWishlistToCollectionSchema,
+  updateWishlistItemSchema,
 } from './wishlist';
 
 describe('wishlist schemas', () => {
@@ -31,5 +32,10 @@ describe('wishlist schemas', () => {
         condition: 'deadstock',
       }),
     ).not.toThrow();
+  });
+
+  test('updateWishlistItemSchema allows partial PATCH bodies', () => {
+    expect(updateWishlistItemSchema.parse({ priority: 'low' })).toMatchObject({ priority: 'low' });
+    expect(updateWishlistItemSchema.parse({ notes: 'Updated' })).toMatchObject({ notes: 'Updated' });
   });
 });
