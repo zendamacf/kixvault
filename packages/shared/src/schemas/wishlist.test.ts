@@ -36,6 +36,9 @@ describe('wishlist schemas', () => {
 
   test('updateWishlistItemSchema allows partial PATCH bodies', () => {
     expect(updateWishlistItemSchema.parse({ priority: 'low' })).toMatchObject({ priority: 'low' });
-    expect(updateWishlistItemSchema.parse({ notes: 'Updated' })).toMatchObject({ notes: 'Updated' });
+    expect(updateWishlistItemSchema.parse({ notes: 'Updated' })).toMatchObject({
+      notes: 'Updated',
+    });
+    expect(updateWishlistItemSchema.parse({})).toEqual({});
   });
 });

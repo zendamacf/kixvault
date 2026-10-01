@@ -11,7 +11,7 @@ function parseWishlistDate(value: string | null | undefined): Date | null {
   return new Date(`${value}T00:00:00.000Z`);
 }
 
-export function buildWishlistUpdate(existing: WishlistRow, input: UpdateWishlistItemInput) {
+export function buildWishlistUpdate(_existing: WishlistRow, input: UpdateWishlistItemInput) {
   const updates: Partial<typeof wishlistItems.$inferInsert> = {};
 
   if (input.brand !== undefined) {

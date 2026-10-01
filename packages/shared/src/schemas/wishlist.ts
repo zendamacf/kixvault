@@ -39,7 +39,13 @@ export const createWishlistItemSchema = z.object({
   ...wishlistCatalogFields,
 });
 
-export const updateWishlistItemSchema = createWishlistItemSchema.partial();
+/** PATCH bodies must not apply create-time defaults (e.g. priority) when fields are omitted. */
+export const updateWishlistItemSchema = createWishlistItemSchema
+  .omit({ priority: true })
+  .partial()
+  .extend({
+    priority: z.enum(wishlistPriorities).optional(),
+  });
 
 export const createWishlistFromCatalogSchema = z.object({
   catalogSource: z.enum(catalogSources),
