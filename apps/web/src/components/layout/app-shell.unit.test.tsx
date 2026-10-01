@@ -9,15 +9,7 @@ afterEach(() => {
 });
 
 mock.module('@tanstack/react-router', () => ({
-  Link: ({
-    children,
-    to,
-    className,
-  }: {
-    children: ReactNode;
-    to: string;
-    className?: string;
-  }) => (
+  Link: ({ children, to, className }: { children: ReactNode; to: string; className?: string }) => (
     <a href={to} className={className}>
       {children}
     </a>
