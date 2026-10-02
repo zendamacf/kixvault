@@ -9,7 +9,11 @@ import {
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
-import { formatSneakerAuditMetadata, recordAuditEvent, recordSneakerCreatedAuditEvent } from '../lib/audit';
+import {
+  formatSneakerAuditMetadata,
+  recordAuditEvent,
+  recordSneakerCreatedAuditEvent,
+} from '../lib/audit';
 import { CatalogProductNotFoundError, CatalogSearchError } from '../lib/catalog';
 import { getRequestClientIp } from '../lib/client-ip';
 import { db } from '../lib/db';

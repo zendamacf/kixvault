@@ -78,7 +78,8 @@ function ActivityPage() {
 
       {!isLoading && !error && events.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-          No activity yet. Actions like signing in, adding grails, or adding sneakers will show up here.
+          No activity yet. Actions like signing in, adding grails, or adding sneakers will show up
+          here.
         </p>
       ) : null}
 

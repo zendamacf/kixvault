@@ -9,10 +9,14 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
+import {
+  formatSneakerAuditMetadata,
+  recordAuditEvent,
+  recordSneakerCreatedAuditEvent,
+} from '../lib/audit';
 import { fetchCatalogProduct } from '../lib/catalog';
-import { formatSneakerAuditMetadata, recordAuditEvent, recordSneakerCreatedAuditEvent } from '../lib/audit';
-import { db } from '../lib/db';
 import { getRequestClientIp } from '../lib/client-ip';
+import { db } from '../lib/db';
 import { isKicksdbConfigured } from '../lib/kicksdb';
 import { parsePurchaseDate } from '../lib/sneakers';
 import {
