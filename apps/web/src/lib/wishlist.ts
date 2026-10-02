@@ -1,4 +1,5 @@
 import type { WishlistPriority } from '@kixvault/shared';
+import { toast } from 'sonner';
 
 export type ClearedGrailSummary = {
   brand: string;
@@ -33,4 +34,12 @@ export function formatGrailClearedMessage(clearedGrails: ClearedGrailSummary[]):
   }
 
   return `Congrats, you got ${clearedGrails.length} grails!`;
+}
+
+export function showGrailClearedToast(clearedGrails: ClearedGrailSummary[]) {
+  if (clearedGrails.length === 0) {
+    return;
+  }
+
+  toast.message(formatGrailClearedMessage(clearedGrails), { icon: '🎉' });
 }

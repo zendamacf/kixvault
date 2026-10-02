@@ -2,7 +2,6 @@ import type { CreateSneakerFromCatalogInput, CreateSneakerInput } from '@kixvaul
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { BackLink } from '@/components/layout/back-link';
 import { CatalogSneakerForm } from '@/components/sneakers/catalog-sneaker-form';
 import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
@@ -12,7 +11,7 @@ import { api, parseApiError } from '@/lib/api';
 import { trackUmamiEvent } from '@/lib/umami';
 import { UmamiEvents } from '@/lib/umami-events';
 import { cn } from '@/lib/utils';
-import { formatGrailClearedMessage } from '@/lib/wishlist';
+import { showGrailClearedToast } from '@/lib/wishlist';
 
 type AddMode = 'catalog' | 'manual';
 
@@ -31,7 +30,7 @@ function NewSneakerPage() {
     clearedGrails?: Array<{ brand: string; model: string }>;
   }) => {
     if (data.clearedGrails?.length) {
-      toast.success(formatGrailClearedMessage(data.clearedGrails));
+      showGrailClearedToast(data.clearedGrails);
       await queryClient.invalidateQueries({ queryKey: ['wishlist'] });
     }
 

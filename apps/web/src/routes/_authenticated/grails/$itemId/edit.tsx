@@ -7,6 +7,7 @@ import { MoveToCollectionForm } from '@/components/wishlist/move-to-collection-f
 import { WishlistManualForm } from '@/components/wishlist/wishlist-manual-form';
 import { api, parseApiError } from '@/lib/api';
 import { wishlistItemQueryOptions } from '@/lib/queries';
+import { showGrailClearedToast } from '@/lib/wishlist';
 
 export const Route = createFileRoute('/_authenticated/grails/$itemId/edit')({
   component: EditGrailPage,
@@ -69,6 +70,10 @@ function EditGrailPage() {
     onSuccess: async (data) => {
       if (!('sneaker' in data)) {
         return;
+      }
+
+      if (item) {
+        showGrailClearedToast([{ brand: item.brand, model: item.model }]);
       }
 
       await queryClient.invalidateQueries({ queryKey: ['wishlist'] });
