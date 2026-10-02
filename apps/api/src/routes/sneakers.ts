@@ -9,7 +9,11 @@ import {
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
-import { formatSneakerAuditMetadata, recordAuditEvent } from '../lib/audit';
+import {
+  formatSneakerAuditMetadata,
+  recordAuditEvent,
+  recordSneakerCreatedAuditEvent,
+} from '../lib/audit';
 import { CatalogProductNotFoundError, CatalogSearchError } from '../lib/catalog';
 import { getRequestClientIp } from '../lib/client-ip';
 import { db } from '../lib/db';
@@ -32,6 +36,7 @@ import {
   parsePurchaseDate,
   parseSneakerId,
 } from '../lib/sneakers';
+import { clearMatchingWishlistItemsForSneaker } from '../lib/wishlist-match';
 import { catalogFromCatalogRateLimit } from '../middleware/catalog-rate-limit';
 import { requireAuth, sessionMiddleware } from '../middleware/session';
 import type { ApiEnv } from '../types';
@@ -147,16 +152,22 @@ export const sneakerRoutes = new Hono<ApiEnv>()
           });
         }
 
-        await recordAuditEvent({
+        const clearedGrails = await clearMatchingWishlistItemsForSneaker(user?.id ?? '', row);
+
+        await recordSneakerCreatedAuditEvent({
           userId: user?.id ?? '',
-          action: 'sneaker.created',
-          resourceType: 'sneaker',
-          resourceId: row.id,
-          metadata: formatSneakerAuditMetadata(row),
+          sneaker: row,
+          clearedGrails,
           ip: getRequestClientIp(c),
         });
 
-        return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
+        return c.json(
+          {
+            sneaker: await formatSneakerWithPricing(row),
+            ...(clearedGrails.length > 0 ? { clearedGrails } : {}),
+          },
+          201,
+        );
       } catch (error) {
         if (error instanceof CatalogProductNotFoundError) {
           return c.json({ error: error.message }, 404);
@@ -248,16 +259,22 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       }
     }
 
-    await recordAuditEvent({
+    const clearedGrails = await clearMatchingWishlistItemsForSneaker(user?.id ?? '', row);
+
+    await recordSneakerCreatedAuditEvent({
       userId: user?.id ?? '',
-      action: 'sneaker.created',
-      resourceType: 'sneaker',
-      resourceId: row.id,
-      metadata: formatSneakerAuditMetadata(row),
+      sneaker: row,
+      clearedGrails,
       ip: getRequestClientIp(c),
     });
 
-    return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
+    return c.json(
+      {
+        sneaker: await formatSneakerWithPricing(row),
+        ...(clearedGrails.length > 0 ? { clearedGrails } : {}),
+      },
+      201,
+    );
   })
   .patch('/:id', zValidator('json', updateSneakerSchema), async (c) => {
     const user = c.get('user');

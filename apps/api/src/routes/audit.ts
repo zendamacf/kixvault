@@ -21,7 +21,7 @@ export const auditRoutes = new Hono<ApiEnv>()
     const events = rows.map((row) => ({
       id: row.id,
       action: row.action as AuditAction,
-      resourceType: row.resourceType as 'sneaker' | 'session' | null,
+      resourceType: row.resourceType as 'sneaker' | 'session' | 'grail' | null,
       resourceId: row.resourceId,
       metadata: row.metadata,
       createdAt: row.createdAt.toISOString(),

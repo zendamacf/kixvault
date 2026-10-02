@@ -30,14 +30,12 @@ type CollectionFieldValues = {
 };
 
 type MoveToCollectionFormProps = {
-  defaultSize?: number | null;
   isSubmitting?: boolean;
   onSubmit: (values: MoveWishlistToCollectionInput) => Promise<void>;
 };
 
 /** Converts a grail into an owned pair in the vault. */
 export function MoveToCollectionForm({
-  defaultSize,
   isSubmitting = false,
   onSubmit,
 }: MoveToCollectionFormProps) {
@@ -49,7 +47,6 @@ export function MoveToCollectionForm({
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      size: defaultSize ?? undefined,
       condition: 'deadstock',
       purchaseDate: '',
       notes: '',

@@ -11,6 +11,7 @@ import { api, parseApiError } from '@/lib/api';
 import { trackUmamiEvent } from '@/lib/umami';
 import { UmamiEvents } from '@/lib/umami-events';
 import { cn } from '@/lib/utils';
+import { showGrailClearedToast } from '@/lib/wishlist';
 
 type AddMode = 'catalog' | 'manual';
 
@@ -23,6 +24,20 @@ function NewSneakerPage() {
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<AddMode>('catalog');
   const [formError, setFormError] = useState<string | null>(null);
+
+  const handleCreateSuccess = async (data: {
+    sneaker: { id: string };
+    clearedGrails?: Array<{ brand: string; model: string }>;
+  }) => {
+    if (data.clearedGrails?.length) {
+      showGrailClearedToast(data.clearedGrails);
+      await queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+    }
+
+    await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
+    await queryClient.invalidateQueries({ queryKey: ['stats'] });
+    await navigate({ to: '/sneakers/$sneakerId', params: { sneakerId: data.sneaker.id } });
+  };
 
   const createFromCatalogMutation = useMutation({
     mutationFn: async (values: CreateSneakerFromCatalogInput) => {
@@ -40,9 +55,7 @@ function NewSneakerPage() {
       }
 
       trackUmamiEvent(UmamiEvents.sneakerCreate, { source: 'catalog' });
-      await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
-      await queryClient.invalidateQueries({ queryKey: ['stats'] });
-      await navigate({ to: '/sneakers/$sneakerId', params: { sneakerId: data.sneaker.id } });
+      await handleCreateSuccess(data);
     },
     onError: (error) => {
       setFormError(error.message);
@@ -65,9 +78,7 @@ function NewSneakerPage() {
       }
 
       trackUmamiEvent(UmamiEvents.sneakerCreate, { source: 'manual' });
-      await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
-      await queryClient.invalidateQueries({ queryKey: ['stats'] });
-      await navigate({ to: '/sneakers/$sneakerId', params: { sneakerId: data.sneaker.id } });
+      await handleCreateSuccess(data);
     },
     onError: (error) => {
       setFormError(error.message);

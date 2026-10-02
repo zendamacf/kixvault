@@ -14,11 +14,6 @@ const dateField = z
     message: 'Expected YYYY-MM-DD',
   });
 
-const optionalTargetSize = z.preprocess(
-  (value) => (value === '' ? undefined : value),
-  z.coerce.number().positive().max(99).optional().nullable(),
-);
-
 const wishlistCatalogFields = {
   sku: z.string().trim().max(50).optional().nullable(),
   catalogSource: z.enum(catalogSources).optional().nullable(),
@@ -33,7 +28,6 @@ export const createWishlistItemSchema = z.object({
   brand: z.string().trim().min(1).max(100),
   model: z.string().trim().min(1).max(100),
   colorway: z.string().trim().max(100).optional().nullable(),
-  targetSize: optionalTargetSize,
   priority: z.enum(wishlistPriorities).default('medium'),
   notes: z.string().trim().max(2000).optional().nullable(),
   ...wishlistCatalogFields,
@@ -50,7 +44,6 @@ export const updateWishlistItemSchema = createWishlistItemSchema
 export const createWishlistFromCatalogSchema = z.object({
   catalogSource: z.enum(catalogSources),
   catalogId: z.string().trim().min(1).max(200),
-  targetSize: optionalTargetSize,
   priority: z.enum(wishlistPriorities).default('medium'),
   notes: z.string().trim().max(2000).optional().nullable(),
 });

@@ -9,7 +9,13 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
+import {
+  formatSneakerAuditMetadata,
+  recordAuditEvent,
+  recordSneakerCreatedAuditEvent,
+} from '../lib/audit';
 import { fetchCatalogProduct } from '../lib/catalog';
+import { getRequestClientIp } from '../lib/client-ip';
 import { db } from '../lib/db';
 import { isKicksdbConfigured } from '../lib/kicksdb';
 import { parsePurchaseDate } from '../lib/sneakers';
@@ -59,7 +65,6 @@ export const wishlistRoutes = new Hono<ApiEnv>()
             model: catalogProduct.model,
             colorway: catalogProduct.colorway,
             nickname: catalogProduct.nickname,
-            targetSize: input.targetSize?.toString() ?? null,
             priority: input.priority,
             notes: input.notes ?? null,
             sku: catalogProduct.sku,
@@ -70,6 +75,15 @@ export const wishlistRoutes = new Hono<ApiEnv>()
             imageUrl: catalogProduct.imageUrl,
           })
           .returning();
+
+        await recordAuditEvent({
+          userId: user?.id ?? '',
+          action: 'grail.added',
+          resourceType: 'grail',
+          resourceId: row.id,
+          metadata: formatSneakerAuditMetadata(row),
+          ip: getRequestClientIp(c),
+        });
 
         return c.json({ item: formatWishlistItem(row) }, 201);
       } catch (error) {
@@ -101,7 +115,6 @@ export const wishlistRoutes = new Hono<ApiEnv>()
         brand: input.brand,
         model: input.model,
         colorway: input.colorway ?? null,
-        targetSize: input.targetSize?.toString() ?? null,
         priority: input.priority,
         notes: input.notes ?? null,
         sku: input.sku ?? null,
@@ -113,6 +126,15 @@ export const wishlistRoutes = new Hono<ApiEnv>()
         imageUrl: input.imageUrl ?? null,
       })
       .returning();
+
+    await recordAuditEvent({
+      userId: user?.id ?? '',
+      action: 'grail.added',
+      resourceType: 'grail',
+      resourceId: row.id,
+      metadata: formatSneakerAuditMetadata(row),
+      ip: getRequestClientIp(c),
+    });
 
     return c.json({ item: formatWishlistItem(row) }, 201);
   })
@@ -200,6 +222,13 @@ export const wishlistRoutes = new Hono<ApiEnv>()
 
       try {
         const sneaker = await moveWishlistItemToCollection(user?.id ?? '', existing, input);
+
+        await recordSneakerCreatedAuditEvent({
+          userId: user?.id ?? '',
+          sneaker: { id: sneaker.id, brand: sneaker.brand, model: sneaker.model },
+          clearedGrails: [{ brand: existing.brand, model: existing.model }],
+          ip: getRequestClientIp(c),
+        });
 
         return c.json({ sneaker }, 201);
       } catch (error) {

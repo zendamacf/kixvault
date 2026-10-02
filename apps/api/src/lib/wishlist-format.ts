@@ -19,7 +19,6 @@ export function formatWishlistItem(row: WishlistRow) {
     brand: row.brand,
     model: row.model,
     colorway: row.colorway,
-    targetSize: row.targetSize ? Number(row.targetSize) : null,
     priority: row.priority,
     notes: row.notes,
     sku: row.sku,

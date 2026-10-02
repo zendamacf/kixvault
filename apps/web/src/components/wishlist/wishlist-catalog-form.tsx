@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { CatalogSneakerSummary } from '@/components/sneakers/catalog-sneaker-summary';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -31,7 +30,6 @@ export function WishlistCatalogForm({
 }: WishlistCatalogFormProps) {
   const [selectedResult, setSelectedResult] = useState<CatalogSearchResult | null>(null);
   const [query, setQuery] = useState('');
-  const [targetSize, setTargetSize] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [notes, setNotes] = useState('');
 
@@ -77,7 +75,6 @@ export function WishlistCatalogForm({
                 await onSubmit({
                   catalogSource: 'kicksdb:stockx',
                   catalogId: selectedResult.catalogId,
-                  targetSize: targetSize ? Number(targetSize) : null,
                   priority,
                   notes: notes.trim() ? notes.trim() : null,
                 });
@@ -93,33 +90,21 @@ export function WishlistCatalogForm({
                   sku: summary.sku,
                 }}
               />
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="grid gap-2">
-                  <Label htmlFor="wishlist-target-size">Target size (optional)</Label>
-                  <Input
-                    id="wishlist-target-size"
-                    type="number"
-                    step="0.5"
-                    value={targetSize}
-                    onChange={(event) => setTargetSize(event.target.value)}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="wishlist-priority">Priority</Label>
-                  <Select
-                    value={priority}
-                    onValueChange={(value) => setPriority(value as typeof priority)}
-                  >
-                    <SelectTrigger id="wishlist-priority">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="grid gap-2">
+                <Label htmlFor="wishlist-priority">Priority</Label>
+                <Select
+                  value={priority}
+                  onValueChange={(value) => setPriority(value as typeof priority)}
+                >
+                  <SelectTrigger id="wishlist-priority">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="wishlist-notes">Notes</Label>
