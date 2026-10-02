@@ -2,8 +2,8 @@ import { Link } from '@tanstack/react-router';
 import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { WishlistPriorityBadge } from '@/components/wishlist/wishlist-priority-badge';
 import type { WishlistItem } from '@/lib/queries';
-import { formatWishlistPriority } from '@/lib/wishlist';
 
 type WishlistCardProps = {
   item: WishlistItem;
@@ -25,9 +25,7 @@ export function WishlistCard({ item }: WishlistCardProps) {
         <CardHeader className="space-y-2 pt-2 pb-2">
           <div className="flex items-start justify-between gap-2">
             <SneakerBrandBadge brand={item.brand} />
-            <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-              {formatWishlistPriority(item.priority)}
-            </span>
+            <WishlistPriorityBadge priority={item.priority} />
           </div>
           <div className="min-w-0 space-y-1">
             <CardTitle className="truncate text-base">{title}</CardTitle>
