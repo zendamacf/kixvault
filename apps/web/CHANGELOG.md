@@ -1,5 +1,32 @@
 # @kixvault/web
 
+## 0.2.0
+
+### Minor Changes
+
+- 10c90e4: Save sneakers you want but do not own yet in **Grails**, separate from your vault. Add from StockX search or manual entry, edit priorities, and move a pair into your collection when you finally cop it.
+- 30517e5: You can review recent sign-ins and collection changes from **Activity** in your profile menu. History is kept for about 90 days.
+- c06f0ae: Add i18next foundation with English catalogs and migrate the login screen to message keys. Closes #100.
+- 92f30cb: Add optional Umami pageview analytics with runtime Docker configuration.
+- 0a0a78a: Track Umami custom events for auth and collection actions.
+
+### Patch Changes
+
+- 27cac61: Re-enable Biome `noLabelWithoutControl` for stricter web accessibility linting. Closes #99.
+- 506c09a: Updated @biomejs/biome from 2.5.9 to 2.5.10, @sentry/bun from 10.70.0 to 10.71.0, @sentry/hono from 10.70.0 to 10.71.0, hono from 4.13.3 to 4.13.5, sharp from 0.35.3 to 0.35.4, @types/bun from 1.3.14 to 1.4.0, @sentry/react from 10.70.0 to 10.71.0, @tanstack/react-query from 5.101.4 to 5.102.6, @tanstack/react-router from 1.170.31 to 1.170.32, lucide-react from 1.33.0 to 1.34.0, react-hook-form from 7.85.0 to 7.86.0, shadcn from 4.18.0 to 4.19.0, @happy-dom/global-registrator from 20.11.6 to 20.11.8, @tanstack/router-cli from 1.167.32 to 1.167.33, @tanstack/router-plugin from 1.168.34 to 1.168.35, @types/react-dom from 19.2.4 to 19.2.5 (version-update:semver-minor).
+- c742b1d: Updated @biomejs/biome from 2.5.8 to 2.5.9, @changesets/cli from 3.0.0 to 3.0.1, hono from 4.13.1 to 4.13.3, @hookform/resolvers from 5.7.1 to 5.9.1, @tanstack/react-router from 1.170.27 to 1.170.31, lucide-react from 1.31.0 to 1.33.0, shadcn from 4.17.0 to 4.18.0, @happy-dom/global-registrator from 20.11.2 to 20.11.6, @tanstack/router-cli from 1.167.28 to 1.167.32, @tanstack/router-plugin from 1.168.30 to 1.168.34, @vitejs/plugin-react from 6.0.5 to 6.1.0, vite from 8.2.1 to 8.2.2 (version-update:semver-minor).
+- 6f8a9ca: Automatically remove pair from Grails when added to your Collection.
+- 1830df5: Add standard security headers to the production nginx config for the web SPA. Closes #96.
+- Updated dependencies [748dbc8]
+- Updated dependencies [c9eb8f8]
+- Updated dependencies [506c09a]
+- Updated dependencies [c742b1d]
+- Updated dependencies [6f8a9ca]
+- Updated dependencies [10c90e4]
+- Updated dependencies [30517e5]
+  - @kixvault/api@0.2.0
+  - @kixvault/shared@0.1.2
+
 ## 0.1.2
 
 ### Patch Changes

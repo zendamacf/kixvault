@@ -1,5 +1,11 @@
 # @kixvault/shared
 
+## 0.1.2
+
+### Patch Changes
+
+- 6f8a9ca: Automatically remove pair from Grails when added to your Collection.
+
 ## 0.1.1
 
 ### Patch Changes
