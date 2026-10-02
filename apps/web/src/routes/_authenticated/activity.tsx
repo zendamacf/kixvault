@@ -13,7 +13,9 @@ const actionLabels: Record<AuditAction, string> = {
   'auth.login': 'Signed in',
   'auth.logout': 'Signed out',
   'auth.register': 'Created account',
+  'grail.added': 'Added a grail',
   'sneaker.created': 'Added a pair',
+  'sneaker.created_from_grail': 'Copped a grail',
   'sneaker.updated': 'Updated a pair',
   'sneaker.deleted': 'Removed a pair',
 };
@@ -21,9 +23,20 @@ const actionLabels: Record<AuditAction, string> = {
 function formatEventDescription(event: AuditEvent): string {
   const brand = event.metadata?.brand;
   const model = event.metadata?.model;
+  const grailsCleared = event.metadata?.grailsCleared;
 
   if (typeof brand === 'string' && typeof model === 'string') {
-    return `${brand} ${model}`;
+    const pair = `${brand} ${model}`;
+
+    if (event.action === 'sneaker.created_from_grail') {
+      if (typeof grailsCleared === 'number' && grailsCleared > 1) {
+        return `${pair} · Removed ${grailsCleared} grails from your list`;
+      }
+
+      return `${pair} · Removed from Grails`;
+    }
+
+    return pair;
   }
 
   return actionLabels[event.action];
@@ -50,7 +63,7 @@ function ActivityPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Activity</h1>
           <p className="text-sm text-muted-foreground">
-            A timeline of sign-ins and changes to your collection.
+            A timeline of sign-ins, grails, and changes to your collection.
           </p>
         </div>
       </div>
@@ -65,7 +78,7 @@ function ActivityPage() {
 
       {!isLoading && !error && events.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-          No activity yet. Actions like signing in or adding sneakers will show up here.
+          No activity yet. Actions like signing in, adding grails, or adding sneakers will show up here.
         </p>
       ) : null}
 

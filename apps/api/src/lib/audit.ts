@@ -63,3 +63,29 @@ export function formatSneakerAuditMetadata(sneaker: {
     model: sneaker.model,
   };
 }
+
+export type ClearedGrailAuditSummary = {
+  brand: string;
+  model: string;
+};
+
+export async function recordSneakerCreatedAuditEvent(input: {
+  userId: string;
+  sneaker: { id: string; brand: string; model: string };
+  clearedGrails: ClearedGrailAuditSummary[];
+  ip?: string;
+}): Promise<void> {
+  const fromGrail = input.clearedGrails.length > 0;
+
+  await recordAuditEvent({
+    userId: input.userId,
+    action: fromGrail ? 'sneaker.created_from_grail' : 'sneaker.created',
+    resourceType: 'sneaker',
+    resourceId: input.sneaker.id,
+    metadata: {
+      ...formatSneakerAuditMetadata(input.sneaker),
+      ...(fromGrail ? { grailsCleared: input.clearedGrails.length } : {}),
+    },
+    ip: input.ip,
+  });
+}

@@ -4,14 +4,16 @@ export const auditActions = [
   'auth.login',
   'auth.logout',
   'auth.register',
+  'grail.added',
   'sneaker.created',
+  'sneaker.created_from_grail',
   'sneaker.updated',
   'sneaker.deleted',
 ] as const;
 
 export type AuditAction = (typeof auditActions)[number];
 
-export const auditResourceTypes = ['sneaker', 'session'] as const;
+export const auditResourceTypes = ['sneaker', 'session', 'grail'] as const;
 export type AuditResourceType = (typeof auditResourceTypes)[number];
 
 export const auditEventMetadataSchema = z.record(

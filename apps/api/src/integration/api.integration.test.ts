@@ -780,6 +780,18 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
 
     expect(grailResponse.status).toBe(201);
 
+    const auditAfterGrail = await app.request('/api/audit', {
+      headers: { Cookie: cookie },
+    });
+    const grailAuditBody = (await auditAfterGrail.json()) as {
+      events: Array<{ action: string; metadata?: { brand?: string } }>;
+    };
+    expect(
+      grailAuditBody.events.some(
+        (event) => event.action === 'grail.added' && event.metadata?.brand === 'New Balance',
+      ),
+    ).toBe(true);
+
     const createSneakerResponse = await app.request('/api/sneakers/custom', {
       method: 'POST',
       headers: { Cookie: cookie, 'Content-Type': 'application/json' },
@@ -804,6 +816,19 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     });
     const listBody = (await listResponse.json()) as { items: unknown[] };
     expect(listBody.items).toHaveLength(0);
+
+    const auditAfterCop = await app.request('/api/audit', {
+      headers: { Cookie: cookie },
+    });
+    const copAuditBody = (await auditAfterCop.json()) as {
+      events: Array<{ action: string; metadata?: { brand?: string } }>;
+    };
+    expect(
+      copAuditBody.events.some(
+        (event) =>
+          event.action === 'sneaker.created_from_grail' && event.metadata?.brand === 'New Balance',
+      ),
+    ).toBe(true);
   });
 
   test('PATCH /api/wishlist/:id updates grail fields for the owner', async () => {

@@ -10,7 +10,9 @@ import { and, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { fetchCatalogProduct } from '../lib/catalog';
+import { formatSneakerAuditMetadata, recordAuditEvent, recordSneakerCreatedAuditEvent } from '../lib/audit';
 import { db } from '../lib/db';
+import { getRequestClientIp } from '../lib/client-ip';
 import { isKicksdbConfigured } from '../lib/kicksdb';
 import { parsePurchaseDate } from '../lib/sneakers';
 import {
@@ -70,6 +72,15 @@ export const wishlistRoutes = new Hono<ApiEnv>()
           })
           .returning();
 
+        await recordAuditEvent({
+          userId: user?.id ?? '',
+          action: 'grail.added',
+          resourceType: 'grail',
+          resourceId: row.id,
+          metadata: formatSneakerAuditMetadata(row),
+          ip: getRequestClientIp(c),
+        });
+
         return c.json({ item: formatWishlistItem(row) }, 201);
       } catch (error) {
         if (error instanceof CatalogProductNotFoundError) {
@@ -111,6 +122,15 @@ export const wishlistRoutes = new Hono<ApiEnv>()
         imageUrl: input.imageUrl ?? null,
       })
       .returning();
+
+    await recordAuditEvent({
+      userId: user?.id ?? '',
+      action: 'grail.added',
+      resourceType: 'grail',
+      resourceId: row.id,
+      metadata: formatSneakerAuditMetadata(row),
+      ip: getRequestClientIp(c),
+    });
 
     return c.json({ item: formatWishlistItem(row) }, 201);
   })
@@ -198,6 +218,13 @@ export const wishlistRoutes = new Hono<ApiEnv>()
 
       try {
         const sneaker = await moveWishlistItemToCollection(user?.id ?? '', existing, input);
+
+        await recordSneakerCreatedAuditEvent({
+          userId: user?.id ?? '',
+          sneaker: { id: sneaker.id, brand: sneaker.brand, model: sneaker.model },
+          clearedGrails: [{ brand: existing.brand, model: existing.model }],
+          ip: getRequestClientIp(c),
+        });
 
         return c.json({ sneaker }, 201);
       } catch (error) {

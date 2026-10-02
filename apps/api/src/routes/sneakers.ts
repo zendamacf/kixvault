@@ -9,7 +9,7 @@ import {
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
-import { formatSneakerAuditMetadata, recordAuditEvent } from '../lib/audit';
+import { formatSneakerAuditMetadata, recordAuditEvent, recordSneakerCreatedAuditEvent } from '../lib/audit';
 import { CatalogProductNotFoundError, CatalogSearchError } from '../lib/catalog';
 import { getRequestClientIp } from '../lib/client-ip';
 import { db } from '../lib/db';
@@ -148,16 +148,14 @@ export const sneakerRoutes = new Hono<ApiEnv>()
           });
         }
 
-        await recordAuditEvent({
+        const clearedGrails = await clearMatchingWishlistItemsForSneaker(user?.id ?? '', row);
+
+        await recordSneakerCreatedAuditEvent({
           userId: user?.id ?? '',
-          action: 'sneaker.created',
-          resourceType: 'sneaker',
-          resourceId: row.id,
-          metadata: formatSneakerAuditMetadata(row),
+          sneaker: row,
+          clearedGrails,
           ip: getRequestClientIp(c),
         });
-
-        const clearedGrails = await clearMatchingWishlistItemsForSneaker(user?.id ?? '', row);
 
         return c.json(
           {
@@ -257,16 +255,14 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       }
     }
 
-    await recordAuditEvent({
+    const clearedGrails = await clearMatchingWishlistItemsForSneaker(user?.id ?? '', row);
+
+    await recordSneakerCreatedAuditEvent({
       userId: user?.id ?? '',
-      action: 'sneaker.created',
-      resourceType: 'sneaker',
-      resourceId: row.id,
-      metadata: formatSneakerAuditMetadata(row),
+      sneaker: row,
+      clearedGrails,
       ip: getRequestClientIp(c),
     });
-
-    const clearedGrails = await clearMatchingWishlistItemsForSneaker(user?.id ?? '', row);
 
     return c.json(
       {
