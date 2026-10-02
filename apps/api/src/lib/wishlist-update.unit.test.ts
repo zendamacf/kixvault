@@ -28,12 +28,10 @@ describe('buildWishlistUpdate', () => {
       buildWishlistUpdate(baseRow, {
         priority: 'high',
         notes: 'Grail pair',
-        targetSize: 9.5,
       }),
     ).toEqual({
       priority: 'high',
       notes: 'Grail pair',
-      targetSize: '9.5',
     });
   });
 
@@ -41,12 +39,10 @@ describe('buildWishlistUpdate', () => {
     expect(
       buildWishlistUpdate(baseRow, {
         colorway: null,
-        targetSize: null,
         notes: null,
       }),
     ).toEqual({
       colorway: null,
-      targetSize: null,
       notes: null,
     });
   });

@@ -719,7 +719,6 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
       body: JSON.stringify({
         brand: 'Adidas',
         model: 'Samba',
-        targetSize: 9,
         priority: 'high',
         notes: 'Classic white',
       }),
@@ -765,6 +764,48 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(sneakersBody.sneakers.some((sneaker) => sneaker.brand === 'Adidas')).toBe(true);
   });
 
+  test('adding a matching sneaker clears the grail from wishlist', async () => {
+    const email = `grail-clear-${crypto.randomUUID()}@example.com`;
+    const { cookie } = await registerTestUser(app, email);
+
+    const grailResponse = await app.request('/api/wishlist/custom', {
+      method: 'POST',
+      headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        brand: 'New Balance',
+        model: '550',
+        priority: 'high',
+      }),
+    });
+
+    expect(grailResponse.status).toBe(201);
+
+    const createSneakerResponse = await app.request('/api/sneakers/custom', {
+      method: 'POST',
+      headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        brand: 'New Balance',
+        model: '550',
+        size: 10,
+        condition: 'deadstock',
+      }),
+    });
+
+    expect(createSneakerResponse.status).toBe(201);
+    const created = (await createSneakerResponse.json()) as {
+      sneaker: { brand: string; model: string };
+      clearedGrails: Array<{ brand: string; model: string }>;
+    };
+    expect(created.clearedGrails).toHaveLength(1);
+    expect(created.clearedGrails[0].brand).toBe('New Balance');
+
+    const listResponse = await app.request('/api/wishlist', {
+      headers: { Cookie: cookie },
+    });
+    const listBody = (await listResponse.json()) as { items: unknown[] };
+    expect(listBody.items).toHaveLength(0);
+  });
+
   test('PATCH /api/wishlist/:id updates grail fields for the owner', async () => {
     const ownerEmail = `wishlist-patch-${crypto.randomUUID()}@example.com`;
     const otherEmail = `wishlist-patch-other-${crypto.randomUUID()}@example.com`;
@@ -805,17 +846,15 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
       body: JSON.stringify({
         priority: 'high',
         notes: 'After edit',
-        targetSize: 10,
       }),
     });
 
     expect(patchResponse.status).toBe(200);
     const patched = (await patchResponse.json()) as {
-      item: { priority: string; notes: string | null; targetSize: number | null };
+      item: { priority: string; notes: string | null };
     };
     expect(patched.item.priority).toBe('high');
     expect(patched.item.notes).toBe('After edit');
-    expect(patched.item.targetSize).toBe(10);
 
     const noopPatch = await app.request(`/api/wishlist/${created.item.id}`, {
       method: 'PATCH',

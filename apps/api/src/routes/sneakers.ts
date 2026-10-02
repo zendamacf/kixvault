@@ -32,6 +32,7 @@ import {
   parsePurchaseDate,
   parseSneakerId,
 } from '../lib/sneakers';
+import { clearMatchingWishlistItemsForSneaker } from '../lib/wishlist-match';
 import { catalogFromCatalogRateLimit } from '../middleware/catalog-rate-limit';
 import { requireAuth, sessionMiddleware } from '../middleware/session';
 import type { ApiEnv } from '../types';
@@ -156,7 +157,15 @@ export const sneakerRoutes = new Hono<ApiEnv>()
           ip: getRequestClientIp(c),
         });
 
-        return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
+        const clearedGrails = await clearMatchingWishlistItemsForSneaker(user?.id ?? '', row);
+
+        return c.json(
+          {
+            sneaker: await formatSneakerWithPricing(row),
+            ...(clearedGrails.length > 0 ? { clearedGrails } : {}),
+          },
+          201,
+        );
       } catch (error) {
         if (error instanceof CatalogProductNotFoundError) {
           return c.json({ error: error.message }, 404);
@@ -257,7 +266,15 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       ip: getRequestClientIp(c),
     });
 
-    return c.json({ sneaker: await formatSneakerWithPricing(row) }, 201);
+    const clearedGrails = await clearMatchingWishlistItemsForSneaker(user?.id ?? '', row);
+
+    return c.json(
+      {
+        sneaker: await formatSneakerWithPricing(row),
+        ...(clearedGrails.length > 0 ? { clearedGrails } : {}),
+      },
+      201,
+    );
   })
   .patch('/:id', zValidator('json', updateSneakerSchema), async (c) => {
     const user = c.get('user');

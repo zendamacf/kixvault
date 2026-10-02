@@ -26,10 +26,6 @@ export function buildWishlistUpdate(_existing: WishlistRow, input: UpdateWishlis
     updates.colorway = input.colorway ?? null;
   }
 
-  if (input.targetSize !== undefined) {
-    updates.targetSize = input.targetSize == null ? null : input.targetSize.toString();
-  }
-
   if (input.priority !== undefined) {
     updates.priority = input.priority;
   }

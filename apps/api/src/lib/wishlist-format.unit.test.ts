@@ -43,7 +43,6 @@ describe('formatWishlistItem', () => {
       brand: 'Nike',
       model: 'Dunk Low',
       colorway: 'Panda',
-      targetSize: 10,
       priority: 'medium',
       notes: null,
       sku: 'SKU-1',
@@ -60,9 +59,8 @@ describe('formatWishlistItem', () => {
   });
 
   test('omits catalog URL when catalog linkage is missing', () => {
-    const row = { ...baseRow, catalogSource: null, catalogId: null, targetSize: null };
+    const row = { ...baseRow, catalogSource: null, catalogId: null };
     const formatted = formatWishlistItem(row);
     expect(formatted.catalogUrl).toBeNull();
-    expect(formatted.targetSize).toBeNull();
   });
 });

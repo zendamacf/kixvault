@@ -25,7 +25,6 @@ describe('WishlistCard', () => {
           brand: 'Nike',
           model: 'Dunk Low',
           colorway: 'Panda',
-          targetSize: 10,
           priority: 'high',
           notes: 'Need these',
           sku: null,

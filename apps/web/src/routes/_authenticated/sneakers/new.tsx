@@ -2,6 +2,7 @@ import type { CreateSneakerFromCatalogInput, CreateSneakerInput } from '@kixvaul
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { BackLink } from '@/components/layout/back-link';
 import { CatalogSneakerForm } from '@/components/sneakers/catalog-sneaker-form';
 import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
@@ -11,6 +12,7 @@ import { api, parseApiError } from '@/lib/api';
 import { trackUmamiEvent } from '@/lib/umami';
 import { UmamiEvents } from '@/lib/umami-events';
 import { cn } from '@/lib/utils';
+import { formatGrailClearedMessage } from '@/lib/wishlist';
 
 type AddMode = 'catalog' | 'manual';
 
@@ -23,6 +25,20 @@ function NewSneakerPage() {
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<AddMode>('catalog');
   const [formError, setFormError] = useState<string | null>(null);
+
+  const handleCreateSuccess = async (data: {
+    sneaker: { id: string };
+    clearedGrails?: Array<{ brand: string; model: string }>;
+  }) => {
+    if (data.clearedGrails?.length) {
+      toast.success(formatGrailClearedMessage(data.clearedGrails));
+      await queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+    }
+
+    await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
+    await queryClient.invalidateQueries({ queryKey: ['stats'] });
+    await navigate({ to: '/sneakers/$sneakerId', params: { sneakerId: data.sneaker.id } });
+  };
 
   const createFromCatalogMutation = useMutation({
     mutationFn: async (values: CreateSneakerFromCatalogInput) => {
@@ -40,9 +56,7 @@ function NewSneakerPage() {
       }
 
       trackUmamiEvent(UmamiEvents.sneakerCreate, { source: 'catalog' });
-      await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
-      await queryClient.invalidateQueries({ queryKey: ['stats'] });
-      await navigate({ to: '/sneakers/$sneakerId', params: { sneakerId: data.sneaker.id } });
+      await handleCreateSuccess(data);
     },
     onError: (error) => {
       setFormError(error.message);
@@ -65,9 +79,7 @@ function NewSneakerPage() {
       }
 
       trackUmamiEvent(UmamiEvents.sneakerCreate, { source: 'manual' });
-      await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
-      await queryClient.invalidateQueries({ queryKey: ['stats'] });
-      await navigate({ to: '/sneakers/$sneakerId', params: { sneakerId: data.sneaker.id } });
+      await handleCreateSuccess(data);
     },
     onError: (error) => {
       setFormError(error.message);

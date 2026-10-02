@@ -109,7 +109,6 @@ function EditGrailPage() {
           brand: item.brand,
           model: item.model,
           colorway: item.colorway,
-          targetSize: item.targetSize,
           priority: item.priority,
           notes: item.notes,
         }}
@@ -119,7 +118,6 @@ function EditGrailPage() {
       />
 
       <MoveToCollectionForm
-        defaultSize={item.targetSize}
         isSubmitting={moveMutation.isPending}
         onSubmit={async (values) => {
           await moveMutation.mutateAsync(values);

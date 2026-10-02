@@ -22,13 +22,6 @@ const formSchema = z.object({
   brand: z.string().trim().min(1).max(100),
   model: z.string().trim().min(1).max(100),
   colorway: z.string().trim().max(100).optional().nullable(),
-  targetSize: z
-    .number()
-    .positive()
-    .max(99)
-    .optional()
-    .nullable()
-    .or(z.nan().transform(() => null)),
   priority: z.enum(wishlistPriorities),
   notes: z.string().trim().max(2000).optional().nullable(),
 });
@@ -61,7 +54,6 @@ export function WishlistManualForm({
       brand: '',
       model: '',
       colorway: '',
-      targetSize: null,
       priority: 'medium',
       notes: '',
       ...defaultValues,
@@ -96,32 +88,21 @@ export function WishlistManualForm({
         <Label htmlFor="colorway">Colorway</Label>
         <Input id="colorway" {...register('colorway')} />
       </div>
-      <div className="grid gap-2 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <Label htmlFor="targetSize">Target size (optional)</Label>
-          <Input
-            id="targetSize"
-            type="number"
-            step="0.5"
-            {...register('targetSize', { valueAsNumber: true })}
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="priority">Priority</Label>
-          <Select
-            value={priority}
-            onValueChange={(value) => setValue('priority', value as FormValues['priority'])}
-          >
-            <SelectTrigger id="priority">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="grid gap-2">
+        <Label htmlFor="priority">Priority</Label>
+        <Select
+          value={priority}
+          onValueChange={(value) => setValue('priority', value as FormValues['priority'])}
+        >
+          <SelectTrigger id="priority">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="grid gap-2">
         <Label htmlFor="notes">Notes</Label>

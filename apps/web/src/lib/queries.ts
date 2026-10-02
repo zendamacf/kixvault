@@ -42,7 +42,6 @@ export type WishlistItem = {
   brand: string;
   model: string;
   colorway: string | null;
-  targetSize: number | null;
   priority: WishlistPriority;
   notes: string | null;
   sku: string | null;

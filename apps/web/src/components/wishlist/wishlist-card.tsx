@@ -31,10 +31,7 @@ export function WishlistCard({ item }: WishlistCardProps) {
           </div>
           <div className="min-w-0 space-y-1">
             <CardTitle className="truncate text-base">{title}</CardTitle>
-            <p className="truncate text-sm text-muted-foreground">
-              {subtitle}
-              {item.targetSize != null ? ` · Target size ${item.targetSize}` : ''}
-            </p>
+            <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
           </div>
         </CardHeader>
         {item.notes ? (
