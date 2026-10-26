@@ -7,8 +7,6 @@ if (import.meta.env.PROD) {
     environment: import.meta.env.MODE,
     release: import.meta.env.VITE_APP_VERSION,
 
-    sendDefaultPii: true,
-
     integrations: [
       Sentry.tanstackRouterBrowserTracingIntegration(router),
       Sentry.replayIntegration({
@@ -22,7 +20,5 @@ if (import.meta.env.PROD) {
 
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
-
-    enableLogs: true,
   });
 }
