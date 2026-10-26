@@ -1,5 +1,20 @@
 # @kixvault/web
 
+## 0.2.1
+
+### Patch Changes
+
+- d3acb10: Updated @biomejs/biome from 2.5.10 to 2.5.11, @hono/zod-validator from 0.9.0 to 0.9.1, @sentry/bun from 10.71.0 to 10.73.0, @sentry/hono from 10.71.0 to 10.73.0, @sentry/cli from 3.6.2 to 3.7.0, @sentry/react from 10.71.0 to 10.73.0, @tanstack/react-query from 5.102.6 to 5.102.8, lucide-react from 1.34.0 to 1.39.0, react-hook-form from 7.86.0 to 7.87.0, shadcn from 4.19.0 to 4.20.1, zod from 4.4.3 to 4.5.4, @happy-dom/global-registrator from 20.11.8 to 20.13.2, @testing-library/react from 16.3.2 to 16.3.3, @vitejs/plugin-react from 6.1.0 to 6.1.1 (version-update:semver-minor).
+- 520967b: Updated @biomejs/biome from 2.5.11 to 2.5.12, @changesets/cli from 3.0.1 to 3.0.2, @sentry/bun from 10.73.0 to 10.74.0, @sentry/hono from 10.73.0 to 10.74.0, hono from 4.13.5 to 4.13.7, @types/bun from 1.4.0 to 1.4.2, @sentry/react from 10.73.0 to 10.74.0, @tanstack/react-router from 1.170.32 to 1.170.34, lucide-react from 1.39.0 to 1.43.0, react from 19.2.8 to 19.3.0, @types/react from 19.2.18 to 19.3.0, react-dom from 19.2.8 to 19.3.0, @types/react-dom from 19.2.5 to 19.3.0, shadcn from 4.20.1 to 4.21.0, zod from 4.5.4 to 4.6.1, @happy-dom/global-registrator from 20.13.2 to 20.14.3, @tanstack/router-cli from 1.167.33 to 1.167.35, @tanstack/router-plugin from 1.168.35 to 1.168.37, @types/react from 19.2.18 to 19.3.0, @types/react-dom from 19.2.5 to 19.3.0 (version-update:semver-minor).
+- e3da34e: Updated @sentry/bun from 10.75.0 to 11.0.0, @sentry/hono from 10.75.0 to 11.0.0, drizzle-orm from 0.45.2 to 0.45.3, @sentry/react from 10.75.0 to 11.0.0, @tanstack/react-query from 5.103.1 to 5.103.2, @tanstack/react-router from 1.170.38 to 1.170.39, lucide-react from 1.46.0 to 1.48.0, drizzle-kit from 0.31.10 to 0.31.11 (version-update:semver-major).
+- 534cb52: Updated @biomejs/biome from 2.5.12 to 2.5.14, @changesets/cli from 3.0.2 to 3.0.3, @sentry/bun from 10.74.0 to 10.75.0, @sentry/hono from 10.74.0 to 10.75.0, @sentry/cli from 3.7.0 to 3.8.0, @sentry/react from 10.74.0 to 10.75.0, @tanstack/react-query from 5.102.8 to 5.103.1, @tanstack/react-router from 1.170.34 to 1.170.38, lucide-react from 1.43.0 to 1.46.0, react-hook-form from 7.87.0 to 7.88.0, tailwind-merge from 3.6.0 to 3.7.0, @happy-dom/global-registrator from 20.14.3 to 20.14.5, @tanstack/router-cli from 1.167.35 to 1.167.38, @tanstack/router-plugin from 1.168.37 to 1.168.40, vite from 8.2.2 to 8.3.0 (version-update:semver-minor).
+- Updated dependencies [d3acb10]
+- Updated dependencies [520967b]
+- Updated dependencies [e3da34e]
+- Updated dependencies [534cb52]
+  - @kixvault/api@0.2.1
+  - @kixvault/shared@0.1.3
+
 ## 0.2.0
 
 ### Minor Changes
