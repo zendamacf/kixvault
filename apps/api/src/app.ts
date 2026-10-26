@@ -22,7 +22,6 @@ const withSentry = env.isProduction
         environment: 'production',
         release: env.sentryRelease,
         tracesSampleRate: 0.2,
-        enableLogs: true,
       }),
     )
   : routes;
