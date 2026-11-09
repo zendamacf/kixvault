@@ -2,6 +2,7 @@ import type { AuditAction } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import {
+  Footprints,
   LogIn,
   LogOut,
   type LucideIcon,
@@ -30,6 +31,8 @@ const actionIcons: Record<AuditAction, LucideIcon> = {
   'sneaker.created_from_grail': Trophy,
   'sneaker.updated': Pencil,
   'sneaker.deleted': Trash2,
+  'sneaker.worn': Footprints,
+  'sneaker.wear_removed': Trash2,
 };
 
 function ActivityPage() {

@@ -27,6 +27,9 @@ export type Sneaker = {
   currentMarketPrice: number | null;
   pricedAt: string | null;
   gainLoss: number | null;
+  wearCount: number;
+  lastWornOn: string | null;
+  suggestedCondition: SneakerCondition | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -205,5 +208,21 @@ export function sneakerPriceHistoryQueryOptions(id: string) {
       return response.json();
     },
     enabled: id.length > 0,
+  });
+}
+
+export function wearsQueryOptions(range: { from: string; to: string }) {
+  return queryOptions({
+    queryKey: ['wears', range],
+    placeholderData: keepPreviousData,
+    queryFn: async () => {
+      const response = await api.api.wears.$get({ query: range });
+
+      if (!response.ok) {
+        throw new Error('Failed to load wears');
+      }
+
+      return response.json();
+    },
   });
 }

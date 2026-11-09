@@ -36,7 +36,12 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
         </h2>
         <div className="flex items-baseline justify-between gap-3 text-sm text-muted-foreground">
           <p className="min-w-0 truncate">{subtitle}</p>
-          <p className="shrink-0 whitespace-nowrap">Size {sneaker.size}</p>
+          <p className="shrink-0 whitespace-nowrap">
+            Size {sneaker.size}
+            {sneaker.wearCount > 0
+              ? ` · ${sneaker.wearCount} ${sneaker.wearCount === 1 ? 'wear' : 'wears'}`
+              : ''}
+          </p>
         </div>
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 pt-1.5">
           {hasMarketPrice ? (

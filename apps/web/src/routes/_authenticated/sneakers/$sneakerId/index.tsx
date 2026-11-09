@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Footprints, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { BackLink } from '@/components/layout/back-link';
 import { PriceHistory } from '@/components/sneakers/price-history';
@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { WearSuggestion } from '@/components/wears/wear-suggestion';
 import { api, parseApiError } from '@/lib/api';
 import { getMarketValueDisclaimer } from '@/lib/pricing';
 import { sneakerPriceHistoryQueryOptions, sneakerQueryOptions } from '@/lib/queries';
@@ -30,6 +31,7 @@ import {
   formatDate,
   getCatalogSourceLabel,
 } from '@/lib/utils';
+import { useLogWear } from '@/lib/wear-actions';
 
 export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
   component: SneakerDetailPage,
@@ -41,6 +43,7 @@ function SneakerDetailPage() {
   const queryClient = useQueryClient();
   const [actionError, setActionError] = useState<string | null>(null);
   const { data, isLoading, error } = useQuery(sneakerQueryOptions(sneakerId));
+  const logWear = useLogWear();
   const { data: priceHistoryData, isLoading: priceHistoryLoading } = useQuery({
     ...sneakerPriceHistoryQueryOptions(sneakerId),
     enabled: Boolean(data?.sneaker),
@@ -105,6 +108,15 @@ function SneakerDetailPage() {
   const facts: { label: string; value: string }[] = [
     { label: 'Size', value: String(sneaker.size) },
     { label: 'Condition', value: formatCondition(sneaker.condition) },
+    {
+      label: 'Worn',
+      value:
+        sneaker.wearCount === 0
+          ? 'Never'
+          : `${sneaker.wearCount} ${sneaker.wearCount === 1 ? 'time' : 'times'}${
+              sneaker.lastWornOn ? `, last ${formatDate(sneaker.lastWornOn)}` : ''
+            }`,
+    },
     ...(sneaker.purchasePrice != null
       ? [{ label: 'Paid', value: formatCurrency(sneaker.purchasePrice) }]
       : []),
@@ -155,7 +167,15 @@ function SneakerDetailPage() {
             ) : null}
           </header>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="lg"
+              disabled={logWear.isPending}
+              onClick={() => logWear.mutate({ sneakerId, label: title })}
+            >
+              <Footprints aria-hidden />
+              Wore today
+            </Button>
             <Button
               variant="outline"
               size="lg"
@@ -194,6 +214,14 @@ function SneakerDetailPage() {
               </AlertDialogContent>
             </AlertDialog>
           </div>
+
+          {sneaker.suggestedCondition ? (
+            <WearSuggestion
+              sneakerId={sneaker.id}
+              wearCount={sneaker.wearCount}
+              suggestedCondition={sneaker.suggestedCondition}
+            />
+          ) : null}
 
           <section aria-label="Market value" className="space-y-2">
             {hasMarketPrice ? (
