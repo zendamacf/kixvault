@@ -2,6 +2,7 @@ import { APP_NAME } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
+import { BrandMark } from '@/components/layout/brand-mark';
 import { UserMenu } from '@/components/layout/user-menu';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { buttonVariants } from '@/components/ui/button';
@@ -48,12 +49,7 @@ export function AppShell() {
               className="group flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label={`${APP_NAME} home`}
             >
-              <span
-                aria-hidden
-                className="grid size-7 -rotate-6 place-items-center rounded-md bg-primary font-display text-base font-extrabold leading-none text-primary-foreground transition-transform group-hover:rotate-0"
-              >
-                K
-              </span>
+              <BrandMark />
               <span className="font-display text-xl font-extrabold tracking-tight">{APP_NAME}</span>
             </Link>
             {user ? (
