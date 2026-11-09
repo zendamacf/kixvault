@@ -10,5 +10,6 @@ Events older than **90 days** are not returned in the activity feed. Stored rows
 
 - Sign-in, sign-out, and account creation
 - Adding, updating, or removing sneakers (brand and model names only in the timeline; notes and other personal fields are not copied into the log)
+- Logging or removing a wear
 
 IP addresses may be stored server-side for security but are not shown in the activity page.
