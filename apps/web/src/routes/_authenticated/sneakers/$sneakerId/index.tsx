@@ -1,11 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { BackLink } from '@/components/layout/back-link';
-import { MarketValue } from '@/components/sneakers/market-value';
 import { PriceHistory } from '@/components/sneakers/price-history';
-import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
-import { SneakerConditionBadge } from '@/components/sneakers/sneaker-condition-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import {
   AlertDialog,
@@ -19,13 +17,19 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api, parseApiError } from '@/lib/api';
+import { getMarketValueDisclaimer } from '@/lib/pricing';
 import { sneakerPriceHistoryQueryOptions, sneakerQueryOptions } from '@/lib/queries';
 import { trackUmamiEvent } from '@/lib/umami';
 import { UmamiEvents } from '@/lib/umami-events';
-import { formatCurrency, formatDate, getCatalogSourceLabel } from '@/lib/utils';
+import {
+  cn,
+  formatCondition,
+  formatCurrency,
+  formatDate,
+  getCatalogSourceLabel,
+} from '@/lib/utils';
 
 export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
   component: SneakerDetailPage,
@@ -65,34 +69,28 @@ function SneakerDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-4 w-36" />
-        <Card>
-          <CardHeader className="space-y-4">
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Skeleton className="h-48 w-full max-w-xs rounded-md sm:h-56" />
-              <div className="flex-1 space-y-3">
-                <Skeleton className="h-8 w-2/3" />
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-6 w-24 rounded-full" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
-            <Skeleton className="h-16" />
-            <Skeleton className="h-16" />
-            <Skeleton className="h-16" />
-            <Skeleton className="h-16" />
-          </CardContent>
-        </Card>
+      <div className="space-y-8">
+        <Skeleton className="h-5 w-40" />
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-12">
+          <Skeleton className="aspect-[5/4] w-full rounded-3xl" />
+          <div className="space-y-6">
+            <Skeleton className="h-12 w-3/4" />
+            <Skeleton className="h-6 w-1/3" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-56 w-full rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error || !data?.sneaker) {
     return (
-      <div>
-        <p className="text-sm text-destructive">{error?.message ?? 'Sneaker not found'}</p>
+      <div className="space-y-4">
+        <BackLink to="/">Back to collection</BackLink>
+        <p className="text-sm text-destructive" role="alert">
+          {error?.message ?? 'Sneaker not found'}
+        </p>
       </div>
     );
   }
@@ -100,147 +98,177 @@ function SneakerDetailPage() {
   const sneaker = data.sneaker;
   const title = `${sneaker.brand} ${sneaker.model}`;
   const catalogSourceLabel = getCatalogSourceLabel(sneaker.catalogSource);
+  const hasMarketPrice = sneaker.currentMarketPrice != null;
+  const disclaimer = getMarketValueDisclaimer(sneaker.condition);
+  const gainLoss = sneaker.gainLoss;
+
+  const facts: { label: string; value: string }[] = [
+    { label: 'Size', value: String(sneaker.size) },
+    { label: 'Condition', value: formatCondition(sneaker.condition) },
+    ...(sneaker.purchasePrice != null
+      ? [{ label: 'Paid', value: formatCurrency(sneaker.purchasePrice) }]
+      : []),
+    ...(sneaker.purchaseDate
+      ? [{ label: 'Purchased', value: formatDate(sneaker.purchaseDate) }]
+      : []),
+    ...(sneaker.releaseDate ? [{ label: 'Released', value: formatDate(sneaker.releaseDate) }] : []),
+    { label: 'Added to vault', value: formatDate(sneaker.createdAt) },
+  ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-10">
       <BackLink to="/">Back to collection</BackLink>
 
-      <Card>
-        <CardHeader className="space-y-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
-            <div className="flex flex-col gap-8 sm:flex-row items-center">
-              <SneakerThumbnail
-                imageUrl={sneaker.primaryImage?.url ?? null}
-                alt={title}
-                className="h-64 w-full max-w-xs sm:h-72"
-              />
-              <div className="flex flex-col">
-                <div className="space-x-2 pb-2">
-                  <SneakerBrandBadge brand={sneaker.brand} />
-                  <SneakerConditionBadge condition={sneaker.condition} />
-                </div>
-                <CardTitle className="text-2xl sm:text-3xl pb-2">{title}</CardTitle>
-                {sneaker.nickname ? (
-                  <p className="text-base font-medium text-foreground pb-2">{`"${sneaker.nickname}"`}</p>
-                ) : null}
-                <p className="text-muted-foreground pb-1">
-                  {sneaker.colorway || 'No colorway listed'}
-                </p>
-                {sneaker.sku ? (
-                  <p className="text-sm text-muted-foreground pb-1">{sneaker.sku}</p>
-                ) : null}
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-12">
+        <div className="self-start rounded-3xl bg-tile ring-1 ring-border lg:sticky lg:top-20">
+          <SneakerThumbnail
+            imageUrl={sneaker.primaryImage?.url ?? null}
+            alt={title}
+            className="aspect-[5/4] w-full rounded-none p-8"
+          />
+        </div>
+
+        <div className="min-w-0 space-y-8">
+          <header className="space-y-3">
+            <h1 className="font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl">
+              <span className="font-normal text-muted-foreground">{sneaker.brand}</span>{' '}
+              <span className="font-semibold">{sneaker.model}</span>
+            </h1>
+            <div className="space-y-0.5 text-lg">
+              {sneaker.nickname ? <p>{`"${sneaker.nickname}"`}</p> : null}
+              <p className="text-muted-foreground">{sneaker.colorway || 'No colorway listed'}</p>
+            </div>
+            {sneaker.sku || (sneaker.catalogUrl && catalogSourceLabel) ? (
+              <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                {sneaker.sku ? <span>{sneaker.sku}</span> : null}
                 {sneaker.catalogUrl && catalogSourceLabel ? (
                   <a
                     href={sneaker.catalogUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex text-sm text-primary hover:underline"
+                    className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
                   >
                     View on {catalogSourceLabel}
                   </a>
                 ) : null}
-              </div>
-            </div>
-            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto"
-                onClick={() => navigate({ to: '/sneakers/$sneakerId/edit', params: { sneakerId } })}
-              >
-                Edit
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
+              </p>
+            ) : null}
+          </header>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => navigate({ to: '/sneakers/$sneakerId/edit', params: { sneakerId } })}
+            >
+              <Pencil aria-hidden />
+              Edit
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="lg" disabled={deleteMutation.isPending}>
+                  <Trash2 aria-hidden />
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete this pair?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently remove it from your collection. This action cannot be
+                    undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
                     variant="destructive"
-                    className="w-full sm:w-auto"
-                    disabled={deleteMutation.isPending}
+                    onClick={() => {
+                      setActionError(null);
+                      deleteMutation.mutate();
+                    }}
                   >
                     Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this pair?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will permanently remove it from your collection. This action cannot be
-                      undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      variant="destructive"
-                      onClick={() => {
-                        setActionError(null);
-                        deleteMutation.mutate();
-                      }}
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-2">
-          {sneaker.description ? (
-            <div className="sm:col-span-2">
-              <StaticDetailItem label="Description" value={sneaker.description} />
-            </div>
-          ) : null}
-          {sneaker.releaseDate ? (
-            <StaticDetailItem label="Release date" value={formatDate(sneaker.releaseDate)} />
-          ) : null}
-          <StaticDetailItem label="Added" value={formatDate(sneaker.createdAt)} />
-          <StaticDetailItem label="Size" value={String(sneaker.size)} />
-          <StaticDetailItem label="Purchase price" value={formatCurrency(sneaker.purchasePrice)} />
-          <StaticDetailItem label="Purchase date" value={formatDate(sneaker.purchaseDate)} />
-          <div className="sm:col-span-2">
-            <StaticDetailItem label="Notes" value={sneaker.notes || '—'} />
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
-          <div className="sm:col-span-2 rounded-lg border border-border bg-background/60 p-4 space-y-8">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Market value</p>
-              <MarketValue
-                price={sneaker.currentMarketPrice}
-                gainLoss={sneaker.gainLoss}
-                condition={sneaker.condition}
-                className="mt-2"
-              />
-              {sneaker.pricedAt ? (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Last updated {formatDate(sneaker.pricedAt)}
-                </p>
-              ) : null}
-            </div>
+          <section aria-label="Market value" className="space-y-2">
+            {hasMarketPrice ? (
+              <p className="font-display text-3xl leading-[1.15] tracking-tight text-muted-foreground">
+                Worth{' '}
+                <strong className="font-semibold text-foreground">
+                  {formatCurrency(sneaker.currentMarketPrice)}
+                </strong>{' '}
+                today.
+                {gainLoss != null && sneaker.purchasePrice != null ? (
+                  <>
+                    {' '}
+                    <span className={cn(gainLoss > 0 && 'text-gain', gainLoss < 0 && 'text-loss')}>
+                      {gainLoss === 0
+                        ? 'Break-even'
+                        : `${gainLoss > 0 ? 'Up' : 'Down'} ${formatCurrency(Math.abs(gainLoss))}`}
+                    </span>{' '}
+                    on the {formatCurrency(sneaker.purchasePrice)} you paid.
+                  </>
+                ) : null}
+              </p>
+            ) : (
+              <p className="text-lg text-muted-foreground">
+                No market value is available for this pair.
+              </p>
+            )}
+            {hasMarketPrice && disclaimer ? (
+              <p className="text-sm text-muted-foreground">{disclaimer}</p>
+            ) : null}
+            {sneaker.pricedAt ? (
+              <p className="text-sm text-muted-foreground">
+                Price updated {formatDate(sneaker.pricedAt)}
+              </p>
+            ) : null}
+          </section>
 
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Price history</p>
-              <div className="mt-2">
-                {priceHistoryLoading ? (
-                  <Skeleton className="h-20 w-full" />
-                ) : (
-                  <PriceHistory history={priceHistoryData?.history ?? []} />
-                )}
+          <dl className="divide-y divide-border rounded-2xl bg-tile ring-1 ring-border">
+            {facts.map((fact) => (
+              <div key={fact.label} className="flex items-baseline justify-between gap-4 px-4 py-3">
+                <dt className="text-sm text-muted-foreground">{fact.label}</dt>
+                <dd className="text-right font-medium">{fact.value}</dd>
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            ))}
+          </dl>
 
-      {actionError ? <p className="text-sm text-destructive">{actionError}</p> : null}
-    </div>
-  );
-}
+          {sneaker.notes ? (
+            <section className="space-y-1">
+              <h2 className="font-heading text-lg font-semibold">Notes</h2>
+              <p className="whitespace-pre-line text-muted-foreground">{sneaker.notes}</p>
+            </section>
+          ) : null}
 
-function StaticDetailItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="p-2">
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <p className="mt-1 text-base">{value}</p>
+          {sneaker.description ? (
+            <section className="space-y-1">
+              <h2 className="font-heading text-lg font-semibold">About this pair</h2>
+              <p className="max-w-prose text-muted-foreground">{sneaker.description}</p>
+            </section>
+          ) : null}
+        </div>
+      </div>
+
+      <section className="space-y-3">
+        <h2 className="font-display text-2xl font-semibold tracking-tight">Price history</h2>
+        {priceHistoryLoading ? (
+          <Skeleton className="h-24 w-full rounded-2xl" />
+        ) : (
+          <PriceHistory history={priceHistoryData?.history ?? []} />
+        )}
+      </section>
+
+      {actionError ? (
+        <p className="text-sm text-destructive" role="alert">
+          {actionError}
+        </p>
+      ) : null}
     </div>
   );
 }

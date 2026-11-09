@@ -1,6 +1,7 @@
 import type { CatalogSearchResult, CreateWishlistFromCatalogInput } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { BackButton } from '@/components/layout/back-button';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { CatalogSneakerSummary } from '@/components/sneakers/catalog-sneaker-summary';
 import { Button } from '@/components/ui/button';
@@ -50,16 +51,10 @@ export function WishlistCatalogForm({
         <CatalogSearchPicker query={query} onQueryChange={setQuery} onSelect={setSelectedResult} />
       ) : (
         <>
-          <button
-            type="button"
-            className="inline-flex w-fit text-sm text-muted-foreground hover:text-foreground"
-            onClick={() => setSelectedResult(null)}
-          >
-            ← Back to search
-          </button>
+          <BackButton onClick={() => setSelectedResult(null)}>Back to search</BackButton>
 
           {isLoading ? (
-            <div className="space-y-4 rounded-lg border bg-background/60 p-4">
+            <div className="space-y-4 rounded-2xl bg-tile p-4 ring-1 ring-border">
               <Skeleton className="h-48 w-48 rounded-md" />
               <Skeleton className="h-4 w-2/3" />
             </div>
@@ -96,7 +91,7 @@ export function WishlistCatalogForm({
                   value={priority}
                   onValueChange={(value) => setPriority(value as typeof priority)}
                 >
-                  <SelectTrigger id="wishlist-priority">
+                  <SelectTrigger id="wishlist-priority" className="w-full sm:w-64">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -115,7 +110,12 @@ export function WishlistCatalogForm({
                   onChange={(event) => setNotes(event.target.value)}
                 />
               </div>
-              <Button type="submit" disabled={isSubmitting || isLoading}>
+              <Button
+                type="submit"
+                size="lg"
+                className="sm:w-fit"
+                disabled={isSubmitting || isLoading}
+              >
                 {submitLabel}
               </Button>
             </form>

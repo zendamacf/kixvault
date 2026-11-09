@@ -7,11 +7,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { catalogSearchQueryOptions } from '@/lib/catalog';
 import { useDebouncedValue } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
-import { SneakerBrandBadge } from './sneaker-brand-badge';
 
 const DEBOUNCE_DELAY = 2000;
 const RESULTS_MAX_HEIGHT = 'max-h-[32rem]';
-const RESULT_THUMBNAIL_CLASS = 'h-32 w-32 shrink-0';
+const RESULT_THUMBNAIL_CLASS = 'h-24 w-28 shrink-0';
 
 type CatalogSearchPickerProps = {
   query: string;
@@ -39,16 +38,18 @@ export function CatalogSearchPicker({
   const unavailable = data?.unavailable ?? false;
 
   return (
-    <div className="min-w-0 space-y-3 rounded-lg border border-dashed p-4">
+    <div className="min-w-0 space-y-4">
       <div className="space-y-2">
         <Label htmlFor="catalog-search">Find a sneaker</Label>
         <Input
           id="catalog-search"
-          placeholder="Search by name or SKU (e.g. Air Jordan 1 Chicago, DZ5485-100)"
+          placeholder="Search by name or SKU"
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
         />
-        <p className="text-xs text-muted-foreground">Search StockX to find your pair.</p>
+        <p className="text-sm text-muted-foreground">
+          Searches StockX. Try "Air Jordan 1 Chicago" or "DZ5485-100".
+        </p>
       </div>
 
       {!canSearch && query.trim().length > 0 ? (
@@ -71,7 +72,10 @@ export function CatalogSearchPicker({
           )}
         >
           {(['one', 'two', 'three', 'four'] as const).map((key) => (
-            <div key={key} className="flex min-w-0 items-center gap-4 rounded-md border p-3">
+            <div
+              key={key}
+              className="flex min-w-0 items-center gap-4 rounded-2xl bg-tile p-3 ring-1 ring-border"
+            >
               <Skeleton className={cn(RESULT_THUMBNAIL_CLASS, 'rounded-md')} />
               <div className="min-w-0 flex-1 space-y-2">
                 <Skeleton className="h-4 w-3/4" />
@@ -102,10 +106,11 @@ export function CatalogSearchPicker({
               <li key={`${result.catalogSource}:${result.catalogId}`} className="min-w-0">
                 <button
                   type="button"
+                  aria-pressed={isSelected}
                   onClick={() => onSelect(result)}
                   className={cn(
-                    'flex w-full min-w-0 items-center gap-4 overflow-hidden rounded-md border p-3 text-left transition-colors hover:bg-accent/50',
-                    isSelected && 'border-primary bg-accent/40',
+                    'flex w-full min-w-0 items-center gap-4 overflow-hidden rounded-2xl bg-tile p-3 text-left ring-1 ring-border transition-shadow outline-none hover:ring-2 hover:ring-foreground/25 focus-visible:ring-2 focus-visible:ring-ring',
+                    isSelected && 'ring-2 ring-foreground',
                   )}
                 >
                   <SneakerThumbnail
@@ -114,8 +119,12 @@ export function CatalogSearchPicker({
                     className={RESULT_THUMBNAIL_CLASS}
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium">{result.title}</span>
-                    <SneakerBrandBadge brand={result.brand} />
+                    <span className="block truncate font-heading font-semibold">
+                      {result.title}
+                    </span>
+                    <span className="block truncate text-sm text-muted-foreground">
+                      {result.brand}
+                    </span>
                     {result.nickname ? (
                       <span className="block truncate text-sm text-foreground">
                         {`"${result.nickname}"`}

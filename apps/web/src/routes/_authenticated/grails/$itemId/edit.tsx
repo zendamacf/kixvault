@@ -1,8 +1,11 @@
 import type { MoveWishlistToCollectionInput, UpdateWishlistItemInput } from '@kixvault/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Trash2 } from 'lucide-react';
 import { BackLink } from '@/components/layout/back-link';
+import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { MoveToCollectionForm } from '@/components/wishlist/move-to-collection-form';
 import { WishlistManualForm } from '@/components/wishlist/wishlist-manual-form';
 import { api, parseApiError } from '@/lib/api';
@@ -84,12 +87,18 @@ function EditGrailPage() {
   });
 
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading grail…</p>;
+    return (
+      <div className="mx-auto max-w-3xl space-y-6">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-72 w-full rounded-2xl" />
+      </div>
+    );
   }
 
   if (error || !item) {
     return (
-      <div className="space-y-2">
+      <div className="mx-auto max-w-3xl space-y-4">
         <BackLink to="/grails">Back to grails</BackLink>
         <p className="text-sm text-destructive" role="alert">
           Grail not found.
@@ -99,12 +108,22 @@ function EditGrailPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
+    <div className="mx-auto max-w-3xl space-y-10">
+      <div className="space-y-5">
         <BackLink to="/grails">Back to grails</BackLink>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {item.brand} {item.model}
-        </h1>
+        <div className="flex items-center gap-5">
+          <div className="w-28 shrink-0 rounded-2xl bg-tile ring-1 ring-border">
+            <SneakerThumbnail
+              imageUrl={item.imageUrl}
+              alt={`${item.brand} ${item.model}`}
+              className="aspect-[5/4] w-full rounded-none p-2"
+            />
+          </div>
+          <h1 className="font-display text-3xl leading-[1.1] tracking-tight sm:text-4xl">
+            <span className="font-normal text-muted-foreground">{item.brand}</span>{' '}
+            <span className="font-semibold">{item.model}</span>
+          </h1>
+        </div>
       </div>
 
       <WishlistManualForm
@@ -129,14 +148,17 @@ function EditGrailPage() {
         }}
       />
 
-      <Button
-        type="button"
-        variant="destructive"
-        onClick={() => deleteMutation.mutate()}
-        disabled={deleteMutation.isPending}
-      >
-        Remove from grails
-      </Button>
+      <div>
+        <Button
+          type="button"
+          variant="destructive"
+          onClick={() => deleteMutation.mutate()}
+          disabled={deleteMutation.isPending}
+        >
+          <Trash2 aria-hidden />
+          Remove from grails
+        </Button>
+      </div>
     </div>
   );
 }

@@ -3,12 +3,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { BackLink } from '@/components/layout/back-link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import { WishlistCatalogForm } from '@/components/wishlist/wishlist-catalog-form';
 import { WishlistManualForm } from '@/components/wishlist/wishlist-manual-form';
 import { api, parseApiError } from '@/lib/api';
-import { cn } from '@/lib/utils';
 
 type AddMode = 'catalog' | 'manual';
 
@@ -71,64 +69,55 @@ function NewGrailPage() {
   const isSubmitting = createFromCatalogMutation.isPending || createManualMutation.isPending;
 
   return (
-    <div className="space-y-4">
-      <BackLink to="/grails">Back to grails</BackLink>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Add a grail</CardTitle>
-          <CardDescription>
+    <div className="mx-auto max-w-3xl space-y-8">
+      <div className="space-y-5">
+        <BackLink to="/grails">Back to grails</BackLink>
+        <div className="space-y-1">
+          <h1 className="font-display text-4xl font-semibold tracking-tight">Add a grail</h1>
+          <p className="max-w-xl text-muted-foreground">
             Search StockX or enter details manually. Grails stay separate until you move them to
             your collection.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant={mode === 'catalog' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setMode('catalog')}
-            >
-              From catalog
-            </Button>
-            <Button
-              type="button"
-              variant={mode === 'manual' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setMode('manual')}
-            >
-              Manual entry
-            </Button>
-          </div>
+          </p>
+        </div>
+        <SegmentedControl
+          label="How to add this grail"
+          value={mode}
+          options={[
+            { value: 'catalog', label: 'From catalog' },
+            { value: 'manual', label: 'Manual entry' },
+          ]}
+          onChange={(value) => {
+            setMode(value);
+            setFormError(null);
+          }}
+        />
+      </div>
 
-          {formError ? (
-            <p className={cn('text-sm text-destructive')} role="alert">
-              {formError}
-            </p>
-          ) : null}
+      {formError ? (
+        <p className="text-sm text-destructive" role="alert">
+          {formError}
+        </p>
+      ) : null}
 
-          {mode === 'catalog' ? (
-            <WishlistCatalogForm
-              submitLabel={isSubmitting ? 'Saving…' : 'Add grail'}
-              isSubmitting={isSubmitting}
-              onSubmit={async (values) => {
-                setFormError(null);
-                await createFromCatalogMutation.mutateAsync(values);
-              }}
-            />
-          ) : (
-            <WishlistManualForm
-              submitLabel={isSubmitting ? 'Saving…' : 'Add grail'}
-              isSubmitting={isSubmitting}
-              onSubmit={async (values) => {
-                setFormError(null);
-                await createManualMutation.mutateAsync(values);
-              }}
-            />
-          )}
-        </CardContent>
-      </Card>
+      {mode === 'catalog' ? (
+        <WishlistCatalogForm
+          submitLabel={isSubmitting ? 'Saving…' : 'Add grail'}
+          isSubmitting={isSubmitting}
+          onSubmit={async (values) => {
+            setFormError(null);
+            await createFromCatalogMutation.mutateAsync(values);
+          }}
+        />
+      ) : (
+        <WishlistManualForm
+          submitLabel={isSubmitting ? 'Saving…' : 'Add grail'}
+          isSubmitting={isSubmitting}
+          onSubmit={async (values) => {
+            setFormError(null);
+            await createManualMutation.mutateAsync(values);
+          }}
+        />
+      )}
     </div>
   );
 }

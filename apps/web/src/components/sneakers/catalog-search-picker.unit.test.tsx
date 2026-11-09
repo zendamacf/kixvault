@@ -89,7 +89,7 @@ describe('CatalogSearchPicker', () => {
       name: /Air Jordan 1 Retro High OG Chicago/,
     });
 
-    expect(resultButton.className).toContain('border-primary');
+    expect(resultButton.getAttribute('aria-pressed')).toBe('true');
   });
 
   test('does not search until the query has at least 3 characters', async () => {

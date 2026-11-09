@@ -5,12 +5,10 @@ import { useState } from 'react';
 import { BackLink } from '@/components/layout/back-link';
 import { CatalogSneakerForm } from '@/components/sneakers/catalog-sneaker-form';
 import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import { api, parseApiError } from '@/lib/api';
 import { trackUmamiEvent } from '@/lib/umami';
 import { UmamiEvents } from '@/lib/umami-events';
-import { cn } from '@/lib/utils';
 import { showGrailClearedToast } from '@/lib/wishlist';
 
 type AddMode = 'catalog' | 'manual';
@@ -88,67 +86,54 @@ function NewSneakerPage() {
   const isSubmitting = createFromCatalogMutation.isPending || createManualMutation.isPending;
 
   return (
-    <div className="space-y-4">
-      <BackLink to="/">Back to collection</BackLink>
+    <div className="mx-auto max-w-3xl space-y-8">
+      <div className="space-y-5">
+        <BackLink to="/">Back to collection</BackLink>
+        <div className="space-y-1">
+          <h1 className="font-display text-4xl font-semibold tracking-tight">Add a pair</h1>
+          <p className="text-muted-foreground">
+            Search the catalog to find your pair, or enter details manually.
+          </p>
+        </div>
+        <SegmentedControl
+          label="How to add this pair"
+          value={mode}
+          options={[
+            { value: 'catalog', label: 'Search catalog' },
+            { value: 'manual', label: 'Enter manually' },
+          ]}
+          onChange={(value) => {
+            setMode(value);
+            setFormError(null);
+          }}
+        />
+      </div>
 
-      <Card>
-        <CardHeader className="space-y-4">
-          <div>
-            <CardTitle>Add a pair</CardTitle>
-            <CardDescription>
-              Search the catalog to find your pair, or enter details manually.
-            </CardDescription>
-          </div>
+      {formError ? (
+        <p className="text-sm text-destructive" role="alert">
+          {formError}
+        </p>
+      ) : null}
 
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={mode === 'catalog' ? 'default' : 'outline'}
-              className={cn(mode !== 'catalog' && 'flex-1 sm:flex-none')}
-              onClick={() => {
-                setMode('catalog');
-                setFormError(null);
-              }}
-            >
-              Search catalog
-            </Button>
-            <Button
-              type="button"
-              variant={mode === 'manual' ? 'default' : 'outline'}
-              className={cn(mode !== 'manual' && 'flex-1 sm:flex-none')}
-              onClick={() => {
-                setMode('manual');
-                setFormError(null);
-              }}
-            >
-              Enter manually
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {formError ? <p className="mb-4 text-sm text-destructive">{formError}</p> : null}
-
-          {mode === 'catalog' ? (
-            <CatalogSneakerForm
-              submitLabel="Add to collection"
-              isSubmitting={isSubmitting}
-              onSubmit={async (values) => {
-                setFormError(null);
-                await createFromCatalogMutation.mutateAsync(values);
-              }}
-            />
-          ) : (
-            <ManualSneakerForm
-              submitLabel="Add to collection"
-              isSubmitting={isSubmitting}
-              onSubmit={async (values) => {
-                setFormError(null);
-                await createManualMutation.mutateAsync(values);
-              }}
-            />
-          )}
-        </CardContent>
-      </Card>
+      {mode === 'catalog' ? (
+        <CatalogSneakerForm
+          submitLabel="Add to collection"
+          isSubmitting={isSubmitting}
+          onSubmit={async (values) => {
+            setFormError(null);
+            await createFromCatalogMutation.mutateAsync(values);
+          }}
+        />
+      ) : (
+        <ManualSneakerForm
+          submitLabel="Add to collection"
+          isSubmitting={isSubmitting}
+          onSubmit={async (values) => {
+            setFormError(null);
+            await createManualMutation.mutateAsync(values);
+          }}
+        />
+      )}
     </div>
   );
 }

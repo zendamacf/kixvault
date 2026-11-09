@@ -1,4 +1,3 @@
-import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 
 export type CatalogSneakerSummaryData = {
@@ -17,15 +16,17 @@ type CatalogSneakerSummaryProps = {
 /** Read-only product summary shown when adding or editing a catalog-linked sneaker. */
 export function CatalogSneakerSummary({ sneaker }: CatalogSneakerSummaryProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-lg border bg-background/60 p-4 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-4 rounded-2xl bg-tile p-4 ring-1 ring-border sm:flex-row sm:items-center sm:gap-6">
       <SneakerThumbnail
         imageUrl={sneaker.imageUrl}
         alt={sneaker.title}
-        className="h-48 w-48 shrink-0 sm:h-56 sm:w-56"
+        className="h-44 w-full shrink-0 sm:h-40 sm:w-52"
       />
       <div className="min-w-0 space-y-1">
-        <p className="font-medium">{sneaker.title}</p>
-        <SneakerBrandBadge brand={sneaker.brand} />
+        <h2 className="font-heading text-xl leading-snug font-semibold">{sneaker.title}</h2>
+        {sneaker.title.toLowerCase().startsWith(sneaker.brand.toLowerCase()) ? null : (
+          <p className="text-sm text-muted-foreground">{sneaker.brand}</p>
+        )}
         {sneaker.nickname ? (
           <p className="text-sm text-foreground">{`"${sneaker.nickname}"`}</p>
         ) : null}

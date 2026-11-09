@@ -64,7 +64,7 @@ export function WishlistManualForm({
 
   return (
     <form
-      className="grid gap-4"
+      className="grid gap-5"
       onSubmit={handleSubmit(async (values) => {
         const parsed = createWishlistItemSchema.parse({
           ...values,
@@ -74,41 +74,43 @@ export function WishlistManualForm({
         await onSubmit(parsed);
       })}
     >
-      <div className="grid gap-2">
-        <Label htmlFor="brand">Brand</Label>
-        <Input id="brand" {...register('brand')} />
-        {errors.brand ? <p className="text-sm text-destructive">{errors.brand.message}</p> : null}
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="model">Model</Label>
-        <Input id="model" {...register('model')} />
-        {errors.model ? <p className="text-sm text-destructive">{errors.model.message}</p> : null}
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="colorway">Colorway</Label>
-        <Input id="colorway" {...register('colorway')} />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="priority">Priority</Label>
-        <Select
-          value={priority}
-          onValueChange={(value) => setValue('priority', value as FormValues['priority'])}
-        >
-          <SelectTrigger id="priority">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="low">Low</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <Label htmlFor="brand">Brand</Label>
+          <Input id="brand" {...register('brand')} />
+          {errors.brand ? <p className="text-sm text-destructive">{errors.brand.message}</p> : null}
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="model">Model</Label>
+          <Input id="model" {...register('model')} />
+          {errors.model ? <p className="text-sm text-destructive">{errors.model.message}</p> : null}
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="colorway">Colorway</Label>
+          <Input id="colorway" {...register('colorway')} />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="priority">Priority</Label>
+          <Select
+            value={priority}
+            onValueChange={(value) => setValue('priority', value as FormValues['priority'])}
+          >
+            <SelectTrigger id="priority" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">Low</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div className="grid gap-2">
         <Label htmlFor="notes">Notes</Label>
         <Textarea id="notes" rows={3} {...register('notes')} />
       </div>
-      <Button type="submit" disabled={isSubmitting}>
+      <Button type="submit" size="lg" className="sm:w-fit" disabled={isSubmitting}>
         {submitLabel}
       </Button>
     </form>

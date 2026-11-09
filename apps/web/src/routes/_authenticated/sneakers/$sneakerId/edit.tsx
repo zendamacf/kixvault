@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { BackLink } from '@/components/layout/back-link';
 import { CollectionSneakerForm } from '@/components/sneakers/collection-sneaker-form';
 import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { api, parseApiError } from '@/lib/api';
 import { sneakerQueryOptions } from '@/lib/queries';
 import { trackUmamiEvent } from '@/lib/umami';
@@ -48,77 +48,92 @@ function EditSneakerPage() {
   });
 
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading sneaker...</p>;
+    return (
+      <div className="mx-auto max-w-3xl space-y-6">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-64 w-full rounded-2xl" />
+      </div>
+    );
   }
 
   if (error || !data?.sneaker) {
-    return <p className="text-sm text-destructive">{error?.message ?? 'Sneaker not found'}</p>;
+    return (
+      <div className="mx-auto max-w-3xl space-y-4">
+        <BackLink to="/">Back to collection</BackLink>
+        <p className="text-sm text-destructive" role="alert">
+          {error?.message ?? 'Sneaker not found'}
+        </p>
+      </div>
+    );
   }
 
   const sneaker = data.sneaker;
   const isCatalogLinked = Boolean(sneaker.sku);
 
   return (
-    <div className="space-y-4">
-      <BackLink to="/sneakers/$sneakerId" params={{ sneakerId }}>
-        Back to details
-      </BackLink>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit pair</CardTitle>
-          <CardDescription>
+    <div className="mx-auto max-w-3xl space-y-8">
+      <div className="space-y-4">
+        <BackLink to="/sneakers/$sneakerId" params={{ sneakerId }}>
+          Back to details
+        </BackLink>
+        <div className="space-y-1">
+          <h1 className="font-display text-4xl font-semibold tracking-tight">Edit pair</h1>
+          <p className="text-muted-foreground">
             Update {sneaker.brand} {sneaker.model}.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {formError ? <p className="mb-4 text-sm text-destructive">{formError}</p> : null}
+          </p>
+        </div>
+      </div>
 
-          {isCatalogLinked ? (
-            <CollectionSneakerForm
-              summary={{
-                imageUrl: sneaker.primaryImage?.url ?? null,
-                title: `${sneaker.brand} ${sneaker.model}`,
-                brand: sneaker.brand,
-                nickname: sneaker.nickname,
-                colorway: sneaker.colorway,
-                sku: sneaker.sku,
-              }}
-              submitLabel="Save changes"
-              isSubmitting={updateMutation.isPending}
-              defaultValues={{
-                size: sneaker.size,
-                condition: sneaker.condition as SneakerCondition,
-                purchasePrice: sneaker.purchasePrice,
-                purchaseDate: sneaker.purchaseDate ?? '',
-                notes: sneaker.notes,
-              }}
-              onSubmit={async (values) => {
-                await updateMutation.mutateAsync(values);
-              }}
-            />
-          ) : (
-            <ManualSneakerForm
-              submitLabel="Save changes"
-              isSubmitting={updateMutation.isPending}
-              defaultValues={{
-                brand: sneaker.brand,
-                model: sneaker.model,
-                colorway: sneaker.colorway,
-                nickname: sneaker.nickname,
-                size: sneaker.size,
-                condition: sneaker.condition as SneakerCondition,
-                purchasePrice: sneaker.purchasePrice,
-                purchaseDate: sneaker.purchaseDate ?? '',
-                notes: sneaker.notes,
-              }}
-              onSubmit={async (values) => {
-                await updateMutation.mutateAsync(values as CreateSneakerInput);
-              }}
-            />
-          )}
-        </CardContent>
-      </Card>
+      {formError ? (
+        <p className="text-sm text-destructive" role="alert">
+          {formError}
+        </p>
+      ) : null}
+
+      {isCatalogLinked ? (
+        <CollectionSneakerForm
+          summary={{
+            imageUrl: sneaker.primaryImage?.url ?? null,
+            title: `${sneaker.brand} ${sneaker.model}`,
+            brand: sneaker.brand,
+            nickname: sneaker.nickname,
+            colorway: sneaker.colorway,
+            sku: sneaker.sku,
+          }}
+          submitLabel="Save changes"
+          isSubmitting={updateMutation.isPending}
+          defaultValues={{
+            size: sneaker.size,
+            condition: sneaker.condition as SneakerCondition,
+            purchasePrice: sneaker.purchasePrice,
+            purchaseDate: sneaker.purchaseDate ?? '',
+            notes: sneaker.notes,
+          }}
+          onSubmit={async (values) => {
+            await updateMutation.mutateAsync(values);
+          }}
+        />
+      ) : (
+        <ManualSneakerForm
+          submitLabel="Save changes"
+          isSubmitting={updateMutation.isPending}
+          defaultValues={{
+            brand: sneaker.brand,
+            model: sneaker.model,
+            colorway: sneaker.colorway,
+            nickname: sneaker.nickname,
+            size: sneaker.size,
+            condition: sneaker.condition as SneakerCondition,
+            purchasePrice: sneaker.purchasePrice,
+            purchaseDate: sneaker.purchaseDate ?? '',
+            notes: sneaker.notes,
+          }}
+          onSubmit={async (values) => {
+            await updateMutation.mutateAsync(values as CreateSneakerInput);
+          }}
+        />
+      )}
     </div>
   );
 }

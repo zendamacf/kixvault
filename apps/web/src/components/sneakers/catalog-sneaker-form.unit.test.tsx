@@ -115,7 +115,7 @@ describe('CatalogSneakerForm', () => {
 
     expect(screen.queryByLabelText('Find a sneaker')).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: '← Back to search' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Back to search' }));
 
     expect(screen.getByLabelText('Find a sneaker')).toBeTruthy();
     expect(screen.getByRole('button', { name: /Air Jordan 1 Retro High OG Chicago/ })).toBeTruthy();
