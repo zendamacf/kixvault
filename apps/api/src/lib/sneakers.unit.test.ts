@@ -116,6 +116,9 @@ describe('formatSneaker', () => {
       currentMarketPrice: null,
       pricedAt: null,
       gainLoss: null,
+      wearCount: 0,
+      lastWornOn: null,
+      suggestedCondition: null,
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-02T00:00:00.000Z',
     });
@@ -236,5 +239,17 @@ describe('buildSneakerSearchCondition', () => {
     const condition = buildSneakerSearchCondition('Nike');
 
     expect(condition).toBeDefined();
+  });
+});
+
+describe('formatSneaker wear fields', () => {
+  test('includes wear stats and a suggested condition', () => {
+    const formatted = formatSneaker(createSneakerRow({ condition: 'lightly_worn' }), {
+      wearStats: { wearCount: 15, lastWornOn: '2026-11-01' },
+    });
+
+    expect(formatted.wearCount).toBe(15);
+    expect(formatted.lastWornOn).toBe('2026-11-01');
+    expect(formatted.suggestedCondition).toBe('worn');
   });
 });

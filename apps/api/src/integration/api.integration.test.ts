@@ -972,4 +972,214 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     };
     expect(otherAfterBody.events.some((event) => event.action === 'sneaker.created')).toBe(false);
   });
+  describe('wear tracking', () => {
+    type WearSneaker = {
+      id: string;
+      condition: string;
+      wearCount: number;
+      lastWornOn: string | null;
+      suggestedCondition: string | null;
+    };
+
+    async function createSneaker(cookie: string, condition: string) {
+      const response = await app.request('/api/sneakers/custom', {
+        method: 'POST',
+        headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brand: 'Nike', model: 'Dunk Low', size: 10, condition }),
+      });
+      const body = (await response.json()) as { sneaker: WearSneaker };
+      return body.sneaker;
+    }
+
+    function logWear(cookie: string, sneakerId: string, wornOn?: string) {
+      return app.request(`/api/wears/${sneakerId}`, {
+        method: 'POST',
+        headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+        body: JSON.stringify(wornOn ? { wornOn } : {}),
+      });
+    }
+
+    function removeWear(cookie: string, sneakerId: string, date: string) {
+      return app.request(`/api/wears/${sneakerId}/${date}`, {
+        method: 'DELETE',
+        headers: { Cookie: cookie },
+      });
+    }
+
+    test('requires authentication', async () => {
+      const response = await app.request('/api/wears?from=2026-11-01&to=2026-11-30');
+
+      expect(response.status).toBe(401);
+    });
+
+    test('first wear of a deadstock pair moves it to lightly worn', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'deadstock');
+
+      const response = await logWear(cookie, sneaker.id, '2026-11-01');
+      const body = (await response.json()) as {
+        created: boolean;
+        conditionChanged: boolean;
+        sneaker: WearSneaker;
+      };
+
+      expect(response.status).toBe(201);
+      expect(body.created).toBe(true);
+      expect(body.conditionChanged).toBe(true);
+      expect(body.sneaker.condition).toBe('lightly_worn');
+      expect(body.sneaker.wearCount).toBe(1);
+      expect(body.sneaker.lastWornOn).toBe('2026-11-01');
+    });
+
+    test('logging the same day twice does not duplicate the wear', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'worn');
+
+      await logWear(cookie, sneaker.id, '2026-11-01');
+      const response = await logWear(cookie, sneaker.id, '2026-11-01');
+      const body = (await response.json()) as { created: boolean; sneaker: WearSneaker };
+
+      expect(response.status).toBe(200);
+      expect(body.created).toBe(false);
+      expect(body.sneaker.wearCount).toBe(1);
+    });
+
+    test('does not change the condition of pairs that are not deadstock', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'worn');
+
+      const response = await logWear(cookie, sneaker.id, '2026-11-01');
+      const body = (await response.json()) as {
+        conditionChanged: boolean;
+        sneaker: WearSneaker;
+      };
+
+      expect(body.conditionChanged).toBe(false);
+      expect(body.sneaker.condition).toBe('worn');
+    });
+
+    test('suggests the next condition after 15 wears', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'lightly_worn');
+
+      for (let day = 1; day <= 15; day++) {
+        await logWear(cookie, sneaker.id, `2026-10-${String(day).padStart(2, '0')}`);
+      }
+
+      const response = await app.request(`/api/sneakers/${sneaker.id}`, {
+        headers: { Cookie: cookie },
+      });
+      const body = (await response.json()) as { sneaker: WearSneaker };
+
+      expect(body.sneaker.wearCount).toBe(15);
+      expect(body.sneaker.suggestedCondition).toBe('worn');
+    });
+
+    test('removing the only wear reverts the automatic deadstock change', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'deadstock');
+      await logWear(cookie, sneaker.id, '2026-11-01');
+
+      const response = await removeWear(cookie, sneaker.id, '2026-11-01');
+      const body = (await response.json()) as {
+        conditionReverted: boolean;
+        sneaker: WearSneaker;
+      };
+
+      expect(response.status).toBe(200);
+      expect(body.conditionReverted).toBe(true);
+      expect(body.sneaker.condition).toBe('deadstock');
+      expect(body.sneaker.wearCount).toBe(0);
+    });
+
+    test('removing one of several wears keeps the condition', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'deadstock');
+      await logWear(cookie, sneaker.id, '2026-11-01');
+      await logWear(cookie, sneaker.id, '2026-11-02');
+
+      const response = await removeWear(cookie, sneaker.id, '2026-11-02');
+      const body = (await response.json()) as {
+        conditionReverted: boolean;
+        sneaker: WearSneaker;
+      };
+
+      expect(body.conditionReverted).toBe(false);
+      expect(body.sneaker.condition).toBe('lightly_worn');
+      expect(body.sneaker.wearCount).toBe(1);
+    });
+
+    test('does not revert a condition the user set by hand', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'worn');
+      await logWear(cookie, sneaker.id, '2026-11-01');
+
+      const response = await removeWear(cookie, sneaker.id, '2026-11-01');
+      const body = (await response.json()) as { sneaker: WearSneaker };
+
+      expect(body.sneaker.condition).toBe('worn');
+    });
+
+    test('returns 404 when removing a wear that does not exist', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'worn');
+
+      const response = await removeWear(cookie, sneaker.id, '2026-11-01');
+
+      expect(response.status).toBe(404);
+    });
+
+    test('lists wears in a date range with sneaker details', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'worn');
+      await logWear(cookie, sneaker.id, '2026-10-31');
+      await logWear(cookie, sneaker.id, '2026-11-05');
+
+      const response = await app.request('/api/wears?from=2026-11-01&to=2026-11-30', {
+        headers: { Cookie: cookie },
+      });
+      const body = (await response.json()) as {
+        wears: Array<{ sneakerId: string; wornOn: string; brand: string; model: string }>;
+      };
+
+      expect(body.wears).toEqual([
+        expect.objectContaining({
+          sneakerId: sneaker.id,
+          wornOn: '2026-11-05',
+          brand: 'Nike',
+          model: 'Dunk Low',
+        }),
+      ]);
+    });
+
+    test('does not let users log or see wears for another user', async () => {
+      const owner = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const other = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(owner.cookie, 'worn');
+      await logWear(owner.cookie, sneaker.id, '2026-11-01');
+
+      const logResponse = await logWear(other.cookie, sneaker.id, '2026-11-02');
+      const listResponse = await app.request('/api/wears?from=2026-11-01&to=2026-11-30', {
+        headers: { Cookie: other.cookie },
+      });
+      const listBody = (await listResponse.json()) as { wears: unknown[] };
+
+      expect(logResponse.status).toBe(404);
+      expect(listBody.wears).toEqual([]);
+    });
+
+    test('records audit events for wears', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'worn');
+      await logWear(cookie, sneaker.id, '2026-11-01');
+      await removeWear(cookie, sneaker.id, '2026-11-01');
+
+      const response = await app.request('/api/audit', { headers: { Cookie: cookie } });
+      const body = (await response.json()) as { events: Array<{ action: string }> };
+      const actions = body.events.map((event) => event.action);
+
+      expect(actions).toContain('sneaker.worn');
+      expect(actions).toContain('sneaker.wear_removed');
+    });
+  });
 });
