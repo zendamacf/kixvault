@@ -4,6 +4,18 @@
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/bricolage-grotesque/opsz.css";
 
+/* Brand panel on the auth pages: ink with a soft box-orange glow where the shoe sits. */
+@utility bg-auth-panel {
+  background-color: var(--chrome);
+  background-image:
+    radial-gradient(
+      46rem 34rem at 88% 100%,
+      color-mix(in oklab, var(--primary) 34%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(160deg, color-mix(in oklab, var(--chrome) 90%, white), var(--chrome) 60%);
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @layer base {

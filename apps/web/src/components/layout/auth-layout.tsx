@@ -10,7 +10,7 @@ type AuthLayoutProps = {
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="grid min-h-screen grid-rows-[auto_1fr] bg-background lg:grid-cols-2 lg:grid-rows-1">
-      <aside className="relative overflow-hidden bg-chrome px-4 py-4 text-chrome-foreground lg:flex lg:flex-col lg:gap-24 lg:p-12">
+      <aside className="relative overflow-hidden bg-auth-panel px-4 py-4 text-chrome-foreground lg:flex lg:flex-col lg:gap-24 lg:p-12">
         <div className="flex items-center gap-2.5">
           <BrandMark />
           <span className="font-heading text-xl font-extrabold tracking-tight">{APP_NAME}</span>

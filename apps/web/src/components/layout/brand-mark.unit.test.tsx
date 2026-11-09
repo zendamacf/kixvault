@@ -25,6 +25,9 @@ describe('BrandMark', () => {
     expect(container.querySelector('path')?.getAttribute('class')).not.toContain(
       'fill-primary-foreground',
     );
-    expect(container.querySelectorAll('circle')).toHaveLength(SNEAKER_EYELETS.length);
+    // Eyelets are holes in a mask, not painted dots, so a gradient behind shows through them.
+    expect(container.querySelector('mask')).toBeTruthy();
+    expect(container.querySelectorAll('mask circle')).toHaveLength(SNEAKER_EYELETS.length);
+    expect(container.querySelector('path')?.getAttribute('mask')).toMatch(/^url\(#.+\)$/);
   });
 });
