@@ -37,7 +37,10 @@ export function ThemeToggle() {
             <DropdownMenuRadioItem key={item.id} value={item.id} className="py-2">
               <span className="flex min-w-0 flex-1 flex-col gap-1.5">
                 {item.label}
-                <span aria-hidden="true" className="flex h-1.5 overflow-hidden rounded-full">
+                <span
+                  aria-hidden="true"
+                  className="flex h-1.5 overflow-hidden rounded-full ring-1 ring-foreground/25"
+                >
                   {item.swatches.map((color) => (
                     <span key={color} className="flex-1" style={{ backgroundColor: color }} />
                   ))}
