@@ -1,74 +1,61 @@
-import type { AuditAction, AuditEvent } from '@kixvault/shared';
+import type { AuditAction } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
+import {
+  LogIn,
+  LogOut,
+  type LucideIcon,
+  Pencil,
+  Plus,
+  Star,
+  Trash2,
+  Trophy,
+  UserPlus,
+} from 'lucide-react';
 import { BackLink } from '@/components/layout/back-link';
+import { Skeleton } from '@/components/ui/skeleton';
+import { actionLabels, formatEventDetail, formatEventTime, groupByDay } from '@/lib/activity';
 import { auditEventsQueryOptions } from '@/lib/queries';
-import { cn } from '@/lib/utils';
 
 export const Route = createFileRoute('/_authenticated/activity')({
   component: ActivityPage,
 });
 
-const actionLabels: Record<AuditAction, string> = {
-  'auth.login': 'Signed in',
-  'auth.logout': 'Signed out',
-  'auth.register': 'Created account',
-  'grail.added': 'Added a grail',
-  'sneaker.created': 'Added a pair',
-  'sneaker.created_from_grail': 'Copped a grail',
-  'sneaker.updated': 'Updated a pair',
-  'sneaker.deleted': 'Removed a pair',
+const actionIcons: Record<AuditAction, LucideIcon> = {
+  'auth.login': LogIn,
+  'auth.logout': LogOut,
+  'auth.register': UserPlus,
+  'grail.added': Star,
+  'sneaker.created': Plus,
+  'sneaker.created_from_grail': Trophy,
+  'sneaker.updated': Pencil,
+  'sneaker.deleted': Trash2,
 };
-
-function formatEventDescription(event: AuditEvent): string {
-  const brand = event.metadata?.brand;
-  const model = event.metadata?.model;
-  const grailsCleared = event.metadata?.grailsCleared;
-
-  if (typeof brand === 'string' && typeof model === 'string') {
-    const pair = `${brand} ${model}`;
-
-    if (event.action === 'sneaker.created_from_grail') {
-      if (typeof grailsCleared === 'number' && grailsCleared > 1) {
-        return `${pair} · Removed ${grailsCleared} grails from your list`;
-      }
-
-      return `${pair} · Removed from Grails`;
-    }
-
-    return pair;
-  }
-
-  return actionLabels[event.action];
-}
-
-function formatEventTime(iso: string): string {
-  const date = new Date(iso);
-
-  return date.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
-}
 
 function ActivityPage() {
   const { data, isLoading, error } = useQuery(auditEventsQueryOptions);
   const events = data?.events ?? [];
   const retentionDays = data?.retentionDays ?? 90;
+  const groups = groupByDay(events);
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <BackLink to="/">← Back to collection</BackLink>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Activity</h1>
-          <p className="text-sm text-muted-foreground">
-            A timeline of sign-ins, grails, and changes to your collection.
+    <div className="mx-auto max-w-3xl space-y-8">
+      <div className="space-y-4">
+        <BackLink to="/">Back to collection</BackLink>
+        <div className="space-y-1">
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">Activity</h1>
+          <p className="text-muted-foreground">
+            Sign-ins, grails, and changes to your collection, newest first.
           </p>
         </div>
       </div>
 
-      {isLoading ? <p className="text-sm text-muted-foreground">Loading activity…</p> : null}
+      {isLoading ? (
+        <div className="space-y-3" aria-hidden>
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-40 w-full rounded-2xl" />
+        </div>
+      ) : null}
 
       {error ? (
         <p className="text-sm text-destructive" role="alert">
@@ -77,42 +64,55 @@ function ActivityPage() {
       ) : null}
 
       {!isLoading && !error && events.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-          No activity yet. Actions like signing in, adding grails, or adding sneakers will show up
-          here.
-        </p>
+        <div className="rounded-2xl bg-card px-6 py-12 text-center ring-1 ring-border">
+          <p className="font-heading text-lg font-semibold">Nothing here yet</p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
+            Signing in, adding grails and adding pairs will show up here.
+          </p>
+        </div>
       ) : null}
 
-      {!isLoading && !error && events.length > 0 ? (
-        <ol className="space-y-3">
-          {events.map((event) => (
-            <li
-              key={event.id}
-              className="flex flex-col gap-1 rounded-lg border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div className="min-w-0">
-                <p className="font-medium">{actionLabels[event.action]}</p>
-                <p className="truncate text-sm text-muted-foreground">
-                  {formatEventDescription(event)}
-                </p>
-              </div>
-              <time
-                className={cn('shrink-0 text-xs text-muted-foreground sm:text-sm')}
-                dateTime={event.createdAt}
-              >
-                {formatEventTime(event.createdAt)}
-              </time>
-            </li>
-          ))}
-        </ol>
-      ) : null}
+      {!isLoading && !error
+        ? groups.map((group) => (
+            <section key={group.key} className="space-y-3">
+              <h2 className="font-heading text-xl font-semibold tracking-tight">{group.heading}</h2>
+              <ol className="divide-y divide-border rounded-2xl bg-card ring-1 ring-border">
+                {group.events.map((event) => {
+                  const Icon = actionIcons[event.action];
+                  const { pair, note } = formatEventDetail(event);
+                  const date = new Date(event.createdAt);
 
-      <p className="text-xs text-muted-foreground">
-        Activity older than {retentionDays} days is no longer shown.{' '}
-        <Link to="/" className="underline-offset-4 hover:underline">
-          Return to your collection
-        </Link>
-        .
+                  return (
+                    <li key={event.id} className="flex items-center gap-4 px-4 py-3.5">
+                      <span
+                        aria-hidden
+                        className="grid size-9 shrink-0 place-items-center rounded-full bg-muted text-foreground"
+                      >
+                        <Icon className="size-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium">{actionLabels[event.action]}</p>
+                        {pair ? (
+                          <p className="truncate text-sm text-muted-foreground">{pair}</p>
+                        ) : null}
+                        {note ? <p className="text-sm text-muted-foreground">{note}</p> : null}
+                      </div>
+                      <time
+                        className="shrink-0 text-sm text-muted-foreground tabular-nums"
+                        dateTime={event.createdAt}
+                      >
+                        {formatEventTime(date)}
+                      </time>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          ))
+        : null}
+
+      <p className="text-sm text-muted-foreground">
+        Activity older than {retentionDays} days is no longer shown.
       </p>
     </div>
   );

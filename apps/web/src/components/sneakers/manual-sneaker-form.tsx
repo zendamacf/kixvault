@@ -116,7 +116,7 @@ export function ManualSneakerForm({
         errors={errors as FieldErrors<CollectionFieldValues>}
       />
 
-      <Button type="submit" disabled={isSubmitting}>
+      <Button type="submit" size="lg" className="sm:w-fit" disabled={isSubmitting}>
         {isSubmitting ? 'Saving...' : submitLabel}
       </Button>
     </form>

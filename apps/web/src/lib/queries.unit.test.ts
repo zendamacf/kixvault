@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { QueryClient } from '@tanstack/react-query';
+import { keepPreviousData, QueryClient } from '@tanstack/react-query';
 import { createJsonResponse, installFetchMock } from '@/test/mocks/api';
 
 describe('sessionQueryOptions', () => {
@@ -240,5 +240,13 @@ describe('sneakerQueryOptions', () => {
     );
 
     expect(result.sneaker.brand).toBe('Nike');
+  });
+});
+
+describe('sneakersQueryOptions', () => {
+  test('keeps the previous results on screen while filters change', async () => {
+    const { sneakersQueryOptions } = await import('./queries');
+
+    expect(sneakersQueryOptions({ search: 'dunk' }).placeholderData).toBe(keepPreviousData);
   });
 });

@@ -40,4 +40,25 @@ describe('AppShell', () => {
     expect(screen.getByRole('link', { name: 'Collection' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Grails' })).toBeTruthy();
   });
+
+  test('lets keyboard users skip past the navigation', async () => {
+    const { AppShell } = await import('./app-shell');
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    client.setQueryData(sessionQueryOptions.queryKey, {
+      user: { id: 'user-1', email: 'collector@example.com' },
+    });
+
+    render(
+      <QueryClientProvider client={client}>
+        <AppShell />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByRole('link', { name: 'Skip to content' }).getAttribute('href')).toBe(
+      '#main-content',
+    );
+    expect(screen.getByRole('main').id).toBe('main-content');
+  });
 });

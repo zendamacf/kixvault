@@ -5,6 +5,7 @@ import type {
 } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { BackButton } from '@/components/layout/back-button';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { CollectionSneakerForm } from '@/components/sneakers/collection-sneaker-form';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -43,16 +44,10 @@ export function CatalogSneakerForm({
         <CatalogSearchPicker query={query} onQueryChange={setQuery} onSelect={setSelectedResult} />
       ) : (
         <>
-          <button
-            type="button"
-            className="inline-flex w-fit text-sm text-muted-foreground hover:text-foreground"
-            onClick={() => setSelectedResult(null)}
-          >
-            ← Back to search
-          </button>
+          <BackButton onClick={() => setSelectedResult(null)}>Back to search</BackButton>
 
           {isLoading ? (
-            <div className="space-y-4 rounded-lg border bg-background/60 p-4">
+            <div className="space-y-4 rounded-2xl bg-card p-4 ring-1 ring-border">
               <Skeleton className="h-48 w-48 rounded-md" />
               <Skeleton className="h-4 w-2/3" />
               <Skeleton className="h-4 w-1/2" />

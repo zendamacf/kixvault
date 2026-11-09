@@ -30,8 +30,8 @@ export function MarketValue({ price, gainLoss, condition, className }: MarketVal
         <p
           className={cn(
             'text-sm font-medium',
-            gainLoss > 0 && 'text-emerald-600 dark:text-emerald-400',
-            gainLoss < 0 && 'text-destructive',
+            gainLoss > 0 && 'text-gain',
+            gainLoss < 0 && 'text-loss',
             gainLoss === 0 && 'text-muted-foreground',
           )}
         >
@@ -77,8 +77,8 @@ export function CatalogMarketPricePreview({
     purchasePrice != null && !Number.isNaN(purchasePrice) ? matched.price - purchasePrice : null;
 
   return (
-    <div className="rounded-lg border border-dashed bg-background/60 p-4">
-      <p className="text-sm font-medium">Market preview</p>
+    <div className="rounded-2xl bg-card p-4 ring-1 ring-border">
+      <p className="font-heading font-semibold">Market preview</p>
       <MarketValue
         price={matched.price}
         gainLoss={gainLoss}

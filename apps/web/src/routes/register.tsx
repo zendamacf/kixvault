@@ -5,7 +5,6 @@ import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-ro
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api, parseApiError } from '@/lib/api';
@@ -66,56 +65,58 @@ function RegisterPage() {
   });
 
   return (
-    <div className="w-full max-w-md">
-      <Card className="w-full shadow-sm">
-        <CardHeader>
-          <CardTitle>Create your vault</CardTitle>
-          <CardDescription>Track every pair in one place.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="space-y-4"
-            onSubmit={handleSubmit((values) => {
-              setFormError(null);
-              registerMutation.mutate(values);
-            })}
-          >
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" autoComplete="email" {...register('email')} />
-              {errors.email ? (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              ) : null}
-            </div>
+    <div className="w-full max-w-sm space-y-8">
+      <div className="space-y-2">
+        <h1 className="font-heading text-4xl font-semibold tracking-tight">Create your vault</h1>
+        <p className="text-muted-foreground">Track every pair in one place.</p>
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                {...register('password')}
-              />
-              {errors.password ? (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              ) : null}
-            </div>
+      <form
+        className="space-y-5"
+        onSubmit={handleSubmit((values) => {
+          setFormError(null);
+          registerMutation.mutate(values);
+        })}
+      >
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="email" autoComplete="email" {...register('email')} />
+          {errors.email ? <p className="text-sm text-destructive">{errors.email.message}</p> : null}
+        </div>
 
-            {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            autoComplete="new-password"
+            {...register('password')}
+          />
+          {errors.password ? (
+            <p className="text-sm text-destructive">{errors.password.message}</p>
+          ) : null}
+        </div>
 
-            <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
-              {registerMutation.isPending ? 'Creating account...' : 'Create account'}
-            </Button>
-          </form>
-
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link to="/login" className="font-medium text-primary hover:underline">
-              Sign in
-            </Link>
+        {formError ? (
+          <p className="text-sm text-destructive" role="alert">
+            {formError}
           </p>
-        </CardContent>
-      </Card>
+        ) : null}
+
+        <Button type="submit" size="lg" className="w-full" disabled={registerMutation.isPending}>
+          {registerMutation.isPending ? 'Creating account...' : 'Create account'}
+        </Button>
+      </form>
+
+      <p className="text-sm text-muted-foreground">
+        Already have an account?{' '}
+        <Link
+          to="/login"
+          className="font-medium text-foreground underline underline-offset-4 hover:decoration-primary hover:decoration-2"
+        >
+          Sign in
+        </Link>
+      </p>
     </div>
   );
 }

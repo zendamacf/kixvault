@@ -55,7 +55,7 @@ export function MoveToCollectionForm({
 
   return (
     <form
-      className="grid gap-4 rounded-lg border border-border bg-card p-4"
+      className="grid gap-5 rounded-2xl bg-card p-5 ring-1 ring-border sm:p-6"
       onSubmit={handleSubmit(async (values) => {
         await onSubmit({
           size: values.size,
@@ -67,7 +67,7 @@ export function MoveToCollectionForm({
       })}
     >
       <div>
-        <h2 className="text-lg font-semibold">Move to collection</h2>
+        <h2 className="font-heading text-2xl font-semibold tracking-tight">Move to collection</h2>
         <p className="text-sm text-muted-foreground">
           Add this grail to your vault and remove it from your wishlist.
         </p>
@@ -77,7 +77,7 @@ export function MoveToCollectionForm({
         control={control as unknown as Control<CollectionFieldValues>}
         errors={errors as FieldErrors<CollectionFieldValues>}
       />
-      <Button type="submit" disabled={isSubmitting}>
+      <Button type="submit" size="lg" className="sm:w-fit" disabled={isSubmitting}>
         Move to collection
       </Button>
     </form>

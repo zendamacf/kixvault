@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import {
   formatGrailClearedMessage,
   formatWishlistPriority,
-  getWishlistPriorityBadgeClassName,
+  getWishlistPriorityDotClassName,
 } from './wishlist';
 
 describe('formatWishlistPriority', () => {
@@ -13,11 +13,11 @@ describe('formatWishlistPriority', () => {
   });
 });
 
-describe('getWishlistPriorityBadgeClassName', () => {
+describe('getWishlistPriorityDotClassName', () => {
   test('returns distinct classes per priority', () => {
-    expect(getWishlistPriorityBadgeClassName('low')).toContain('muted');
-    expect(getWishlistPriorityBadgeClassName('medium')).toContain('amber');
-    expect(getWishlistPriorityBadgeClassName('high')).toContain('destructive');
+    expect(getWishlistPriorityDotClassName('low')).toContain('muted-foreground');
+    expect(getWishlistPriorityDotClassName('medium')).toContain('bg-muted-foreground');
+    expect(getWishlistPriorityDotClassName('high')).toContain('bg-primary');
   });
 });
 

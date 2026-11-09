@@ -1,5 +1,5 @@
 import type { SneakerCondition, WishlistPriority } from '@kixvault/shared';
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import { api } from './api';
 
 export type Sneaker = {
@@ -104,6 +104,8 @@ export function sneakersQueryOptions(filters: {
 }) {
   return queryOptions({
     queryKey: ['sneakers', filters],
+    // Keep the current grid on screen while a new search, filter, or sort loads.
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       const response = await api.api.sneakers.$get({
         query: {

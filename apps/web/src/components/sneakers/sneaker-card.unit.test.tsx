@@ -54,9 +54,9 @@ describe('SneakerCard', () => {
   test('renders sneaker details', () => {
     render(<SneakerCard sneaker={sneaker} />);
 
-    expect(screen.getByText('Nike')).toBeTruthy();
-    expect(screen.getByText('Nike Air Max 1')).toBeTruthy();
-    expect(screen.getByText('Anniversary Red · Size 10')).toBeTruthy();
+    expect(screen.getByRole('heading').textContent).toBe('Nike Air Max 1');
+    expect(screen.getByText('Anniversary Red')).toBeTruthy();
+    expect(screen.getByText('Size 10')).toBeTruthy();
     expect(screen.getByText('Deadstock')).toBeTruthy();
     expect(screen.getByText('Paid $180')).toBeTruthy();
   });
@@ -79,6 +79,7 @@ describe('SneakerCard', () => {
   test('prefers nickname over colorway in the subtitle', () => {
     render(<SneakerCard sneaker={{ ...sneaker, nickname: 'Patta' }} />);
 
-    expect(screen.getByText('"Patta" · Size 10')).toBeTruthy();
+    expect(screen.getByText('"Patta"')).toBeTruthy();
+    expect(screen.queryByText('Anniversary Red')).toBeNull();
   });
 });
