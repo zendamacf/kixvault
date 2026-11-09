@@ -100,6 +100,25 @@ export const auditEvents = pgTable(
   (table) => [index('audit_events_user_id_created_at_idx').on(table.userId, table.createdAt)],
 );
 
+export const sneakerWears = pgTable(
+  'sneaker_wears',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    sneakerId: uuid('sneaker_id')
+      .notNull()
+      .references(() => sneakers.id, { onDelete: 'cascade' }),
+    wornOn: date('worn_on', { mode: 'string' }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('sneaker_wears_sneaker_id_worn_on_unique').on(table.sneakerId, table.wornOn),
+    index('sneaker_wears_user_id_worn_on_idx').on(table.userId, table.wornOn),
+  ],
+);
+
 export const wishlistPriorities = ['low', 'medium', 'high'] as const;
 export type WishlistPriority = (typeof wishlistPriorities)[number];
 
@@ -139,6 +158,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   sneakers: many(sneakers),
   auditEvents: many(auditEvents),
   wishlistItems: many(wishlistItems),
+  sneakerWears: many(sneakerWears),
 }));
 
 export const wishlistItemsRelations = relations(wishlistItems, ({ one }) => ({
@@ -224,6 +244,18 @@ export const sneakersRelations = relations(sneakers, ({ one, many }) => ({
     references: [sneakerImages.id],
   }),
   gallery360Images: many(sneakerGallery360Images),
+  wears: many(sneakerWears),
+}));
+
+export const sneakerWearsRelations = relations(sneakerWears, ({ one }) => ({
+  user: one(users, {
+    fields: [sneakerWears.userId],
+    references: [users.id],
+  }),
+  sneaker: one(sneakers, {
+    fields: [sneakerWears.sneakerId],
+    references: [sneakers.id],
+  }),
 }));
 
 export const sneakerImagesRelations = relations(sneakerImages, ({ one }) => ({
