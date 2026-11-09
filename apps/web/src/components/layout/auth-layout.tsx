@@ -1,7 +1,6 @@
 import { APP_NAME } from '@kixvault/shared';
 import type { ReactNode } from 'react';
 import { BrandMark } from '@/components/layout/brand-mark';
-import { ShoeSilhouette } from '@/components/layout/shoe-silhouette';
 
 type AuthLayoutProps = {
   children: ReactNode;
@@ -24,9 +23,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <p className="text-lg text-chrome-muted">Built for sneaker collectors.</p>
         </div>
 
-        <ShoeSilhouette
-          detail
-          className="pointer-events-none absolute -right-4 -bottom-6 hidden w-[30rem] text-primary lg:block"
+        {/* The logo shoe without its tile, so it sits straight on the panel. */}
+        <BrandMark
+          bare
+          className="pointer-events-none absolute -right-4 -bottom-6 hidden w-[30rem] lg:block"
         />
       </aside>
 

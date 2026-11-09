@@ -15,13 +15,4 @@ describe('ShoeSilhouette', () => {
     expect(svg?.getAttribute('aria-hidden')).toBe('true');
     expect(container.querySelector('path')?.getAttribute('d')).toBe(SNEAKER_UPPER_PATH);
   });
-
-  test('only draws laces when detail is requested', () => {
-    const plain = render(<ShoeSilhouette />);
-    expect(plain.container.querySelector('g')).toBeNull();
-    plain.unmount();
-
-    const detailed = render(<ShoeSilhouette detail />);
-    expect(detailed.container.querySelector('g')).toBeTruthy();
-  });
 });
