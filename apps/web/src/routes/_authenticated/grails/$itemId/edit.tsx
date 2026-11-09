@@ -90,7 +90,7 @@ function EditGrailPage() {
   if (error || !item) {
     return (
       <div className="space-y-2">
-        <BackLink to="/grails">← Back to grails</BackLink>
+        <BackLink to="/grails">Back to grails</BackLink>
         <p className="text-sm text-destructive" role="alert">
           Grail not found.
         </p>
@@ -101,7 +101,7 @@ function EditGrailPage() {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <BackLink to="/grails">← Back to grails</BackLink>
+        <BackLink to="/grails">Back to grails</BackLink>
         <h1 className="text-2xl font-semibold tracking-tight">
           {item.brand} {item.model}
         </h1>

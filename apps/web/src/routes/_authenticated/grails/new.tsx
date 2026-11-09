@@ -72,7 +72,7 @@ function NewGrailPage() {
 
   return (
     <div className="space-y-4">
-      <BackLink to="/grails">← Back to grails</BackLink>
+      <BackLink to="/grails">Back to grails</BackLink>
 
       <Card>
         <CardHeader>

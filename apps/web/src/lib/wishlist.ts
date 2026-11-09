@@ -17,14 +17,14 @@ export function formatWishlistPriority(priority: WishlistPriority): string {
   }
 }
 
-export function getWishlistPriorityBadgeClassName(priority: WishlistPriority): string {
+export function getWishlistPriorityDotClassName(priority: WishlistPriority): string {
   switch (priority) {
     case 'low':
-      return 'border-border bg-muted text-muted-foreground';
+      return 'border border-muted-foreground bg-transparent';
     case 'high':
-      return 'border-destructive/30 bg-destructive/10 text-destructive dark:bg-destructive/20';
+      return 'bg-primary';
     default:
-      return 'border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-300';
+      return 'bg-muted-foreground';
   }
 }
 

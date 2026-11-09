@@ -41,7 +41,7 @@ describe('WishlistCard', () => {
       />,
     );
 
-    expect(screen.getByText('Nike Dunk Low')).toBeTruthy();
+    expect(screen.getByRole('heading').textContent).toBe('Nike Dunk Low');
     expect(screen.getByText('High priority')).toBeTruthy();
     expect(screen.getByText('Need these')).toBeTruthy();
   });

@@ -61,7 +61,7 @@ function EditSneakerPage() {
   return (
     <div className="space-y-4">
       <BackLink to="/sneakers/$sneakerId" params={{ sneakerId }}>
-        ← Back to details
+        Back to details
       </BackLink>
 
       <Card>

@@ -89,7 +89,7 @@ function NewSneakerPage() {
 
   return (
     <div className="space-y-4">
-      <BackLink to="/">← Back to collection</BackLink>
+      <BackLink to="/">Back to collection</BackLink>
 
       <Card>
         <CardHeader className="space-y-4">
