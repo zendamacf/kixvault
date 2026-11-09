@@ -4,6 +4,7 @@ export const auditActions = [
   'auth.login',
   'auth.logout',
   'auth.register',
+  'auth.email_verified',
   'grail.added',
   'sneaker.created',
   'sneaker.created_from_grail',

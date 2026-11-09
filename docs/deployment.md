@@ -46,6 +46,9 @@ services:
       KICKSDB_API_KEY: ${KICKSDB_API_KEY}
       REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
       SIGNUPS_ENABLED: ${SIGNUPS_ENABLED:-false}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-KixVault <onboarding@resend.dev>}
+      APP_URL: ${APP_URL:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
       PORT: 3000
@@ -146,7 +149,26 @@ IMAGE_MAX_WIDTH=1024
 
 # Feature flags
 SIGNUPS_ENABLED=true
+
+# Email (optional, see "Email" below)
+RESEND_API_KEY=
+EMAIL_FROM=KixVault <noreply@yourdomain.com>
+APP_URL=https://kixvault.yourdomain.com
 ```
+
+## Email
+
+KixVault sends email through [Resend](https://resend.com). Set these on the `api` service:
+
+| Variable | Purpose |
+|----------|---------|
+| `RESEND_API_KEY` | Resend API key. Leave empty to turn email off. |
+| `EMAIL_FROM` | Sender, for example `KixVault <noreply@yourdomain.com>`. The domain must be verified in Resend. |
+| `APP_URL` | Public URL of the web app, without a trailing slash. Used for links in emails. |
+
+When `RESEND_API_KEY` is set, new accounts must confirm their email address before they can sign in. The link works once and expires after 24 hours. Existing accounts count as confirmed.
+
+When `RESEND_API_KEY` is empty, emails are written to the API log instead of being sent, and new accounts can sign in at once. This is the default for local development.
 
 ## Umami analytics (optional)
 

@@ -18,3 +18,23 @@ export async function parseApiError(response: { json(): Promise<unknown> }, fall
     return fallback;
   }
 }
+
+/** API failure that keeps the machine-readable `code` next to the message. */
+export class ApiError extends Error {
+  readonly code?: string;
+
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.code = code;
+  }
+}
+
+export async function toApiError(response: { json(): Promise<unknown> }, fallback: string) {
+  try {
+    const data = (await response.json()) as { error?: string; code?: string };
+    return new ApiError(data.error ?? fallback, data.code);
+  } catch {
+    return new ApiError(fallback);
+  }
+}

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { loginSchema, loginSearchSchema } from '@kixvault/shared';
+import { EMAIL_NOT_VERIFIED_CODE, loginSchema, loginSearchSchema } from '@kixvault/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { api, parseApiError } from '@/lib/api';
+import { ApiError, api, toApiError } from '@/lib/api';
 import { authConfigQueryOptions, sessionQueryOptions } from '@/lib/queries';
 import { trackUmamiEvent } from '@/lib/umami';
 import { UmamiEvents } from '@/lib/umami-events';
@@ -46,7 +46,7 @@ function LoginPage() {
       const response = await api.api.auth.login.$post({ json: values });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to log in'));
+        throw await toApiError(response, 'Failed to log in');
       }
 
       return response.json();
@@ -56,8 +56,14 @@ function LoginPage() {
       await queryClient.invalidateQueries({ queryKey: ['auth'] });
       await navigate({ to: redirectTo || '/' });
     },
-    onError: (error) => {
+    onError: async (error, values) => {
       trackUmamiEvent(UmamiEvents.authLoginFailed);
+
+      if (error instanceof ApiError && error.code === EMAIL_NOT_VERIFIED_CODE) {
+        await navigate({ to: '/verify-email-pending', search: { email: values.email.trim() } });
+        return;
+      }
+
       setFormError(error.message);
     },
   });
