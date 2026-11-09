@@ -24,7 +24,7 @@ Grail tiles, priority pill, and the grail add/edit and move-to-collection forms.
 
 ## [theme](./theme)
 
-Theme switching for light, dark, and system preferences.
+Sneaker colourway themes: the registry in `themes.ts` and the header picker.
 
 ## [ui](./ui)
 
