@@ -1,10 +1,11 @@
 import { type SneakerCondition, sneakerConditions } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
+import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { CollectionSummary } from '@/components/collection/collection-summary';
 import { EmptyState } from '@/components/collection/empty-state';
 import { SneakerGridSkeleton } from '@/components/collection/sneaker-grid-skeleton';
-import { StatsCards } from '@/components/collection/stats-cards';
 import { SneakerCard } from '@/components/sneakers/sneaker-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,9 +19,22 @@ import {
 } from '@/components/ui/select';
 import { useDebouncedValue } from '@/lib/hooks';
 import { type Sneaker, sneakersQueryOptions, statsQueryOptions } from '@/lib/queries';
-import { formatCondition } from '@/lib/utils';
+import { cn, formatCondition } from '@/lib/utils';
 
 const DEBOUNCE_DELAY = 300;
+
+const DEFAULT_SORT = 'created_at:desc';
+
+const SORT_OPTIONS = [
+  { value: 'created_at:desc', label: 'Recently added' },
+  { value: 'created_at:asc', label: 'Oldest added' },
+  { value: 'purchase_date:desc', label: 'Newest purchase' },
+  { value: 'purchase_date:asc', label: 'Oldest purchase' },
+  { value: 'purchase_price:desc', label: 'Price paid, high to low' },
+  { value: 'purchase_price:asc', label: 'Price paid, low to high' },
+  { value: 'brand:asc', label: 'Brand, A to Z' },
+  { value: 'brand:desc', label: 'Brand, Z to A' },
+] as const;
 
 type SneakerConditionFilter = SneakerCondition | '';
 
@@ -31,29 +45,25 @@ export const Route = createFileRoute('/_authenticated/')({
 function CollectionPage() {
   const [search, setSearch] = useState('');
   const [condition, setCondition] = useState<SneakerConditionFilter>('');
-  const [sort, setSort] = useState('created_at');
-  const [order, setOrder] = useState('desc');
+  const [sortKey, setSortKey] = useState<string>(DEFAULT_SORT);
 
   const debouncedSearch = useDebouncedValue(search.trim(), DEBOUNCE_DELAY);
 
-  const filters = useMemo(
-    () => ({
+  const filters = useMemo(() => {
+    const [sort, order] = sortKey.split(':');
+
+    return {
       search: debouncedSearch || undefined,
       condition: condition || undefined,
       sort,
       order,
-    }),
-    [debouncedSearch, condition, sort, order],
-  );
+    };
+  }, [debouncedSearch, condition, sortKey]);
 
   const hasActiveFilters = Boolean(debouncedSearch || condition);
+  const hasCustomView = hasActiveFilters || sortKey !== DEFAULT_SORT;
 
-  const {
-    data: sneakersData,
-    isLoading,
-    isFetching,
-    error,
-  } = useQuery(sneakersQueryOptions(filters));
+  const { data: sneakersData, isLoading, error } = useQuery(sneakersQueryOptions(filters));
   const { data: statsData, isLoading: statsLoading } = useQuery(statsQueryOptions);
 
   const sneakers = (sneakersData?.sneakers ?? []) as Sneaker[];
@@ -62,13 +72,19 @@ function CollectionPage() {
   function clearFilters() {
     setSearch('');
     setCondition('');
-    setSort('created_at');
-    setOrder('desc');
+    setSortKey(DEFAULT_SORT);
   }
 
+  const conditionChips: { value: SneakerConditionFilter; label: string }[] = [
+    { value: '', label: 'All' },
+    ...sneakerConditions.map((value) => ({ value, label: formatCondition(value) })),
+  ];
+
   return (
-    <div className="space-y-8">
-      <StatsCards
+    <div className="space-y-10">
+      <h1 className="sr-only">Your collection</h1>
+
+      <CollectionSummary
         count={statsData?.stats.count}
         totalSpend={statsData?.stats.totalSpend}
         avgSpend={statsData?.stats.avgSpend}
@@ -77,97 +93,77 @@ function CollectionPage() {
         isLoading={statsLoading}
       />
 
-      <section className="space-y-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Your collection</h1>
-            <p className="text-sm text-muted-foreground">
-              Search, filter, and manage every pair you own.
-            </p>
+      <section className="space-y-6" aria-label="Pairs">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="relative lg:w-80">
+            <Label htmlFor="search-filter" className="sr-only">
+              Search your collection
+            </Label>
+            <Search
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <Input
+              id="search-filter"
+              type="search"
+              className="pl-9"
+              placeholder="Search brand, model, colorway, SKU"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
           </div>
-          <Link
-            to="/sneakers/new"
-            className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto"
-          >
-            Add pair
-          </Link>
-        </div>
 
-        <div className="rounded-lg border border-border bg-card p-4">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm font-medium">Filters</p>
-            {hasActiveFilters ? (
-              <Button type="button" variant="ghost" size="sm" onClick={clearFilters}>
-                Clear filters
+          <fieldset className="-mx-4 flex min-w-0 gap-1.5 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0 lg:pb-0">
+            <legend className="sr-only">Condition</legend>
+            {conditionChips.map((chip) => {
+              const active = condition === chip.value;
+
+              return (
+                <button
+                  key={chip.value || 'all'}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setCondition(chip.value)}
+                  className={cn(
+                    'h-9 shrink-0 rounded-full border px-3.5 text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+                    active
+                      ? 'border-foreground bg-foreground text-background'
+                      : 'border-input bg-tile text-foreground hover:bg-muted',
+                  )}
+                >
+                  {chip.label}
+                </button>
+              );
+            })}
+          </fieldset>
+
+          <div className="flex items-center gap-2 lg:ml-auto">
+            {hasCustomView ? (
+              <Button type="button" variant="ghost" onClick={clearFilters}>
+                Reset
               </Button>
             ) : null}
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="space-y-2">
-              <Label htmlFor="search-filter">Search</Label>
-              <Input
-                id="search-filter"
-                placeholder="Search brand, model, colorway, SKU, or notes"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="condition-filter">Condition</Label>
-              <Select
-                value={condition}
-                onValueChange={(value: SneakerConditionFilter) => setCondition(value)}
-              >
-                <SelectTrigger id="condition-filter" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All conditions</SelectItem>
-                  {sneakerConditions.map((value) => (
-                    <SelectItem key={value} value={value}>
-                      {formatCondition(value)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sort-filter">Sort by</Label>
-              <Select value={sort} onValueChange={setSort}>
-                <SelectTrigger id="sort-filter" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="created_at">Date added</SelectItem>
-                  <SelectItem value="purchase_date">Purchase date</SelectItem>
-                  <SelectItem value="purchase_price">Purchase price</SelectItem>
-                  <SelectItem value="brand">Brand</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="order-filter">Order</Label>
-              <Select value={order} onValueChange={setOrder}>
-                <SelectTrigger id="order-filter" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="desc">Descending</SelectItem>
-                  <SelectItem value="asc">Ascending</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Label htmlFor="sort-filter" className="sr-only">
+              Sort pairs
+            </Label>
+            <Select value={sortKey} onValueChange={setSortKey}>
+              <SelectTrigger id="sort-filter" className="w-full lg:w-56">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SORT_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>
-            {isLoading || isFetching
-              ? 'Updating results...'
-              : `${sneakers.length} ${sneakers.length === 1 ? 'pair' : 'pairs'} shown`}
-          </p>
-        </div>
+        <p className="min-h-5 text-sm text-muted-foreground" aria-live="polite">
+          {isLoading ? '' : `${sneakers.length} ${sneakers.length === 1 ? 'pair' : 'pairs'}`}
+        </p>
 
         {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
 
@@ -185,13 +181,13 @@ function CollectionPage() {
         {!isLoading && sneakers.length === 0 && totalCount > 0 ? (
           <EmptyState
             title="No matches found"
-            description="Try a different brand or condition, or clear your filters."
+            description="Try a different brand or condition, or reset the filters."
             onClearFilters={clearFilters}
           />
         ) : null}
 
         {!isLoading && sneakers.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
             {sneakers.map((sneaker) => (
               <SneakerCard key={sneaker.id} sneaker={sneaker} />
             ))}

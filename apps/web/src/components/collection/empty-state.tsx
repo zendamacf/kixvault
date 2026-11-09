@@ -36,7 +36,7 @@ export function EmptyState({
           ) : null}
           {onClearFilters ? (
             <Button type="button" variant="outline" onClick={onClearFilters}>
-              Clear filters
+              Reset filters
             </Button>
           ) : null}
         </div>

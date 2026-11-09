@@ -1,68 +1,73 @@
 import { Link } from '@tanstack/react-router';
-import { SneakerBrandBadge } from '@/components/sneakers/sneaker-brand-badge';
-import { SneakerConditionBadge } from '@/components/sneakers/sneaker-condition-badge';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Sneaker } from '@/lib/queries';
-import { formatCurrency, formatDate, formatGainLoss } from '@/lib/utils';
+import { cn, formatCondition, formatCurrency, formatGainLoss } from '@/lib/utils';
 
 type SneakerCardProps = {
   sneaker: Sneaker;
 };
 
-/** Grid card linking to a sneaker's detail page. */
+/** Shoe tile with a caption underneath, linking to the sneaker's detail page. */
 export function SneakerCard({ sneaker }: SneakerCardProps) {
   const title = `${sneaker.brand} ${sneaker.model}`;
   const subtitle = sneaker.nickname ? `"${sneaker.nickname}"` : sneaker.colorway || 'No colorway';
+  const hasMarketPrice = sneaker.currentMarketPrice != null;
 
   return (
-    <Link to="/sneakers/$sneakerId" params={{ sneakerId: sneaker.id }} className="block h-full">
-      <Card className="h-full overflow-hidden transition-colors hover:border-primary/40 hover:bg-accent/30">
+    <Link
+      to="/sneakers/$sneakerId"
+      params={{ sneakerId: sneaker.id }}
+      className="group block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+    >
+      <div className="relative rounded-2xl bg-tile ring-1 ring-border transition-shadow group-hover:ring-2 group-hover:ring-foreground/25">
         <SneakerThumbnail
           imageUrl={sneaker.primaryImage?.url ?? null}
           alt={title}
-          className="aspect-square w-full rounded-none p-2"
+          className="aspect-[5/4] w-full rounded-none p-5"
         />
-        <CardHeader className="pt-2 pb-2 space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <SneakerBrandBadge brand={sneaker.brand} />
-            <SneakerConditionBadge condition={sneaker.condition} />
-          </div>
-          <div className="min-w-0 space-y-1">
-            <CardTitle className="truncate text-base">{title}</CardTitle>
-            <p className="truncate text-sm text-muted-foreground">
-              {subtitle} · Size {sneaker.size}
-            </p>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-1 pt-0 text-sm text-muted-foreground">
-          <div className="flex items-center justify-between gap-2">
-            <p>Paid {formatCurrency(sneaker.purchasePrice)}</p>
-            {sneaker.purchaseDate ? <p>{formatDate(sneaker.purchaseDate)}</p> : null}
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <p>
-              Value{' '}
-              <span className="font-medium text-foreground">
+        <span className="absolute top-3 left-3 rounded-full bg-background/85 px-2.5 py-1 text-xs font-medium text-foreground backdrop-blur-sm">
+          {formatCondition(sneaker.condition)}
+        </span>
+      </div>
+
+      <div className="mt-3 space-y-1 px-1">
+        <h2 className="line-clamp-2 font-heading text-base leading-snug font-semibold">
+          <span className="font-normal text-muted-foreground">{sneaker.brand}</span> {sneaker.model}
+        </h2>
+        <div className="flex items-baseline justify-between gap-3 text-sm text-muted-foreground">
+          <p className="min-w-0 truncate">{subtitle}</p>
+          <p className="shrink-0 whitespace-nowrap">Size {sneaker.size}</p>
+        </div>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 pt-1.5">
+          {hasMarketPrice ? (
+            <p className="flex items-baseline gap-2">
+              <span className="font-display text-xl leading-none font-semibold tracking-tight">
                 {formatCurrency(sneaker.currentMarketPrice)}
               </span>
+              {sneaker.gainLoss != null ? (
+                <span
+                  className={cn(
+                    'text-sm font-medium',
+                    sneaker.gainLoss > 0 && 'text-gain',
+                    sneaker.gainLoss < 0 && 'text-loss',
+                    sneaker.gainLoss === 0 && 'text-muted-foreground',
+                  )}
+                >
+                  {formatGainLoss(sneaker.gainLoss)}
+                </span>
+              ) : null}
             </p>
-            {sneaker.gainLoss != null ? (
-              <p
-                className={
-                  sneaker.gainLoss > 0
-                    ? 'font-medium text-emerald-600 dark:text-emerald-400'
-                    : sneaker.gainLoss < 0
-                      ? 'font-medium text-destructive'
-                      : undefined
-                }
-              >
-                {formatGainLoss(sneaker.gainLoss)}
-              </p>
-            ) : null}
-          </div>
-        </CardContent>
-      </Card>
+          ) : null}
+          <p
+            className={cn(
+              'text-sm whitespace-nowrap text-muted-foreground',
+              !hasMarketPrice && 'font-medium',
+            )}
+          >
+            Paid {formatCurrency(sneaker.purchasePrice)}
+          </p>
+        </div>
+      </div>
     </Link>
   );
 }

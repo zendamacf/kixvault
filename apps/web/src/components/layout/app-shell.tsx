@@ -43,14 +43,16 @@ export function AppShell() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 bg-chrome text-chrome-foreground">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
-          <div className="flex min-w-0 items-center gap-4 sm:gap-8">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-8">
             <Link
               to="/"
               className="group flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label={`${APP_NAME} home`}
             >
               <BrandMark />
-              <span className="font-display text-xl font-extrabold tracking-tight">{APP_NAME}</span>
+              <span className="hidden font-display text-xl font-extrabold tracking-tight sm:inline">
+                {APP_NAME}
+              </span>
             </Link>
             {user ? (
               <nav className="flex items-center gap-1" aria-label="Main">

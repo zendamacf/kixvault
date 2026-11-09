@@ -3,17 +3,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 /** Loading skeleton for the collection sneaker grid. */
 export function SneakerGridSkeleton() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {['a', 'b', 'c', 'd', 'e', 'f'].map((id) => (
-        <div key={id} className="space-y-3 rounded-lg border border-border bg-card p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-            <Skeleton className="h-6 w-20 rounded-full" />
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+      {['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((id) => (
+        <div key={id} className="space-y-3">
+          <Skeleton className="aspect-[5/4] w-full rounded-2xl" />
+          <div className="space-y-2 px-1">
+            <Skeleton className="h-5 w-4/5" />
+            <Skeleton className="h-4 w-3/5" />
+            <Skeleton className="h-6 w-2/5" />
           </div>
-          <Skeleton className="h-4 w-24" />
         </div>
       ))}
     </div>
