@@ -9,6 +9,8 @@ export const auditActions = [
   'sneaker.created_from_grail',
   'sneaker.updated',
   'sneaker.deleted',
+  'sneaker.worn',
+  'sneaker.wear_removed',
 ] as const;
 
 export type AuditAction = (typeof auditActions)[number];
