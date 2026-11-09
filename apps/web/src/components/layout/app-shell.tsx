@@ -2,6 +2,7 @@ import { APP_NAME } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
+import { AuthLayout } from '@/components/layout/auth-layout';
 import { BrandMark } from '@/components/layout/brand-mark';
 import { UserMenu } from '@/components/layout/user-menu';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
@@ -23,11 +24,9 @@ export function AppShell() {
 
   if (isAuthRoute) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-accent/40">
-        <div className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-8">
-          <Outlet />
-        </div>
-      </div>
+      <AuthLayout>
+        <Outlet />
+      </AuthLayout>
     );
   }
 
