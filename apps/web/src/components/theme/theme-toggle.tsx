@@ -27,7 +27,7 @@ export function ThemeToggle() {
           <Palette className="size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="min-w-56">
         <DropdownMenuRadioGroup value={active} onValueChange={setTheme}>
           {THEMES.map((item) => (
             <DropdownMenuRadioItem key={item.id} value={item.id}>
