@@ -27,20 +27,22 @@ export function ThemeToggle() {
           <Palette className="size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-56">
-        <DropdownMenuRadioGroup value={active} onValueChange={setTheme}>
+      <DropdownMenuContent align="end" className="min-w-48">
+        <DropdownMenuRadioGroup
+          value={active}
+          onValueChange={setTheme}
+          className="flex flex-col gap-1.5"
+        >
           {THEMES.map((item) => (
-            <DropdownMenuRadioItem key={item.id} value={item.id}>
-              <span aria-hidden="true" className="flex gap-0.5">
-                {item.swatches.map((color) => (
-                  <span
-                    key={color}
-                    className="size-3 rounded-full border border-border"
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
+            <DropdownMenuRadioItem key={item.id} value={item.id} className="py-2">
+              <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+                {item.label}
+                <span aria-hidden="true" className="flex h-1.5 overflow-hidden rounded-full">
+                  {item.swatches.map((color) => (
+                    <span key={color} className="flex-1" style={{ backgroundColor: color }} />
+                  ))}
+                </span>
               </span>
-              {item.label}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

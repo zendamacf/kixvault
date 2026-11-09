@@ -6,8 +6,8 @@ export type ThemeDefinition = {
   label: string;
   /** Whether the theme has a dark stage. Drives the `dark:` variant and toast styling. */
   mode: ThemeMode;
-  /** Three preview colours for the picker: stage, chrome, accent. */
-  swatches: [string, string, string];
+  /** Preview colours for the picker, drawn as equal bands. Two for two-tone colourways, otherwise three (stage, chrome, accent). */
+  swatches: [string, string] | [string, string, string];
 };
 
 /** Sneaker colourway themes. Add a matching `[data-theme]` block in `index.css` for each. */
@@ -34,13 +34,13 @@ export const THEMES: readonly ThemeDefinition[] = [
     id: 'panda',
     label: 'Panda',
     mode: 'light',
-    swatches: ['hsl(0 0% 96%)', 'hsl(0 0% 6%)', 'hsl(0 0% 12%)'],
+    swatches: ['hsl(0 0% 96%)', 'hsl(0 0% 6%)'],
   },
   {
     id: 'bred',
     label: 'Bred',
     mode: 'dark',
-    swatches: ['hsl(0 0% 6%)', 'hsl(0 0% 3%)', 'hsl(354 85% 50%)'],
+    swatches: ['hsl(0 0% 6%)', 'hsl(354 85% 50%)'],
   },
   {
     id: 'royal',
