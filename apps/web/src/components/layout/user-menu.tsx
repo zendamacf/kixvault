@@ -56,7 +56,7 @@ export function UserMenu({ user }: UserMenuProps) {
       <DropdownMenuTrigger
         type="button"
         className={cn(
-          'inline-flex size-9 items-center justify-center rounded-full border border-border bg-accent text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          'inline-flex size-9 items-center justify-center rounded-full border border-chrome-foreground/25 bg-chrome-foreground/10 font-heading text-sm font-bold text-chrome-foreground transition-colors hover:bg-chrome-foreground/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         )}
         aria-label="Account menu"
       >
