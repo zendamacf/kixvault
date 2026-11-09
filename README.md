@@ -35,6 +35,8 @@ The web app uses TanStack Router, TanStack Query, Tailwind CSS, and a typed Hono
 
 Protected routes redirect to `/login` when no session cookie is present.
 
+The **Log wear** button in the header opens a search box. Pick a pair to log a wear for today. The **Wears** page shows a calendar of worn pairs.
+
 The dashboard opens with a one-sentence summary of what the collection cost and what it is worth today (pairs, spend, market value, gain or loss, average per pair). Below it are debounced search, condition chips, a single sort menu, and a grid of shoe tiles, with loading skeletons and distinct empty states for an empty vault vs. no filter matches.
 
 ## API
@@ -94,3 +96,4 @@ packages/
 | `users` | Account credentials (Lucia auth) |
 | `sessions` | Active login sessions |
 | `sneakers` | Collection entries per user |
+| `sneaker_wears` | One row for each day a pair was worn |

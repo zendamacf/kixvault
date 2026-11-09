@@ -60,6 +60,7 @@ describe.skipIf(!databaseUrl)('migrations', () => {
       'sessions',
       'sneaker_gallery_360_images',
       'sneaker_images',
+      'sneaker_wears',
       'sneakers',
       'users',
       'wishlist_items',

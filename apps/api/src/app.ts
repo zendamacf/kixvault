@@ -10,6 +10,7 @@ import { catalogRoutes } from './routes/catalog';
 import { imageRoutes } from './routes/images';
 import { sneakerRoutes } from './routes/sneakers';
 import { statsRoutes } from './routes/stats';
+import { wearRoutes } from './routes/wears';
 import { wishlistRoutes } from './routes/wishlist';
 import type { ApiEnv } from './types';
 
@@ -42,6 +43,7 @@ export const app = withSentry
   .route('/api/images', imageRoutes)
   .route('/api/sneakers', sneakerRoutes)
   .route('/api/stats', statsRoutes)
+  .route('/api/wears', wearRoutes)
   .route('/api/wishlist', wishlistRoutes);
 
 export type AppType = typeof app;

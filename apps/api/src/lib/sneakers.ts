@@ -1,6 +1,6 @@
 import { sneakers as sneakersTable } from '@kixvault/db';
 import type { CatalogSource, UpdateSneakerInput } from '@kixvault/shared';
-import { buildCatalogUrl } from '@kixvault/shared';
+import { buildCatalogUrl, suggestCondition } from '@kixvault/shared';
 import { or, type SQL, sql } from 'drizzle-orm';
 import {
   computeGainLoss,
@@ -19,6 +19,7 @@ import {
   hasPrimaryImageChanged,
   type SneakerImageRow,
 } from './sneaker-images';
+import { getWearStatsForSneakerIds, type WearStats } from './wears';
 
 type SneakerRow = typeof sneakersTable.$inferSelect;
 
@@ -172,8 +173,10 @@ export function formatSneaker(
     marketPrice?: MarketPriceRecord | null;
     primaryImage?: SneakerImageRow | null;
     gallery360Images?: SneakerGallery360ImageRow[];
+    wearStats?: WearStats;
   } = {},
 ) {
+  const wearCount = options.wearStats?.wearCount ?? 0;
   const marketPrice = options.marketPrice;
   const formattedPrimaryImage = options.primaryImage
     ? formatPrimaryImage(options.primaryImage)
@@ -211,6 +214,9 @@ export function formatSneaker(
     currentMarketPrice,
     pricedAt,
     gainLoss,
+    wearCount,
+    lastWornOn: options.wearStats?.lastWornOn ?? null,
+    suggestedCondition: suggestCondition(row.condition, wearCount),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -218,10 +224,16 @@ export function formatSneaker(
 
 export async function formatSneakersWithPricing(rows: SneakerRow[]) {
   const sneakerIds = rows.map((row) => row.id);
-  const [marketPrices, primaryImagesBySneakerId, gallery360ImagesBySneakerId] = await Promise.all([
+  const [
+    marketPrices,
+    primaryImagesBySneakerId,
+    gallery360ImagesBySneakerId,
+    wearStatsBySneakerId,
+  ] = await Promise.all([
     getMarketPricesForSneakers(rows),
     getPrimaryImagesForSneakerIds(sneakerIds),
     getGallery360ImagesForSneakerIds(sneakerIds),
+    getWearStatsForSneakerIds(sneakerIds),
   ]);
 
   return rows.map((row) =>
@@ -229,6 +241,7 @@ export async function formatSneakersWithPricing(rows: SneakerRow[]) {
       marketPrice: getMarketPriceForSneaker(row, marketPrices),
       primaryImage: primaryImagesBySneakerId.get(row.id) ?? null,
       gallery360Images: gallery360ImagesBySneakerId.get(row.id) ?? [],
+      wearStats: wearStatsBySneakerId.get(row.id),
     }),
   );
 }

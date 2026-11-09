@@ -1,13 +1,16 @@
 import { APP_NAME } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link, Outlet, useRouterState } from '@tanstack/react-router';
-import { Plus } from 'lucide-react';
+import { Footprints, Plus } from 'lucide-react';
+import { useState } from 'react';
 import { AppFooter } from '@/components/layout/app-footer';
 import { AuthLayout } from '@/components/layout/auth-layout';
 import { BrandMark } from '@/components/layout/brand-mark';
+import { MobileMenu } from '@/components/layout/mobile-menu';
 import { UserMenu } from '@/components/layout/user-menu';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { QuickLogDialog } from '@/components/wears/quick-log-dialog';
 import { sessionQueryOptions } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
@@ -16,11 +19,13 @@ export function AppShell() {
   const routerState = useRouterState();
   const { data } = useQuery(sessionQueryOptions);
   const user = data?.user ?? null;
+  const [quickLogOpen, setQuickLogOpen] = useState(false);
 
   const pathname = routerState.location.pathname;
 
   const isAuthRoute = pathname === '/login' || pathname === '/register';
   const isGrailsRoute = pathname.startsWith('/grails');
+  const isWearsRoute = pathname.startsWith('/wears');
   const isCollectionRoute = pathname === '/' || pathname.startsWith('/sneakers');
 
   if (isAuthRoute) {
@@ -49,7 +54,8 @@ export function AppShell() {
       </a>
       <header className="sticky top-0 z-10 bg-chrome text-chrome-foreground">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
-          <div className="flex min-w-0 items-center gap-3 sm:gap-8">
+          <div className="flex min-w-0 items-center gap-1 sm:gap-3 md:gap-8">
+            {user ? <MobileMenu user={user} pathname={pathname} /> : null}
             <Link
               to="/"
               className="group flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -61,21 +67,35 @@ export function AppShell() {
               </span>
             </Link>
             {user ? (
-              <nav className="flex items-center gap-1" aria-label="Main">
+              <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
                 <Link to="/" className={navLinkClass(isCollectionRoute)}>
                   Collection
                 </Link>
                 <Link to="/grails" className={navLinkClass(isGrailsRoute)}>
                   Grails
                 </Link>
+                <Link to="/wears" className={navLinkClass(isWearsRoute)}>
+                  Wears
+                </Link>
               </nav>
             ) : null}
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <ThemeToggle />
+            <div className="hidden md:block">
+              <ThemeToggle />
+            </div>
             {user ? (
               <>
+                <Button
+                  variant="outline"
+                  className="border-chrome-foreground/25 bg-transparent text-chrome-foreground hover:bg-chrome-foreground/12 hover:text-chrome-foreground dark:bg-transparent"
+                  aria-label="Log wear"
+                  onClick={() => setQuickLogOpen(true)}
+                >
+                  <Footprints className="size-4" aria-hidden />
+                  <span className="hidden sm:inline">Log wear</span>
+                </Button>
                 <Link
                   to="/sneakers/new"
                   className={buttonVariants({ size: 'default' })}
@@ -84,7 +104,9 @@ export function AppShell() {
                   <Plus className="size-4" aria-hidden />
                   <span className="hidden sm:inline">Add pair</span>
                 </Link>
-                <UserMenu user={user} />
+                <div className="hidden md:block">
+                  <UserMenu user={user} />
+                </div>
               </>
             ) : null}
           </div>
@@ -100,6 +122,7 @@ export function AppShell() {
       </main>
 
       <AppFooter />
+      {user ? <QuickLogDialog open={quickLogOpen} onOpenChange={setQuickLogOpen} /> : null}
     </div>
   );
 }

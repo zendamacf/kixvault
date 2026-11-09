@@ -7,5 +7,6 @@ export * from './schemas/catalog';
 export * from './schemas/pricing';
 export * from './schemas/router';
 export * from './schemas/sneaker';
+export * from './schemas/wear';
 export * from './schemas/wishlist';
 export * from './types';

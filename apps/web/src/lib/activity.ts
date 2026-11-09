@@ -9,6 +9,8 @@ export const actionLabels: Record<AuditAction, string> = {
   'sneaker.created_from_grail': 'Copped a grail',
   'sneaker.updated': 'Updated a pair',
   'sneaker.deleted': 'Removed a pair',
+  'sneaker.worn': 'Logged a wear',
+  'sneaker.wear_removed': 'Removed a wear',
 };
 
 /** The pair an event is about, plus an extra note for events that clear grails. */
