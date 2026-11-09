@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { History, LogOut } from 'lucide-react';
 import {
@@ -9,10 +8,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { api, parseApiError } from '@/lib/api';
 import type { AuthUser } from '@/lib/queries';
-import { trackUmamiEvent } from '@/lib/umami';
-import { UmamiEvents } from '@/lib/umami-events';
+import { useLogout } from '@/lib/use-logout';
 import { cn } from '@/lib/utils';
 
 function getInitials(email: string): string {
@@ -32,24 +29,8 @@ type UserMenuProps = {
 
 /** Profile avatar with account actions in the top bar. */
 export function UserMenu({ user }: UserMenuProps) {
-  const queryClient = useQueryClient();
   const initials = getInitials(user.email);
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const response = await api.api.auth.logout.$post();
-
-      if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to log out'));
-      }
-    },
-    onSuccess: async () => {
-      trackUmamiEvent(UmamiEvents.authLogout);
-      await queryClient.invalidateQueries({ queryKey: ['auth'] });
-      await queryClient.clear();
-      window.location.href = '/login';
-    },
-  });
+  const logoutMutation = useLogout();
 
   return (
     <DropdownMenu>

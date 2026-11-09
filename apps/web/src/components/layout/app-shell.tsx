@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { AppFooter } from '@/components/layout/app-footer';
 import { AuthLayout } from '@/components/layout/auth-layout';
 import { BrandMark } from '@/components/layout/brand-mark';
+import { MobileMenu } from '@/components/layout/mobile-menu';
 import { UserMenu } from '@/components/layout/user-menu';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -53,7 +54,8 @@ export function AppShell() {
       </a>
       <header className="sticky top-0 z-10 bg-chrome text-chrome-foreground">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
-          <div className="flex min-w-0 items-center gap-3 sm:gap-8">
+          <div className="flex min-w-0 items-center gap-1 sm:gap-3 md:gap-8">
+            {user ? <MobileMenu user={user} pathname={pathname} /> : null}
             <Link
               to="/"
               className="group flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -65,7 +67,7 @@ export function AppShell() {
               </span>
             </Link>
             {user ? (
-              <nav className="flex items-center gap-1" aria-label="Main">
+              <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
                 <Link to="/" className={navLinkClass(isCollectionRoute)}>
                   Collection
                 </Link>
@@ -80,7 +82,9 @@ export function AppShell() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <ThemeToggle />
+            <div className="hidden md:block">
+              <ThemeToggle />
+            </div>
             {user ? (
               <>
                 <Button
@@ -100,7 +104,9 @@ export function AppShell() {
                   <Plus className="size-4" aria-hidden />
                   <span className="hidden sm:inline">Add pair</span>
                 </Link>
-                <UserMenu user={user} />
+                <div className="hidden md:block">
+                  <UserMenu user={user} />
+                </div>
               </>
             ) : null}
           </div>
