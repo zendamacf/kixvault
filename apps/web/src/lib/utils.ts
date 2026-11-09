@@ -38,10 +38,9 @@ export function formatGainLoss(value: number | null | undefined) {
 }
 
 export function formatCondition(condition: SneakerCondition) {
-  return condition
-    .split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  const label = condition.split('_').join(' ');
+
+  return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 export function formatDate(value: string | Date | null | undefined) {

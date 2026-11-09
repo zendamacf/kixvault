@@ -50,6 +50,30 @@ describe('CollectionSummary', () => {
     expect(screen.queryByText(/Up|Down/)).toBeNull();
   });
 
+  test('leaves out spend and average when no purchase prices are recorded', () => {
+    render(<CollectionSummary count={2} totalSpend={0} avgSpend={0} totalMarketValue={350} />);
+
+    const text = screen.getByRole('region').textContent ?? '';
+
+    expect(text).toContain('2 pairs, worth $350 today.');
+    expect(text).not.toContain('bought for');
+    expect(screen.queryByText(/average per pair/)).toBeNull();
+  });
+
+  test('says break-even when value matches spend', () => {
+    render(
+      <CollectionSummary
+        count={1}
+        totalSpend={100}
+        avgSpend={100}
+        totalMarketValue={100}
+        totalGainLoss={0}
+      />,
+    );
+
+    expect(screen.getByText('Break-even.')).toBeTruthy();
+  });
+
   test('shows skeletons while loading', () => {
     const { container } = render(<CollectionSummary isLoading />);
 

@@ -40,6 +40,12 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen bg-background">
+      <a
+        href="#main-content"
+        className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-2 focus-visible:left-4 focus-visible:z-50 focus-visible:rounded-md focus-visible:bg-primary focus-visible:px-3 focus-visible:py-2 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-primary-foreground"
+      >
+        Skip to content
+      </a>
       <header className="sticky top-0 z-10 bg-chrome text-chrome-foreground">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
           <div className="flex min-w-0 items-center gap-3 sm:gap-8">
@@ -49,7 +55,7 @@ export function AppShell() {
               aria-label={`${APP_NAME} home`}
             >
               <BrandMark />
-              <span className="hidden font-display text-xl font-extrabold tracking-tight sm:inline">
+              <span className="hidden font-heading text-xl font-extrabold tracking-tight sm:inline">
                 {APP_NAME}
               </span>
             </Link>
@@ -84,7 +90,11 @@ export function AppShell() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-6 sm:py-10">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto max-w-6xl px-4 py-6 outline-none sm:py-10"
+      >
         <Outlet />
       </main>
     </div>

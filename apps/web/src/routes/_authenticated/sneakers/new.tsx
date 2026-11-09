@@ -90,7 +90,7 @@ function NewSneakerPage() {
       <div className="space-y-5">
         <BackLink to="/">Back to collection</BackLink>
         <div className="space-y-1">
-          <h1 className="font-display text-4xl font-semibold tracking-tight">Add a pair</h1>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">Add a pair</h1>
           <p className="text-muted-foreground">
             Search the catalog to find your pair, or enter details manually.
           </p>

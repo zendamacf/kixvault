@@ -32,11 +32,9 @@
 
 @theme inline {
   --font-heading: "Bricolage Grotesque Variable", var(--font-sans);
-  --font-display: "Bricolage Grotesque Variable", var(--font-sans);
   --color-chrome: var(--chrome);
   --color-chrome-foreground: var(--chrome-foreground);
   --color-chrome-muted: var(--chrome-muted);
-  --color-tile: var(--tile);
   --color-gain: var(--gain);
   --color-loss: var(--loss);
   --font-sans: "Geist Variable", sans-serif;
@@ -84,10 +82,9 @@
 }
 
 :root {
-  /* Stage: the wall the shoes hang on. Tile: the plinth under each pair. */
+  /* Stage: the wall the shoes hang on. Card: the plinth under each pair. */
   --background: hsl(75 6% 91%);
   --foreground: hsl(220 14% 8%);
-  --tile: hsl(60 14% 98%);
   --card: hsl(60 14% 98%);
   --card-foreground: hsl(220 14% 8%);
   --popover: hsl(0 0% 100%);
@@ -114,7 +111,6 @@
   --chart-4: hsl(38 92% 48%);
   --chart-5: hsl(270 60% 55%);
   --radius: 0.625rem;
-  --shadow-card: 0 1px 0 hsl(220 14% 8% / 0.04);
 
   --chrome: hsl(220 14% 8%);
   --chrome-foreground: hsl(60 14% 96%);
@@ -136,7 +132,6 @@
 .dark {
   --background: hsl(220 12% 7%);
   --foreground: hsl(60 10% 95%);
-  --tile: hsl(220 10% 12%);
   --card: hsl(220 10% 12%);
   --card-foreground: hsl(60 10% 95%);
   --popover: hsl(220 10% 13%);
@@ -161,7 +156,6 @@
   --chart-3: hsl(145 68% 66%);
   --chart-4: hsl(38 100% 64%);
   --chart-5: hsl(270 80% 70%);
-  --shadow-card: none;
 
   --chrome: hsl(220 14% 4%);
   --chrome-foreground: hsl(60 10% 95%);

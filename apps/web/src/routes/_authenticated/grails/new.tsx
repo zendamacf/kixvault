@@ -73,7 +73,7 @@ function NewGrailPage() {
       <div className="space-y-5">
         <BackLink to="/grails">Back to grails</BackLink>
         <div className="space-y-1">
-          <h1 className="font-display text-4xl font-semibold tracking-tight">Add a grail</h1>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">Add a grail</h1>
           <p className="max-w-xl text-muted-foreground">
             Search StockX or enter details manually. Grails stay separate until you move them to
             your collection.

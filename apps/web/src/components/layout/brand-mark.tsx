@@ -1,3 +1,10 @@
+import {
+  SNEAKER_EYELET_RADIUS,
+  SNEAKER_EYELETS,
+  SNEAKER_SOLE,
+  SNEAKER_SOLE_COLOR,
+  SNEAKER_UPPER_PATH,
+} from '@/components/layout/sneaker-art';
 import { cn } from '@/lib/utils';
 
 type BrandMarkProps = {
@@ -5,7 +12,8 @@ type BrandMarkProps = {
 };
 
 /**
- * KixVault app mark: a low-top sneaker on a box-orange tile. Matches public/favicon.svg.
+ * KixVault app mark: a low-top sneaker on a box-orange tile. Drawing lives in sneaker-art.ts
+ * and is mirrored by public/favicon.svg.
  * Hovering a parent `group` lights the eyelets in sequence. Only colors animate, so edges
  * never get resampled the way they do with rotate/scale.
  */
@@ -26,14 +34,16 @@ export function BrandMark({ className }: BrandMarkProps) {
         rx="14"
         className="fill-primary transition-colors duration-200 motion-reduce:transition-none group-hover:fill-brand-hover"
       />
-      <path
-        d="M10 40v-8c0-2 1-3 3-3.5l8-2 5-9c1-2 3-2.5 5-1.5l4 3c4 4 9 7 15 8 4 1 5 3 5 6v7z"
-        className="fill-primary-foreground"
-      />
-      <rect x="8" y="41" width="48" height="6" rx="3" fill="#F9F9F7" />
-      <circle cx="28" cy="26" r="1.4" className={eyelet} />
-      <circle cx="33" cy="29" r="1.4" className={cn(eyelet, 'delay-75')} />
-      <circle cx="38" cy="32" r="1.4" className={cn(eyelet, 'delay-150')} />
+      <path d={SNEAKER_UPPER_PATH} className="fill-primary-foreground" />
+      <rect {...SNEAKER_SOLE} fill={SNEAKER_SOLE_COLOR} />
+      {SNEAKER_EYELETS.map((spot, index) => (
+        <circle
+          key={spot.cx}
+          {...spot}
+          r={SNEAKER_EYELET_RADIUS}
+          className={cn(eyelet, index === 1 && 'delay-75', index === 2 && 'delay-150')}
+        />
+      ))}
     </svg>
   );
 }

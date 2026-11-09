@@ -18,7 +18,7 @@ export function WishlistCard({ item }: WishlistCardProps) {
       params={{ itemId: item.id }}
       className="group block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
     >
-      <div className="relative rounded-2xl bg-tile ring-1 ring-border transition-shadow group-hover:ring-2 group-hover:ring-foreground/25">
+      <div className="relative rounded-2xl bg-card ring-1 ring-border transition-shadow group-hover:ring-2 group-hover:ring-foreground/25">
         <SneakerThumbnail
           imageUrl={item.imageUrl}
           alt={title}

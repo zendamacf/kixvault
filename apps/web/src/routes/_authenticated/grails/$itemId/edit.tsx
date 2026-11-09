@@ -112,14 +112,14 @@ function EditGrailPage() {
       <div className="space-y-5">
         <BackLink to="/grails">Back to grails</BackLink>
         <div className="flex items-center gap-5">
-          <div className="w-28 shrink-0 rounded-2xl bg-tile ring-1 ring-border">
+          <div className="w-28 shrink-0 rounded-2xl bg-card ring-1 ring-border">
             <SneakerThumbnail
               imageUrl={item.imageUrl}
               alt={`${item.brand} ${item.model}`}
               className="aspect-[5/4] w-full rounded-none p-2"
             />
           </div>
-          <h1 className="font-display text-3xl leading-[1.1] tracking-tight sm:text-4xl">
+          <h1 className="font-heading text-3xl leading-[1.1] tracking-tight sm:text-4xl">
             <span className="font-normal text-muted-foreground">{item.brand}</span>{' '}
             <span className="font-semibold">{item.model}</span>
           </h1>

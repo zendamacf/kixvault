@@ -19,7 +19,7 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
       params={{ sneakerId: sneaker.id }}
       className="group block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
     >
-      <div className="relative rounded-2xl bg-tile ring-1 ring-border transition-shadow group-hover:ring-2 group-hover:ring-foreground/25">
+      <div className="relative rounded-2xl bg-card ring-1 ring-border transition-shadow group-hover:ring-2 group-hover:ring-foreground/25">
         <SneakerThumbnail
           imageUrl={sneaker.primaryImage?.url ?? null}
           alt={title}
@@ -41,7 +41,7 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 pt-1.5">
           {hasMarketPrice ? (
             <p className="flex items-baseline gap-2">
-              <span className="font-display text-xl leading-none font-semibold tracking-tight">
+              <span className="font-heading text-xl leading-none font-semibold tracking-tight">
                 {formatCurrency(sneaker.currentMarketPrice)}
               </span>
               {sneaker.gainLoss != null ? (

@@ -120,7 +120,7 @@ function SneakerDetailPage() {
       <BackLink to="/">Back to collection</BackLink>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-12">
-        <div className="self-start rounded-3xl bg-tile ring-1 ring-border lg:sticky lg:top-20">
+        <div className="self-start rounded-3xl bg-card ring-1 ring-border lg:sticky lg:top-20">
           <SneakerThumbnail
             imageUrl={sneaker.primaryImage?.url ?? null}
             alt={title}
@@ -130,7 +130,7 @@ function SneakerDetailPage() {
 
         <div className="min-w-0 space-y-8">
           <header className="space-y-3">
-            <h1 className="font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl">
+            <h1 className="font-heading text-4xl leading-[1.05] tracking-tight sm:text-5xl">
               <span className="font-normal text-muted-foreground">{sneaker.brand}</span>{' '}
               <span className="font-semibold">{sneaker.model}</span>
             </h1>
@@ -146,7 +146,7 @@ function SneakerDetailPage() {
                     href={sneaker.catalogUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
+                    className="font-medium text-foreground underline underline-offset-4 hover:decoration-primary hover:decoration-2"
                   >
                     View on {catalogSourceLabel}
                   </a>
@@ -197,7 +197,7 @@ function SneakerDetailPage() {
 
           <section aria-label="Market value" className="space-y-2">
             {hasMarketPrice ? (
-              <p className="font-display text-3xl leading-[1.15] tracking-tight text-muted-foreground">
+              <p className="font-heading text-3xl leading-[1.15] tracking-tight text-muted-foreground">
                 Worth{' '}
                 <strong className="font-semibold text-foreground">
                   {formatCurrency(sneaker.currentMarketPrice)}
@@ -230,7 +230,7 @@ function SneakerDetailPage() {
             ) : null}
           </section>
 
-          <dl className="divide-y divide-border rounded-2xl bg-tile ring-1 ring-border">
+          <dl className="divide-y divide-border rounded-2xl bg-card ring-1 ring-border">
             {facts.map((fact) => (
               <div key={fact.label} className="flex items-baseline justify-between gap-4 px-4 py-3">
                 <dt className="text-sm text-muted-foreground">{fact.label}</dt>
@@ -256,7 +256,7 @@ function SneakerDetailPage() {
       </div>
 
       <section className="space-y-3">
-        <h2 className="font-display text-2xl font-semibold tracking-tight">Price history</h2>
+        <h2 className="font-heading text-2xl font-semibold tracking-tight">Price history</h2>
         {priceHistoryLoading ? (
           <Skeleton className="h-24 w-full rounded-2xl" />
         ) : (

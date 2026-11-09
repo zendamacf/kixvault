@@ -45,9 +45,13 @@ export function CollectionSummary({
 
   return (
     <section aria-label="Collection summary" className="space-y-2">
-      <p className="max-w-4xl text-balance font-display text-3xl leading-[1.15] tracking-tight text-muted-foreground sm:text-4xl">
-        <Figure>{count}</Figure> {count === 1 ? 'pair' : 'pairs'}, bought for{' '}
-        <Figure>{formatCurrency(totalSpend)}</Figure>
+      <p className="max-w-4xl text-balance font-heading text-3xl leading-[1.15] tracking-tight text-muted-foreground sm:text-4xl">
+        <Figure>{count}</Figure> {count === 1 ? 'pair' : 'pairs'}
+        {totalSpend > 0 ? (
+          <>
+            , bought for <Figure>{formatCurrency(totalSpend)}</Figure>
+          </>
+        ) : null}
         {totalMarketValue != null ? (
           <>
             , worth <Figure>{formatCurrency(totalMarketValue)}</Figure> today.
@@ -70,7 +74,9 @@ export function CollectionSummary({
           </span>
         ) : null}
       </p>
-      <p className="text-sm text-muted-foreground">{formatCurrency(avgSpend)} average per pair</p>
+      {avgSpend > 0 ? (
+        <p className="text-sm text-muted-foreground">{formatCurrency(avgSpend)} average per pair</p>
+      ) : null}
     </section>
   );
 }

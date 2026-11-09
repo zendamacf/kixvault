@@ -77,7 +77,7 @@ export function CatalogMarketPricePreview({
     purchasePrice != null && !Number.isNaN(purchasePrice) ? matched.price - purchasePrice : null;
 
   return (
-    <div className="rounded-2xl bg-tile p-4 ring-1 ring-border">
+    <div className="rounded-2xl bg-card p-4 ring-1 ring-border">
       <p className="font-heading font-semibold">Market preview</p>
       <MarketValue
         price={matched.price}

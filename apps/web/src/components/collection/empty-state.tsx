@@ -19,10 +19,10 @@ export function EmptyState({
   onClearFilters,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center gap-6 rounded-3xl bg-tile px-6 py-14 text-center ring-1 ring-border">
+    <div className="flex flex-col items-center gap-6 rounded-3xl bg-card px-6 py-14 text-center ring-1 ring-border">
       <ShoeSilhouette className="w-40 text-muted-foreground/40" />
       <div className="space-y-2">
-        <h2 className="font-display text-2xl font-semibold tracking-tight">{title}</h2>
+        <h2 className="font-heading text-2xl font-semibold tracking-tight">{title}</h2>
         <p className="mx-auto max-w-md text-muted-foreground">{description}</p>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-2">

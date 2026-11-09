@@ -67,7 +67,7 @@ function RegisterPage() {
   return (
     <div className="w-full max-w-sm space-y-8">
       <div className="space-y-2">
-        <h1 className="font-display text-4xl font-semibold tracking-tight">Create your vault</h1>
+        <h1 className="font-heading text-4xl font-semibold tracking-tight">Create your vault</h1>
         <p className="text-muted-foreground">Track every pair in one place.</p>
       </div>
 
@@ -112,7 +112,7 @@ function RegisterPage() {
         Already have an account?{' '}
         <Link
           to="/login"
-          className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
+          className="font-medium text-foreground underline underline-offset-4 hover:decoration-primary hover:decoration-2"
         >
           Sign in
         </Link>

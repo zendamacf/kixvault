@@ -54,7 +54,7 @@ export function WishlistCatalogForm({
           <BackButton onClick={() => setSelectedResult(null)}>Back to search</BackButton>
 
           {isLoading ? (
-            <div className="space-y-4 rounded-2xl bg-tile p-4 ring-1 ring-border">
+            <div className="space-y-4 rounded-2xl bg-card p-4 ring-1 ring-border">
               <Skeleton className="h-48 w-48 rounded-md" />
               <Skeleton className="h-4 w-2/3" />
             </div>

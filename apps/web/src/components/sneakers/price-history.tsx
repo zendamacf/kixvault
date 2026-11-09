@@ -9,14 +9,14 @@ type PriceHistoryProps = {
 export function PriceHistory({ history }: PriceHistoryProps) {
   if (history.length === 0) {
     return (
-      <p className="rounded-2xl bg-tile px-4 py-6 text-sm text-muted-foreground ring-1 ring-border">
+      <p className="rounded-2xl bg-card px-4 py-6 text-sm text-muted-foreground ring-1 ring-border">
         Price history will appear after market values are recorded.
       </p>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-tile ring-1 ring-border">
+    <div className="overflow-hidden rounded-2xl bg-card ring-1 ring-border">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-muted/60 text-left text-muted-foreground">

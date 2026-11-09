@@ -128,7 +128,7 @@ function CollectionPage() {
                     'h-9 shrink-0 rounded-full border px-3.5 text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
                     active
                       ? 'border-foreground bg-foreground text-background'
-                      : 'border-input bg-tile text-foreground hover:bg-muted',
+                      : 'border-input bg-card text-foreground hover:bg-muted',
                   )}
                 >
                   {chip.label}
@@ -187,11 +187,13 @@ function CollectionPage() {
         ) : null}
 
         {!isLoading && sneakers.length > 0 ? (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+          <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
             {sneakers.map((sneaker) => (
-              <SneakerCard key={sneaker.id} sneaker={sneaker} />
+              <li key={sneaker.id}>
+                <SneakerCard sneaker={sneaker} />
+              </li>
             ))}
-          </div>
+          </ul>
         ) : null}
       </section>
     </div>

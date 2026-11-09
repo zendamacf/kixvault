@@ -78,7 +78,7 @@ function EditSneakerPage() {
           Back to details
         </BackLink>
         <div className="space-y-1">
-          <h1 className="font-display text-4xl font-semibold tracking-tight">Edit pair</h1>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">Edit pair</h1>
           <p className="text-muted-foreground">
             Update {sneaker.brand} {sneaker.model}.
           </p>

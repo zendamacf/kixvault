@@ -23,7 +23,7 @@ function GrailsPage() {
 
       <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
         {hasItems ? (
-          <p className="max-w-3xl text-balance font-display text-3xl leading-[1.15] tracking-tight text-muted-foreground sm:text-4xl">
+          <p className="max-w-3xl text-balance font-heading text-3xl leading-[1.15] tracking-tight text-muted-foreground sm:text-4xl">
             <strong className="font-semibold text-foreground">{items.length}</strong>{' '}
             {items.length === 1 ? 'grail' : 'grails'} on the hunt
             {highCount > 0 ? (
@@ -36,7 +36,7 @@ function GrailsPage() {
             )}
           </p>
         ) : (
-          <p className="max-w-xl text-balance font-display text-3xl leading-[1.15] tracking-tight text-muted-foreground sm:text-4xl">
+          <p className="max-w-xl text-balance font-heading text-3xl leading-[1.15] tracking-tight text-muted-foreground sm:text-4xl">
             Pairs you want but don't own yet.
           </p>
         )}
@@ -67,11 +67,13 @@ function GrailsPage() {
       ) : null}
 
       {hasItems ? (
-        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => (
-            <WishlistCard key={item.id} item={item} />
+            <li key={item.id}>
+              <WishlistCard item={item} />
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null}
     </div>
   );

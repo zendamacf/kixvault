@@ -1,4 +1,4 @@
-import type { AuditAction, AuditEvent } from '@kixvault/shared';
+import type { AuditAction } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import {
@@ -14,22 +14,12 @@ import {
 } from 'lucide-react';
 import { BackLink } from '@/components/layout/back-link';
 import { Skeleton } from '@/components/ui/skeleton';
+import { actionLabels, formatEventDetail, formatEventTime, groupByDay } from '@/lib/activity';
 import { auditEventsQueryOptions } from '@/lib/queries';
 
 export const Route = createFileRoute('/_authenticated/activity')({
   component: ActivityPage,
 });
-
-const actionLabels: Record<AuditAction, string> = {
-  'auth.login': 'Signed in',
-  'auth.logout': 'Signed out',
-  'auth.register': 'Created account',
-  'grail.added': 'Added a grail',
-  'sneaker.created': 'Added a pair',
-  'sneaker.created_from_grail': 'Copped a grail',
-  'sneaker.updated': 'Updated a pair',
-  'sneaker.deleted': 'Removed a pair',
-};
 
 const actionIcons: Record<AuditAction, LucideIcon> = {
   'auth.login': LogIn,
@@ -42,79 +32,6 @@ const actionIcons: Record<AuditAction, LucideIcon> = {
   'sneaker.deleted': Trash2,
 };
 
-function formatEventDetail(event: AuditEvent): { pair: string | null; note: string | null } {
-  const brand = event.metadata?.brand;
-  const model = event.metadata?.model;
-  const grailsCleared = event.metadata?.grailsCleared;
-
-  if (typeof brand !== 'string' || typeof model !== 'string') {
-    return { pair: null, note: null };
-  }
-
-  const pair = `${brand} ${model}`;
-
-  if (event.action === 'sneaker.created_from_grail') {
-    return {
-      pair,
-      note:
-        typeof grailsCleared === 'number' && grailsCleared > 1
-          ? `Removed ${grailsCleared} grails from your list`
-          : 'Removed from Grails',
-    };
-  }
-
-  return { pair, note: null };
-}
-
-function dayKey(date: Date): string {
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-}
-
-function formatDayHeading(date: Date): string {
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-
-  if (dayKey(date) === dayKey(today)) {
-    return 'Today';
-  }
-
-  if (dayKey(date) === dayKey(yesterday)) {
-    return 'Yesterday';
-  }
-
-  return date.toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    ...(date.getFullYear() === today.getFullYear() ? {} : { year: 'numeric' }),
-  });
-}
-
-function formatEventTime(date: Date): string {
-  return date.toLocaleTimeString(undefined, { timeStyle: 'short' });
-}
-
-type DayGroup = { key: string; heading: string; events: AuditEvent[] };
-
-function groupByDay(events: AuditEvent[]): DayGroup[] {
-  const groups: DayGroup[] = [];
-
-  for (const event of events) {
-    const date = new Date(event.createdAt);
-    const key = dayKey(date);
-    const last = groups[groups.length - 1];
-
-    if (last?.key === key) {
-      last.events.push(event);
-    } else {
-      groups.push({ key, heading: formatDayHeading(date), events: [event] });
-    }
-  }
-
-  return groups;
-}
-
 function ActivityPage() {
   const { data, isLoading, error } = useQuery(auditEventsQueryOptions);
   const events = data?.events ?? [];
@@ -126,7 +43,7 @@ function ActivityPage() {
       <div className="space-y-4">
         <BackLink to="/">Back to collection</BackLink>
         <div className="space-y-1">
-          <h1 className="font-display text-4xl font-semibold tracking-tight">Activity</h1>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">Activity</h1>
           <p className="text-muted-foreground">
             Sign-ins, grails, and changes to your collection, newest first.
           </p>
@@ -147,7 +64,7 @@ function ActivityPage() {
       ) : null}
 
       {!isLoading && !error && events.length === 0 ? (
-        <div className="rounded-2xl bg-tile px-6 py-12 text-center ring-1 ring-border">
+        <div className="rounded-2xl bg-card px-6 py-12 text-center ring-1 ring-border">
           <p className="font-heading text-lg font-semibold">Nothing here yet</p>
           <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
             Signing in, adding grails and adding pairs will show up here.
@@ -158,8 +75,8 @@ function ActivityPage() {
       {!isLoading && !error
         ? groups.map((group) => (
             <section key={group.key} className="space-y-3">
-              <h2 className="font-display text-xl font-semibold tracking-tight">{group.heading}</h2>
-              <ol className="divide-y divide-border rounded-2xl bg-tile ring-1 ring-border">
+              <h2 className="font-heading text-xl font-semibold tracking-tight">{group.heading}</h2>
+              <ol className="divide-y divide-border rounded-2xl bg-card ring-1 ring-border">
                 {group.events.map((event) => {
                   const Icon = actionIcons[event.action];
                   const { pair, note } = formatEventDetail(event);

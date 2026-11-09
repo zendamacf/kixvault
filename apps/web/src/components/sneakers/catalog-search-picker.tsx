@@ -74,7 +74,7 @@ export function CatalogSearchPicker({
           {(['one', 'two', 'three', 'four'] as const).map((key) => (
             <div
               key={key}
-              className="flex min-w-0 items-center gap-4 rounded-2xl bg-tile p-3 ring-1 ring-border"
+              className="flex min-w-0 items-center gap-4 rounded-2xl bg-card p-3 ring-1 ring-border"
             >
               <Skeleton className={cn(RESULT_THUMBNAIL_CLASS, 'rounded-md')} />
               <div className="min-w-0 flex-1 space-y-2">
@@ -109,7 +109,7 @@ export function CatalogSearchPicker({
                   aria-pressed={isSelected}
                   onClick={() => onSelect(result)}
                   className={cn(
-                    'flex w-full min-w-0 items-center gap-4 overflow-hidden rounded-2xl bg-tile p-3 text-left ring-1 ring-border transition-shadow outline-none hover:ring-2 hover:ring-foreground/25 focus-visible:ring-2 focus-visible:ring-ring',
+                    'flex w-full min-w-0 items-center gap-4 overflow-hidden rounded-2xl bg-card p-3 text-left ring-1 ring-border transition-shadow outline-none hover:ring-2 hover:ring-foreground/25 focus-visible:ring-2 focus-visible:ring-ring',
                     isSelected && 'ring-2 ring-foreground',
                   )}
                 >

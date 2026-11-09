@@ -14,11 +14,11 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       <aside className="relative overflow-hidden bg-chrome px-4 py-4 text-chrome-foreground lg:flex lg:flex-col lg:gap-24 lg:p-12">
         <div className="flex items-center gap-2.5">
           <BrandMark />
-          <span className="font-display text-xl font-extrabold tracking-tight">{APP_NAME}</span>
+          <span className="font-heading text-xl font-extrabold tracking-tight">{APP_NAME}</span>
         </div>
 
         <div className="relative z-10 hidden max-w-md space-y-4 lg:block">
-          <p className="font-display text-5xl leading-[1.05] font-semibold tracking-tight">
+          <p className="font-heading text-5xl leading-[1.05] font-semibold tracking-tight">
             Every pair, what you paid, and what it is worth.
           </p>
           <p className="text-lg text-chrome-muted">Built for sneaker collectors.</p>

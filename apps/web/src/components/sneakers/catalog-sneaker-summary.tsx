@@ -16,7 +16,7 @@ type CatalogSneakerSummaryProps = {
 /** Read-only product summary shown when adding or editing a catalog-linked sneaker. */
 export function CatalogSneakerSummary({ sneaker }: CatalogSneakerSummaryProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-2xl bg-tile p-4 ring-1 ring-border sm:flex-row sm:items-center sm:gap-6">
+    <div className="flex flex-col gap-4 rounded-2xl bg-card p-4 ring-1 ring-border sm:flex-row sm:items-center sm:gap-6">
       <SneakerThumbnail
         imageUrl={sneaker.imageUrl}
         alt={sneaker.title}

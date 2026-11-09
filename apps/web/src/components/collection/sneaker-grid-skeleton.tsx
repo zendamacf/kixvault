@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 /** Loading skeleton for the collection sneaker grid. */
 export function SneakerGridSkeleton() {
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+    <div aria-hidden className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
       {['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((id) => (
         <div key={id} className="space-y-3">
           <Skeleton className="aspect-[5/4] w-full rounded-2xl" />

@@ -13,8 +13,9 @@ describe('formatCurrency', () => {
 });
 
 describe('formatCondition', () => {
-  test('title-cases underscored condition values', () => {
-    expect(formatCondition('lightly_worn')).toBe('Lightly Worn');
+  test('sentence-cases underscored condition values', () => {
+    expect(formatCondition('lightly_worn')).toBe('Lightly worn');
+    expect(formatCondition('deadstock')).toBe('Deadstock');
   });
 });
 
