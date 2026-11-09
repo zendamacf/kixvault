@@ -2,6 +2,7 @@ import { APP_NAME } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
+import { AppFooter } from '@/components/layout/app-footer';
 import { AuthLayout } from '@/components/layout/auth-layout';
 import { BrandMark } from '@/components/layout/brand-mark';
 import { UserMenu } from '@/components/layout/user-menu';
@@ -39,7 +40,7 @@ export function AppShell() {
     );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <a
         href="#main-content"
         className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-2 focus-visible:left-4 focus-visible:z-50 focus-visible:rounded-md focus-visible:bg-primary focus-visible:px-3 focus-visible:py-2 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-primary-foreground"
@@ -93,10 +94,12 @@ export function AppShell() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto max-w-6xl px-4 py-6 outline-none sm:py-10"
+        className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 outline-none sm:py-10"
       >
         <Outlet />
       </main>
+
+      <AppFooter />
     </div>
   );
 }
