@@ -4,6 +4,7 @@ import { ThemeProvider } from 'next-themes';
 import { UmamiAnalytics } from '@/components/analytics/umami-analytics';
 import { RouteErrorFallback } from '@/components/errors/route-error-fallback';
 import { AppShell } from '@/components/layout/app-shell';
+import { DEFAULT_THEME, THEME_IDS } from '@/components/theme/themes';
 import { Toaster } from '@/components/ui/sonner';
 
 export type RouterContext = {
@@ -19,7 +20,14 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="kixvault-theme">
+    <ThemeProvider
+      attribute="data-theme"
+      themes={THEME_IDS}
+      defaultTheme={DEFAULT_THEME}
+      enableSystem={false}
+      enableColorScheme={false}
+      storageKey="kixvault-colourway"
+    >
       <QueryClientProvider client={queryClient}>
         <UmamiAnalytics />
         <AppShell />

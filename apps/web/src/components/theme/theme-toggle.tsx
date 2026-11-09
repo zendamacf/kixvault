@@ -1,16 +1,19 @@
-import { Monitor, Moon, Sun } from 'lucide-react';
+import { Palette } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { DEFAULT_THEME, THEME_IDS, THEMES } from './themes';
 
-/** Light, dark, and system theme switcher for the app header. */
+/** Sneaker colourway picker for the app header. */
 export function ThemeToggle() {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
+  const active = theme && THEME_IDS.includes(theme) ? theme : DEFAULT_THEME;
 
   return (
     <DropdownMenu>
@@ -18,26 +21,34 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="Toggle theme"
-          className="relative text-chrome-foreground hover:bg-chrome-foreground/10 hover:text-chrome-foreground focus-visible:ring-primary dark:hover:bg-chrome-foreground/10"
+          aria-label="Change theme"
+          className="text-chrome-foreground hover:bg-chrome-foreground/10 hover:text-chrome-foreground focus-visible:ring-primary dark:hover:bg-chrome-foreground/10"
         >
-          <Sun className="size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <Palette className="size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme('light')}>
-          <Sun className="size-4" />
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>
-          <Moon className="size-4" />
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>
-          <Monitor className="size-4" />
-          System
-        </DropdownMenuItem>
+      <DropdownMenuContent align="end" className="min-w-48">
+        <DropdownMenuRadioGroup
+          value={active}
+          onValueChange={setTheme}
+          className="flex flex-col gap-1.5"
+        >
+          {THEMES.map((item) => (
+            <DropdownMenuRadioItem key={item.id} value={item.id} className="py-2">
+              <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+                {item.label}
+                <span
+                  aria-hidden="true"
+                  className="flex h-1.5 overflow-hidden rounded-full ring-1 ring-foreground/25"
+                >
+                  {item.swatches.map((color) => (
+                    <span key={color} className="flex-1" style={{ backgroundColor: color }} />
+                  ))}
+                </span>
+              </span>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
