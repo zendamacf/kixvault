@@ -49,9 +49,16 @@ export async function logWear(
   wornOn: string,
 ): Promise<LogWearResult> {
   return db.transaction(async (tx) => {
+    const changesCondition = sneaker.condition === 'deadstock';
+
     const [inserted] = await tx
       .insert(sneakerWears)
-      .values({ userId, sneakerId: sneaker.id, wornOn })
+      .values({
+        userId,
+        sneakerId: sneaker.id,
+        wornOn,
+        autoConditionChange: changesCondition,
+      })
       .onConflictDoNothing()
       .returning();
 
@@ -72,7 +79,7 @@ export async function logWear(
     let updatedSneaker = sneaker;
     let conditionChanged = false;
 
-    if (sneaker.condition === 'deadstock') {
+    if (changesCondition) {
       const [updated] = await tx
         .update(sneakers)
         .set({ condition: 'lightly_worn' })
@@ -82,6 +89,12 @@ export async function logWear(
       if (updated) {
         updatedSneaker = updated;
         conditionChanged = true;
+      } else {
+        // The condition changed in the meantime, so this wear did not cause a switch.
+        await tx
+          .update(sneakerWears)
+          .set({ autoConditionChange: false })
+          .where(eq(sneakerWears.id, inserted.id));
       }
     }
 
@@ -96,7 +109,7 @@ export async function logWear(
 
 export type RemoveWearResult = {
   removed: boolean;
-  /** True when removing the only wear moved the pair back to deadstock. */
+  /** True when removing the wear that caused the switch moved the pair back to deadstock. */
   conditionReverted: boolean;
   sneaker: SneakerRow;
 };
@@ -116,7 +129,7 @@ export async function removeWear(
           eq(sneakerWears.wornOn, wornOn),
         ),
       )
-      .returning({ id: sneakerWears.id });
+      .returning({ id: sneakerWears.id, autoConditionChange: sneakerWears.autoConditionChange });
 
     if (deleted.length === 0) {
       return { removed: false, conditionReverted: false, sneaker };
@@ -127,7 +140,9 @@ export async function removeWear(
       .from(sneakerWears)
       .where(eq(sneakerWears.sneakerId, sneaker.id));
 
-    if (Number(remaining) > 0) {
+    const [removedWear] = deleted;
+
+    if (!removedWear.autoConditionChange || Number(remaining) > 0) {
       return { removed: true, conditionReverted: false, sneaker };
     }
 

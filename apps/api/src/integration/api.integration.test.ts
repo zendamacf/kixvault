@@ -1109,6 +1109,38 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
       expect(body.sneaker.wearCount).toBe(1);
     });
 
+    test('does not revert a lightly worn condition the user set by hand', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'lightly_worn');
+      await logWear(cookie, sneaker.id, '2026-11-01');
+
+      const response = await removeWear(cookie, sneaker.id, '2026-11-01');
+      const body = (await response.json()) as {
+        conditionReverted: boolean;
+        sneaker: WearSneaker;
+      };
+
+      expect(body.conditionReverted).toBe(false);
+      expect(body.sneaker.condition).toBe('lightly_worn');
+    });
+
+    test('does not revert when the first wear is removed but other wears remain', async () => {
+      const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie, 'deadstock');
+      await logWear(cookie, sneaker.id, '2026-11-01');
+      await logWear(cookie, sneaker.id, '2026-11-02');
+
+      const response = await removeWear(cookie, sneaker.id, '2026-11-01');
+      const body = (await response.json()) as {
+        conditionReverted: boolean;
+        sneaker: WearSneaker;
+      };
+
+      expect(body.conditionReverted).toBe(false);
+      expect(body.sneaker.condition).toBe('lightly_worn');
+      expect(body.sneaker.wearCount).toBe(1);
+    });
+
     test('does not revert a condition the user set by hand', async () => {
       const { cookie } = await registerTestUser(app, `wear-${crypto.randomUUID()}@example.com`);
       const sneaker = await createSneaker(cookie, 'worn');

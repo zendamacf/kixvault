@@ -1,6 +1,7 @@
 import { relations, type SQL, sql } from 'drizzle-orm';
 import {
   type AnyPgColumn,
+  boolean,
   date,
   index,
   integer,
@@ -111,6 +112,8 @@ export const sneakerWears = pgTable(
       .notNull()
       .references(() => sneakers.id, { onDelete: 'cascade' }),
     wornOn: date('worn_on', { mode: 'string' }).notNull(),
+    /** True when this wear moved a deadstock pair to lightly worn. */
+    autoConditionChange: boolean('auto_condition_change').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
