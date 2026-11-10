@@ -14,6 +14,9 @@ import { QuickLogDialog } from '@/components/wears/quick-log-dialog';
 import { sessionQueryOptions } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
+/** Pages shown inside the signed-out brand layout. */
+const AUTH_PATHS = new Set(['/login', '/register', '/verify-email', '/verify-email-pending']);
+
 /** Root layout with header, main content area, and auth vs. authenticated shells. */
 export function AppShell() {
   const routerState = useRouterState();
@@ -23,7 +26,7 @@ export function AppShell() {
 
   const pathname = routerState.location.pathname;
 
-  const isAuthRoute = pathname === '/login' || pathname === '/register';
+  const isAuthRoute = AUTH_PATHS.has(pathname);
   const isGrailsRoute = pathname.startsWith('/grails');
   const isWearsRoute = pathname.startsWith('/wears');
   const isCollectionRoute = pathname === '/' || pathname.startsWith('/sneakers');

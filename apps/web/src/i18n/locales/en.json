@@ -12,5 +12,28 @@
   },
   "common": {
     "emptyValue": "—"
+  },
+  "verifyEmail": {
+    "verifyingTitle": "Confirming your email",
+    "verifyingDescription": "This takes a moment.",
+    "successTitle": "Email confirmed",
+    "successDescription": "Your vault is ready. Sign in to start tracking your pairs.",
+    "successAction": "Sign in",
+    "errorTitle": "This link did not work",
+    "errorDescription": "The link is invalid, expired or already used.",
+    "missingToken": "This link is missing its token.",
+    "errorAction": "Get a new link",
+    "backToSignIn": "Back to sign in"
+  },
+  "verifyEmailPending": {
+    "title": "Check your email",
+    "description": "We sent a confirmation link to {{email}}. Open it to finish setting up your account.",
+    "descriptionNoEmail": "We sent a confirmation link to your email. Open it to finish setting up your account.",
+    "emailLabel": "Email",
+    "resend": "Send a new link",
+    "resendPending": "Sending...",
+    "resendDone": "If that account needs confirming, a new link is on its way.",
+    "resendFailed": "Could not send a new link. Try again.",
+    "backToSignIn": "Back to sign in"
   }
 }

@@ -26,8 +26,26 @@ export const users = pgTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
+  /** Null until the owner proves they control the address by following an emailed link. */
+  emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true, mode: 'date' }),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
+
+export const emailVerificationTokens = pgTable(
+  'email_verification_tokens',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** SHA-256 of the emailed token. The raw token is never stored. */
+    tokenHash: text('token_hash').notNull().unique(),
+    expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true, mode: 'date' }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (table) => [index('email_verification_tokens_user_id_idx').on(table.userId)],
+);
 
 export const sessions = pgTable('sessions', {
   id: text('id').primaryKey(),
@@ -162,6 +180,14 @@ export const usersRelations = relations(users, ({ many }) => ({
   auditEvents: many(auditEvents),
   wishlistItems: many(wishlistItems),
   sneakerWears: many(sneakerWears),
+  emailVerificationTokens: many(emailVerificationTokens),
+}));
+
+export const emailVerificationTokensRelations = relations(emailVerificationTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [emailVerificationTokens.userId],
+    references: [users.id],
+  }),
 }));
 
 export const wishlistItemsRelations = relations(wishlistItems, ({ one }) => ({

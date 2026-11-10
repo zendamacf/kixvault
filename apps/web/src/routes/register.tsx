@@ -53,8 +53,14 @@ function RegisterPage() {
 
       return response.json();
     },
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       trackUmamiEvent(UmamiEvents.authRegister);
+
+      if (data.requiresVerification) {
+        await navigate({ to: '/verify-email-pending', search: { email: data.user.email } });
+        return;
+      }
+
       await queryClient.invalidateQueries({ queryKey: ['auth'] });
       await navigate({ to: '/' });
     },
