@@ -1,5 +1,29 @@
 # @kixvault/web
 
+## 0.4.0
+
+### Minor Changes
+
+- c6ef047: Add an Analytics page with charts for your collection's market value over time, wears per month, your most-worn pairs, and breakdowns by brand and condition.
+- dc82772: Add email verification for new signups. When a Resend API key is set, new accounts must confirm their email before they can sign in. Without a key, emails are logged to the console and signups work as before.
+- 121b583: Move all user-facing web copy and email content into translation files. Currently only US English is supported.
+- eb14557: Redesign the KixVault logo and clean up the login page.
+- a5613cf: Add password recovery. Verified accounts can request a single-use, one-hour reset link by email. Requests are rate limited to reduce chances of abuse, and a successful reset signs out every existing session.
+- 9835cca: Add a price history chart to the sneaker page. Market price snapshots are plotted over time, and hovering the dashed line shows what you paid. Switch between the chart (default) and the table.
+- 4f604f2: Add wear tracking. Log a wear from the Log wear button, the sneaker page, or the Wears calendar. The first wear of a deadstock pair changes its condition to lightly worn. After 15 and 40 wears, the sneaker page suggests the next condition.
+
+### Patch Changes
+
+- eb14557: Enlarge sneaker images in the wear calendar days.
+- Updated dependencies [c6ef047]
+- Updated dependencies [dc82772]
+- Updated dependencies [121b583]
+- Updated dependencies [a5613cf]
+- Updated dependencies [fed37c5]
+- Updated dependencies [4f604f2]
+  - @kixvault/api@0.3.0
+  - @kixvault/shared@0.2.0
+
 ## 0.3.0
 
 ### Minor Changes

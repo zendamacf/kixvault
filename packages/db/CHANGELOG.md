@@ -1,5 +1,13 @@
 # @kixvault/db
 
+## 0.3.0
+
+### Minor Changes
+
+- dc82772: Add email verification for new signups. When a Resend API key is set, new accounts must confirm their email before they can sign in. Without a key, emails are logged to the console and signups work as before.
+- a5613cf: Add password recovery. Verified accounts can request a single-use, one-hour reset link by email. Requests are rate limited to reduce chances of abuse, and a successful reset signs out every existing session.
+- 4f604f2: Add wear tracking. Log a wear from the Log wear button, the sneaker page, or the Wears calendar. The first wear of a deadstock pair changes its condition to lightly worn. After 15 and 40 wears, the sneaker page suggests the next condition.
+
 ## 0.2.1
 
 ### Patch Changes
