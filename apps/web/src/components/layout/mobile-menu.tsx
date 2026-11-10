@@ -83,9 +83,10 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
         </Button>
       </SheetTrigger>
       <SheetContent aria-describedby="mobile-menu-description">
-        <div className="space-y-0.5 border-b border-border px-5 pt-5 pb-4 pr-14">
-          <SheetTitle>{t('layout.mobileMenu.title')}</SheetTitle>
-          <SheetDescription id="mobile-menu-description" className="truncate">
+        <div className="border-b border-border px-5 pt-5 pb-4 pr-14">
+          {/* Dialogs need a name for screen readers. Sighted users see the account email instead. */}
+          <SheetTitle className="sr-only">{t('layout.mobileMenu.title')}</SheetTitle>
+          <SheetDescription id="mobile-menu-description" className="truncate text-foreground">
             {user.email}
           </SheetDescription>
         </div>
