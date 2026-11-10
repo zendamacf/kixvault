@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, spyOn, test } from 'bun:test';
+import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { ApiError, api, parseApiError, toApiError } from './api';
 
 describe('parseApiError', () => {
@@ -44,19 +44,23 @@ describe('toApiError', () => {
 });
 
 describe('api client', () => {
-  const fetchSpy = spyOn(globalThis, 'fetch');
+  const originalFetch = globalThis.fetch;
 
   afterEach(() => {
-    fetchSpy.mockReset();
+    globalThis.fetch = originalFetch;
   });
 
   test('sends the app language, not the browser language', async () => {
-    fetchSpy.mockResolvedValue(new Response('{}', { status: 200 }));
+    const calls: RequestInit[] = [];
+    globalThis.fetch = mock(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      calls.push(init ?? {});
+      return new Response('{}', { status: 200 });
+    }) as unknown as typeof fetch;
 
     await api.api.auth['forgot-password'].$post({ json: { email: 'a@example.com' } });
 
-    const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
-    expect(new Headers(init.headers).get('Accept-Language')).toBe('en');
-    expect(new Headers(init.headers).get('Content-Type')).toContain('application/json');
+    const headers = new Headers(calls[0]?.headers);
+    expect(headers.get('Accept-Language')).toBe('en');
+    expect(headers.get('Content-Type')).toContain('application/json');
   });
 });
