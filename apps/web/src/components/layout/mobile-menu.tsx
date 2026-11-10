@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import {
   CalendarDays,
+  ChartColumn,
   ChevronDown,
   History,
   LayoutGrid,
@@ -49,6 +50,12 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
     },
     { to: '/grails', label: 'Grails', icon: Star, active: pathname.startsWith('/grails') },
     { to: '/wears', label: 'Wears', icon: CalendarDays, active: pathname.startsWith('/wears') },
+    {
+      to: '/analytics',
+      label: 'Analytics',
+      icon: ChartColumn,
+      active: pathname.startsWith('/analytics'),
+    },
   ] as const;
 
   return (

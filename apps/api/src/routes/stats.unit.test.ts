@@ -109,4 +109,62 @@ describe('stats routes', () => {
       },
     });
   });
+
+  test('GET /analytics returns charts data for the signed-in user', async () => {
+    mockSelect
+      .mockResolvedValueOnce([
+        {
+          id: 'sneaker-1',
+          brand: 'Nike',
+          model: 'Air Max 1',
+          nickname: null,
+          condition: 'deadstock',
+          size: '10.0',
+          sku: 'SKU-1',
+          catalogSource: 'kicksdb:stockx',
+          purchaseDate: new Date('2026-07-01T00:00:00.000Z'),
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          catalogSource: 'kicksdb:stockx',
+          sku: 'SKU-1',
+          size: '10.0',
+          snapshotDate: new Date('2026-07-08T00:00:00.000Z'),
+          price: '150.00',
+        },
+      ])
+      .mockResolvedValueOnce([{ sneakerId: 'sneaker-1', wornOn: '2026-07-09' }]);
+
+    const response = await statsRoutes.request('/analytics');
+
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      analytics: {
+        portfolioValue: unknown;
+        trackedPairs: number;
+        totalPairs: number;
+        mostWorn: unknown;
+        brands: unknown;
+        conditions: unknown;
+      };
+    };
+    expect(body.analytics.portfolioValue).toEqual([{ date: '2026-07-08', value: 150, pairs: 1 }]);
+    expect(body.analytics.trackedPairs).toBe(1);
+    expect(body.analytics.totalPairs).toBe(1);
+    expect(body.analytics.mostWorn).toEqual([
+      { sneakerId: 'sneaker-1', name: 'Air Max 1', count: 1 },
+    ]);
+    expect(body.analytics.brands).toEqual([{ label: 'Nike', count: 1 }]);
+    expect(body.analytics.conditions).toEqual([{ condition: 'deadstock', count: 1 }]);
+  });
+
+  test('GET /analytics skips the snapshot query when no pair is catalog-linked', async () => {
+    mockSelect.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+    const response = await statsRoutes.request('/analytics');
+
+    expect(response.status).toBe(200);
+    expect(mockSelect).toHaveBeenCalledTimes(2);
+  });
 });

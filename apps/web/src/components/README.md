@@ -2,6 +2,10 @@
 
 React components used across the web app. Route files in `src/routes/` compose these; they should not import from routes.
 
+## [analytics](./analytics)
+
+Charts and cards for the analytics page: collection value over time, wears, most-worn pairs, and brand and condition breakdowns.
+
 ## [collection](./collection)
 
 Collection home page UI: the collection summary sentence, loading placeholders, and empty states.
