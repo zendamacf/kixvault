@@ -10,7 +10,7 @@ Styling is Tailwind v4 with the tokens in `src/index.css`.
 - **Chrome:** the header and the auth brand panel use the `chrome` tokens, which are dark in every theme.
 - **Type:** Geist for body text and Bricolage Grotesque for headings, the wordmark and prices (`font-heading`).
 - **Sneaker artwork:** the brand mark and silhouette share `src/components/layout/sneaker-art.ts`. `public/favicon.svg` is a static copy, and `sneaker-art.unit.test.ts` fails if the two drift apart.
-- **Motion:** only the brand mark's eyelets animate on hover, and only colours change. Avoid rotate and scale on small graphics, which render with jagged edges.
+- **Motion:** the brand mark's eyelets animate on hover, and only colours change. Avoid rotate and scale on small graphics, which render with jagged edges. The only other motion is the confetti in `src/lib/celebrate.ts`, shown when a sneaker is added or a grail moves to the collection. It is off when the user prefers reduced motion.
 
 ## Internationalization
 

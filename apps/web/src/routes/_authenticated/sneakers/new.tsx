@@ -8,6 +8,7 @@ import { CatalogSneakerForm } from '@/components/sneakers/catalog-sneaker-form';
 import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { api, parseApiError } from '@/lib/api';
+import { celebrate } from '@/lib/celebrate';
 import { trackUmamiEvent } from '@/lib/umami';
 import { UmamiEvents } from '@/lib/umami-events';
 import { showGrailClearedToast } from '@/lib/wishlist';
@@ -30,8 +31,11 @@ function NewSneakerPage() {
     clearedGrails?: Array<{ brand: string; model: string }>;
   }) => {
     if (data.clearedGrails?.length) {
+      celebrate('big');
       showGrailClearedToast(data.clearedGrails);
       await queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+    } else {
+      celebrate('small');
     }
 
     await queryClient.invalidateQueries({ queryKey: ['sneakers'] });
