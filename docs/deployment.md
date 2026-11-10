@@ -47,7 +47,7 @@ services:
       REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
       SIGNUPS_ENABLED: ${SIGNUPS_ENABLED:-false}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
-      EMAIL_FROM: ${EMAIL_FROM:-KixVault <onboarding@resend.dev>}
+      EMAIL_FROM: ${EMAIL_FROM:-KixVault <noreply@yourdomain.com>}
       APP_URL: ${APP_URL:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
@@ -160,11 +160,11 @@ APP_URL=https://kixvault.yourdomain.com
 
 KixVault sends email through [Resend](https://resend.com). Set these on the `api` service:
 
-| Variable | Purpose |
-|----------|---------|
-| `RESEND_API_KEY` | Resend API key. Leave empty to turn email off. |
-| `EMAIL_FROM` | Sender, for example `KixVault <noreply@yourdomain.com>`. The domain must be verified in Resend. |
-| `APP_URL` | Public URL of the web app, without a trailing slash. Used for links in emails. |
+| Variable         | Purpose                                                                                         |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| `RESEND_API_KEY` | Resend API key. Leave empty to turn email off.                                                  |
+| `EMAIL_FROM`     | Sender, for example `KixVault <noreply@yourdomain.com>`. The domain must be verified in Resend. |
+| `APP_URL`        | Public URL of the web app, without a trailing slash. Used for links in emails.                  |
 
 When `RESEND_API_KEY` is set, new accounts must confirm their email address before they can sign in. The link works once and expires after 24 hours. Existing accounts count as confirmed.
 
