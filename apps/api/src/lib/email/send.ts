@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/bun';
 import { env } from '../env';
+import { logger } from '../logger';
 import { getEmailFrom, getEmailProvider } from './config';
 import { type EmailTemplateProps, type EmailType, emailTemplates } from './templates';
 
@@ -17,7 +18,7 @@ export async function sendEmail<T extends EmailType>(
     await getEmailProvider().send({ to, ...rendered }, getEmailFrom());
     return true;
   } catch (error) {
-    console.error('Failed to send email', { type, error });
+    logger.error('Failed to send email', { type, error });
     if (env.isProduction) {
       Sentry.captureException(error, { tags: { emailType: type } });
     }

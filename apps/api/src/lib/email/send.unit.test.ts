@@ -57,9 +57,9 @@ describe('sendEmail', () => {
 
     expect(sent).toBe(true);
     expect(fetchSpy).not.toHaveBeenCalled();
-    const [, details] = infoSpy.mock.calls[0] as [string, { to: string; text?: string }];
-    expect(details.to).toBe('user@example.com');
-    expect(details.text).toContain(props.verifyUrl);
+    const line = String(infoSpy.mock.calls[0]?.[0]);
+    expect(line).toContain('user@example.com');
+    expect(line).toContain(props.verifyUrl);
   });
 
   test('does not log the email body in production', async () => {
@@ -67,8 +67,9 @@ describe('sendEmail', () => {
 
     await sendEmail('verifyEmail', 'user@example.com', props);
 
-    const [, details] = infoSpy.mock.calls[0] as [string, { text?: string }];
-    expect(details.text).toBeUndefined();
+    const line = String(infoSpy.mock.calls[0]?.[0]);
+    expect(line).not.toContain('text:');
+    expect(line).not.toContain(props.verifyUrl);
   });
 
   test('posts to Resend when an API key is set', async () => {

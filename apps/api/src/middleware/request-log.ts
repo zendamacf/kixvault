@@ -1,5 +1,6 @@
 import { createMiddleware } from 'hono/factory';
 import { isRequestLoggingEnabled, parseLogLevel } from '../lib/log-level';
+import { logger } from '../lib/logger';
 import type { ApiEnv } from '../types';
 
 const HEALTH_CHECK_PATH = '/api/health';
@@ -25,7 +26,7 @@ export const requestLogMiddleware = createMiddleware<ApiEnv>(async (c, next) => 
   const user = c.get('user');
   const userSuffix = user ? ` user=${user.id}` : '';
 
-  console.log(
+  logger.log(
     `${c.req.method} ${c.req.path} ${c.res.status} ${durationMs}ms requestId=${requestId}${userSuffix}`,
   );
 });

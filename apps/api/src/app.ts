@@ -2,6 +2,7 @@ import { APP_NAME } from '@kixvault/shared';
 import { sentry } from '@sentry/hono/bun';
 import { Hono } from 'hono';
 import { env } from './lib/env';
+import { redactDeep } from './lib/redact';
 import { globalApiRateLimit } from './middleware/global-rate-limit';
 import { requestLogMiddleware } from './middleware/request-log';
 import { auditRoutes } from './routes/audit';
@@ -23,6 +24,9 @@ const withSentry = env.isProduction
         environment: 'production',
         release: env.sentryRelease,
         tracesSampleRate: 0.2,
+        // Scrub configured secrets from every event/breadcrumb before it leaves the process.
+        beforeSend: (event) => redactDeep(event),
+        beforeBreadcrumb: (breadcrumb) => redactDeep(breadcrumb),
       }),
     )
   : routes;

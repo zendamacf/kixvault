@@ -1,3 +1,4 @@
+import { logger } from '../lib/logger';
 import { getTestDatabaseUrl, prepareTestDatabase } from './helpers';
 
 const testDatabaseUrl = getTestDatabaseUrl();
@@ -7,4 +8,4 @@ if (!testDatabaseUrl) {
 }
 
 await prepareTestDatabase(testDatabaseUrl);
-console.log(`Prepared test database: ${testDatabaseUrl}`);
+logger.log(`Prepared test database: ${testDatabaseUrl}`);

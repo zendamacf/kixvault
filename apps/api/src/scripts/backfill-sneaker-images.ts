@@ -1,9 +1,10 @@
 import { backfillSneakerImages } from '../lib/backfill-sneaker-images';
 import { ensureKicksdbClient, isKicksdbConfigured } from '../lib/kicksdb';
+import { logger } from '../lib/logger';
 
 async function main() {
   if (!isKicksdbConfigured()) {
-    console.error('KICKSDB_API_KEY is required to backfill sneaker images.');
+    logger.error('KICKSDB_API_KEY is required to backfill sneaker images.');
     process.exit(1);
   }
 
@@ -11,18 +12,18 @@ async function main() {
 
   const result = await backfillSneakerImages({
     onProgress: (message) => {
-      console.log(message);
+      logger.log(message);
     },
   });
 
-  console.log(
+  logger.log(
     `Backfill complete: ${result.sneakersUpdated}/${result.sneakersProcessed} sneakers updated, ${result.catalogProductsFetched} catalog products fetched, ${result.failures.length} failures.`,
   );
 }
 
 main()
   .catch((error) => {
-    console.error(error);
+    logger.error(error);
     process.exit(1);
   })
   .then(() => {
