@@ -16,11 +16,11 @@ Built for Sneaker Collectors.
 # Install dependencies
 bun install
 
-# Lint and format
-bun run check
+# Lint and format (whole repo)
+bun run lint:fix
 
-# Typecheck all packages
-bun run typecheck
+# Typecheck a package (also: apps/web, packages/db, packages/shared)
+bun run --cwd apps/api typecheck
 
 # Run API (requires .env with DATABASE_URL)
 bun run --cwd apps/api dev

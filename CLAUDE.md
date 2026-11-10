@@ -6,7 +6,7 @@ KixVault is a sneaker-collection tracker: a Bun workspaces monorepo (`apps/api`,
 
 ## Commands
 
-There are no root `check`/`typecheck`/`test` scripts (the README mentions some, but they don't exist). Run scripts per package with `bun run --cwd <pkg> <script>`; CI does the same for `lint`, `typecheck` and `test:coverage` across all four packages.
+There are no root `typecheck`/`test` scripts. Run scripts per package with `bun run --cwd <pkg> <script>`; CI does the same for `lint`, `typecheck` and `test:coverage` across all four packages.
 
 ```bash
 bun install
