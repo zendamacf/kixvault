@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { MoveToCollectionForm } from '@/components/wishlist/move-to-collection-form';
 import { WishlistManualForm } from '@/components/wishlist/wishlist-manual-form';
 import { api, parseApiError } from '@/lib/api';
+import { celebrate } from '@/lib/celebrate';
 import { wishlistItemQueryOptions } from '@/lib/queries';
 import { showGrailClearedToast } from '@/lib/wishlist';
 
@@ -76,6 +77,8 @@ function EditGrailPage() {
       if (!('sneaker' in data)) {
         return;
       }
+
+      celebrate('big');
 
       if (item) {
         showGrailClearedToast([{ brand: item.brand, model: item.model }]);
