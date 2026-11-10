@@ -4,6 +4,7 @@ import { and, desc, eq, gte, isNotNull } from 'drizzle-orm';
 import { db } from '../lib/db';
 import { env } from '../lib/env';
 import { isKicksdbConfigured } from '../lib/kicksdb';
+import { logger } from '../lib/logger';
 import {
   matchVariantPrice,
   refreshCatalogProductWithPrices,
@@ -179,11 +180,11 @@ export async function runPricingRefresh(): Promise<PricingRefreshResult> {
 if (import.meta.main) {
   runPricingRefresh()
     .then((result) => {
-      console.log(JSON.stringify(result));
+      logger.log(JSON.stringify(result));
       process.exit(0);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(error);
       process.exit(1);
     });
 }

@@ -33,12 +33,25 @@ describe('email config', () => {
   });
 });
 
+// The logger redacts configured secrets. CI's database password ("kixvault") also appears in the
+// fixture URLs below, so clear secret env vars to keep these assertions about the email itself.
+const SECRET_ENV_VARS = [
+  'DATABASE_URL',
+  'TEST_DATABASE_URL',
+  'REDIS_URL',
+  'KICKSDB_API_KEY',
+  'RESEND_API_KEY',
+  'SENTRY_AUTH_TOKEN',
+];
+const savedSecrets = Object.fromEntries(SECRET_ENV_VARS.map((name) => [name, process.env[name]]));
+
 describe('sendEmail', () => {
   let infoSpy: ReturnType<typeof spyOn>;
   let errorSpy: ReturnType<typeof spyOn>;
   let fetchSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
+    for (const name of SECRET_ENV_VARS) delete process.env[name];
     mockEnv.resendApiKey = undefined;
     mockEnv.isProduction = false;
     infoSpy = spyOn(console, 'info').mockImplementation(() => undefined);
@@ -47,6 +60,10 @@ describe('sendEmail', () => {
   });
 
   afterEach(() => {
+    for (const [name, value] of Object.entries(savedSecrets)) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
     infoSpy.mockRestore();
     errorSpy.mockRestore();
     fetchSpy.mockRestore();
@@ -57,9 +74,9 @@ describe('sendEmail', () => {
 
     expect(sent).toBe(true);
     expect(fetchSpy).not.toHaveBeenCalled();
-    const [, details] = infoSpy.mock.calls[0] as [string, { to: string; text?: string }];
-    expect(details.to).toBe('user@example.com');
-    expect(details.text).toContain(props.verifyUrl);
+    const line = String(infoSpy.mock.calls[0]?.[0]);
+    expect(line).toContain('user@example.com');
+    expect(line).toContain(props.verifyUrl);
   });
 
   test('does not log the email body in production', async () => {
@@ -67,8 +84,9 @@ describe('sendEmail', () => {
 
     await sendEmail('verifyEmail', 'user@example.com', props);
 
-    const [, details] = infoSpy.mock.calls[0] as [string, { text?: string }];
-    expect(details.text).toBeUndefined();
+    const line = String(infoSpy.mock.calls[0]?.[0]);
+    expect(line).not.toContain('text:');
+    expect(line).not.toContain(props.verifyUrl);
   });
 
   test('posts to Resend when an API key is set', async () => {

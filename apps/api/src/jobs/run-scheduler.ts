@@ -1,16 +1,17 @@
 import { Cron } from 'croner';
 import { env } from '../lib/env';
+import { logger } from '../lib/logger';
 import { runPricingRefresh } from './pricing-refresh';
 
-console.log(`Pricing scheduler started (schedule: ${env.jobSchedule})`);
+logger.log(`Pricing scheduler started (schedule: ${env.jobSchedule})`);
 
 new Cron(env.jobSchedule, async () => {
   try {
-    console.log('Running pricing refresh');
+    logger.log('Running pricing refresh');
     const result = await runPricingRefresh();
-    console.log(JSON.stringify(result));
+    logger.log(JSON.stringify(result));
   } catch (error) {
-    console.error('Pricing refresh failed:', error);
+    logger.error('Pricing refresh failed:', error);
   }
 });
 
