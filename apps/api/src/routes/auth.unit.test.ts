@@ -297,7 +297,19 @@ describe('authRoutes password recovery', () => {
   let fetchSpy: ReturnType<typeof spyOn>;
   let infoSpy: ReturnType<typeof spyOn>;
 
+  // Other test files can stub out the store reset (mock.module is global), so each test uses
+  // its own client IP and addresses instead of relying on a clean store.
+  let testId = 0;
+  const post = (path: string, body: unknown, ip = `10.1.${testId}.1`) =>
+    authRoutes.request(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': ip },
+      body: JSON.stringify(body),
+    });
+  const email = (name = 'user') => `${name}-${testId}@example.com`;
+
   beforeEach(() => {
+    testId += 1;
     resetRateLimitStoreForTests();
     selectRows = [];
     claimedRows = [];
@@ -316,10 +328,7 @@ describe('authRoutes password recovery', () => {
   });
 
   test('forgot-password answers the same for an unknown account and sends nothing', async () => {
-    const response = await authRoutes.request(
-      '/forgot-password',
-      json({ email: 'ghost@example.com' }),
-    );
+    const response = await post('/forgot-password', { email: email('ghost') });
 
     expect(response.status).toBe(200);
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -328,10 +337,7 @@ describe('authRoutes password recovery', () => {
   test('forgot-password does not send to an unverified account', async () => {
     selectRows = [{ id: 'user-1', emailVerifiedAt: null, createdAt: new Date(0) }];
 
-    const response = await authRoutes.request(
-      '/forgot-password',
-      json({ email: 'user@example.com' }),
-    );
+    const response = await post('/forgot-password', { email: email() });
     await Bun.sleep(0);
 
     expect(response.status).toBe(200);
@@ -341,10 +347,7 @@ describe('authRoutes password recovery', () => {
   test('forgot-password emails a verified account', async () => {
     selectRows = [{ id: 'user-1', emailVerifiedAt: new Date(0), createdAt: new Date(0) }];
 
-    const response = await authRoutes.request(
-      '/forgot-password',
-      json({ email: 'user@example.com' }),
-    );
+    const response = await post('/forgot-password', { email: email() });
     await Bun.sleep(0);
 
     expect(response.status).toBe(200);
@@ -354,28 +357,20 @@ describe('authRoutes password recovery', () => {
   test('forgot-password is unavailable when email is not configured', async () => {
     mockEnv.resendApiKey = undefined;
 
-    const response = await authRoutes.request(
-      '/forgot-password',
-      json({ email: 'user@example.com' }),
-    );
+    const response = await post('/forgot-password', { email: email() });
 
     expect(response.status).toBe(503);
   });
 
   test('forgot-password stops emailing one address after the per-address limit', async () => {
     selectRows = [{ id: 'user-1', emailVerifiedAt: new Date(0), createdAt: new Date(0) }];
-    const headers = (ip: string) => ({
-      'Content-Type': 'application/json',
-      'X-Forwarded-For': ip,
-    });
-
     // Different IPs, so only the per-address limit can be what stops the fourth request.
     for (let index = 0; index < 4; index += 1) {
-      const response = await authRoutes.request('/forgot-password', {
-        method: 'POST',
-        headers: headers(`10.0.0.${index}`),
-        body: JSON.stringify({ email: 'user@example.com' }),
-      });
+      const response = await post(
+        '/forgot-password',
+        { email: email() },
+        `10.2.${testId}.${index}`,
+      );
       expect(response.status).toBe(200);
     }
     await Bun.sleep(0);
@@ -385,17 +380,11 @@ describe('authRoutes password recovery', () => {
 
   test('forgot-password returns 429 after 5 requests per IP in an hour', async () => {
     for (let index = 0; index < 5; index += 1) {
-      const response = await authRoutes.request(
-        '/forgot-password',
-        json({ email: `user${index}@example.com` }),
-      );
+      const response = await post('/forgot-password', { email: email(`user${index}`) });
       expect(response.status).toBe(200);
     }
 
-    const response = await authRoutes.request(
-      '/forgot-password',
-      json({ email: 'another@example.com' }),
-    );
+    const response = await post('/forgot-password', { email: email('another') });
 
     expect(response.status).toBe(429);
     expect(response.headers.get('Retry-After')).toBeTruthy();
@@ -404,20 +393,14 @@ describe('authRoutes password recovery', () => {
   test('reset-password rejects an unknown, expired or used token', async () => {
     claimedRows = [];
 
-    const response = await authRoutes.request(
-      '/reset-password',
-      json({ token: 'nope', password: 'new-password-1' }),
-    );
+    const response = await post('/reset-password', { token: 'nope', password: 'new-password-1' });
 
     expect(response.status).toBe(400);
     expect(mockInvalidateUserSessions).not.toHaveBeenCalled();
   });
 
   test('reset-password rejects a weak password', async () => {
-    const response = await authRoutes.request(
-      '/reset-password',
-      json({ token: 'good', password: 'short' }),
-    );
+    const response = await post('/reset-password', { token: 'good', password: 'short' });
 
     expect(response.status).toBe(400);
   });
@@ -425,10 +408,7 @@ describe('authRoutes password recovery', () => {
   test('reset-password sets the password, ends sessions and records it', async () => {
     claimedRows = [{ userId: 'user-1' }];
 
-    const response = await authRoutes.request(
-      '/reset-password',
-      json({ token: 'good', password: 'new-password-1' }),
-    );
+    const response = await post('/reset-password', { token: 'good', password: 'new-password-1' });
 
     expect(response.status).toBe(200);
     expect(response.headers.get('set-cookie')).toBeNull();
