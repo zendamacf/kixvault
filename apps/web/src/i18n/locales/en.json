@@ -14,9 +14,7 @@
   "common": {
     "emptyValue": "—",
     "close": "Close",
-    "back": "Back",
     "cancel": "Cancel",
-    "save": "Save",
     "delete": "Delete",
     "backToCollection": "Back to collection",
     "backToGrails": "Back to grails",
@@ -82,8 +80,7 @@
     "requestNew": "Request a new link",
     "successTitle": "Password updated",
     "successDescription": "Your password has been changed and you have been signed out everywhere. Sign in with your new password.",
-    "successAction": "Go to sign in",
-    "backToSignIn": "Back to sign in"
+    "successAction": "Go to sign in"
   },
   "layout": {
     "skipToContent": "Skip to content",
@@ -349,8 +346,7 @@
     "edit": {
       "title": "Edit pair",
       "description": "Update {{brand}} {{model}}.",
-      "backToDetails": "Back to details",
-      "notFound": "Sneaker not found"
+      "backToDetails": "Back to details"
     },
     "detail": {
       "noColorway": "No colorway listed",
@@ -383,7 +379,8 @@
       "notes": "Notes",
       "about": "About this pair",
       "priceHistory": "Price history"
-    }
+    },
+    "notFound": "Sneaker not found"
   },
   "notFound": {
     "title": "Page not found",

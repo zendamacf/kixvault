@@ -107,7 +107,7 @@ function SneakerDetailPage() {
       <div className="space-y-4">
         <BackLink to={backTarget.to}>{t(backTarget.labelKey)}</BackLink>
         <p className="text-sm text-destructive" role="alert">
-          {error?.message ?? t('sneakers.edit.notFound')}
+          {error?.message ?? t('sneakers.notFound')}
         </p>
       </div>
     );

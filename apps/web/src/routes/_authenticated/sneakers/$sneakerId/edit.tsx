@@ -64,7 +64,7 @@ function EditSneakerPage() {
       <div className="mx-auto max-w-3xl space-y-4">
         <BackLink to="/">{t('common.backToCollection')}</BackLink>
         <p className="text-sm text-destructive" role="alert">
-          {error?.message ?? t('sneakers.edit.notFound')}
+          {error?.message ?? t('sneakers.notFound')}
         </p>
       </div>
     );
