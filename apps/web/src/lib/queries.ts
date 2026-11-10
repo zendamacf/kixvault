@@ -1,5 +1,6 @@
 import type { SneakerCondition, WishlistPriority } from '@kixvault/shared';
 import { keepPreviousData, queryOptions } from '@tanstack/react-query';
+import { i18n } from '@/i18n';
 import { api } from './api';
 
 export type Sneaker = {
@@ -65,7 +66,7 @@ export const sessionQueryOptions = queryOptions({
     const response = await api.api.auth.me.$get();
 
     if (!response.ok) {
-      throw new Error('Failed to load session');
+      throw new Error(i18n.t('errors.loadSession'));
     }
 
     return response.json();
@@ -78,7 +79,7 @@ export const authConfigQueryOptions = queryOptions({
     const response = await api.api.auth.config.$get();
 
     if (!response.ok) {
-      throw new Error('Failed to load auth config');
+      throw new Error(i18n.t('errors.loadAuthConfig'));
     }
 
     return response.json();
@@ -92,7 +93,7 @@ export const statsQueryOptions = queryOptions({
     const response = await api.api.stats.$get();
 
     if (!response.ok) {
-      throw new Error('Failed to load stats');
+      throw new Error(i18n.t('errors.loadStats'));
     }
 
     return response.json();
@@ -105,7 +106,7 @@ export const analyticsQueryOptions = queryOptions({
     const response = await api.api.stats.analytics.$get();
 
     if (!response.ok) {
-      throw new Error('Failed to load analytics');
+      throw new Error(i18n.t('errors.loadAnalytics'));
     }
 
     return response.json();
@@ -135,7 +136,7 @@ export function sneakersQueryOptions(filters: {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to load sneakers');
+        throw new Error(i18n.t('errors.loadSneakers'));
       }
 
       return response.json();
@@ -152,7 +153,7 @@ export function sneakerQueryOptions(id: string) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to load sneaker');
+        throw new Error(i18n.t('errors.loadSneaker'));
       }
 
       return response.json();
@@ -166,7 +167,7 @@ export const wishlistQueryOptions = queryOptions({
     const response = await api.api.wishlist.$get();
 
     if (!response.ok) {
-      throw new Error('Failed to load grails');
+      throw new Error(i18n.t('errors.loadGrails'));
     }
 
     return response.json();
@@ -182,7 +183,7 @@ export function wishlistItemQueryOptions(id: string) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to load grail');
+        throw new Error(i18n.t('errors.loadGrail'));
       }
 
       return response.json();
@@ -199,7 +200,7 @@ export const auditEventsQueryOptions = queryOptions({
     });
 
     if (!response.ok) {
-      throw new Error('Failed to load activity');
+      throw new Error(i18n.t('errors.loadActivity'));
     }
 
     return response.json();
@@ -215,7 +216,7 @@ export function sneakerPriceHistoryQueryOptions(id: string) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to load price history');
+        throw new Error(i18n.t('errors.loadPriceHistory'));
       }
 
       return response.json();
@@ -232,7 +233,7 @@ export function wearsQueryOptions(range: { from: string; to: string }) {
       const response = await api.api.wears.$get({ query: range });
 
       if (!response.ok) {
-        throw new Error('Failed to load wears');
+        throw new Error(i18n.t('errors.loadWears'));
       }
 
       return response.json();

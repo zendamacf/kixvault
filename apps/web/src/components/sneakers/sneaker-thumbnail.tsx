@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 type SneakerThumbnailProps = {
@@ -8,6 +9,8 @@ type SneakerThumbnailProps = {
 
 /** Product image with a fallback placeholder when no URL is available. */
 export function SneakerThumbnail({ imageUrl, alt, className }: SneakerThumbnailProps) {
+  const { t } = useTranslation();
+
   if (!imageUrl) {
     return (
       <div
@@ -16,7 +19,7 @@ export function SneakerThumbnail({ imageUrl, alt, className }: SneakerThumbnailP
           className,
         )}
       >
-        No image
+        {t('common.noImage')}
       </div>
     );
   }

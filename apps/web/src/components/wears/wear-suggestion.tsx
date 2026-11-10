@@ -1,6 +1,7 @@
 import type { SneakerCondition } from '@kixvault/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { api, parseApiError } from '@/lib/api';
@@ -34,6 +35,7 @@ function rememberDismissal(sneakerId: string, condition: SneakerCondition) {
 
 /** Offers a condition change once a pair has enough wears. Dismissals are kept per device. */
 export function WearSuggestion({ sneakerId, wearCount, suggestedCondition }: WearSuggestionProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [dismissed, setDismissed] = useState(() => isDismissed(sneakerId, suggestedCondition));
 
@@ -45,7 +47,7 @@ export function WearSuggestion({ sneakerId, wearCount, suggestedCondition }: Wea
       });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to update condition'));
+        throw new Error(await parseApiError(response, t('errors.updateCondition')));
       }
     },
     onSuccess: async () => {
@@ -54,7 +56,9 @@ export function WearSuggestion({ sneakerId, wearCount, suggestedCondition }: Wea
         queryClient.invalidateQueries({ queryKey: ['stats'] }),
         queryClient.invalidateQueries({ queryKey: ['audit'] }),
       ]);
-      toast.success(`Marked as ${formatCondition(suggestedCondition).toLowerCase()}.`);
+      toast.success(
+        t('wearSuggestion.marked', { target: formatCondition(suggestedCondition).toLowerCase() }),
+      );
     },
     onError: (error) => {
       toast.error(error.message);
@@ -69,16 +73,20 @@ export function WearSuggestion({ sneakerId, wearCount, suggestedCondition }: Wea
 
   return (
     <section
-      aria-label="Condition suggestion"
+      aria-label={t('wearSuggestion.label')}
       className="space-y-3 rounded-2xl bg-card p-4 ring-1 ring-border"
     >
       <p className="text-sm">
-        Worn {wearCount} {wearCount === 1 ? 'time' : 'times'}. Mark this pair as{' '}
-        <strong className="font-semibold">{target}</strong>?
+        <Trans
+          i18nKey="wearSuggestion.prompt"
+          count={wearCount}
+          values={{ target }}
+          components={{ strong: <strong className="font-semibold" /> }}
+        />
       </p>
       <div className="flex gap-2">
         <Button size="sm" disabled={accept.isPending} onClick={() => accept.mutate()}>
-          Mark as {target}
+          {t('wearSuggestion.accept', { target })}
         </Button>
         <Button
           size="sm"
@@ -88,7 +96,7 @@ export function WearSuggestion({ sneakerId, wearCount, suggestedCondition }: Wea
             setDismissed(true);
           }}
         >
-          Not now
+          {t('wearSuggestion.notNow')}
         </Button>
       </div>
     </section>

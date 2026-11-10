@@ -1,5 +1,6 @@
 import type { WishlistPriority } from '@kixvault/shared';
 import { toast } from 'sonner';
+import { i18n } from '@/i18n';
 
 export type ClearedGrailSummary = {
   brand: string;
@@ -9,11 +10,10 @@ export type ClearedGrailSummary = {
 export function formatWishlistPriority(priority: WishlistPriority): string {
   switch (priority) {
     case 'low':
-      return 'Low priority';
     case 'high':
-      return 'High priority';
+      return i18n.t(`priority.${priority}`);
     default:
-      return 'Medium priority';
+      return i18n.t('priority.medium');
   }
 }
 
@@ -29,11 +29,7 @@ export function getWishlistPriorityDotClassName(priority: WishlistPriority): str
 }
 
 export function formatGrailClearedMessage(clearedGrails: ClearedGrailSummary[]): string {
-  if (clearedGrails.length === 1) {
-    return `Congrats, you got your grail!`;
-  }
-
-  return `Congrats, you got ${clearedGrails.length} grails!`;
+  return i18n.t('grails.cleared', { count: clearedGrails.length });
 }
 
 export function showGrailClearedToast(clearedGrails: ClearedGrailSummary[]) {

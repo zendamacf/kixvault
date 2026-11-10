@@ -5,6 +5,7 @@ import type {
 } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BackButton } from '@/components/layout/back-button';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { CollectionSneakerForm } from '@/components/sneakers/collection-sneaker-form';
@@ -23,6 +24,7 @@ export function CatalogSneakerForm({
   isSubmitting = false,
   onSubmit,
 }: CatalogSneakerFormProps) {
+  const { t } = useTranslation();
   const [selectedResult, setSelectedResult] = useState<CatalogSearchResult | null>(null);
   const [query, setQuery] = useState('');
 
@@ -44,7 +46,9 @@ export function CatalogSneakerForm({
         <CatalogSearchPicker query={query} onQueryChange={setQuery} onSelect={setSelectedResult} />
       ) : (
         <>
-          <BackButton onClick={() => setSelectedResult(null)}>Back to search</BackButton>
+          <BackButton onClick={() => setSelectedResult(null)}>
+            {t('catalogForm.backToSearch')}
+          </BackButton>
 
           {isLoading ? (
             <div className="space-y-4 rounded-2xl bg-card p-4 ring-1 ring-border">
@@ -57,10 +61,7 @@ export function CatalogSneakerForm({
           {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
 
           {catalogProduct?.unavailable ? (
-            <p className="text-sm text-muted-foreground">
-              Catalog pricing is unavailable. You can still add this pair, but market value will not
-              be stored.
-            </p>
+            <p className="text-sm text-muted-foreground">{t('catalogForm.pricingUnavailable')}</p>
           ) : null}
 
           {summary ? (

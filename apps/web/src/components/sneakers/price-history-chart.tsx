@@ -1,5 +1,6 @@
 import type { PriceSnapshotEntry } from '@kixvault/shared';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CartesianGrid, Line, LineChart, ReferenceLine, XAxis, YAxis } from 'recharts';
 import {
   type ChartConfig,
@@ -15,10 +16,6 @@ type PriceHistoryChartProps = {
   /** Optional purchase price drawn as a dashed reference line. */
   purchasePrice?: number | null;
 };
-
-const chartConfig = {
-  price: { label: 'Market price', color: 'var(--chart-1)' },
-} satisfies ChartConfig;
 
 type PurchasePriceLineProps = {
   x1?: number;
@@ -36,8 +33,9 @@ export function PurchasePriceLine({
   y2 = 0,
   purchasePrice,
 }: PurchasePriceLineProps) {
+  const { t } = useTranslation();
   const [active, setActive] = useState(false);
-  const label = `${formatCurrency(purchasePrice)} paid`;
+  const label = t('priceHistory.paid', { value: formatCurrency(purchasePrice) });
 
   return (
     <g>
@@ -83,11 +81,15 @@ export function PurchasePriceLine({
 
 /** Line chart of market price snapshots over time. */
 export function PriceHistoryChart({ history, purchasePrice }: PriceHistoryChartProps) {
+  const { t } = useTranslation();
   if (history.length === 0) {
     return null;
   }
 
   const data = sortSnapshotsAscending(history);
+  const chartConfig = {
+    price: { label: t('priceHistory.marketPrice'), color: 'var(--chart-1)' },
+  } satisfies ChartConfig;
 
   return (
     <div className="rounded-2xl bg-card p-4 ring-1 ring-border">
@@ -95,7 +97,7 @@ export function PriceHistoryChart({ history, purchasePrice }: PriceHistoryChartP
         config={chartConfig}
         className="h-56 w-full"
         role="img"
-        aria-label="Market price over time"
+        aria-label={t('priceHistory.chartLabel')}
       >
         <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid vertical={false} />

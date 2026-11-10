@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { i18n } from '@/i18n';
 import { api, parseApiError } from '@/lib/api';
 import { trackUmamiEvent } from '@/lib/umami';
 import { UmamiEvents } from '@/lib/umami-events';
@@ -12,7 +13,7 @@ export function useLogout() {
       const response = await api.api.auth.logout.$post();
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to log out'));
+        throw new Error(await parseApiError(response, i18n.t('errors.logOut')));
       }
     },
     onSuccess: async () => {

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { Footprints, Plus } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppFooter } from '@/components/layout/app-footer';
 import { AuthLayout } from '@/components/layout/auth-layout';
 import { BrandLockup } from '@/components/layout/brand-lockup';
@@ -19,6 +20,7 @@ const AUTH_PATHS = new Set(['/login', '/register', '/verify-email', '/verify-ema
 
 /** Root layout with header, main content area, and auth vs. authenticated shells. */
 export function AppShell() {
+  const { t } = useTranslation();
   const routerState = useRouterState();
   const { data } = useQuery(sessionQueryOptions);
   const user = data?.user ?? null;
@@ -54,7 +56,7 @@ export function AppShell() {
         href="#main-content"
         className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-2 focus-visible:left-4 focus-visible:z-50 focus-visible:rounded-md focus-visible:bg-primary focus-visible:px-3 focus-visible:py-2 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-primary-foreground"
       >
-        Skip to content
+        {t('layout.skipToContent')}
       </a>
       <header className="sticky top-0 z-10 bg-chrome text-chrome-foreground">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
@@ -63,23 +65,26 @@ export function AppShell() {
             <Link
               to="/"
               className="group flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand"
-              aria-label={`${APP_NAME} home`}
+              aria-label={t('layout.homeLabel', { appName: APP_NAME })}
             >
               <BrandLockup className="h-9 w-auto" />
             </Link>
             {user ? (
-              <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
+              <nav
+                className="hidden items-center gap-1 md:flex"
+                aria-label={t('layout.mainNavLabel')}
+              >
                 <Link to="/" className={navLinkClass(isCollectionRoute)}>
-                  Collection
+                  {t('layout.nav.collection')}
                 </Link>
                 <Link to="/grails" className={navLinkClass(isGrailsRoute)}>
-                  Grails
+                  {t('layout.nav.grails')}
                 </Link>
                 <Link to="/wears" className={navLinkClass(isWearsRoute)}>
-                  Wears
+                  {t('layout.nav.wears')}
                 </Link>
                 <Link to="/analytics" className={navLinkClass(isAnalyticsRoute)}>
-                  Analytics
+                  {t('layout.nav.analytics')}
                 </Link>
               </nav>
             ) : null}
@@ -94,19 +99,19 @@ export function AppShell() {
                 <Button
                   variant="outline"
                   className="border-chrome-foreground/25 bg-transparent text-chrome-foreground hover:bg-chrome-foreground/12 hover:text-chrome-foreground dark:bg-transparent"
-                  aria-label="Log wear"
+                  aria-label={t('layout.logWear')}
                   onClick={() => setQuickLogOpen(true)}
                 >
                   <Footprints className="size-4" aria-hidden />
-                  <span className="hidden sm:inline">Log wear</span>
+                  <span className="hidden sm:inline">{t('layout.logWear')}</span>
                 </Button>
                 <Link
                   to="/sneakers/new"
                   className={buttonVariants({ size: 'default' })}
-                  aria-label="Add pair"
+                  aria-label={t('layout.addPair')}
                 >
                   <Plus className="size-4" aria-hidden />
-                  <span className="hidden sm:inline">Add pair</span>
+                  <span className="hidden sm:inline">{t('layout.addPair')}</span>
                 </Link>
                 <div className="hidden md:block">
                   <UserMenu user={user} />

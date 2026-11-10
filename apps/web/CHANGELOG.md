@@ -11,7 +11,7 @@
   - Grails, activity, sneaker detail and the add and edit forms follow the same style.
   - Also adds a 404 page, a skip-to-content link, a keyboard-accessible add mode switch, and sentence-case condition labels, and keeps the current results on screen while filters load.
   - Removes the per-brand badge colours.
-- 1b8bcdf: Replace Light, Dark and System with sneaker colourway themes.
+- 1b8bcdf: Replace Light, Dark and System with sneaker colorway themes.
   
   - Pick from Shattered Backboard (the new default), Chicago, UNC, Panda, Bred, Royal and Mocha from the palette menu in the header.
   - Your previous light or dark choice is reset to the default theme.

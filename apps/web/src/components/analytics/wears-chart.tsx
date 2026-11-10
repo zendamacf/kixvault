@@ -1,4 +1,5 @@
 import type { WearsByMonthPoint } from '@kixvault/shared';
+import { useTranslation } from 'react-i18next';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import {
   type ChartConfig,
@@ -8,18 +9,19 @@ import {
 } from '@/components/ui/chart';
 import { formatMonth } from '@/lib/analytics';
 
-const chartConfig = {
-  count: { label: 'Wears', color: 'var(--chart-2)' },
-} satisfies ChartConfig;
-
 /** Wears per month over the last year. */
 export function WearsChart({ data }: { data: WearsByMonthPoint[] }) {
+  const { t } = useTranslation();
+  const chartConfig = {
+    count: { label: t('charts.wears'), color: 'var(--chart-2)' },
+  } satisfies ChartConfig;
+
   return (
     <ChartContainer
       config={chartConfig}
       className="h-56 w-full"
       role="img"
-      aria-label="Wears per month"
+      aria-label={t('charts.wearsPerMonth')}
     >
       <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
         <CartesianGrid vertical={false} />

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CollectionSummary } from '@/components/collection/collection-summary';
 import { EmptyState } from '@/components/collection/empty-state';
 import { SneakerGridSkeleton } from '@/components/collection/sneaker-grid-skeleton';
@@ -26,14 +27,14 @@ const DEBOUNCE_DELAY = 300;
 const DEFAULT_SORT = 'created_at:desc';
 
 const SORT_OPTIONS = [
-  { value: 'created_at:desc', label: 'Recently added' },
-  { value: 'created_at:asc', label: 'Oldest added' },
-  { value: 'purchase_date:desc', label: 'Newest purchase' },
-  { value: 'purchase_date:asc', label: 'Oldest purchase' },
-  { value: 'purchase_price:desc', label: 'Price paid, high to low' },
-  { value: 'purchase_price:asc', label: 'Price paid, low to high' },
-  { value: 'brand:asc', label: 'Brand, A to Z' },
-  { value: 'brand:desc', label: 'Brand, Z to A' },
+  'created_at:desc',
+  'created_at:asc',
+  'purchase_date:desc',
+  'purchase_date:asc',
+  'purchase_price:desc',
+  'purchase_price:asc',
+  'brand:asc',
+  'brand:desc',
 ] as const;
 
 type SneakerConditionFilter = SneakerCondition | '';
@@ -43,6 +44,7 @@ export const Route = createFileRoute('/_authenticated/')({
 });
 
 function CollectionPage() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [condition, setCondition] = useState<SneakerConditionFilter>('');
   const [sortKey, setSortKey] = useState<string>(DEFAULT_SORT);
@@ -76,13 +78,13 @@ function CollectionPage() {
   }
 
   const conditionChips: { value: SneakerConditionFilter; label: string }[] = [
-    { value: '', label: 'All' },
+    { value: '', label: t('collection.allConditions') },
     ...sneakerConditions.map((value) => ({ value, label: formatCondition(value) })),
   ];
 
   return (
     <div className="space-y-10">
-      <h1 className="sr-only">Your collection</h1>
+      <h1 className="sr-only">{t('collection.pageTitle')}</h1>
 
       <CollectionSummary
         count={statsData?.stats.count}
@@ -93,11 +95,11 @@ function CollectionPage() {
         isLoading={statsLoading}
       />
 
-      <section className="space-y-6" aria-label="Pairs">
+      <section className="space-y-6" aria-label={t('collection.pairsLabel')}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <div className="relative lg:w-80">
             <Label htmlFor="search-filter" className="sr-only">
-              Search your collection
+              {t('collection.searchLabel')}
             </Label>
             <Search
               className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
@@ -107,14 +109,14 @@ function CollectionPage() {
               id="search-filter"
               type="search"
               className="pl-9"
-              placeholder="Search brand, model, colorway, SKU"
+              placeholder={t('collection.searchPlaceholder')}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
           </div>
 
           <fieldset className="-mx-4 flex min-w-0 gap-1.5 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0 lg:pb-0">
-            <legend className="sr-only">Condition</legend>
+            <legend className="sr-only">{t('collection.conditionLegend')}</legend>
             {conditionChips.map((chip) => {
               const active = condition === chip.value;
 
@@ -140,11 +142,11 @@ function CollectionPage() {
           <div className="flex items-center gap-2 lg:ml-auto">
             {hasCustomView ? (
               <Button type="button" variant="ghost" onClick={clearFilters}>
-                Reset
+                {t('collection.reset')}
               </Button>
             ) : null}
             <Label htmlFor="sort-filter" className="sr-only">
-              Sort pairs
+              {t('collection.sortLabel')}
             </Label>
             <Select value={sortKey} onValueChange={setSortKey}>
               <SelectTrigger id="sort-filter" className="w-full lg:w-56">
@@ -152,8 +154,8 @@ function CollectionPage() {
               </SelectTrigger>
               <SelectContent>
                 {SORT_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                  <SelectItem key={option} value={option}>
+                    {t(`collection.sort.${option}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -162,7 +164,7 @@ function CollectionPage() {
         </div>
 
         <p className="min-h-5 text-sm text-muted-foreground" aria-live="polite">
-          {isLoading ? '' : `${sneakers.length} ${sneakers.length === 1 ? 'pair' : 'pairs'}`}
+          {isLoading ? '' : t('collection.pairCount', { count: sneakers.length })}
         </p>
 
         {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
@@ -171,17 +173,17 @@ function CollectionPage() {
 
         {!isLoading && sneakers.length === 0 && totalCount === 0 ? (
           <EmptyState
-            title="Your vault is empty"
-            description="Add your first pair to start tracking brands, sizes, and spend."
-            actionLabel="Add your first pair"
+            title={t('collection.empty.title')}
+            description={t('collection.empty.description')}
+            actionLabel={t('collection.empty.action')}
             actionTo="/sneakers/new"
           />
         ) : null}
 
         {!isLoading && sneakers.length === 0 && totalCount > 0 ? (
           <EmptyState
-            title="No matches found"
-            description="Try a different brand or condition, or reset the filters."
+            title={t('collection.noMatches.title')}
+            description={t('collection.noMatches.description')}
             onClearFilters={clearFilters}
           />
         ) : null}

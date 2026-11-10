@@ -27,7 +27,7 @@ function RootComponent() {
       defaultTheme={DEFAULT_THEME}
       enableSystem={false}
       enableColorScheme={false}
-      storageKey="kixvault-colourway"
+      storageKey="kixvault-colorway"
     >
       <ThemeFavicon />
       <QueryClientProvider client={queryClient}>

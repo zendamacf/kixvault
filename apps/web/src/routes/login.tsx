@@ -46,7 +46,7 @@ function LoginPage() {
       const response = await api.api.auth.login.$post({ json: values });
 
       if (!response.ok) {
-        throw await toApiError(response, 'Failed to log in');
+        throw await toApiError(response, t('errors.logIn'));
       }
 
       return response.json();

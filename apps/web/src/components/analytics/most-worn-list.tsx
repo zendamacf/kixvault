@@ -1,8 +1,10 @@
 import type { MostWornEntry } from '@kixvault/shared';
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 
 /** Ranked list of the most-worn pairs, with proportional bars. */
 export function MostWornList({ entries }: { entries: MostWornEntry[] }) {
+  const { t } = useTranslation();
   const max = Math.max(...entries.map((entry) => entry.count), 1);
 
   return (
@@ -20,7 +22,7 @@ export function MostWornList({ entries }: { entries: MostWornEntry[] }) {
               {entry.name}
             </Link>
             <span className="shrink-0 tabular-nums text-muted-foreground">
-              {entry.count} {entry.count === 1 ? 'wear' : 'wears'}
+              {t('common.wearCount', { count: entry.count })}
             </span>
           </div>
           <div className="h-1.5 rounded-full bg-muted" aria-hidden>

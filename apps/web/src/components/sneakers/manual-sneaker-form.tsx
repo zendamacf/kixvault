@@ -2,14 +2,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { type CreateSneakerInput, createSneakerSchema } from '@kixvault/shared';
 import type { Control, FieldErrors, UseFormRegister } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { SneakerCollectionFields } from '@/components/sneakers/sneaker-collection-fields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { i18n } from '@/i18n';
 
 const manualSneakerFormSchema = createSneakerSchema.extend({
-  size: z.number({ error: 'Size is required' }).positive().max(99),
+  size: z
+    .number({ error: () => i18n.t('forms.sizeRequired') })
+    .positive()
+    .max(99),
   purchasePrice: z
     .number()
     .nonnegative()
@@ -42,6 +47,7 @@ export function ManualSneakerForm({
   isSubmitting = false,
   onSubmit,
 }: ManualSneakerFormProps) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -88,25 +94,41 @@ export function ManualSneakerForm({
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="brand">Brand</Label>
-          <Input id="brand" placeholder="Nike" {...register('brand')} />
+          <Label htmlFor="brand">{t('common.brand')}</Label>
+          <Input
+            id="brand"
+            placeholder={t('sneakerForm.brandPlaceholder')}
+            {...register('brand')}
+          />
           {errors.brand ? <p className="text-sm text-destructive">{errors.brand.message}</p> : null}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="model">Model</Label>
-          <Input id="model" placeholder="Air Jordan 1" {...register('model')} />
+          <Label htmlFor="model">{t('common.model')}</Label>
+          <Input
+            id="model"
+            placeholder={t('sneakerForm.modelPlaceholder')}
+            {...register('model')}
+          />
           {errors.model ? <p className="text-sm text-destructive">{errors.model.message}</p> : null}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="colorway">Colorway</Label>
-          <Input id="colorway" placeholder="Chicago" {...register('colorway')} />
+          <Label htmlFor="colorway">{t('common.colorway')}</Label>
+          <Input
+            id="colorway"
+            placeholder={t('sneakerForm.colorwayPlaceholder')}
+            {...register('colorway')}
+          />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="nickname">Nickname</Label>
-          <Input id="nickname" placeholder="Chicago" {...register('nickname')} />
+          <Label htmlFor="nickname">{t('sneakerForm.nickname')}</Label>
+          <Input
+            id="nickname"
+            placeholder={t('sneakerForm.nicknamePlaceholder')}
+            {...register('nickname')}
+          />
         </div>
       </div>
 
@@ -117,7 +139,7 @@ export function ManualSneakerForm({
       />
 
       <Button type="submit" size="lg" className="sm:w-fit" disabled={isSubmitting}>
-        {isSubmitting ? 'Saving...' : submitLabel}
+        {isSubmitting ? t('common.saving') : submitLabel}
       </Button>
     </form>
   );

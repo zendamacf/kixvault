@@ -1,0 +1,25 @@
+{
+  "common": {
+    "signOff": "{{appName}}. Built for sneaker collectors.",
+    "linkFallback": "Button not working? Paste this link into your browser:"
+  },
+  "verifyEmail": {
+    "subject": "Confirm your {{appName}} email",
+    "heading": "Confirm your email",
+    "intro": "Welcome to {{appName}}. Confirm your email address to finish creating your vault.",
+    "textIntro": "Welcome to {{appName}}.",
+    "action": "Confirm email",
+    "textAction": "Confirm your email address: {{url}}",
+    "expiry_one": "This link expires in {{count}} hour and works once. If you did not create a {{appName}} account, ignore this email.",
+    "expiry_other": "This link expires in {{count}} hours and works once. If you did not create a {{appName}} account, ignore this email."
+  },
+  "resetPassword": {
+    "subject": "Reset your {{appName}} password",
+    "heading": "Reset your password",
+    "intro": "Someone asked to reset the password for your {{appName}} account.",
+    "action": "Choose a new password",
+    "textAction": "Choose a new password: {{url}}",
+    "expiry_one": "This link expires in {{count}} minute and works once. If you did not ask to reset your password, ignore this email and your password stays the same.",
+    "expiry_other": "This link expires in {{count}} minutes and works once. If you did not ask to reset your password, ignore this email and your password stays the same."
+  }
+}

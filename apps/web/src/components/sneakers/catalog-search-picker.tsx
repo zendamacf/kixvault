@@ -1,5 +1,6 @@
 import type { CatalogSearchResult } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,6 +27,7 @@ export function CatalogSearchPicker({
   onSelect,
   selectedCatalogId,
 }: CatalogSearchPickerProps) {
+  const { t } = useTranslation();
   const debouncedQuery = useDebouncedValue(query.trim(), DEBOUNCE_DELAY);
   const canSearch = debouncedQuery.length >= 3;
 
@@ -40,26 +42,22 @@ export function CatalogSearchPicker({
   return (
     <div className="min-w-0 space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="catalog-search">Find a sneaker</Label>
+        <Label htmlFor="catalog-search">{t('catalogSearch.find')}</Label>
         <Input
           id="catalog-search"
-          placeholder="Search by name or SKU"
+          placeholder={t('catalogSearch.placeholder')}
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
         />
-        <p className="text-sm text-muted-foreground">
-          Searches StockX. Try "Air Jordan 1 Chicago" or "DZ5485-100".
-        </p>
+        <p className="text-sm text-muted-foreground">{t('catalogSearch.hint')}</p>
       </div>
 
       {!canSearch && query.trim().length > 0 ? (
-        <p className="text-sm text-muted-foreground">Type at least 3 characters to search.</p>
+        <p className="text-sm text-muted-foreground">{t('catalogSearch.minChars')}</p>
       ) : null}
 
       {unavailable ? (
-        <p className="text-sm text-muted-foreground">
-          Catalog search is unavailable. Switch to manual entry to add a pair.
-        </p>
+        <p className="text-sm text-muted-foreground">{t('catalogSearch.unavailable')}</p>
       ) : null}
 
       {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
@@ -88,7 +86,7 @@ export function CatalogSearchPicker({
 
       {canSearch && !isLoading && !isFetching && !error && !unavailable && results.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No sneakers found on StockX for &ldquo;{debouncedQuery}&rdquo;.
+          {t('catalogSearch.noResults', { query: debouncedQuery })}
         </p>
       ) : null}
 

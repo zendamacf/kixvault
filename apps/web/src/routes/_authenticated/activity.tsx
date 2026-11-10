@@ -15,9 +15,10 @@ import {
   Trophy,
   UserPlus,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { BackLink } from '@/components/layout/back-link';
 import { Skeleton } from '@/components/ui/skeleton';
-import { actionLabels, formatEventDetail, formatEventTime, groupByDay } from '@/lib/activity';
+import { actionLabel, formatEventDetail, formatEventTime, groupByDay } from '@/lib/activity';
 import { auditEventsQueryOptions } from '@/lib/queries';
 
 export const Route = createFileRoute('/_authenticated/activity')({
@@ -40,6 +41,7 @@ const actionIcons: Record<AuditAction, LucideIcon> = {
 };
 
 function ActivityPage() {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useQuery(auditEventsQueryOptions);
   const events = data?.events ?? [];
   const retentionDays = data?.retentionDays ?? 90;
@@ -48,12 +50,12 @@ function ActivityPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <div className="space-y-4">
-        <BackLink to="/">Back to collection</BackLink>
+        <BackLink to="/">{t('activityPage.back')}</BackLink>
         <div className="space-y-1">
-          <h1 className="font-heading text-4xl font-semibold tracking-tight">Activity</h1>
-          <p className="text-muted-foreground">
-            Sign-ins, grails, and changes to your collection, newest first.
-          </p>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">
+            {t('activityPage.title')}
+          </h1>
+          <p className="text-muted-foreground">{t('activityPage.description')}</p>
         </div>
       </div>
 
@@ -66,15 +68,15 @@ function ActivityPage() {
 
       {error ? (
         <p className="text-sm text-destructive" role="alert">
-          Could not load activity. Try again in a moment.
+          {t('activityPage.loadFailed')}
         </p>
       ) : null}
 
       {!isLoading && !error && events.length === 0 ? (
         <div className="rounded-2xl bg-card px-6 py-12 text-center ring-1 ring-border">
-          <p className="font-heading text-lg font-semibold">Nothing here yet</p>
+          <p className="font-heading text-lg font-semibold">{t('activityPage.emptyTitle')}</p>
           <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-            Signing in, adding grails and adding pairs will show up here.
+            {t('activityPage.emptyDescription')}
           </p>
         </div>
       ) : null}
@@ -98,7 +100,7 @@ function ActivityPage() {
                         <Icon className="size-4" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium">{actionLabels[event.action]}</p>
+                        <p className="font-medium">{actionLabel(event.action)}</p>
                         {pair ? (
                           <p className="truncate text-sm text-muted-foreground">{pair}</p>
                         ) : null}
@@ -119,7 +121,7 @@ function ActivityPage() {
         : null}
 
       <p className="text-sm text-muted-foreground">
-        Activity older than {retentionDays} days is no longer shown.
+        {t('activityPage.retention', { days: retentionDays })}
       </p>
     </div>
   );

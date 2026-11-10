@@ -1,4 +1,5 @@
 import { APP_NAME } from '@kixvault/shared';
+import type { TFunction } from 'i18next';
 
 /**
  * Colors mirror the default KixVault theme (apps/web/src/index.css) and the app icon
@@ -61,23 +62,21 @@ export function renderButton(href: string, label: string): string {
 }
 
 /** Fallback for clients that block buttons: the raw link as plain text. */
-export function renderLinkFallback(href: string): string {
-  return `<p class="muted" style="margin:16px 0 0;font-size:12px;color:${emailColors.light.muted};word-break:break-all;">Button not working? Paste this link into your browser:<br>${escapeHtml(href)}</p>`;
+export function renderLinkFallback(href: string, t: TFunction): string {
+  return `<p class="muted" style="margin:16px 0 0;font-size:12px;color:${emailColors.light.muted};word-break:break-all;">${escapeHtml(t('common.linkFallback'))}<br>${escapeHtml(href)}</p>`;
 }
-
-/** Closing line shared by every email. */
-export const EMAIL_SIGN_OFF = `${APP_NAME}. Built for sneaker collectors.`;
 
 /**
  * Shared HTML shell for every transactional email: ink header with the wordmark, themed card,
  * light and dark mode (through prefers-color-scheme where the client supports it).
- * `bodyHtml` must already be escaped: build it with the render helpers above.
+ * `bodyHtml` must already be escaped: build it with the render helpers above. `t` is fixed to the
+ * email's locale, which also sets the document language.
  */
-export function renderLayout(bodyHtml: string): string {
+export function renderLayout(bodyHtml: string, t: TFunction, locale: string): string {
   const l = emailColors.light;
   const d = emailColors.dark;
   return `<!doctype html>
-<html lang="en">
+<html lang="${escapeHtml(locale)}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -100,7 +99,7 @@ export function renderLayout(bodyHtml: string): string {
       </div>
       <div class="card" style="background:${l.card};color:${l.text};border:1px solid ${l.border};border-top:0;border-radius:0 0 16px 16px;padding:28px;font-size:16px;line-height:1.5;">
         ${bodyHtml}
-        <p class="muted" style="margin:28px 0 0;font-size:12px;color:${l.muted};">${escapeHtml(EMAIL_SIGN_OFF)}</p>
+        <p class="muted" style="margin:28px 0 0;font-size:12px;color:${l.muted};">${escapeHtml(t('common.signOff', { appName: APP_NAME }))}</p>
       </div>
     </div>
   </body>

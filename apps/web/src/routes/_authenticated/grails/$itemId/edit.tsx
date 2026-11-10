@@ -2,6 +2,7 @@ import type { MoveWishlistToCollectionInput, UpdateWishlistItemInput } from '@ki
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { BackLink } from '@/components/layout/back-link';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ export const Route = createFileRoute('/_authenticated/grails/$itemId/edit')({
 });
 
 function EditGrailPage() {
+  const { t } = useTranslation();
   const { itemId } = Route.useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -31,7 +33,7 @@ function EditGrailPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to update grail'));
+        throw new Error(await parseApiError(response, t('errors.updateGrail')));
       }
 
       return response.json();
@@ -48,7 +50,7 @@ function EditGrailPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to remove grail'));
+        throw new Error(await parseApiError(response, t('errors.removeGrail')));
       }
     },
     onSuccess: async () => {
@@ -65,7 +67,7 @@ function EditGrailPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to move to collection'));
+        throw new Error(await parseApiError(response, t('errors.moveToCollection')));
       }
 
       return response.json();
@@ -99,9 +101,9 @@ function EditGrailPage() {
   if (error || !item) {
     return (
       <div className="mx-auto max-w-3xl space-y-4">
-        <BackLink to="/grails">Back to grails</BackLink>
+        <BackLink to="/grails">{t('common.backToGrails')}</BackLink>
         <p className="text-sm text-destructive" role="alert">
-          Grail not found.
+          {t('grails.edit.notFound')}
         </p>
       </div>
     );
@@ -110,7 +112,7 @@ function EditGrailPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-10">
       <div className="space-y-5">
-        <BackLink to="/grails">Back to grails</BackLink>
+        <BackLink to="/grails">{t('common.backToGrails')}</BackLink>
         <div className="flex items-center gap-5">
           <div className="w-28 shrink-0 rounded-2xl bg-card ring-1 ring-border">
             <SneakerThumbnail
@@ -127,7 +129,7 @@ function EditGrailPage() {
       </div>
 
       <WishlistManualForm
-        submitLabel={updateMutation.isPending ? 'Saving…' : 'Save changes'}
+        submitLabel={updateMutation.isPending ? t('common.saving') : t('common.saveChanges')}
         isSubmitting={updateMutation.isPending}
         defaultValues={{
           brand: item.brand,
@@ -156,7 +158,7 @@ function EditGrailPage() {
           disabled={deleteMutation.isPending}
         >
           <Trash2 aria-hidden />
-          Remove from grails
+          {t('grails.edit.remove')}
         </Button>
       </div>
     </div>

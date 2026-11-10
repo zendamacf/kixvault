@@ -1,4 +1,5 @@
 import type { ConditionBreakdownEntry } from '@kixvault/shared';
+import { useTranslation } from 'react-i18next';
 import { Cell, Pie, PieChart } from 'recharts';
 import {
   type ChartConfig,
@@ -8,22 +9,23 @@ import {
 } from '@/components/ui/chart';
 import { formatCondition } from '@/lib/utils';
 
-const chartConfig = {
-  deadstock: { label: 'Deadstock', color: 'var(--chart-1)' },
-  lightly_worn: { label: 'Lightly worn', color: 'var(--chart-2)' },
-  worn: { label: 'Worn', color: 'var(--chart-3)' },
-  beat: { label: 'Beat', color: 'var(--chart-4)' },
-} satisfies ChartConfig;
-
 /** Share of pairs in each condition, with a legend that doubles as a text alternative. */
 export function ConditionChart({ data }: { data: ConditionBreakdownEntry[] }) {
+  const { t } = useTranslation();
+  const chartConfig = {
+    deadstock: { label: formatCondition('deadstock'), color: 'var(--chart-1)' },
+    lightly_worn: { label: formatCondition('lightly_worn'), color: 'var(--chart-2)' },
+    worn: { label: formatCondition('worn'), color: 'var(--chart-3)' },
+    beat: { label: formatCondition('beat'), color: 'var(--chart-4)' },
+  } satisfies ChartConfig;
+
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-8">
       <ChartContainer
         config={chartConfig}
         className="aspect-square h-48 shrink-0"
         role="img"
-        aria-label="Pairs per condition"
+        aria-label={t('charts.pairsPerCondition')}
       >
         <PieChart>
           <ChartTooltip content={<ChartTooltipContent hideLabel nameKey="condition" />} />

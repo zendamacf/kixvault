@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +21,6 @@ import {
   toIsoDate,
 } from '@/lib/wears';
 
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 // Wearing two pairs in one day is rare, so the cell is built around one large sneaker.
 const MAX_THUMBNAILS = 2;
 
@@ -38,6 +38,7 @@ function wearLabel(wear: CalendarWear): string {
 
 /** Month grid of worn pairs. Days with wears open a dialog to review or remove them. */
 export function WearCalendar({ year, month, wears, onMonthChange, onAddWear }: WearCalendarProps) {
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const removeWear = useRemoveWear();
 
@@ -55,6 +56,7 @@ export function WearCalendar({ year, month, wears, onMonthChange, onAddWear }: W
     onMonthChange(next.getFullYear(), next.getMonth());
   }
 
+  const weekdays = t('wearCalendar.weekdays', { returnObjects: true }) as string[];
   const selectedWears = selectedDate ? (wearsByDay.get(selectedDate) ?? []) : [];
 
   return (
@@ -72,12 +74,12 @@ export function WearCalendar({ year, month, wears, onMonthChange, onAddWear }: W
               onMonthChange(now.getFullYear(), now.getMonth());
             }}
           >
-            Today
+            {t('wearCalendar.today')}
           </Button>
           <Button
             variant="outline"
             size="icon"
-            aria-label="Previous month"
+            aria-label={t('wearCalendar.previousMonth')}
             onClick={() => goToMonth(-1)}
           >
             <ChevronLeft aria-hidden />
@@ -85,7 +87,7 @@ export function WearCalendar({ year, month, wears, onMonthChange, onAddWear }: W
           <Button
             variant="outline"
             size="icon"
-            aria-label="Next month"
+            aria-label={t('wearCalendar.nextMonth')}
             onClick={() => goToMonth(1)}
           >
             <ChevronRight aria-hidden />
@@ -95,7 +97,7 @@ export function WearCalendar({ year, month, wears, onMonthChange, onAddWear }: W
 
       <div className="overflow-hidden rounded-2xl bg-card ring-1 ring-border">
         <div className="grid grid-cols-7 border-b border-border bg-muted/50 text-center text-xs font-medium text-muted-foreground">
-          {WEEKDAYS.map((weekday) => (
+          {weekdays.map((weekday) => (
             <div key={weekday} className="py-2">
               {weekday}
             </div>
@@ -118,11 +120,14 @@ export function WearCalendar({ year, month, wears, onMonthChange, onAddWear }: W
                 type="button"
                 disabled={isFuture}
                 onClick={() => setSelectedDate(iso)}
-                aria-label={`${day.toLocaleDateString(undefined, {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                })}, ${dayWears.length} ${dayWears.length === 1 ? 'wear' : 'wears'}`}
+                aria-label={t('wearCalendar.dayLabel', {
+                  date: day.toLocaleDateString(undefined, {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                  }),
+                  wears: t('common.wearCount', { count: dayWears.length }),
+                })}
                 className={cn(
                   'relative flex min-h-20 flex-col border-r border-b border-border p-1 text-left outline-none transition-colors last:border-r-0 focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring sm:min-h-28 sm:p-1.5',
                   'hover:bg-muted/60 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent',
@@ -181,8 +186,8 @@ export function WearCalendar({ year, month, wears, onMonthChange, onAddWear }: W
             </DialogTitle>
             <DialogDescription>
               {selectedWears.length === 0
-                ? 'Nothing logged for this day.'
-                : `${selectedWears.length} ${selectedWears.length === 1 ? 'pair' : 'pairs'} worn.`}
+                ? t('wearCalendar.nothingLogged')
+                : t('wearCalendar.pairsWorn', { count: selectedWears.length })}
             </DialogDescription>
           </DialogHeader>
 
@@ -206,13 +211,15 @@ export function WearCalendar({ year, month, wears, onMonthChange, onAddWear }: W
                       {wear.model}
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">
-                      {wear.nickname ? `"${wear.nickname}"` : wear.colorway || 'No colorway'}
+                      {wear.nickname
+                        ? `"${wear.nickname}"`
+                        : wear.colorway || t('common.noColorway')}
                     </span>
                   </Link>
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label={`Remove ${wearLabel(wear)} from this day`}
+                    aria-label={t('wearCalendar.removeLabel', { name: wearLabel(wear) })}
                     disabled={removeWear.isPending}
                     onClick={() =>
                       removeWear.mutate({ sneakerId: wear.sneakerId, wornOn: wear.wornOn })
@@ -235,7 +242,7 @@ export function WearCalendar({ year, month, wears, onMonthChange, onAddWear }: W
             }}
           >
             <Plus aria-hidden />
-            Add a pair
+            {t('wearCalendar.addPair')}
           </Button>
         </DialogContent>
       </Dialog>

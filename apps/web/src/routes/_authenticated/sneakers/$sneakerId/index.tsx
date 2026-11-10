@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Footprints, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { BackLink } from '@/components/layout/back-link';
 import { PriceHistory } from '@/components/sneakers/price-history';
@@ -36,9 +37,9 @@ import { useLogWear } from '@/lib/wear-actions';
 
 /** Pages that link to a sneaker and want the back link to return to them. */
 const backTargets = {
-  analytics: { to: '/analytics', label: 'Back to analytics' },
-  wears: { to: '/wears', label: 'Back to wears' },
-  collection: { to: '/', label: 'Back to collection' },
+  analytics: { to: '/analytics', labelKey: 'common.backToAnalytics' },
+  wears: { to: '/wears', labelKey: 'common.backToWears' },
+  collection: { to: '/', labelKey: 'common.backToCollection' },
 } as const;
 
 export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
@@ -49,6 +50,7 @@ export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
 });
 
 function SneakerDetailPage() {
+  const { t } = useTranslation();
   const { sneakerId } = Route.useParams();
   const { from } = Route.useSearch();
   const backTarget = backTargets[from ?? 'collection'];
@@ -69,7 +71,7 @@ function SneakerDetailPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to delete sneaker'));
+        throw new Error(await parseApiError(response, t('errors.deleteSneaker')));
       }
     },
     onSuccess: async () => {
@@ -103,9 +105,9 @@ function SneakerDetailPage() {
   if (error || !data?.sneaker) {
     return (
       <div className="space-y-4">
-        <BackLink to={backTarget.to}>{backTarget.label}</BackLink>
+        <BackLink to={backTarget.to}>{t(backTarget.labelKey)}</BackLink>
         <p className="text-sm text-destructive" role="alert">
-          {error?.message ?? 'Sneaker not found'}
+          {error?.message ?? t('sneakers.notFound')}
         </p>
       </div>
     );
@@ -119,30 +121,40 @@ function SneakerDetailPage() {
   const gainLoss = sneaker.gainLoss;
 
   const facts: { label: string; value: string }[] = [
-    { label: 'Size', value: String(sneaker.size) },
-    { label: 'Condition', value: formatCondition(sneaker.condition) },
+    { label: t('sneakers.detail.facts.size'), value: String(sneaker.size) },
+    { label: t('sneakers.detail.facts.condition'), value: formatCondition(sneaker.condition) },
     {
-      label: 'Worn',
+      label: t('sneakers.detail.facts.worn'),
       value:
         sneaker.wearCount === 0
-          ? 'Never'
-          : `${sneaker.wearCount} ${sneaker.wearCount === 1 ? 'time' : 'times'}${
-              sneaker.lastWornOn ? `, last ${formatDate(sneaker.lastWornOn)}` : ''
-            }`,
+          ? t('sneakers.detail.neverWorn')
+          : sneaker.lastWornOn
+            ? t('sneakers.detail.wornTimesLast', {
+                count: sneaker.wearCount,
+                date: formatDate(sneaker.lastWornOn),
+              })
+            : t('sneakers.detail.wornTimes', { count: sneaker.wearCount }),
     },
     ...(sneaker.purchasePrice != null
-      ? [{ label: 'Paid', value: formatCurrency(sneaker.purchasePrice) }]
+      ? [{ label: t('sneakers.detail.facts.paid'), value: formatCurrency(sneaker.purchasePrice) }]
       : []),
     ...(sneaker.purchaseDate
-      ? [{ label: 'Purchased', value: formatDate(sneaker.purchaseDate) }]
+      ? [
+          {
+            label: t('sneakers.detail.facts.purchased'),
+            value: formatDate(sneaker.purchaseDate),
+          },
+        ]
       : []),
-    ...(sneaker.releaseDate ? [{ label: 'Released', value: formatDate(sneaker.releaseDate) }] : []),
-    { label: 'Added to vault', value: formatDate(sneaker.createdAt) },
+    ...(sneaker.releaseDate
+      ? [{ label: t('sneakers.detail.facts.released'), value: formatDate(sneaker.releaseDate) }]
+      : []),
+    { label: t('sneakers.detail.facts.added'), value: formatDate(sneaker.createdAt) },
   ];
 
   return (
     <div className="space-y-10">
-      <BackLink to={backTarget.to}>{backTarget.label}</BackLink>
+      <BackLink to={backTarget.to}>{t(backTarget.labelKey)}</BackLink>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-12">
         <div className="self-start rounded-3xl bg-card ring-1 ring-border lg:sticky lg:top-20">
@@ -161,7 +173,9 @@ function SneakerDetailPage() {
             </h1>
             <div className="space-y-0.5 text-lg">
               {sneaker.nickname ? <p>{`"${sneaker.nickname}"`}</p> : null}
-              <p className="text-muted-foreground">{sneaker.colorway || 'No colorway listed'}</p>
+              <p className="text-muted-foreground">
+                {sneaker.colorway || t('sneakers.detail.noColorway')}
+              </p>
             </div>
             {sneaker.sku || (sneaker.catalogUrl && catalogSourceLabel) ? (
               <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
@@ -173,7 +187,7 @@ function SneakerDetailPage() {
                     rel="noopener noreferrer"
                     className="font-medium text-foreground underline underline-offset-4 hover:decoration-primary hover:decoration-2"
                   >
-                    View on {catalogSourceLabel}
+                    {t('sneakers.detail.viewOn', { source: catalogSourceLabel })}
                   </a>
                 ) : null}
               </p>
@@ -187,7 +201,7 @@ function SneakerDetailPage() {
               onClick={() => logWear.mutate({ sneakerId, label: title })}
             >
               <Footprints aria-hidden />
-              Wore today
+              {t('sneakers.detail.woreToday')}
             </Button>
             <Button
               variant="outline"
@@ -195,25 +209,24 @@ function SneakerDetailPage() {
               onClick={() => navigate({ to: '/sneakers/$sneakerId/edit', params: { sneakerId } })}
             >
               <Pencil aria-hidden />
-              Edit
+              {t('common.edit')}
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" size="lg" disabled={deleteMutation.isPending}>
                   <Trash2 aria-hidden />
-                  Delete
+                  {t('common.delete')}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete this pair?</AlertDialogTitle>
+                  <AlertDialogTitle>{t('sneakers.detail.deleteTitle')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently remove it from your collection. This action cannot be
-                    undone.
+                    {t('sneakers.detail.deleteDescription')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                   <AlertDialogAction
                     variant="destructive"
                     onClick={() => {
@@ -221,7 +234,7 @@ function SneakerDetailPage() {
                       deleteMutation.mutate();
                     }}
                   >
-                    Delete
+                    {t('common.delete')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -236,37 +249,48 @@ function SneakerDetailPage() {
             />
           ) : null}
 
-          <section aria-label="Market value" className="space-y-2">
+          <section aria-label={t('sneakers.detail.marketValueLabel')} className="space-y-2">
             {hasMarketPrice ? (
               <p className="font-heading text-3xl leading-[1.15] tracking-tight text-muted-foreground">
-                Worth{' '}
-                <strong className="font-semibold text-foreground">
-                  {formatCurrency(sneaker.currentMarketPrice)}
-                </strong>{' '}
-                today.
+                <Trans
+                  i18nKey="sneakers.detail.worth"
+                  values={{ value: formatCurrency(sneaker.currentMarketPrice) }}
+                  components={{ strong: <strong className="font-semibold text-foreground" /> }}
+                />
                 {gainLoss != null && sneaker.purchasePrice != null ? (
                   <>
                     {' '}
-                    <span className={cn(gainLoss > 0 && 'text-gain', gainLoss < 0 && 'text-loss')}>
-                      {gainLoss === 0
-                        ? 'Break-even'
-                        : `${gainLoss > 0 ? 'Up' : 'Down'} ${formatCurrency(Math.abs(gainLoss))}`}
-                    </span>{' '}
-                    on the {formatCurrency(sneaker.purchasePrice)} you paid.
+                    <Trans
+                      i18nKey="sneakers.detail.gain"
+                      values={{
+                        change:
+                          gainLoss === 0
+                            ? t('sneakers.detail.breakEven')
+                            : t(gainLoss > 0 ? 'sneakers.detail.up' : 'sneakers.detail.down', {
+                                amount: formatCurrency(Math.abs(gainLoss)),
+                              }),
+                        paid: formatCurrency(sneaker.purchasePrice),
+                      }}
+                      components={{
+                        tone: (
+                          <span
+                            className={cn(gainLoss > 0 && 'text-gain', gainLoss < 0 && 'text-loss')}
+                          />
+                        ),
+                      }}
+                    />
                   </>
                 ) : null}
               </p>
             ) : (
-              <p className="text-lg text-muted-foreground">
-                No market value is available for this pair.
-              </p>
+              <p className="text-lg text-muted-foreground">{t('sneakers.detail.noMarketValue')}</p>
             )}
             {hasMarketPrice && disclaimer ? (
               <p className="text-sm text-muted-foreground">{disclaimer}</p>
             ) : null}
             {sneaker.pricedAt ? (
               <p className="text-sm text-muted-foreground">
-                Price updated {formatDate(sneaker.pricedAt)}
+                {t('sneakers.detail.priceUpdated', { date: formatDate(sneaker.pricedAt) })}
               </p>
             ) : null}
           </section>
@@ -282,14 +306,14 @@ function SneakerDetailPage() {
 
           {sneaker.notes ? (
             <section className="space-y-1">
-              <h2 className="font-heading text-lg font-semibold">Notes</h2>
+              <h2 className="font-heading text-lg font-semibold">{t('sneakers.detail.notes')}</h2>
               <p className="whitespace-pre-line text-muted-foreground">{sneaker.notes}</p>
             </section>
           ) : null}
 
           {sneaker.description ? (
             <section className="space-y-1">
-              <h2 className="font-heading text-lg font-semibold">About this pair</h2>
+              <h2 className="font-heading text-lg font-semibold">{t('sneakers.detail.about')}</h2>
               <p className="max-w-prose text-muted-foreground">{sneaker.description}</p>
             </section>
           ) : null}
@@ -297,7 +321,9 @@ function SneakerDetailPage() {
       </div>
 
       <section className="space-y-3">
-        <h2 className="font-heading text-2xl font-semibold tracking-tight">Price history</h2>
+        <h2 className="font-heading text-2xl font-semibold tracking-tight">
+          {t('sneakers.detail.priceHistory')}
+        </h2>
         {priceHistoryLoading ? (
           <Skeleton className="h-24 w-full rounded-2xl" />
         ) : (

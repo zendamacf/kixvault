@@ -5,12 +5,17 @@ import {
 } from '@kixvault/shared';
 import type { Control, FieldErrors, UseFormRegister } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { SneakerCollectionFields } from '@/components/sneakers/sneaker-collection-fields';
 import { Button } from '@/components/ui/button';
+import { i18n } from '@/i18n';
 
 const formSchema = moveWishlistToCollectionSchema.omit({ size: true }).extend({
-  size: z.number({ error: 'Size is required' }).positive().max(99),
+  size: z
+    .number({ error: () => i18n.t('forms.sizeRequired') })
+    .positive()
+    .max(99),
   purchasePrice: z
     .number()
     .nonnegative()
@@ -39,6 +44,7 @@ export function MoveToCollectionForm({
   isSubmitting = false,
   onSubmit,
 }: MoveToCollectionFormProps) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -67,10 +73,10 @@ export function MoveToCollectionForm({
       })}
     >
       <div>
-        <h2 className="font-heading text-2xl font-semibold tracking-tight">Move to collection</h2>
-        <p className="text-sm text-muted-foreground">
-          Add this grail to your vault and remove it from your wishlist.
-        </p>
+        <h2 className="font-heading text-2xl font-semibold tracking-tight">
+          {t('wishlist.moveTitle')}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t('wishlist.moveDescription')}</p>
       </div>
       <SneakerCollectionFields
         register={register as unknown as UseFormRegister<CollectionFieldValues>}
@@ -78,7 +84,7 @@ export function MoveToCollectionForm({
         errors={errors as FieldErrors<CollectionFieldValues>}
       />
       <Button type="submit" size="lg" className="sm:w-fit" disabled={isSubmitting}>
-        Move to collection
+        {t('wishlist.moveTitle')}
       </Button>
     </form>
   );

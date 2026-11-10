@@ -1,4 +1,5 @@
 import { APP_NAME } from '@kixvault/shared';
+import { getEmailT, resolveEmailLocale } from '../i18n';
 import type { RenderedEmail } from './index';
 import {
   renderButton,
@@ -12,27 +13,33 @@ import {
 export type VerifyEmailProps = {
   verifyUrl: string;
   expiresInHours: number;
+  /** Defaults to English. */
+  locale?: string;
 };
 
 export function verifyEmailTemplate({
   verifyUrl,
   expiresInHours,
+  locale,
 }: VerifyEmailProps): RenderedEmail {
-  const expiry = `This link expires in ${expiresInHours} hours and works once. If you did not create a ${APP_NAME} account, ignore this email.`;
+  const resolvedLocale = resolveEmailLocale(locale);
+  const t = getEmailT(resolvedLocale);
+  const appName = APP_NAME;
+  const expiry = t('verifyEmail.expiry', { count: expiresInHours, appName });
 
   return {
-    subject: `Confirm your ${APP_NAME} email`,
+    subject: t('verifyEmail.subject', { appName }),
     html: renderLayout(
       [
-        renderHeading('Confirm your email'),
-        renderParagraph(
-          `Welcome to ${APP_NAME}. Confirm your email address to finish creating your vault.`,
-        ),
-        `<p style="margin:0 0 24px;">${renderButton(verifyUrl, 'Confirm email')}</p>`,
+        renderHeading(t('verifyEmail.heading')),
+        renderParagraph(t('verifyEmail.intro', { appName })),
+        `<p style="margin:0 0 24px;">${renderButton(verifyUrl, t('verifyEmail.action'))}</p>`,
         renderMuted(expiry),
-        renderLinkFallback(verifyUrl),
+        renderLinkFallback(verifyUrl, t),
       ].join('\n'),
+      t,
+      resolvedLocale,
     ),
-    text: `Welcome to ${APP_NAME}.\n\nConfirm your email address: ${verifyUrl}\n\n${expiry}`,
+    text: `${t('verifyEmail.textIntro', { appName })}\n\n${t('verifyEmail.textAction', { url: verifyUrl })}\n\n${expiry}`,
   };
 }

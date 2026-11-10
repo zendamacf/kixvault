@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import { QuickLogDialog } from '@/components/wears/quick-log-dialog';
 import { WearCalendar } from '@/components/wears/wear-calendar';
@@ -12,6 +13,7 @@ export const Route = createFileRoute('/_authenticated/wears')({
 });
 
 function WearsPage() {
+  const { t } = useTranslation();
   const now = new Date();
   const [view, setView] = useState({ year: now.getFullYear(), month: now.getMonth() });
   const [addDate, setAddDate] = useState<string | null>(null);
@@ -23,8 +25,10 @@ function WearsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="font-heading text-4xl font-semibold tracking-tight">Wear calendar</h1>
-        <p className="text-muted-foreground">Every pair you have worn, day by day.</p>
+        <h1 className="font-heading text-4xl font-semibold tracking-tight">
+          {t('wearsPage.title')}
+        </h1>
+        <p className="text-muted-foreground">{t('wearsPage.description')}</p>
       </div>
 
       {error ? (

@@ -1,19 +1,10 @@
 import type { AuditAction, AuditEvent } from '@kixvault/shared';
+import { i18n } from '@/i18n';
 
-export const actionLabels: Record<AuditAction, string> = {
-  'auth.login': 'Signed in',
-  'auth.logout': 'Signed out',
-  'auth.register': 'Created account',
-  'auth.email_verified': 'Verified email',
-  'auth.password_reset': 'Reset password',
-  'grail.added': 'Added a grail',
-  'sneaker.created': 'Added a pair',
-  'sneaker.created_from_grail': 'Copped a grail',
-  'sneaker.updated': 'Updated a pair',
-  'sneaker.deleted': 'Removed a pair',
-  'sneaker.worn': 'Logged a wear',
-  'sneaker.wear_removed': 'Removed a wear',
-};
+/** Display label for an audit action. */
+export function actionLabel(action: AuditAction): string {
+  return i18n.t(`activity.actions.${action}`);
+}
 
 /** The pair an event is about, plus an extra note for events that clear grails. */
 export function formatEventDetail(event: AuditEvent): { pair: string | null; note: string | null } {
@@ -32,8 +23,8 @@ export function formatEventDetail(event: AuditEvent): { pair: string | null; not
       pair,
       note:
         typeof grailsCleared === 'number' && grailsCleared > 1
-          ? `Removed ${grailsCleared} grails from your list`
-          : 'Removed from Grails',
+          ? i18n.t('activity.grailsRemoved', { count: grailsCleared })
+          : i18n.t('activity.grailsRemoved', { count: 1 }),
     };
   }
 
@@ -51,11 +42,11 @@ export function formatDayHeading(date: Date, now: Date = new Date()): string {
   yesterday.setDate(now.getDate() - 1);
 
   if (dayKey(date) === dayKey(now)) {
-    return 'Today';
+    return i18n.t('activity.today');
   }
 
   if (dayKey(date) === dayKey(yesterday)) {
-    return 'Yesterday';
+    return i18n.t('activity.yesterday');
   }
 
   return date.toLocaleDateString(undefined, {

@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import { WishlistPriorityBadge } from '@/components/wishlist/wishlist-priority-badge';
 import type { WishlistItem } from '@/lib/queries';
@@ -9,8 +10,9 @@ type WishlistCardProps = {
 
 /** Shoe tile for a grail, with its priority on the image and any notes underneath. */
 export function WishlistCard({ item }: WishlistCardProps) {
+  const { t } = useTranslation();
   const title = `${item.brand} ${item.model}`;
-  const subtitle = item.nickname ? `"${item.nickname}"` : item.colorway || 'No colorway';
+  const subtitle = item.nickname ? `"${item.nickname}"` : item.colorway || t('common.noColorway');
 
   return (
     <Link

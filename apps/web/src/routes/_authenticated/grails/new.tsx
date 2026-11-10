@@ -2,6 +2,7 @@ import type { CreateWishlistFromCatalogInput, CreateWishlistItemInput } from '@k
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BackLink } from '@/components/layout/back-link';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { WishlistCatalogForm } from '@/components/wishlist/wishlist-catalog-form';
@@ -15,6 +16,7 @@ export const Route = createFileRoute('/_authenticated/grails/new')({
 });
 
 function NewGrailPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<AddMode>('catalog');
@@ -25,7 +27,7 @@ function NewGrailPage() {
       const response = await api.api.wishlist['from-catalog'].$post({ json: values });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to add grail from catalog'));
+        throw new Error(await parseApiError(response, t('errors.addGrailFromCatalog')));
       }
 
       return response.json();
@@ -48,7 +50,7 @@ function NewGrailPage() {
       const response = await api.api.wishlist.custom.$post({ json: values });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to add grail'));
+        throw new Error(await parseApiError(response, t('errors.addGrail')));
       }
 
       return response.json();
@@ -71,20 +73,19 @@ function NewGrailPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <div className="space-y-5">
-        <BackLink to="/grails">Back to grails</BackLink>
+        <BackLink to="/grails">{t('common.backToGrails')}</BackLink>
         <div className="space-y-1">
-          <h1 className="font-heading text-4xl font-semibold tracking-tight">Add a grail</h1>
-          <p className="max-w-xl text-muted-foreground">
-            Search StockX or enter details manually. Grails stay separate until you move them to
-            your collection.
-          </p>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">
+            {t('grails.new.title')}
+          </h1>
+          <p className="max-w-xl text-muted-foreground">{t('grails.new.description')}</p>
         </div>
         <SegmentedControl
-          label="How to add this grail"
+          label={t('grails.new.modeLabel')}
           value={mode}
           options={[
-            { value: 'catalog', label: 'From catalog' },
-            { value: 'manual', label: 'Manual entry' },
+            { value: 'catalog', label: t('grails.new.fromCatalog') },
+            { value: 'manual', label: t('grails.new.manual') },
           ]}
           onChange={(value) => {
             setMode(value);
@@ -101,7 +102,7 @@ function NewGrailPage() {
 
       {mode === 'catalog' ? (
         <WishlistCatalogForm
-          submitLabel={isSubmitting ? 'Saving…' : 'Add grail'}
+          submitLabel={isSubmitting ? t('common.saving') : t('grails.add')}
           isSubmitting={isSubmitting}
           onSubmit={async (values) => {
             setFormError(null);
@@ -110,7 +111,7 @@ function NewGrailPage() {
         />
       ) : (
         <WishlistManualForm
-          submitLabel={isSubmitting ? 'Saving…' : 'Add grail'}
+          submitLabel={isSubmitting ? t('common.saving') : t('grails.add')}
           isSubmitting={isSubmitting}
           onSubmit={async (values) => {
             setFormError(null);

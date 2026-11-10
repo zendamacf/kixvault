@@ -2,6 +2,7 @@ import type { CreateSneakerFromCatalogInput, CreateSneakerInput } from '@kixvaul
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BackLink } from '@/components/layout/back-link';
 import { CatalogSneakerForm } from '@/components/sneakers/catalog-sneaker-form';
 import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
@@ -18,6 +19,7 @@ export const Route = createFileRoute('/_authenticated/sneakers/new')({
 });
 
 function NewSneakerPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<AddMode>('catalog');
@@ -42,7 +44,7 @@ function NewSneakerPage() {
       const response = await api.api.sneakers['from-catalog'].$post({ json: values });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to add sneaker from catalog'));
+        throw new Error(await parseApiError(response, t('errors.addSneakerFromCatalog')));
       }
 
       return response.json();
@@ -65,7 +67,7 @@ function NewSneakerPage() {
       const response = await api.api.sneakers.custom.$post({ json: values });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to create sneaker'));
+        throw new Error(await parseApiError(response, t('errors.createSneaker')));
       }
 
       return response.json();
@@ -88,19 +90,19 @@ function NewSneakerPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <div className="space-y-5">
-        <BackLink to="/">Back to collection</BackLink>
+        <BackLink to="/">{t('common.backToCollection')}</BackLink>
         <div className="space-y-1">
-          <h1 className="font-heading text-4xl font-semibold tracking-tight">Add a pair</h1>
-          <p className="text-muted-foreground">
-            Search the catalog to find your pair, or enter details manually.
-          </p>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">
+            {t('sneakers.new.title')}
+          </h1>
+          <p className="text-muted-foreground">{t('sneakers.new.description')}</p>
         </div>
         <SegmentedControl
-          label="How to add this pair"
+          label={t('sneakers.new.modeLabel')}
           value={mode}
           options={[
-            { value: 'catalog', label: 'Search catalog' },
-            { value: 'manual', label: 'Enter manually' },
+            { value: 'catalog', label: t('sneakers.new.searchCatalog') },
+            { value: 'manual', label: t('sneakers.new.manual') },
           ]}
           onChange={(value) => {
             setMode(value);
@@ -117,7 +119,7 @@ function NewSneakerPage() {
 
       {mode === 'catalog' ? (
         <CatalogSneakerForm
-          submitLabel="Add to collection"
+          submitLabel={t('sneakers.new.submit')}
           isSubmitting={isSubmitting}
           onSubmit={async (values) => {
             setFormError(null);
@@ -126,7 +128,7 @@ function NewSneakerPage() {
         />
       ) : (
         <ManualSneakerForm
-          submitLabel="Add to collection"
+          submitLabel={t('sneakers.new.submit')}
           isSubmitting={isSubmitting}
           onSubmit={async (values) => {
             setFormError(null);

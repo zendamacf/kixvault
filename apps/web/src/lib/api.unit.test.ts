@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'bun:test';
-import { ApiError, parseApiError, toApiError } from './api';
+import { afterEach, describe, expect, mock, test } from 'bun:test';
+import { ApiError, api, parseApiError, toApiError } from './api';
 
 describe('parseApiError', () => {
   test('returns the API error message when present', async () => {
@@ -40,5 +40,27 @@ describe('toApiError', () => {
 
     expect(error.message).toBe('Failed to log in');
     expect(error.code).toBeUndefined();
+  });
+});
+
+describe('api client', () => {
+  const originalFetch = globalThis.fetch;
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  test('sends the app language, not the browser language', async () => {
+    const calls: RequestInit[] = [];
+    globalThis.fetch = mock(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      calls.push(init ?? {});
+      return new Response('{}', { status: 200 });
+    }) as unknown as typeof fetch;
+
+    await api.api.auth['forgot-password'].$post({ json: { email: 'a@example.com' } });
+
+    const headers = new Headers(calls[0]?.headers);
+    expect(headers.get('Accept-Language')).toBe('en');
+    expect(headers.get('Content-Type')).toContain('application/json');
   });
 });

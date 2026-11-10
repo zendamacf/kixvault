@@ -15,10 +15,15 @@ export function buildResetUrl(token: string): string {
 }
 
 /** Sends the reset email. Never throws: the user can ask for another link. */
-export function sendPasswordResetEmail(to: string, token: string): Promise<boolean> {
+export function sendPasswordResetEmail(
+  to: string,
+  token: string,
+  locale?: string,
+): Promise<boolean> {
   return sendEmail('resetPassword', to, {
     resetUrl: buildResetUrl(token),
     expiresInMinutes: PASSWORD_RESET_TOKEN_TTL_MINUTES,
+    locale,
   });
 }
 

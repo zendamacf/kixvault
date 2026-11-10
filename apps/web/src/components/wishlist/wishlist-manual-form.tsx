@@ -5,6 +5,7 @@ import {
   wishlistPriorities,
 } from '@kixvault/shared';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,7 @@ export function WishlistManualForm({
   defaultValues,
   onSubmit,
 }: WishlistManualFormProps) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -76,21 +78,21 @@ export function WishlistManualForm({
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="brand">Brand</Label>
+          <Label htmlFor="brand">{t('common.brand')}</Label>
           <Input id="brand" {...register('brand')} />
           {errors.brand ? <p className="text-sm text-destructive">{errors.brand.message}</p> : null}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="model">Model</Label>
+          <Label htmlFor="model">{t('common.model')}</Label>
           <Input id="model" {...register('model')} />
           {errors.model ? <p className="text-sm text-destructive">{errors.model.message}</p> : null}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="colorway">Colorway</Label>
+          <Label htmlFor="colorway">{t('common.colorway')}</Label>
           <Input id="colorway" {...register('colorway')} />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="priority">Priority</Label>
+          <Label htmlFor="priority">{t('common.priority')}</Label>
           <Select
             value={priority}
             onValueChange={(value) => setValue('priority', value as FormValues['priority'])}
@@ -99,15 +101,15 @@ export function WishlistManualForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="low">{t('wishlist.priorityOption.low')}</SelectItem>
+              <SelectItem value="medium">{t('wishlist.priorityOption.medium')}</SelectItem>
+              <SelectItem value="high">{t('wishlist.priorityOption.high')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="notes">{t('common.notes')}</Label>
         <Textarea id="notes" rows={3} {...register('notes')} />
       </div>
       <Button type="submit" size="lg" className="sm:w-fit" disabled={isSubmitting}>

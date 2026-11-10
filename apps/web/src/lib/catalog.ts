@@ -1,6 +1,7 @@
 import type { CatalogProductDetail, CatalogSearchResult } from '@kixvault/shared';
 import { catalogProductDetailSchema } from '@kixvault/shared';
 import { queryOptions } from '@tanstack/react-query';
+import { i18n } from '@/i18n';
 import { api, parseApiError } from './api';
 
 export type CatalogSearchResponse = {
@@ -25,7 +26,7 @@ export function catalogSearchQueryOptions(query: string) {
       }
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Catalog search failed'));
+        throw new Error(await parseApiError(response, i18n.t('errors.catalogSearch')));
       }
 
       const data = await response.json();
@@ -66,7 +67,7 @@ export function catalogProductQueryOptions(catalogId: string) {
       }
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to load catalog product'));
+        throw new Error(await parseApiError(response, i18n.t('errors.loadCatalogProduct')));
       }
 
       const data = await response.json();

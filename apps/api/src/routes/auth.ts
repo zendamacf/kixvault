@@ -82,7 +82,7 @@ export const authRoutes = new Hono<ApiEnv>()
     if (requiresVerification) {
       // No session until the address is confirmed. Sending never throws: the user can resend.
       const token = await issueVerificationToken(userId);
-      await sendVerificationEmail(email, token);
+      await sendVerificationEmail(email, token, c.get('locale'));
 
       return c.json({ requiresVerification: true as const, user: { id: userId, email } }, 201);
     }
@@ -166,7 +166,7 @@ export const authRoutes = new Hono<ApiEnv>()
 
       if (token) {
         // Not awaited, so response time does not show whether the account exists.
-        void sendVerificationEmail(email, token);
+        void sendVerificationEmail(email, token, c.get('locale'));
       }
 
       // Same answer for unknown, verified and throttled accounts.
@@ -203,7 +203,7 @@ export const authRoutes = new Hono<ApiEnv>()
 
         if (token) {
           // Not awaited, so response time does not show whether the account exists.
-          void sendPasswordResetEmail(email, token);
+          void sendPasswordResetEmail(email, token, c.get('locale'));
         }
       }
 
