@@ -21,6 +21,7 @@ const mockTx = {
     }),
   }),
 };
+const mockInvalidateUserSessions = mock(async () => undefined);
 const mockCreateSession = mock(async () => ({ id: 'session-1' }));
 const mockCreateSessionCookie = mock(() => ({
   serialize: () => 'auth_session=session-1; Path=/',
@@ -52,6 +53,7 @@ mock.module('../lib/db', () => ({
 mock.module('../lib/auth', () => ({
   lucia: {
     createSession: mockCreateSession,
+    invalidateUserSessions: mockInvalidateUserSessions,
     createSessionCookie: mockCreateSessionCookie,
   },
 }));
@@ -70,6 +72,7 @@ mock.module('../lib/env', () => ({
 }));
 
 const { authRoutes } = await import('./auth');
+const { resetRateLimitStoreForTests } = await import('../lib/rate-limit-store');
 
 describe('authRoutes register', () => {
   beforeEach(() => {
@@ -287,5 +290,151 @@ describe('authRoutes with email verification', () => {
     );
 
     expect(response.status).toBe(503);
+  });
+});
+
+describe('authRoutes password recovery', () => {
+  let fetchSpy: ReturnType<typeof spyOn>;
+  let infoSpy: ReturnType<typeof spyOn>;
+
+  beforeEach(() => {
+    resetRateLimitStoreForTests();
+    selectRows = [];
+    claimedRows = [];
+    mockInsert.mockClear();
+    mockInvalidateUserSessions.mockClear();
+    mockEnv.resendApiKey = 're_test';
+    fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
+    infoSpy = spyOn(console, 'info').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    mockEnv.resendApiKey = undefined;
+    fetchSpy.mockRestore();
+    infoSpy.mockRestore();
+    resetRateLimitStoreForTests();
+  });
+
+  test('forgot-password answers the same for an unknown account and sends nothing', async () => {
+    const response = await authRoutes.request(
+      '/forgot-password',
+      json({ email: 'ghost@example.com' }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  test('forgot-password does not send to an unverified account', async () => {
+    selectRows = [{ id: 'user-1', emailVerifiedAt: null, createdAt: new Date(0) }];
+
+    const response = await authRoutes.request(
+      '/forgot-password',
+      json({ email: 'user@example.com' }),
+    );
+    await Bun.sleep(0);
+
+    expect(response.status).toBe(200);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  test('forgot-password emails a verified account', async () => {
+    selectRows = [{ id: 'user-1', emailVerifiedAt: new Date(0), createdAt: new Date(0) }];
+
+    const response = await authRoutes.request(
+      '/forgot-password',
+      json({ email: 'user@example.com' }),
+    );
+    await Bun.sleep(0);
+
+    expect(response.status).toBe(200);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('forgot-password is unavailable when email is not configured', async () => {
+    mockEnv.resendApiKey = undefined;
+
+    const response = await authRoutes.request(
+      '/forgot-password',
+      json({ email: 'user@example.com' }),
+    );
+
+    expect(response.status).toBe(503);
+  });
+
+  test('forgot-password stops emailing one address after the per-address limit', async () => {
+    selectRows = [{ id: 'user-1', emailVerifiedAt: new Date(0), createdAt: new Date(0) }];
+    const headers = (ip: string) => ({
+      'Content-Type': 'application/json',
+      'X-Forwarded-For': ip,
+    });
+
+    // Different IPs, so only the per-address limit can be what stops the fourth request.
+    for (let index = 0; index < 4; index += 1) {
+      const response = await authRoutes.request('/forgot-password', {
+        method: 'POST',
+        headers: headers(`10.0.0.${index}`),
+        body: JSON.stringify({ email: 'user@example.com' }),
+      });
+      expect(response.status).toBe(200);
+    }
+    await Bun.sleep(0);
+
+    expect(fetchSpy).toHaveBeenCalledTimes(3);
+  });
+
+  test('forgot-password returns 429 after 5 requests per IP in an hour', async () => {
+    for (let index = 0; index < 5; index += 1) {
+      const response = await authRoutes.request(
+        '/forgot-password',
+        json({ email: `user${index}@example.com` }),
+      );
+      expect(response.status).toBe(200);
+    }
+
+    const response = await authRoutes.request(
+      '/forgot-password',
+      json({ email: 'another@example.com' }),
+    );
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get('Retry-After')).toBeTruthy();
+  });
+
+  test('reset-password rejects an unknown, expired or used token', async () => {
+    claimedRows = [];
+
+    const response = await authRoutes.request(
+      '/reset-password',
+      json({ token: 'nope', password: 'new-password-1' }),
+    );
+
+    expect(response.status).toBe(400);
+    expect(mockInvalidateUserSessions).not.toHaveBeenCalled();
+  });
+
+  test('reset-password rejects a weak password', async () => {
+    const response = await authRoutes.request(
+      '/reset-password',
+      json({ token: 'good', password: 'short' }),
+    );
+
+    expect(response.status).toBe(400);
+  });
+
+  test('reset-password sets the password, ends sessions and records it', async () => {
+    claimedRows = [{ userId: 'user-1' }];
+
+    const response = await authRoutes.request(
+      '/reset-password',
+      json({ token: 'good', password: 'new-password-1' }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('set-cookie')).toBeNull();
+    expect(mockInvalidateUserSessions).toHaveBeenCalledWith('user-1');
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'user-1', action: 'auth.password_reset' }),
+    );
   });
 });

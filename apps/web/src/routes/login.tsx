@@ -99,6 +99,12 @@ function LoginPage() {
           {errors.password ? (
             <p className="text-sm text-destructive">{errors.password.message}</p>
           ) : null}
+          <Link
+            to="/forgot-password"
+            className="inline-block text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            {t('login.forgotPassword')}
+          </Link>
         </div>
 
         {formError ? (

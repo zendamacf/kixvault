@@ -29,6 +29,15 @@ export const resendVerificationSchema = z.object({
   email: emailSchema,
 });
 
+export const forgotPasswordSchema = z.object({
+  email: emailSchema,
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1).max(256),
+  password: registerSchema.shape.password,
+});
+
 /** Error code returned by login when the account has not confirmed its email yet. */
 export const EMAIL_NOT_VERIFIED_CODE = 'email_not_verified';
 
@@ -36,3 +45,5 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
 export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

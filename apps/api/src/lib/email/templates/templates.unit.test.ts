@@ -5,6 +5,10 @@ import { emailColors, escapeHtml } from './layout';
 /** One sample per registered template. The type forces a sample when a template is added. */
 const samples: { [K in EmailType]: EmailTemplateProps[K] } = {
   verifyEmail: { verifyUrl: 'https://kixvault.example/verify-email?token=abc', expiresInHours: 24 },
+  resetPassword: {
+    resetUrl: 'https://kixvault.example/reset-password?token=abc',
+    expiresInMinutes: 60,
+  },
 };
 
 describe('email templates', () => {

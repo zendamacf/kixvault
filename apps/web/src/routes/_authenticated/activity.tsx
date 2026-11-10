@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import {
   Footprints,
+  KeyRound,
   LogIn,
   LogOut,
   type LucideIcon,
@@ -28,6 +29,7 @@ const actionIcons: Record<AuditAction, LucideIcon> = {
   'auth.logout': LogOut,
   'auth.register': UserPlus,
   'auth.email_verified': MailCheck,
+  'auth.password_reset': KeyRound,
   'grail.added': Star,
   'sneaker.created': Plus,
   'sneaker.created_from_grail': Trophy,

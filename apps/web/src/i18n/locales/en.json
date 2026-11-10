@@ -8,7 +8,8 @@
     "submitPending": "Signing in...",
     "signupPrompt": "New here?",
     "signupLink": "Create an account",
-    "signupsDisabled": "Contact an administrator to create an account."
+    "signupsDisabled": "Contact an administrator to create an account.",
+    "forgotPassword": "Forgot your password?"
   },
   "common": {
     "emptyValue": "—"
@@ -34,6 +35,29 @@
     "resendPending": "Sending...",
     "resendDone": "If that account needs confirming, a new link is on its way.",
     "resendFailed": "Could not send a new link. Try again.",
+    "backToSignIn": "Back to sign in"
+  },
+  "forgotPassword": {
+    "title": "Reset your password",
+    "description": "Enter your email and we will send you a link to choose a new password.",
+    "emailLabel": "Email",
+    "submit": "Send reset link",
+    "submitPending": "Sending...",
+    "done": "If an account exists for that email, a reset link is on its way.",
+    "failed": "Could not send a reset link. Try again.",
+    "backToSignIn": "Back to sign in"
+  },
+  "resetPassword": {
+    "title": "Choose a new password",
+    "passwordLabel": "New password",
+    "submit": "Update password",
+    "submitPending": "Updating...",
+    "failed": "This reset link is invalid or has expired.",
+    "missingToken": "This reset link is incomplete.",
+    "requestNew": "Request a new link",
+    "successTitle": "Password updated",
+    "successDescription": "Your password has been changed and you have been signed out everywhere. Sign in with your new password.",
+    "successAction": "Go to sign in",
     "backToSignIn": "Back to sign in"
   }
 }
