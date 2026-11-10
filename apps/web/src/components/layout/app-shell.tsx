@@ -41,7 +41,7 @@ export function AppShell() {
 
   const navLinkClass = (active: boolean) =>
     cn(
-      'rounded-md px-3 py-1.5 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary',
+      'rounded-md px-3 py-1.5 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand',
       active
         ? 'bg-chrome-foreground/12 text-chrome-foreground'
         : 'text-chrome-muted hover:text-chrome-foreground',
@@ -61,7 +61,7 @@ export function AppShell() {
             {user ? <MobileMenu user={user} pathname={pathname} /> : null}
             <Link
               to="/"
-              className="group flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="group flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand"
               aria-label={`${APP_NAME} home`}
             >
               <BrandLockup className="h-9 w-auto" />

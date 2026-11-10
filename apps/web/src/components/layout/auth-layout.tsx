@@ -34,7 +34,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <ul className="space-y-4">
             {HIGHLIGHTS.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand">
                   <Icon className="size-5" aria-hidden />
                 </span>
                 <span className="text-chrome-muted">{text}</span>

@@ -58,7 +58,7 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
           variant="ghost"
           size="icon"
           aria-label="Open menu"
-          className="text-chrome-foreground hover:bg-chrome-foreground/10 hover:text-chrome-foreground focus-visible:ring-primary md:hidden dark:hover:bg-chrome-foreground/10"
+          className="text-chrome-foreground hover:bg-chrome-foreground/10 hover:text-chrome-foreground focus-visible:ring-brand md:hidden dark:hover:bg-chrome-foreground/10"
         >
           <Menu aria-hidden />
         </Button>

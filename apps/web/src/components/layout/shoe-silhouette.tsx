@@ -7,7 +7,7 @@ type ShoeSilhouetteProps = {
 
 /**
  * Flat low-top sneaker profile in the current text color, for muted placeholders such as empty
- * states. Shape lives in sneaker-art.ts, which public/favicon.svg mirrors.
+ * states. Shape lives in sneaker-art.ts.
  */
 export function ShoeSilhouette({ className }: ShoeSilhouetteProps) {
   return (

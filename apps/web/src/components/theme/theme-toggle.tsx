@@ -22,7 +22,7 @@ export function ThemeToggle() {
           variant="ghost"
           size="icon-sm"
           aria-label="Change theme"
-          className="text-chrome-foreground hover:bg-chrome-foreground/10 hover:text-chrome-foreground focus-visible:ring-primary dark:hover:bg-chrome-foreground/10"
+          className="text-chrome-foreground hover:bg-chrome-foreground/10 hover:text-chrome-foreground focus-visible:ring-brand dark:hover:bg-chrome-foreground/10"
         >
           <Palette className="size-4" />
         </Button>
