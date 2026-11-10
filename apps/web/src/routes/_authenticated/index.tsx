@@ -155,7 +155,7 @@ function CollectionPage() {
               <SelectContent>
                 {SORT_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>
-                    {t(`collection.sort.${option}`)}
+                    {t(`collection.sort.${option.replace(':', '_')}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

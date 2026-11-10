@@ -3,7 +3,7 @@ import { i18n } from '@/i18n';
 
 /** Display label for an audit action. */
 export function actionLabel(action: AuditAction): string {
-  return i18n.t(`activity.actions.${action}`);
+  return i18n.t(`activity.actions.${action.replace('.', '_')}`);
 }
 
 /** The pair an event is about, plus an extra note for events that clear grails. */
