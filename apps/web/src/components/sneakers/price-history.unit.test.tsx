@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from 'bun:test';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { PriceHistory } from './price-history';
 
 afterEach(() => {
@@ -7,7 +7,7 @@ afterEach(() => {
 });
 
 describe('PriceHistory', () => {
-  test('renders snapshot entries', () => {
+  test('shows the chart by default and switches to the table', () => {
     render(
       <PriceHistory
         history={[
@@ -17,8 +17,18 @@ describe('PriceHistory', () => {
       />,
     );
 
+    expect(screen.getByRole('img', { name: 'Market price over time' })).toBeTruthy();
+    expect(screen.queryByRole('table')).toBeNull();
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Table' }));
+
     expect(screen.getByText('$250')).toBeTruthy();
     expect(screen.getByText('$240')).toBeTruthy();
+    expect(screen.queryByRole('img', { name: 'Market price over time' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Chart' }));
+
+    expect(screen.getByRole('img', { name: 'Market price over time' })).toBeTruthy();
   });
 
   test('shows an empty state when no history exists', () => {
