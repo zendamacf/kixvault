@@ -180,18 +180,18 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "actions": {
-      "auth.login": "Signed in",
-      "auth.logout": "Signed out",
-      "auth.register": "Created account",
-      "auth.email_verified": "Verified email",
-      "auth.password_reset": "Reset password",
-      "grail.added": "Added a grail",
-      "sneaker.created": "Added a pair",
-      "sneaker.created_from_grail": "Copped a grail",
-      "sneaker.updated": "Updated a pair",
-      "sneaker.deleted": "Removed a pair",
-      "sneaker.worn": "Logged a wear",
-      "sneaker.wear_removed": "Removed a wear"
+      "auth_login": "Signed in",
+      "auth_logout": "Signed out",
+      "auth_register": "Created account",
+      "auth_email_verified": "Verified email",
+      "auth_password_reset": "Reset password",
+      "grail_added": "Added a grail",
+      "sneaker_created": "Added a pair",
+      "sneaker_created_from_grail": "Copped a grail",
+      "sneaker_updated": "Updated a pair",
+      "sneaker_deleted": "Removed a pair",
+      "sneaker_worn": "Logged a wear",
+      "sneaker_wear_removed": "Removed a wear"
     },
     "grailsRemoved_one": "Removed from Grails",
     "grailsRemoved_other": "Removed {{count}} grails from your list"
@@ -259,14 +259,14 @@
     "pairCount_one": "{{count}} pair",
     "pairCount_other": "{{count}} pairs",
     "sort": {
-      "created_at:desc": "Recently added",
-      "created_at:asc": "Oldest added",
-      "purchase_date:desc": "Newest purchase",
-      "purchase_date:asc": "Oldest purchase",
-      "purchase_price:desc": "Price paid, high to low",
-      "purchase_price:asc": "Price paid, low to high",
-      "brand:asc": "Brand, A to Z",
-      "brand:desc": "Brand, Z to A"
+      "created_at_desc": "Recently added",
+      "created_at_asc": "Oldest added",
+      "purchase_date_desc": "Newest purchase",
+      "purchase_date_asc": "Oldest purchase",
+      "purchase_price_desc": "Price paid, high to low",
+      "purchase_price_asc": "Price paid, low to high",
+      "brand_asc": "Brand, A to Z",
+      "brand_desc": "Brand, Z to A"
     },
     "empty": {
       "title": "Your vault is empty",

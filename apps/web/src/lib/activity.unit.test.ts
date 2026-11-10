@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import type { AuditEvent } from '@kixvault/shared';
-import { dayKey, formatDayHeading, formatEventDetail, groupByDay } from './activity';
+import { type AuditEvent, auditActions } from '@kixvault/shared';
+import { actionLabel, dayKey, formatDayHeading, formatEventDetail, groupByDay } from './activity';
 
 function event(overrides: Partial<AuditEvent> & { createdAt: string }): AuditEvent {
   return {
@@ -110,5 +110,13 @@ describe('formatEventDetail', () => {
         }),
       ).note,
     ).toBe('Removed 3 grails from your list');
+  });
+});
+
+describe('actionLabel', () => {
+  test('resolves a human label for every audit action', () => {
+    for (const action of auditActions) {
+      expect(actionLabel(action)).not.toContain('activity.actions');
+    }
   });
 });
