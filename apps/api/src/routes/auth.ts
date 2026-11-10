@@ -2,9 +2,11 @@ import { zValidator } from '@hono/zod-validator';
 import { users } from '@kixvault/db';
 import {
   EMAIL_NOT_VERIFIED_CODE,
+  forgotPasswordSchema,
   loginSchema,
   registerSchema,
   resendVerificationSchema,
+  resetPasswordSchema,
   verifyEmailSchema,
 } from '@kixvault/shared';
 import { Hono } from 'hono';
@@ -21,8 +23,21 @@ import {
   sendVerificationEmail,
 } from '../lib/email-verification';
 import { env } from '../lib/env';
+import {
+  consumePasswordResetToken,
+  createPasswordResetToken,
+  sendPasswordResetEmail,
+} from '../lib/password-reset';
+import { getRateLimitStore } from '../lib/rate-limit-store';
 import { userEmailEquals } from '../lib/user-email';
-import { authRateLimit } from '../middleware/auth-rate-limit';
+import {
+  authRateLimit,
+  FORGOT_PASSWORD_MAX_PER_EMAIL,
+  FORGOT_PASSWORD_WINDOW_MS,
+  forgotPasswordRateLimit,
+  resendVerificationRateLimit,
+  resetPasswordRateLimit,
+} from '../middleware/auth-rate-limit';
 import { sessionMiddleware } from '../middleware/session';
 import type { ApiEnv } from '../types';
 
@@ -133,7 +148,7 @@ export const authRoutes = new Hono<ApiEnv>()
   })
   .post(
     '/resend-verification',
-    authRateLimit,
+    resendVerificationRateLimit,
     zValidator('json', resendVerificationSchema),
     async (c) => {
       if (!isEmailEnabled()) {
@@ -141,7 +156,13 @@ export const authRoutes = new Hono<ApiEnv>()
       }
 
       const { email } = c.req.valid('json');
-      const token = await createVerificationToken(email);
+      // Per-address cap, answered like any other request so it does not reveal the account.
+      const decision = await getRateLimitStore().consume(
+        `auth:resend-verification:email:${email}`,
+        FORGOT_PASSWORD_MAX_PER_EMAIL,
+        FORGOT_PASSWORD_WINDOW_MS,
+      );
+      const token = decision.allowed ? await createVerificationToken(email) : null;
 
       if (token) {
         // Not awaited, so response time does not show whether the account exists.
@@ -153,6 +174,66 @@ export const authRoutes = new Hono<ApiEnv>()
         { message: 'If that account needs confirming, a new link is on its way.' },
         200,
       );
+    },
+  )
+  .post(
+    '/forgot-password',
+    forgotPasswordRateLimit,
+    zValidator('json', forgotPasswordSchema),
+    async (c) => {
+      if (!isEmailEnabled()) {
+        return c.json({ error: 'Password recovery is not enabled' }, 503);
+      }
+
+      const { email } = c.req.valid('json');
+      const generic = {
+        message: 'If an account exists for that email, a reset link is on its way.',
+      };
+
+      // Per-address cap, so one inbox cannot be flooded from many IPs. Over the cap we answer
+      // exactly as for any other request, which keeps the response independent of the account.
+      const decision = await getRateLimitStore().consume(
+        `auth:forgot-password:email:${email}`,
+        FORGOT_PASSWORD_MAX_PER_EMAIL,
+        FORGOT_PASSWORD_WINDOW_MS,
+      );
+
+      if (decision.allowed) {
+        const token = await createPasswordResetToken(email);
+
+        if (token) {
+          // Not awaited, so response time does not show whether the account exists.
+          void sendPasswordResetEmail(email, token);
+        }
+      }
+
+      return c.json(generic, 200);
+    },
+  )
+  .post(
+    '/reset-password',
+    resetPasswordRateLimit,
+    zValidator('json', resetPasswordSchema),
+    async (c) => {
+      const { token, password } = c.req.valid('json');
+      const passwordHash = await Bun.password.hash(password, { algorithm: 'argon2id' });
+      const userId = await consumePasswordResetToken(token, passwordHash);
+
+      if (!userId) {
+        return c.json({ error: 'This reset link is invalid or has expired' }, 400);
+      }
+
+      // A reset means the old password may be compromised, so end every existing session.
+      await lucia.invalidateUserSessions(userId);
+
+      await recordAuditEvent({
+        userId,
+        action: 'auth.password_reset',
+        ip: getRequestClientIp(c),
+      });
+
+      // Does not sign the user in: they sign in with the new password.
+      return c.json({ message: 'Password updated. You can now sign in.' }, 200);
     },
   )
   .post('/logout', async (c) => {

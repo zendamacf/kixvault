@@ -20,7 +20,7 @@ describe('authRateLimit', () => {
   test('returns 429 when the auth limit is exceeded', async () => {
     const app = createTestApp();
 
-    for (let index = 0; index < 20; index += 1) {
+    for (let index = 0; index < 10; index += 1) {
       const response = await app.request('/login', { method: 'POST' });
       expect(response.status).toBe(200);
     }

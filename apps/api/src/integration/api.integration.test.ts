@@ -633,7 +633,7 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
   });
 
   test('POST /api/auth/login returns 429 when the auth rate limit is exceeded', async () => {
-    for (let index = 0; index < 20; index += 1) {
+    for (let index = 0; index < 10; index += 1) {
       const response = await app.request('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

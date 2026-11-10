@@ -47,6 +47,22 @@ export const emailVerificationTokens = pgTable(
   (table) => [index('email_verification_tokens_user_id_idx').on(table.userId)],
 );
 
+export const passwordResetTokens = pgTable(
+  'password_reset_tokens',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** SHA-256 of the emailed token. The raw token is never stored. */
+    tokenHash: text('token_hash').notNull().unique(),
+    expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true, mode: 'date' }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (table) => [index('password_reset_tokens_user_id_idx').on(table.userId)],
+);
+
 export const sessions = pgTable('sessions', {
   id: text('id').primaryKey(),
   userId: text('user_id')
@@ -181,11 +197,19 @@ export const usersRelations = relations(users, ({ many }) => ({
   wishlistItems: many(wishlistItems),
   sneakerWears: many(sneakerWears),
   emailVerificationTokens: many(emailVerificationTokens),
+  passwordResetTokens: many(passwordResetTokens),
 }));
 
 export const emailVerificationTokensRelations = relations(emailVerificationTokens, ({ one }) => ({
   user: one(users, {
     fields: [emailVerificationTokens.userId],
+    references: [users.id],
+  }),
+}));
+
+export const passwordResetTokensRelations = relations(passwordResetTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [passwordResetTokens.userId],
     references: [users.id],
   }),
 }));

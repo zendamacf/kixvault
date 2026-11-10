@@ -5,6 +5,7 @@ export const actionLabels: Record<AuditAction, string> = {
   'auth.logout': 'Signed out',
   'auth.register': 'Created account',
   'auth.email_verified': 'Verified email',
+  'auth.password_reset': 'Reset password',
   'grail.added': 'Added a grail',
   'sneaker.created': 'Added a pair',
   'sneaker.created_from_grail': 'Copped a grail',
