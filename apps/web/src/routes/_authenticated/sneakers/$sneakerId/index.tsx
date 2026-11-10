@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Footprints, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { z } from 'zod';
 import { BackLink } from '@/components/layout/back-link';
 import { PriceHistory } from '@/components/sneakers/price-history';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
@@ -33,12 +34,24 @@ import {
 } from '@/lib/utils';
 import { useLogWear } from '@/lib/wear-actions';
 
+/** Pages that link to a sneaker and want the back link to return to them. */
+const backTargets = {
+  analytics: { to: '/analytics', label: 'Back to analytics' },
+  wears: { to: '/wears', label: 'Back to wears' },
+  collection: { to: '/', label: 'Back to collection' },
+} as const;
+
 export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
+  validateSearch: z.object({
+    from: z.enum(['analytics', 'wears']).optional().catch(undefined),
+  }),
   component: SneakerDetailPage,
 });
 
 function SneakerDetailPage() {
   const { sneakerId } = Route.useParams();
+  const { from } = Route.useSearch();
+  const backTarget = backTargets[from ?? 'collection'];
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [actionError, setActionError] = useState<string | null>(null);
@@ -90,7 +103,7 @@ function SneakerDetailPage() {
   if (error || !data?.sneaker) {
     return (
       <div className="space-y-4">
-        <BackLink to="/">Back to collection</BackLink>
+        <BackLink to={backTarget.to}>{backTarget.label}</BackLink>
         <p className="text-sm text-destructive" role="alert">
           {error?.message ?? 'Sneaker not found'}
         </p>
@@ -129,7 +142,7 @@ function SneakerDetailPage() {
 
   return (
     <div className="space-y-10">
-      <BackLink to="/">Back to collection</BackLink>
+      <BackLink to={backTarget.to}>{backTarget.label}</BackLink>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-12">
         <div className="self-start rounded-3xl bg-card ring-1 ring-border lg:sticky lg:top-20">

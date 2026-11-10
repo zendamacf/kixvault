@@ -198,6 +198,7 @@ export function WearCalendar({ year, month, wears, onMonthChange, onAddWear }: W
                   <Link
                     to="/sneakers/$sneakerId"
                     params={{ sneakerId: wear.sneakerId }}
+                    search={{ from: 'wears' }}
                     className="min-w-0 flex-1 rounded-md text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <span className="block truncate font-medium">

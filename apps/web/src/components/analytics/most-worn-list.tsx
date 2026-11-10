@@ -13,6 +13,7 @@ export function MostWornList({ entries }: { entries: MostWornEntry[] }) {
             <Link
               to="/sneakers/$sneakerId"
               params={{ sneakerId: entry.sneakerId }}
+              search={{ from: 'analytics' }}
               className="min-w-0 truncate rounded-sm font-medium outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="mr-2 text-muted-foreground tabular-nums">{index + 1}.</span>
