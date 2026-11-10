@@ -9,7 +9,7 @@
   background-color: var(--chrome);
   background-image: linear-gradient(
     to top,
-    color-mix(in oklab, var(--primary) 16%, transparent),
+    color-mix(in oklab, var(--brand) 16%, transparent),
     transparent 70%
   );
 }

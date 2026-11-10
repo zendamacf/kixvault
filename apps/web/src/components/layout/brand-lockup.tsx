@@ -13,7 +13,7 @@ type BrandLockupProps = {
 /**
  * Full KixVault logo: the sneaker pair plus the wordmark. Meant for dark chrome surfaces (the
  * auth panel). Colours come from the theme tokens, so it follows the colorway: the sneakers and
- * "Kix" use primary, "Vault" uses chrome-foreground.
+ * "Kix" use the brand colour, "Vault" uses chrome-foreground.
  */
 export function BrandLockup({ className }: BrandLockupProps) {
   return (
@@ -25,7 +25,7 @@ export function BrandLockup({ className }: BrandLockupProps) {
       className={cn('shrink-0', className)}
     >
       {/* Crop to the artwork's 780 x 616 bounds and scale it to the 144 tall lockup. */}
-      <g transform="scale(0.2338) translate(-128 -212)" className="fill-primary">
+      <g transform="scale(0.2338) translate(-128 -212)" className="fill-brand">
         <g transform={SNEAKER_PAIR_TRANSFORM}>
           <path d={SNEAKER_PAIR_BACK_PATH} />
           <path d={SNEAKER_PAIR_FRONT_PATH} />
@@ -39,7 +39,7 @@ export function BrandLockup({ className }: BrandLockupProps) {
         fontWeight={800}
         letterSpacing={-3.8}
       >
-        <tspan className="fill-primary">Kix</tspan>
+        <tspan className="fill-brand">Kix</tspan>
         <tspan className="fill-chrome-foreground">Vault</tspan>
       </text>
     </svg>
