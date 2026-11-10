@@ -68,7 +68,7 @@ describe('WearCalendar', () => {
       wear('d', '2020-11-05', 'Gazelle'),
     ]);
 
-    expect(screen.getByText('+1')).toBeTruthy();
+    expect(screen.getByText('+2')).toBeTruthy();
   });
 
   test('opens a day dialog listing the pairs worn', () => {

@@ -21,7 +21,8 @@ import {
 } from '@/lib/wears';
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const MAX_THUMBNAILS = 3;
+// Wearing two pairs in one day is rare, so the cell is built around one large sneaker.
+const MAX_THUMBNAILS = 2;
 
 type WearCalendarProps = {
   year: number;
@@ -123,31 +124,33 @@ export function WearCalendar({ year, month, wears, onMonthChange, onAddWear }: W
                   day: 'numeric',
                 })}, ${dayWears.length} ${dayWears.length === 1 ? 'wear' : 'wears'}`}
                 className={cn(
-                  'flex min-h-20 flex-col gap-1 border-r border-b border-border p-1.5 text-left outline-none transition-colors last:border-r-0 focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring sm:min-h-28 sm:p-2',
+                  'relative flex min-h-20 flex-col border-r border-b border-border p-1 text-left outline-none transition-colors last:border-r-0 focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring sm:min-h-28 sm:p-1.5',
                   'hover:bg-muted/60 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent',
                   !inMonth && 'bg-muted/30 text-muted-foreground',
                 )}
               >
                 <span
                   className={cn(
-                    'inline-flex size-6 items-center justify-center rounded-full text-xs font-medium',
+                    'relative z-10 inline-flex size-5 items-center justify-center rounded-full text-xs font-medium sm:size-6',
                     isToday && 'bg-primary text-primary-foreground',
                   )}
                 >
                   {day.getDate()}
                 </span>
                 {dayWears.length > 0 ? (
-                  <span className="flex flex-wrap items-center gap-1">
+                  <span className="-mt-1 flex min-h-0 flex-1 items-center justify-center gap-0.5">
                     {visible.map((wear) => (
                       <SneakerThumbnail
                         key={wear.id}
                         imageUrl={wear.primaryImage?.url ?? null}
                         alt=""
-                        className="size-7 rounded-md bg-background p-0.5 ring-1 ring-border sm:size-9"
+                        className="min-w-0 flex-1 basis-0 self-stretch bg-transparent p-0 text-[10px] leading-tight"
                       />
                     ))}
                     {extra > 0 ? (
-                      <span className="text-xs font-medium text-muted-foreground">+{extra}</span>
+                      <span className="absolute right-1 bottom-1 rounded-full bg-foreground px-1.5 text-[10px] font-semibold text-background">
+                        +{extra}
+                      </span>
                     ) : null}
                   </span>
                 ) : null}
