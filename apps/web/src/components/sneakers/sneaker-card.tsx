@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import type { Sneaker } from '@/lib/queries';
 import { cn, formatCondition, formatCurrency, formatGainLoss } from '@/lib/utils';
@@ -9,8 +10,11 @@ type SneakerCardProps = {
 
 /** Shoe tile with a caption underneath, linking to the sneaker's detail page. */
 export function SneakerCard({ sneaker }: SneakerCardProps) {
+  const { t } = useTranslation();
   const title = `${sneaker.brand} ${sneaker.model}`;
-  const subtitle = sneaker.nickname ? `"${sneaker.nickname}"` : sneaker.colorway || 'No colorway';
+  const subtitle = sneaker.nickname
+    ? `"${sneaker.nickname}"`
+    : sneaker.colorway || t('common.noColorway');
   const hasMarketPrice = sneaker.currentMarketPrice != null;
 
   return (
@@ -37,9 +41,9 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
         <div className="flex items-baseline justify-between gap-3 text-sm text-muted-foreground">
           <p className="min-w-0 truncate">{subtitle}</p>
           <p className="shrink-0 whitespace-nowrap">
-            Size {sneaker.size}
+            {t('common.size', { size: sneaker.size })}
             {sneaker.wearCount > 0
-              ? ` · ${sneaker.wearCount} ${sneaker.wearCount === 1 ? 'wear' : 'wears'}`
+              ? ` · ${t('common.wearCount', { count: sneaker.wearCount })}`
               : ''}
           </p>
         </div>
@@ -69,7 +73,7 @@ export function SneakerCard({ sneaker }: SneakerCardProps) {
               !hasMarketPrice && 'font-medium',
             )}
           >
-            Paid {formatCurrency(sneaker.purchasePrice)}
+            {t('sneakerCard.paid', { value: formatCurrency(sneaker.purchasePrice) })}
           </p>
         </div>
       </div>

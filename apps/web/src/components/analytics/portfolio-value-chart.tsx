@@ -1,4 +1,5 @@
 import type { PortfolioValuePoint } from '@kixvault/shared';
+import { useTranslation } from 'react-i18next';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import {
   type ChartConfig,
@@ -8,18 +9,19 @@ import {
 } from '@/components/ui/chart';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
-const chartConfig = {
-  value: { label: 'Market value', color: 'var(--chart-1)' },
-} satisfies ChartConfig;
-
 /** Total market value of the collection over time. */
 export function PortfolioValueChart({ data }: { data: PortfolioValuePoint[] }) {
+  const { t } = useTranslation();
+  const chartConfig = {
+    value: { label: t('charts.marketValue'), color: 'var(--chart-1)' },
+  } satisfies ChartConfig;
+
   return (
     <ChartContainer
       config={chartConfig}
       className="h-64 w-full"
       role="img"
-      aria-label="Collection market value over time"
+      aria-label={t('charts.valueOverTime')}
     >
       <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
         <CartesianGrid vertical={false} />
@@ -45,7 +47,7 @@ export function PortfolioValueChart({ data }: { data: PortfolioValuePoint[] }) {
               formatter={(value, _name, item) => (
                 <span className="flex w-full items-center justify-between gap-4">
                   <span className="text-muted-foreground">
-                    {item.payload.pairs} {item.payload.pairs === 1 ? 'pair' : 'pairs'}
+                    {t('common.pairCount', { count: item.payload.pairs })}
                   </span>
                   <span className="font-medium tabular-nums">{formatCurrency(Number(value))}</span>
                 </span>

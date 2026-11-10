@@ -32,7 +32,7 @@ describe('AuthLayout', () => {
     expect(screen.getByText(/Chart your collection value/)).toBeTruthy();
   });
 
-  test('lets visitors change the colourway', () => {
+  test('lets visitors change the colorway', () => {
     render(
       <AuthLayout>
         <p>Form</p>

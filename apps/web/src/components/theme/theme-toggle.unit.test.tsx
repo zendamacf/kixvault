@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { i18n } from '@/i18n';
 import { THEMES } from './themes';
 
 afterEach(() => {
@@ -21,7 +22,9 @@ describe('ThemeToggle', () => {
     fireEvent.keyDown(screen.getByRole('button', { name: 'Change theme' }), { key: 'Enter' });
 
     const items = await screen.findAllByRole('menuitemradio');
-    expect(items.map((item) => item.textContent)).toEqual(THEMES.map((theme) => theme.label));
+    expect(items.map((item) => item.textContent)).toEqual(
+      THEMES.map((theme) => i18n.t(`theme.names.${theme.id}`)),
+    );
     expect(screen.getByRole('menuitemradio', { name: 'Bred' }).getAttribute('aria-checked')).toBe(
       'true',
     );

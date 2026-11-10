@@ -47,6 +47,40 @@ describe('email templates', () => {
   });
 });
 
+describe('email localization', () => {
+  test('sets the document language and defaults to English', () => {
+    const email = emailTemplates.verifyEmail({
+      verifyUrl: 'https://kixvault.example/v',
+      expiresInHours: 24,
+    });
+    expect(email.html).toContain('<html lang="en">');
+  });
+
+  test('falls back to English for unsupported locales', () => {
+    const props = { verifyUrl: 'https://kixvault.example/v', expiresInHours: 24 };
+    expect(emailTemplates.verifyEmail({ ...props, locale: 'xx' })).toEqual(
+      emailTemplates.verifyEmail(props),
+    );
+  });
+
+  test('pluralizes expiry times', () => {
+    const one = emailTemplates.resetPassword({
+      resetUrl: 'https://kixvault.example/r',
+      expiresInMinutes: 1,
+    });
+    expect(one.text).toContain('expires in 1 minute and');
+    expect(one.text).not.toContain('1 minutes');
+  });
+
+  test('uses US English spelling', () => {
+    const email = emailTemplates.resetPassword({
+      resetUrl: 'https://kixvault.example/r',
+      expiresInMinutes: 60,
+    });
+    expect(email.html).not.toMatch(/colour|favour|behaviour/i);
+  });
+});
+
 describe('escapeHtml', () => {
   test('escapes markup characters', () => {
     expect(escapeHtml(`<a href="x">'&'</a>`)).toBe(

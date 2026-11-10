@@ -1,7 +1,7 @@
 import type { SneakerCondition } from '@kixvault/shared';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { getActiveLocale } from '@/i18n';
+import { getActiveLocale, i18n } from '@/i18n';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatCurrency(value: number | null | undefined) {
   if (value == null) {
-    return '—';
+    return i18n.t('common.emptyValue');
   }
 
   return new Intl.NumberFormat(getActiveLocale(), {
@@ -21,7 +21,7 @@ export function formatCurrency(value: number | null | undefined) {
 
 export function formatGainLoss(value: number | null | undefined) {
   if (value == null) {
-    return '—';
+    return i18n.t('common.emptyValue');
   }
 
   const formatted = formatCurrency(Math.abs(value));
@@ -38,14 +38,12 @@ export function formatGainLoss(value: number | null | undefined) {
 }
 
 export function formatCondition(condition: SneakerCondition) {
-  const label = condition.split('_').join(' ');
-
-  return label.charAt(0).toUpperCase() + label.slice(1);
+  return i18n.t(`condition.${condition}`);
 }
 
 export function formatDate(value: string | Date | null | undefined) {
   if (!value) {
-    return '—';
+    return i18n.t('common.emptyValue');
   }
 
   const date = typeof value === 'string' ? new Date(value) : value;

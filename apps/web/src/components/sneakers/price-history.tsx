@@ -1,15 +1,11 @@
 import type { PriceSnapshotEntry } from '@kixvault/shared';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { PriceHistoryChart } from './price-history-chart';
 
 type PriceHistoryView = 'chart' | 'table';
-
-const viewOptions: { value: PriceHistoryView; label: string }[] = [
-  { value: 'chart', label: 'Chart' },
-  { value: 'table', label: 'Table' },
-];
 
 type PriceHistoryProps = {
   history: PriceSnapshotEntry[];
@@ -18,12 +14,18 @@ type PriceHistoryProps = {
 
 /** Shows stored market price snapshots for a sneaker as a chart or a table. */
 export function PriceHistory({ history, purchasePrice }: PriceHistoryProps) {
+  const { t } = useTranslation();
   const [view, setView] = useState<PriceHistoryView>('chart');
+
+  const viewOptions: { value: PriceHistoryView; label: string }[] = [
+    { value: 'chart', label: t('priceHistory.chart') },
+    { value: 'table', label: t('priceHistory.table') },
+  ];
 
   if (history.length === 0) {
     return (
       <p className="rounded-2xl bg-card px-4 py-6 text-sm text-muted-foreground ring-1 ring-border">
-        Price history will appear after market values are recorded.
+        {t('priceHistory.empty')}
       </p>
     );
   }
@@ -31,7 +33,7 @@ export function PriceHistory({ history, purchasePrice }: PriceHistoryProps) {
   return (
     <div className="space-y-3">
       <SegmentedControl
-        label="Price history view"
+        label={t('priceHistory.viewLabel')}
         value={view}
         options={viewOptions}
         onChange={setView}
@@ -43,8 +45,8 @@ export function PriceHistory({ history, purchasePrice }: PriceHistoryProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/60 text-left text-muted-foreground">
-                <th className="px-4 py-2.5 font-medium">Date</th>
-                <th className="px-4 py-2.5 text-right font-medium">Price</th>
+                <th className="px-4 py-2.5 font-medium">{t('priceHistory.date')}</th>
+                <th className="px-4 py-2.5 text-right font-medium">{t('priceHistory.price')}</th>
               </tr>
             </thead>
             <tbody>

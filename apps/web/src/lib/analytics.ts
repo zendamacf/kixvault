@@ -1,7 +1,9 @@
+import { i18n } from '@/i18n';
+
 /** Formats a `YYYY-MM` month for chart labels. */
 export function formatMonth(value: string | null | undefined, style: 'short' | 'long'): string {
   if (!value) {
-    return '—';
+    return i18n.t('common.emptyValue');
   }
 
   const [year, month] = value.split('-').map(Number);

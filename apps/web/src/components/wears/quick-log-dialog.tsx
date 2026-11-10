@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import {
   Dialog,
@@ -28,16 +29,9 @@ type QuickLogDialogProps = {
   date?: string;
 };
 
-function describeWearCount(sneaker: Sneaker): string {
-  if (sneaker.wearCount === 0) {
-    return 'Never worn';
-  }
-
-  return `${sneaker.wearCount} ${sneaker.wearCount === 1 ? 'wear' : 'wears'}`;
-}
-
 /** Type-to-filter picker: Enter or a tap logs the highlighted pair and closes. */
 export function QuickLogDialog({ open, onOpenChange, date }: QuickLogDialogProps) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const { data, isLoading } = useQuery({ ...sneakersQueryOptions({}), enabled: open });
@@ -94,12 +88,19 @@ export function QuickLogDialog({ open, onOpenChange, date }: QuickLogDialogProps
   }
 
   const heading = isToday
-    ? 'What are you wearing today?'
-    : `What did you wear on ${parseIsoDate(targetDate).toLocaleDateString(undefined, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-      })}?`;
+    ? t('quickLog.headingToday')
+    : t('quickLog.headingDate', {
+        date: parseIsoDate(targetDate).toLocaleDateString(undefined, {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+        }),
+      });
+
+  const describeWearCount = (sneaker: Sneaker) =>
+    sneaker.wearCount === 0
+      ? t('quickLog.neverWorn')
+      : t('common.wearCount', { count: sneaker.wearCount });
 
   const activeId = results[activeIndex] ? `quick-log-option-${results[activeIndex].id}` : undefined;
 
@@ -108,7 +109,7 @@ export function QuickLogDialog({ open, onOpenChange, date }: QuickLogDialogProps
       <DialogContent className="gap-4 sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{heading}</DialogTitle>
-          <DialogDescription>Pick a pair to log a wear.</DialogDescription>
+          <DialogDescription>{t('quickLog.description')}</DialogDescription>
         </DialogHeader>
 
         <div className="relative">
@@ -121,8 +122,8 @@ export function QuickLogDialog({ open, onOpenChange, date }: QuickLogDialogProps
             aria-expanded="true"
             aria-controls="quick-log-options"
             aria-activedescendant={activeId}
-            aria-label="Search your pairs"
-            placeholder="Search your pairs"
+            aria-label={t('quickLog.searchLabel')}
+            placeholder={t('quickLog.searchPlaceholder')}
             className="pl-9"
             value={search}
             onChange={(event) => updateSearch(event.target.value)}
@@ -133,7 +134,7 @@ export function QuickLogDialog({ open, onOpenChange, date }: QuickLogDialogProps
         <div
           id="quick-log-options"
           role="listbox"
-          aria-label="Your pairs"
+          aria-label={t('quickLog.listLabel')}
           className="-mx-1 max-h-80 space-y-0.5 overflow-y-auto px-1"
         >
           {isLoading ? (
@@ -146,7 +147,7 @@ export function QuickLogDialog({ open, onOpenChange, date }: QuickLogDialogProps
 
           {!isLoading && results.length === 0 ? (
             <p className="px-2 py-6 text-center text-sm text-muted-foreground">
-              {search ? 'No pairs match that search.' : 'Add a pair to start logging wears.'}
+              {search ? t('quickLog.noMatches') : t('quickLog.noPairs')}
             </p>
           ) : null}
 
@@ -181,9 +182,11 @@ export function QuickLogDialog({ open, onOpenChange, date }: QuickLogDialogProps
                   {sneaker.model}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {sneaker.nickname ? `"${sneaker.nickname}"` : sneaker.colorway || 'No colorway'}
+                  {sneaker.nickname
+                    ? `"${sneaker.nickname}"`
+                    : sneaker.colorway || t('common.noColorway')}
                   {' · '}
-                  Size {sneaker.size}
+                  {t('common.size', { size: sneaker.size })}
                 </p>
               </div>
               <div className="shrink-0 text-right text-xs text-muted-foreground">

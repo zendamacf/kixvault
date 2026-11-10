@@ -1,6 +1,7 @@
 import type { CatalogSearchResult, CreateWishlistFromCatalogInput } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BackButton } from '@/components/layout/back-button';
 import { CatalogSearchPicker } from '@/components/sneakers/catalog-search-picker';
 import { CatalogSneakerSummary } from '@/components/sneakers/catalog-sneaker-summary';
@@ -29,6 +30,7 @@ export function WishlistCatalogForm({
   isSubmitting = false,
   onSubmit,
 }: WishlistCatalogFormProps) {
+  const { t } = useTranslation();
   const [selectedResult, setSelectedResult] = useState<CatalogSearchResult | null>(null);
   const [query, setQuery] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
@@ -51,7 +53,9 @@ export function WishlistCatalogForm({
         <CatalogSearchPicker query={query} onQueryChange={setQuery} onSelect={setSelectedResult} />
       ) : (
         <>
-          <BackButton onClick={() => setSelectedResult(null)}>Back to search</BackButton>
+          <BackButton onClick={() => setSelectedResult(null)}>
+            {t('catalogForm.backToSearch')}
+          </BackButton>
 
           {isLoading ? (
             <div className="space-y-4 rounded-2xl bg-card p-4 ring-1 ring-border">
@@ -86,7 +90,7 @@ export function WishlistCatalogForm({
                 }}
               />
               <div className="grid gap-2">
-                <Label htmlFor="wishlist-priority">Priority</Label>
+                <Label htmlFor="wishlist-priority">{t('common.priority')}</Label>
                 <Select
                   value={priority}
                   onValueChange={(value) => setPriority(value as typeof priority)}
@@ -95,14 +99,14 @@ export function WishlistCatalogForm({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="low">{t('wishlist.priorityOption.low')}</SelectItem>
+                    <SelectItem value="medium">{t('wishlist.priorityOption.medium')}</SelectItem>
+                    <SelectItem value="high">{t('wishlist.priorityOption.high')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="wishlist-notes">Notes</Label>
+                <Label htmlFor="wishlist-notes">{t('common.notes')}</Label>
                 <Textarea
                   id="wishlist-notes"
                   rows={3}

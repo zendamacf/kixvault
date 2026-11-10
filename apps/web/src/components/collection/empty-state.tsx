@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { ShoeSilhouette } from '@/components/layout/shoe-silhouette';
 import { Button, buttonVariants } from '@/components/ui/button';
 
@@ -18,6 +19,8 @@ export function EmptyState({
   actionTo,
   onClearFilters,
 }: EmptyStateProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col items-center gap-6 rounded-3xl bg-card px-6 py-14 text-center ring-1 ring-border">
       <ShoeSilhouette className="w-40 text-muted-foreground/40" />
@@ -33,7 +36,7 @@ export function EmptyState({
         ) : null}
         {onClearFilters ? (
           <Button type="button" size="lg" variant="outline" onClick={onClearFilters}>
-            Reset filters
+            {t('collection.resetFilters')}
           </Button>
         ) : null}
       </div>

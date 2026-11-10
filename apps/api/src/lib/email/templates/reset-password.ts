@@ -1,4 +1,5 @@
 import { APP_NAME } from '@kixvault/shared';
+import { getEmailT, resolveEmailLocale } from '../i18n';
 import type { RenderedEmail } from './index';
 import {
   renderButton,
@@ -12,25 +13,34 @@ import {
 export type ResetPasswordEmailProps = {
   resetUrl: string;
   expiresInMinutes: number;
+  /** Defaults to English. */
+  locale?: string;
 };
 
 export function resetPasswordEmailTemplate({
   resetUrl,
   expiresInMinutes,
+  locale,
 }: ResetPasswordEmailProps): RenderedEmail {
-  const expiry = `This link expires in ${expiresInMinutes} minutes and works once. If you did not ask to reset your password, ignore this email and your password stays the same.`;
+  const resolvedLocale = resolveEmailLocale(locale);
+  const t = getEmailT(resolvedLocale);
+  const appName = APP_NAME;
+  const intro = t('resetPassword.intro', { appName });
+  const expiry = t('resetPassword.expiry', { count: expiresInMinutes });
 
   return {
-    subject: `Reset your ${APP_NAME} password`,
+    subject: t('resetPassword.subject', { appName }),
     html: renderLayout(
       [
-        renderHeading('Reset your password'),
-        renderParagraph(`Someone asked to reset the password for your ${APP_NAME} account.`),
-        `<p style="margin:0 0 24px;">${renderButton(resetUrl, 'Choose a new password')}</p>`,
+        renderHeading(t('resetPassword.heading')),
+        renderParagraph(intro),
+        `<p style="margin:0 0 24px;">${renderButton(resetUrl, t('resetPassword.action'))}</p>`,
         renderMuted(expiry),
-        renderLinkFallback(resetUrl),
+        renderLinkFallback(resetUrl, t),
       ].join('\n'),
+      t,
+      resolvedLocale,
     ),
-    text: `Someone asked to reset the password for your ${APP_NAME} account.\n\nChoose a new password: ${resetUrl}\n\n${expiry}`,
+    text: `${intro}\n\n${t('resetPassword.textAction', { url: resetUrl })}\n\n${expiry}`,
   };
 }

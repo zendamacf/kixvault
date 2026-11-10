@@ -1,5 +1,6 @@
 import { Palette } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,8 +11,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DEFAULT_THEME, THEME_IDS, THEMES } from './themes';
 
-/** Sneaker colourway picker for the app header. */
+/** Sneaker colorway picker for the app header. */
 export function ThemeToggle() {
+  const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
   const active = theme && THEME_IDS.includes(theme) ? theme : DEFAULT_THEME;
 
@@ -21,7 +23,7 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="Change theme"
+          aria-label={t('theme.change')}
           className="text-chrome-foreground hover:bg-chrome-foreground/10 hover:text-chrome-foreground focus-visible:ring-brand dark:hover:bg-chrome-foreground/10"
         >
           <Palette className="size-4" />
@@ -36,7 +38,7 @@ export function ThemeToggle() {
           {THEMES.map((item) => (
             <DropdownMenuRadioItem key={item.id} value={item.id} className="py-2">
               <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-                {item.label}
+                {t(`theme.names.${item.id}`)}
                 <span
                   aria-hidden="true"
                   className="flex h-1.5 overflow-hidden rounded-full ring-1 ring-foreground/25"

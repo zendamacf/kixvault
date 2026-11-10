@@ -12,7 +12,32 @@
     "forgotPassword": "Forgot your password?"
   },
   "common": {
-    "emptyValue": "—"
+    "emptyValue": "—",
+    "close": "Close",
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "backToCollection": "Back to collection",
+    "backToGrails": "Back to grails",
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "backToAnalytics": "Back to analytics",
+    "backToWears": "Back to wears",
+    "edit": "Edit",
+    "tryAgain": "Try again",
+    "noColorway": "No colorway",
+    "size": "Size {{size}}",
+    "noImage": "No image",
+    "wearCount_one": "{{count}} wear",
+    "wearCount_other": "{{count}} wears",
+    "pairCount_one": "{{count}} pair",
+    "pairCount_other": "{{count}} pairs",
+    "notes": "Notes",
+    "brand": "Brand",
+    "model": "Model",
+    "colorway": "Colorway",
+    "priority": "Priority"
   },
   "verifyEmail": {
     "verifyingTitle": "Confirming your email",
@@ -59,5 +84,413 @@
     "successDescription": "Your password has been changed and you have been signed out everywhere. Sign in with your new password.",
     "successAction": "Go to sign in",
     "backToSignIn": "Back to sign in"
+  },
+  "layout": {
+    "skipToContent": "Skip to content",
+    "homeLabel": "{{appName}} home",
+    "mainNavLabel": "Main",
+    "siteMenuLabel": "Site menu",
+    "logWear": "Log wear",
+    "addPair": "Add pair",
+    "nav": {
+      "collection": "Collection",
+      "grails": "Grails",
+      "wears": "Wears",
+      "analytics": "Analytics",
+      "activity": "Activity"
+    },
+    "footer": {
+      "github": "{{appName}} on GitHub",
+      "version": "v{{version}}"
+    },
+    "auth": {
+      "headline": "Every pair, what you paid, and what it is worth.",
+      "tagline": "Built for sneaker collectors.",
+      "highlights": {
+        "track": "Track what you paid and what each pair is worth",
+        "grails": "Keep a grails list of the pairs you are chasing",
+        "wears": "Log every wear and see what actually gets worn",
+        "charts": "Chart your collection value, wears, and price history"
+      }
+    },
+    "mobileMenu": {
+      "open": "Open menu",
+      "title": "Menu",
+      "colorway": "Colorway",
+      "logOut": "Log out"
+    },
+    "userMenu": {
+      "trigger": "Account menu",
+      "account": "Account",
+      "logOut": "Log out"
+    }
+  },
+  "theme": {
+    "change": "Change theme",
+    "names": {
+      "shattered-backboard": "Shattered Backboard",
+      "chicago": "Chicago",
+      "unc": "UNC",
+      "panda": "Panda",
+      "bred": "Bred",
+      "royal": "Royal",
+      "mocha": "Mocha"
+    }
+  },
+  "errors": {
+    "logIn": "Failed to log in",
+    "logOut": "Failed to log out",
+    "createAccount": "Failed to create account",
+    "catalogSearch": "Catalog search failed",
+    "loadCatalogProduct": "Failed to load catalog product",
+    "loadUmami": "Failed to load Umami analytics script",
+    "loadSession": "Failed to load session",
+    "loadAuthConfig": "Failed to load auth config",
+    "loadStats": "Failed to load stats",
+    "loadAnalytics": "Failed to load analytics",
+    "loadSneakers": "Failed to load sneakers",
+    "loadSneaker": "Failed to load sneaker",
+    "loadGrails": "Failed to load grails",
+    "loadGrail": "Failed to load grail",
+    "loadActivity": "Failed to load activity",
+    "loadPriceHistory": "Failed to load price history",
+    "loadWears": "Failed to load wears",
+    "removeWear": "Failed to remove wear",
+    "logWear": "Failed to log wear",
+    "addGrailFromCatalog": "Failed to add grail from catalog",
+    "addGrail": "Failed to add grail",
+    "updateGrail": "Failed to update grail",
+    "removeGrail": "Failed to remove grail",
+    "moveToCollection": "Failed to move to collection",
+    "addSneakerFromCatalog": "Failed to add sneaker from catalog",
+    "createSneaker": "Failed to create sneaker",
+    "updateSneaker": "Failed to update sneaker",
+    "deleteSneaker": "Failed to delete sneaker",
+    "updateCondition": "Failed to update condition"
+  },
+  "condition": {
+    "deadstock": "Deadstock",
+    "lightly_worn": "Lightly worn",
+    "worn": "Worn",
+    "beat": "Beat"
+  },
+  "priority": {
+    "low": "Low priority",
+    "medium": "Medium priority",
+    "high": "High priority"
+  },
+  "activity": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "actions": {
+      "auth.login": "Signed in",
+      "auth.logout": "Signed out",
+      "auth.register": "Created account",
+      "auth.email_verified": "Verified email",
+      "auth.password_reset": "Reset password",
+      "grail.added": "Added a grail",
+      "sneaker.created": "Added a pair",
+      "sneaker.created_from_grail": "Copped a grail",
+      "sneaker.updated": "Updated a pair",
+      "sneaker.deleted": "Removed a pair",
+      "sneaker.worn": "Logged a wear",
+      "sneaker.wear_removed": "Removed a wear"
+    },
+    "grailsRemoved_one": "Removed from Grails",
+    "grailsRemoved_other": "Removed {{count}} grails from your list"
+  },
+  "wears": {
+    "toast": {
+      "removed": "Wear removed.",
+      "removedReverted": "Wear removed. Marked as deadstock again.",
+      "alreadyLogged": "{{label}} is already logged for that day.",
+      "logged": "Logged {{label}}.",
+      "loggedWithCondition": "Logged {{label}}. Marked as {{condition}}.",
+      "undo": "Undo"
+    }
+  },
+  "grails": {
+    "cleared_one": "Congrats, you got your grail!",
+    "cleared_other": "Congrats, you got {{count}} grails!",
+    "pageTitle": "Grails",
+    "summary_one": "<strong>{{count}}</strong> grail on the hunt.",
+    "summary_other": "<strong>{{count}}</strong> grails on the hunt.",
+    "summaryHigh_one": "<strong>{{count}}</strong> grail on the hunt, <strong>{{high}}</strong> at high priority.",
+    "summaryHigh_other": "<strong>{{count}}</strong> grails on the hunt, <strong>{{high}}</strong> at high priority.",
+    "tagline": "Pairs you want but don't own yet.",
+    "add": "Add grail",
+    "loadFailed": "Could not load your grails. Try again in a moment.",
+    "empty": {
+      "title": "No grails yet",
+      "description": "Save pairs you are hunting for from StockX search or a quick manual entry.",
+      "action": "Add your first grail"
+    },
+    "new": {
+      "title": "Add a grail",
+      "description": "Search StockX or enter details manually. Grails stay separate until you move them to your collection.",
+      "modeLabel": "How to add this grail",
+      "fromCatalog": "From catalog",
+      "manual": "Manual entry"
+    },
+    "edit": {
+      "notFound": "Grail not found.",
+      "remove": "Remove from grails"
+    }
+  },
+  "pricing": {
+    "deadstockDisclaimer": "Market value reflects deadstock pricing."
+  },
+  "register": {
+    "title": "Create your vault",
+    "description": "Track every pair in one place.",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "submit": "Create account",
+    "submitPending": "Creating account...",
+    "signinPrompt": "Already have an account?",
+    "signinLink": "Sign in"
+  },
+  "collection": {
+    "pageTitle": "Your collection",
+    "pairsLabel": "Pairs",
+    "searchLabel": "Search your collection",
+    "searchPlaceholder": "Search brand, model, colorway, SKU",
+    "conditionLegend": "Condition",
+    "allConditions": "All",
+    "reset": "Reset",
+    "sortLabel": "Sort pairs",
+    "pairCount_one": "{{count}} pair",
+    "pairCount_other": "{{count}} pairs",
+    "sort": {
+      "created_at:desc": "Recently added",
+      "created_at:asc": "Oldest added",
+      "purchase_date:desc": "Newest purchase",
+      "purchase_date:asc": "Oldest purchase",
+      "purchase_price:desc": "Price paid, high to low",
+      "purchase_price:asc": "Price paid, low to high",
+      "brand:asc": "Brand, A to Z",
+      "brand:desc": "Brand, Z to A"
+    },
+    "empty": {
+      "title": "Your vault is empty",
+      "description": "Add your first pair to start tracking brands, sizes, and spend.",
+      "action": "Add your first pair"
+    },
+    "noMatches": {
+      "title": "No matches found",
+      "description": "Try a different brand or condition, or reset the filters."
+    },
+    "resetFilters": "Reset filters",
+    "summary": {
+      "label": "Collection summary",
+      "pairs_one": "<figure>{{count}}</figure> pair",
+      "pairs_other": "<figure>{{count}}</figure> pairs",
+      "boughtFor": ", bought for <figure>{{value}}</figure>",
+      "worth": ", worth <figure>{{value}}</figure> today.",
+      "noWorth": ".",
+      "breakEven": "Break-even.",
+      "up": "Up <strong>{{amount}}</strong>.",
+      "down": "Down <strong>{{amount}}</strong>.",
+      "average": "{{value}} average per pair"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "description": "How your collection is worth, worn, and made up.",
+    "value": {
+      "title": "Collection value",
+      "description": "Combined market value of your pairs, week by week.",
+      "empty": "Value history appears once market prices are recorded for your pairs.",
+      "footnote": "Based on {{tracked}} of {{total}} pairs. Pairs without catalog pricing are left out."
+    },
+    "wearsPerMonth": {
+      "title": "Wears per month",
+      "description": "The last 12 months.",
+      "empty": "Log a wear to start tracking."
+    },
+    "mostWorn": {
+      "title": "Most worn",
+      "description": "Your top pairs of all time.",
+      "empty": "No wears logged yet."
+    },
+    "byBrand": {
+      "title": "By brand",
+      "description": "Pairs per brand.",
+      "empty": "Add sneakers to see your brands."
+    },
+    "byCondition": {
+      "title": "By condition",
+      "description": "How worn your pairs are.",
+      "empty": "Add sneakers to see their condition."
+    }
+  },
+  "wearsPage": {
+    "title": "Wear calendar",
+    "description": "Every pair you have worn, day by day."
+  },
+  "activityPage": {
+    "back": "Back to collection",
+    "title": "Activity",
+    "description": "Sign-ins, grails, and changes to your collection, newest first.",
+    "loadFailed": "Could not load activity. Try again in a moment.",
+    "emptyTitle": "Nothing here yet",
+    "emptyDescription": "Signing in, adding grails and adding pairs will show up here.",
+    "retention": "Activity older than {{days}} days is no longer shown."
+  },
+  "sneakers": {
+    "new": {
+      "title": "Add a pair",
+      "description": "Search the catalog to find your pair, or enter details manually.",
+      "modeLabel": "How to add this pair",
+      "searchCatalog": "Search catalog",
+      "manual": "Enter manually",
+      "submit": "Add to collection"
+    },
+    "edit": {
+      "title": "Edit pair",
+      "description": "Update {{brand}} {{model}}.",
+      "backToDetails": "Back to details",
+      "notFound": "Sneaker not found"
+    },
+    "detail": {
+      "noColorway": "No colorway listed",
+      "viewOn": "View on {{source}}",
+      "woreToday": "Wore today",
+      "deleteTitle": "Delete this pair?",
+      "deleteDescription": "This will permanently remove it from your collection. This action cannot be undone.",
+      "marketValueLabel": "Market value",
+      "worth": "Worth <strong>{{value}}</strong> today.",
+      "gain": "<tone>{{change}}</tone> on the {{paid}} you paid.",
+      "breakEven": "Break-even",
+      "up": "Up {{amount}}",
+      "down": "Down {{amount}}",
+      "noMarketValue": "No market value is available for this pair.",
+      "priceUpdated": "Price updated {{date}}",
+      "facts": {
+        "size": "Size",
+        "condition": "Condition",
+        "worn": "Worn",
+        "paid": "Paid",
+        "purchased": "Purchased",
+        "released": "Released",
+        "added": "Added to vault"
+      },
+      "neverWorn": "Never",
+      "wornTimes_one": "{{count}} time",
+      "wornTimes_other": "{{count}} times",
+      "wornTimesLast_one": "{{count}} time, last {{date}}",
+      "wornTimesLast_other": "{{count}} times, last {{date}}",
+      "notes": "Notes",
+      "about": "About this pair",
+      "priceHistory": "Price history"
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "That page does not exist or has moved. Head back to your collection."
+  },
+  "routeError": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Try again, and if it keeps happening, reload the page."
+  },
+  "charts": {
+    "pairs": "Pairs",
+    "wears": "Wears",
+    "marketValue": "Market value",
+    "pairsPerBrand": "Pairs per brand",
+    "pairsPerCondition": "Pairs per condition",
+    "valueOverTime": "Collection market value over time",
+    "wearsPerMonth": "Wears per month"
+  },
+  "forms": {
+    "sizeRequired": "Size is required"
+  },
+  "catalogSearch": {
+    "find": "Find a sneaker",
+    "placeholder": "Search by name or SKU",
+    "hint": "Searches StockX. Try \"Air Jordan 1 Chicago\" or \"DZ5485-100\".",
+    "minChars": "Type at least 3 characters to search.",
+    "unavailable": "Catalog search is unavailable. Switch to manual entry to add a pair.",
+    "noResults": "No sneakers found on StockX for “{{query}}”."
+  },
+  "catalogForm": {
+    "backToSearch": "Back to search",
+    "pricingUnavailable": "Catalog pricing is unavailable. You can still add this pair, but market value will not be stored."
+  },
+  "sneakerForm": {
+    "brandPlaceholder": "Nike",
+    "modelPlaceholder": "Air Jordan 1",
+    "colorwayPlaceholder": "Chicago",
+    "nickname": "Nickname",
+    "nicknamePlaceholder": "Chicago",
+    "size": "Size",
+    "sizePlaceholder": "10",
+    "condition": "Condition",
+    "purchasePrice": "Purchase price",
+    "purchasePricePlaceholder": "180",
+    "purchaseDate": "Purchase date (optional)",
+    "notesPlaceholder": "Where you bought them, lace swap, etc."
+  },
+  "marketValue": {
+    "unavailable": "Market value unavailable",
+    "value": "Value",
+    "vsPaid": "{{amount}} vs paid",
+    "enterSize": "Enter a size to preview the current market value.",
+    "noPrice": "No market price available for size {{size}}.",
+    "preview": "Market preview"
+  },
+  "priceHistory": {
+    "empty": "Price history will appear after market values are recorded.",
+    "viewLabel": "Price history view",
+    "chart": "Chart",
+    "table": "Table",
+    "date": "Date",
+    "price": "Price",
+    "chartLabel": "Market price over time",
+    "marketPrice": "Market price",
+    "paid": "{{value}} paid"
+  },
+  "sneakerCard": {
+    "paid": "Paid {{value}}"
+  },
+  "quickLog": {
+    "headingToday": "What are you wearing today?",
+    "headingDate": "What did you wear on {{date}}?",
+    "description": "Pick a pair to log a wear.",
+    "searchLabel": "Search your pairs",
+    "searchPlaceholder": "Search your pairs",
+    "listLabel": "Your pairs",
+    "noMatches": "No pairs match that search.",
+    "noPairs": "Add a pair to start logging wears.",
+    "neverWorn": "Never worn"
+  },
+  "wearCalendar": {
+    "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "today": "Today",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "dayLabel": "{{date}}, {{wears}}",
+    "nothingLogged": "Nothing logged for this day.",
+    "pairsWorn_one": "{{count}} pair worn.",
+    "pairsWorn_other": "{{count}} pairs worn.",
+    "removeLabel": "Remove {{name}} from this day",
+    "addPair": "Add a pair"
+  },
+  "wearSuggestion": {
+    "label": "Condition suggestion",
+    "prompt_one": "Worn {{count}} time. Mark this pair as <strong>{{target}}</strong>?",
+    "prompt_other": "Worn {{count}} times. Mark this pair as <strong>{{target}}</strong>?",
+    "accept": "Mark as {{target}}",
+    "notNow": "Not now",
+    "marked": "Marked as {{target}}."
+  },
+  "wishlist": {
+    "moveTitle": "Move to collection",
+    "moveDescription": "Add this grail to your vault and remove it from your wishlist.",
+    "priorityOption": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    }
   }
 }

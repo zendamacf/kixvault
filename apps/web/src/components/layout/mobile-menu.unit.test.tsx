@@ -44,7 +44,7 @@ describe('MobileMenu', () => {
     expect(screen.getByRole('button', { name: 'Open menu' })).toBeTruthy();
   });
 
-  test('lists navigation, activity, colourway, and log out', () => {
+  test('lists navigation, activity, colorway, and log out', () => {
     renderMenu();
 
     fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
@@ -54,7 +54,7 @@ describe('MobileMenu', () => {
     expect(screen.getByRole('link', { name: 'Wears' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Analytics' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Activity' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Colourway' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Colorway' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Log out' })).toBeTruthy();
     expect(screen.getByText('collector@example.com')).toBeTruthy();
   });
@@ -78,15 +78,15 @@ describe('MobileMenu', () => {
     );
   });
 
-  test('expands the colourway list', () => {
+  test('expands the colorway list', () => {
     renderMenu();
     fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
 
-    expect(screen.queryByRole('group', { name: 'Colourway' })).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Colorway' })).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Colourway' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Colorway' }));
 
-    const group = screen.getByRole('group', { name: 'Colourway' });
+    const group = screen.getByRole('group', { name: 'Colorway' });
     expect(group.querySelectorAll('button[aria-pressed]').length).toBeGreaterThan(1);
     expect(group.querySelectorAll('button[aria-pressed="true"]')).toHaveLength(1);
   });

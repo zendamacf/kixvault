@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { i18n } from '@/i18n';
 import { api, parseApiError } from '@/lib/api';
 import { formatCondition } from '@/lib/utils';
 import { toIsoDate } from '@/lib/wears';
@@ -40,7 +41,7 @@ export function useRemoveWear(options: { quiet?: boolean } = {}) {
       });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to remove wear'));
+        throw new Error(await parseApiError(response, i18n.t('errors.removeWear')));
       }
 
       return response.json();
@@ -50,7 +51,9 @@ export function useRemoveWear(options: { quiet?: boolean } = {}) {
 
       if (!options.quiet) {
         toast.success(
-          result.conditionReverted ? 'Wear removed. Marked as deadstock again.' : 'Wear removed.',
+          result.conditionReverted
+            ? i18n.t('wears.toast.removedReverted')
+            : i18n.t('wears.toast.removed'),
         );
       }
     },
@@ -74,7 +77,7 @@ export function useLogWear() {
       });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to log wear'));
+        throw new Error(await parseApiError(response, i18n.t('errors.logWear')));
       }
 
       return { ...(await response.json()), date };
@@ -83,17 +86,20 @@ export function useLogWear() {
       await invalidate();
 
       if (!result.created) {
-        toast.info(`${variables.label} is already logged for that day.`);
+        toast.info(i18n.t('wears.toast.alreadyLogged', { label: variables.label }));
         return;
       }
 
-      const conditionNote = result.conditionChanged
-        ? ` Marked as ${formatCondition(result.sneaker.condition).toLowerCase()}.`
-        : '';
+      const message = result.conditionChanged
+        ? i18n.t('wears.toast.loggedWithCondition', {
+            label: variables.label,
+            condition: formatCondition(result.sneaker.condition).toLowerCase(),
+          })
+        : i18n.t('wears.toast.logged', { label: variables.label });
 
-      toast.success(`Logged ${variables.label}.${conditionNote}`, {
+      toast.success(message, {
         action: {
-          label: 'Undo',
+          label: i18n.t('wears.toast.undo'),
           onClick: () => removeWear.mutate({ sneakerId: variables.sneakerId, wornOn: result.date }),
         },
       });

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
+import { Trans, useTranslation } from 'react-i18next';
 import { EmptyState } from '@/components/collection/empty-state';
 import { SneakerGridSkeleton } from '@/components/collection/sneaker-grid-skeleton';
 import { buttonVariants } from '@/components/ui/button';
@@ -12,6 +13,7 @@ export const Route = createFileRoute('/_authenticated/grails/')({
 });
 
 function GrailsPage() {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useQuery(wishlistQueryOptions);
   const items = data?.items ?? [];
   const highCount = items.filter((item) => item.priority === 'high').length;
@@ -19,32 +21,28 @@ function GrailsPage() {
 
   return (
     <div className="space-y-10">
-      <h1 className="sr-only">Grails</h1>
+      <h1 className="sr-only">{t('grails.pageTitle')}</h1>
 
       <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
         {hasItems ? (
           <p className="max-w-3xl text-balance font-heading text-3xl leading-[1.15] tracking-tight text-muted-foreground sm:text-4xl">
-            <strong className="font-semibold text-foreground">{items.length}</strong>{' '}
-            {items.length === 1 ? 'grail' : 'grails'} on the hunt
-            {highCount > 0 ? (
-              <>
-                , <strong className="font-semibold text-foreground">{highCount}</strong> at high
-                priority.
-              </>
-            ) : (
-              '.'
-            )}
+            <Trans
+              i18nKey={highCount > 0 ? 'grails.summaryHigh' : 'grails.summary'}
+              count={items.length}
+              values={{ high: highCount }}
+              components={{ strong: <strong className="font-semibold text-foreground" /> }}
+            />
           </p>
         ) : (
           <p className="max-w-xl text-balance font-heading text-3xl leading-[1.15] tracking-tight text-muted-foreground sm:text-4xl">
-            Pairs you want but don't own yet.
+            {t('grails.tagline')}
           </p>
         )}
 
         {hasItems ? (
           <Link to="/grails/new" className={buttonVariants({ size: 'lg' })}>
             <Plus aria-hidden />
-            Add grail
+            {t('grails.add')}
           </Link>
         ) : null}
       </div>
@@ -53,15 +51,15 @@ function GrailsPage() {
 
       {error ? (
         <p className="text-sm text-destructive" role="alert">
-          Could not load your grails. Try again in a moment.
+          {t('grails.loadFailed')}
         </p>
       ) : null}
 
       {!isLoading && !error && items.length === 0 ? (
         <EmptyState
-          title="No grails yet"
-          description="Save pairs you are hunting for from StockX search or a quick manual entry."
-          actionLabel="Add your first grail"
+          title={t('grails.empty.title')}
+          description={t('grails.empty.description')}
+          actionLabel={t('grails.empty.action')}
           actionTo="/grails/new"
         />
       ) : null}

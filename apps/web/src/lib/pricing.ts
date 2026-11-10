@@ -1,4 +1,5 @@
 import type { SneakerCondition, VariantPrice } from '@kixvault/shared';
+import { i18n } from '@/i18n';
 
 export function normalizeSizeValue(size: number | string): string {
   const numericSize = typeof size === 'number' ? size : Number(size);
@@ -31,7 +32,7 @@ export function matchVariantPrice(
 
 export function getMarketValueDisclaimer(condition: SneakerCondition | string): string | null {
   if (condition !== 'deadstock') {
-    return 'Market value reflects deadstock pricing.';
+    return i18n.t('pricing.deadstockDisclaimer');
   }
 
   return null;

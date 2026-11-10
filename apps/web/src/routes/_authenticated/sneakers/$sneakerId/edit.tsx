@@ -2,6 +2,7 @@ import type { CreateSneakerInput, SneakerCondition, UpdateSneakerInput } from '@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BackLink } from '@/components/layout/back-link';
 import { CollectionSneakerForm } from '@/components/sneakers/collection-sneaker-form';
 import { ManualSneakerForm } from '@/components/sneakers/manual-sneaker-form';
@@ -16,6 +17,7 @@ export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/edit')
 });
 
 function EditSneakerPage() {
+  const { t } = useTranslation();
   const { sneakerId } = Route.useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -30,7 +32,7 @@ function EditSneakerPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await parseApiError(response, 'Failed to update sneaker'));
+        throw new Error(await parseApiError(response, t('errors.updateSneaker')));
       }
 
       return response.json();
@@ -60,9 +62,9 @@ function EditSneakerPage() {
   if (error || !data?.sneaker) {
     return (
       <div className="mx-auto max-w-3xl space-y-4">
-        <BackLink to="/">Back to collection</BackLink>
+        <BackLink to="/">{t('common.backToCollection')}</BackLink>
         <p className="text-sm text-destructive" role="alert">
-          {error?.message ?? 'Sneaker not found'}
+          {error?.message ?? t('sneakers.edit.notFound')}
         </p>
       </div>
     );
@@ -75,12 +77,14 @@ function EditSneakerPage() {
     <div className="mx-auto max-w-3xl space-y-8">
       <div className="space-y-4">
         <BackLink to="/sneakers/$sneakerId" params={{ sneakerId }}>
-          Back to details
+          {t('sneakers.edit.backToDetails')}
         </BackLink>
         <div className="space-y-1">
-          <h1 className="font-heading text-4xl font-semibold tracking-tight">Edit pair</h1>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">
+            {t('sneakers.edit.title')}
+          </h1>
           <p className="text-muted-foreground">
-            Update {sneaker.brand} {sneaker.model}.
+            {t('sneakers.edit.description', { brand: sneaker.brand, model: sneaker.model })}
           </p>
         </div>
       </div>
@@ -101,7 +105,7 @@ function EditSneakerPage() {
             colorway: sneaker.colorway,
             sku: sneaker.sku,
           }}
-          submitLabel="Save changes"
+          submitLabel={t('common.saveChanges')}
           isSubmitting={updateMutation.isPending}
           defaultValues={{
             size: sneaker.size,
@@ -116,7 +120,7 @@ function EditSneakerPage() {
         />
       ) : (
         <ManualSneakerForm
-          submitLabel="Save changes"
+          submitLabel={t('common.saveChanges')}
           isSubmitting={updateMutation.isPending}
           defaultValues={{
             brand: sneaker.brand,

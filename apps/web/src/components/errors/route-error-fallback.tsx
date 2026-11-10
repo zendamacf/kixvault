@@ -1,10 +1,12 @@
 import * as Sentry from '@sentry/react';
 import type { ErrorComponentProps } from '@tanstack/react-router';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ShoeSilhouette } from '@/components/layout/shoe-silhouette';
 import { Button } from '@/components/ui/button';
 
 export function RouteErrorFallback({ error, reset }: ErrorComponentProps) {
+  const { t } = useTranslation();
   useEffect(() => {
     Sentry.captureException(error);
   }, [error]);
@@ -13,13 +15,13 @@ export function RouteErrorFallback({ error, reset }: ErrorComponentProps) {
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 p-6 text-center">
       <ShoeSilhouette className="w-36 text-muted-foreground/40" />
       <div className="space-y-2">
-        <h1 className="font-heading text-3xl font-semibold tracking-tight">Something went wrong</h1>
-        <p className="max-w-md text-muted-foreground">
-          An unexpected error occurred. Try again, and if it keeps happening, reload the page.
-        </p>
+        <h1 className="font-heading text-3xl font-semibold tracking-tight">
+          {t('routeError.title')}
+        </h1>
+        <p className="max-w-md text-muted-foreground">{t('routeError.description')}</p>
       </div>
       <Button size="lg" onClick={reset}>
-        Try again
+        {t('common.tryAgain')}
       </Button>
     </div>
   );

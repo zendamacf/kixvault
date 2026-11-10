@@ -1,6 +1,7 @@
 import { sneakerConditions } from '@kixvault/shared';
 import type { Control, FieldErrors, UseFormRegister } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -33,23 +34,25 @@ export function SneakerCollectionFields({
   control,
   errors,
 }: SneakerCollectionFieldsProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="size">Size</Label>
+          <Label htmlFor="size">{t('sneakerForm.size')}</Label>
           <Input
             id="size"
             type="number"
             step="0.5"
-            placeholder="10"
+            placeholder={t('sneakerForm.sizePlaceholder')}
             {...register('size', { valueAsNumber: true })}
           />
           {errors.size ? <p className="text-sm text-destructive">{errors.size.message}</p> : null}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="condition">Condition</Label>
+          <Label htmlFor="condition">{t('sneakerForm.condition')}</Label>
           <Controller
             name="condition"
             control={control}
@@ -71,12 +74,12 @@ export function SneakerCollectionFields({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="purchasePrice">Purchase price</Label>
+          <Label htmlFor="purchasePrice">{t('sneakerForm.purchasePrice')}</Label>
           <Input
             id="purchasePrice"
             type="number"
             step="1"
-            placeholder="180"
+            placeholder={t('sneakerForm.purchasePricePlaceholder')}
             {...register('purchasePrice', {
               setValueAs: (value) => (value === '' ? undefined : Number(value)),
             })}
@@ -84,7 +87,7 @@ export function SneakerCollectionFields({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="purchaseDate">Purchase date (optional)</Label>
+          <Label htmlFor="purchaseDate">{t('sneakerForm.purchaseDate')}</Label>
           <Input id="purchaseDate" type="date" {...register('purchaseDate')} />
           {errors.purchaseDate ? (
             <p className="text-sm text-destructive">{errors.purchaseDate.message}</p>
@@ -93,10 +96,10 @@ export function SneakerCollectionFields({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="notes">{t('common.notes')}</Label>
         <Textarea
           id="notes"
-          placeholder="Where you bought them, lace swap, etc."
+          placeholder={t('sneakerForm.notesPlaceholder')}
           {...register('notes')}
         />
       </div>

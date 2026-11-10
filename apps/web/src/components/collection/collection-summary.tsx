@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 
@@ -10,7 +11,7 @@ type CollectionSummaryProps = {
   isLoading?: boolean;
 };
 
-function Figure({ children }: { children: React.ReactNode }) {
+function Figure({ children }: { children?: React.ReactNode }) {
   return <strong className="font-semibold text-foreground">{children}</strong>;
 }
 
@@ -23,9 +24,11 @@ export function CollectionSummary({
   totalGainLoss = null,
   isLoading,
 }: CollectionSummaryProps) {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return (
-      <section aria-label="Collection summary" className="space-y-3">
+      <section aria-label={t('collection.summary.label')} className="space-y-3">
         <Skeleton className="h-9 w-full max-w-xl" />
         <Skeleton className="h-9 w-2/3 max-w-sm" />
       </section>
@@ -44,38 +47,48 @@ export function CollectionSummary({
         : 'text-loss';
 
   return (
-    <section aria-label="Collection summary" className="space-y-2">
+    <section aria-label={t('collection.summary.label')} className="space-y-2">
       <p className="max-w-4xl text-balance font-heading text-3xl leading-[1.15] tracking-tight text-muted-foreground sm:text-4xl">
-        <Figure>{count}</Figure> {count === 1 ? 'pair' : 'pairs'}
+        <Trans
+          i18nKey="collection.summary.pairs"
+          count={count}
+          components={{ figure: <Figure /> }}
+        />
         {totalSpend > 0 ? (
-          <>
-            , bought for <Figure>{formatCurrency(totalSpend)}</Figure>
-          </>
+          <Trans
+            i18nKey="collection.summary.boughtFor"
+            values={{ value: formatCurrency(totalSpend) }}
+            components={{ figure: <Figure /> }}
+          />
         ) : null}
         {totalMarketValue != null ? (
-          <>
-            , worth <Figure>{formatCurrency(totalMarketValue)}</Figure> today.
-          </>
+          <Trans
+            i18nKey="collection.summary.worth"
+            values={{ value: formatCurrency(totalMarketValue) }}
+            components={{ figure: <Figure /> }}
+          />
         ) : (
-          '.'
+          t('collection.summary.noWorth')
         )}
         {totalGainLoss != null ? (
           <span className={`${gainClassName} whitespace-nowrap`}>
             {' '}
             {totalGainLoss === 0 ? (
-              'Break-even.'
+              t('collection.summary.breakEven')
             ) : (
-              <>
-                {totalGainLoss > 0 ? 'Up ' : 'Down '}
-                <strong className="font-semibold">{formatCurrency(Math.abs(totalGainLoss))}</strong>
-                .
-              </>
+              <Trans
+                i18nKey={totalGainLoss > 0 ? 'collection.summary.up' : 'collection.summary.down'}
+                values={{ amount: formatCurrency(Math.abs(totalGainLoss)) }}
+                components={{ strong: <strong className="font-semibold" /> }}
+              />
             )}
           </span>
         ) : null}
       </p>
       {avgSpend > 0 ? (
-        <p className="text-sm text-muted-foreground">{formatCurrency(avgSpend)} average per pair</p>
+        <p className="text-sm text-muted-foreground">
+          {t('collection.summary.average', { value: formatCurrency(avgSpend) })}
+        </p>
       ) : null}
     </section>
   );

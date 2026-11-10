@@ -3,6 +3,7 @@ import type { VariantPrice } from '@kixvault/shared';
 import { createSneakerFromCatalogSchema, type SneakerCondition } from '@kixvault/shared';
 import type { Control, FieldErrors, UseFormRegister } from 'react-hook-form';
 import { useForm, useWatch } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import {
   CatalogSneakerSummary,
@@ -11,11 +12,15 @@ import {
 import { CatalogMarketPricePreview } from '@/components/sneakers/market-value';
 import { SneakerCollectionFields } from '@/components/sneakers/sneaker-collection-fields';
 import { Button } from '@/components/ui/button';
+import { i18n } from '@/i18n';
 
 const collectionSneakerFormSchema = createSneakerFromCatalogSchema
   .omit({ catalogSource: true, catalogId: true })
   .extend({
-    size: z.number({ error: 'Size is required' }).positive().max(99),
+    size: z
+      .number({ error: () => i18n.t('forms.sizeRequired') })
+      .positive()
+      .max(99),
     purchasePrice: z
       .number()
       .nonnegative()
@@ -52,6 +57,7 @@ export function CollectionSneakerForm({
   isSubmitting = false,
   onSubmit,
 }: CollectionSneakerFormProps) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -104,7 +110,7 @@ export function CollectionSneakerForm({
       ) : null}
 
       <Button type="submit" size="lg" className="sm:w-fit" disabled={isSubmitting}>
-        {isSubmitting ? 'Saving...' : submitLabel}
+        {isSubmitting ? t('common.saving') : submitLabel}
       </Button>
     </form>
   );

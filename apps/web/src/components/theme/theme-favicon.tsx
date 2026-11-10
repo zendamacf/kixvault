@@ -21,7 +21,7 @@ function syncFavicon() {
 }
 
 /**
- * Keeps the browser tab icon in the active colourway's brand colour. Favicons cannot read the
+ * Keeps the browser tab icon in the active colorway's brand colour. Favicons cannot read the
  * page's CSS, so this watches the `data-theme` attribute that next-themes sets and rewrites the
  * icon link. public/favicon.svg (default orange) stays as the fallback until this runs.
  */

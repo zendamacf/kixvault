@@ -7,7 +7,8 @@ export type RenderedEmail = { subject: string; html: string; text: string };
  * Registry of email types. To add an email:
  * 1. Create `templates/<name>.ts` that exports a props type and a function returning
  *    `RenderedEmail`. Build the HTML with `renderLayout` and the helpers in `layout.ts`,
- *    so every email keeps the KixVault branding.
+ *    so every email keeps the KixVault branding. Put all copy in `../locales/en.json` and read it
+ *    through `getEmailT(locale)`, never as literals in the template.
  * 2. Add the props type to `EmailTemplateProps` and the function to `emailTemplates` below.
  * 3. Send it with `sendEmail('<name>', to, props)`.
  * `templates.unit.test.ts` renders every registered template, so a new one gets branding

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DEFAULT_THEME, THEME_IDS, THEMES } from '@/components/theme/themes';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,25 +35,36 @@ type MobileMenuProps = {
 const itemClass =
   'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring';
 
-/** Side menu for small screens: main navigation, colourway, activity, and log out. */
+/** Side menu for small screens: main navigation, colorway, activity, and log out. */
 export function MobileMenu({ user, pathname }: MobileMenuProps) {
+  const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
   const logout = useLogout();
-  const [colourwayOpen, setColourwayOpen] = useState(false);
+  const [colorwayOpen, setColorwayOpen] = useState(false);
   const activeTheme = theme && THEME_IDS.includes(theme) ? theme : DEFAULT_THEME;
 
   const navItems = [
     {
       to: '/',
-      label: 'Collection',
+      label: t('layout.nav.collection'),
       icon: LayoutGrid,
       active: pathname === '/' || pathname.startsWith('/sneakers'),
     },
-    { to: '/grails', label: 'Grails', icon: Star, active: pathname.startsWith('/grails') },
-    { to: '/wears', label: 'Wears', icon: CalendarDays, active: pathname.startsWith('/wears') },
+    {
+      to: '/grails',
+      label: t('layout.nav.grails'),
+      icon: Star,
+      active: pathname.startsWith('/grails'),
+    },
+    {
+      to: '/wears',
+      label: t('layout.nav.wears'),
+      icon: CalendarDays,
+      active: pathname.startsWith('/wears'),
+    },
     {
       to: '/analytics',
-      label: 'Analytics',
+      label: t('layout.nav.analytics'),
       icon: ChartColumn,
       active: pathname.startsWith('/analytics'),
     },
@@ -64,7 +76,7 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Open menu"
+          aria-label={t('layout.mobileMenu.open')}
           className="text-chrome-foreground hover:bg-chrome-foreground/10 hover:text-chrome-foreground focus-visible:ring-brand md:hidden dark:hover:bg-chrome-foreground/10"
         >
           <Menu aria-hidden />
@@ -72,13 +84,16 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
       </SheetTrigger>
       <SheetContent aria-describedby="mobile-menu-description">
         <div className="space-y-0.5 border-b border-border px-5 pt-5 pb-4 pr-14">
-          <SheetTitle>Menu</SheetTitle>
+          <SheetTitle>{t('layout.mobileMenu.title')}</SheetTitle>
           <SheetDescription id="mobile-menu-description" className="truncate">
             {user.email}
           </SheetDescription>
         </div>
 
-        <nav aria-label="Site menu" className="flex-1 space-y-1 overflow-y-auto p-3">
+        <nav
+          aria-label={t('layout.siteMenuLabel')}
+          className="flex-1 space-y-1 overflow-y-auto p-3"
+        >
           {navItems.map((item) => (
             <SheetClose key={item.to} asChild>
               <Link
@@ -97,26 +112,26 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
           <button
             type="button"
             className={itemClass}
-            aria-expanded={colourwayOpen}
-            aria-controls="mobile-menu-colourway"
-            onClick={() => setColourwayOpen((open) => !open)}
+            aria-expanded={colorwayOpen}
+            aria-controls="mobile-menu-colorway"
+            onClick={() => setColorwayOpen((open) => !open)}
           >
             <Palette className="size-4 text-muted-foreground" aria-hidden />
-            Colourway
+            {t('layout.mobileMenu.colorway')}
             <ChevronDown
               className={cn(
                 'ml-auto size-4 text-muted-foreground transition-transform',
-                colourwayOpen && 'rotate-180',
+                colorwayOpen && 'rotate-180',
               )}
               aria-hidden
             />
           </button>
-          {colourwayOpen ? (
+          {colorwayOpen ? (
             <fieldset
-              id="mobile-menu-colourway"
+              id="mobile-menu-colorway"
               className="m-0 min-w-0 space-y-1 border-0 p-0 pb-1 pl-4"
             >
-              <legend className="sr-only">Colourway</legend>
+              <legend className="sr-only">{t('layout.mobileMenu.colorway')}</legend>
               {THEMES.map((item) => (
                 <button
                   key={item.id}
@@ -128,7 +143,7 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
                     item.id === activeTheme && 'bg-muted font-medium',
                   )}
                 >
-                  {item.label}
+                  {t(`theme.names.${item.id}`)}
                   <span
                     aria-hidden="true"
                     className="flex h-1.5 overflow-hidden rounded-full ring-1 ring-foreground/25"
@@ -145,7 +160,7 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
           <SheetClose asChild>
             <Link to="/activity" className={itemClass}>
               <History className="size-4 text-muted-foreground" aria-hidden />
-              Activity
+              {t('layout.nav.activity')}
             </Link>
           </SheetClose>
         </nav>
@@ -158,7 +173,7 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
             onClick={() => logout.mutate()}
           >
             <LogOut className="size-4" aria-hidden />
-            Log out
+            {t('layout.mobileMenu.logOut')}
           </button>
         </div>
       </SheetContent>

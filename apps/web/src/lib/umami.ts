@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import { getRuntimeConfig } from '@/lib/runtime-config';
 import type { UmamiEventData } from '@/lib/umami-events';
 
@@ -100,7 +101,7 @@ export function ensureUmamiScript(): Promise<void> {
       script.onload = () => resolve();
       script.onerror = () => {
         scriptLoadPromise = null;
-        reject(new Error('Failed to load Umami analytics script'));
+        reject(new Error(i18n.t('errors.loadUmami')));
       };
       document.head.appendChild(script);
     });
