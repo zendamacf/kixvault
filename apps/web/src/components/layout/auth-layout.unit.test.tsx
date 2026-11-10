@@ -30,4 +30,14 @@ describe('AuthLayout', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(3);
     expect(screen.getByText(/grails list/)).toBeTruthy();
   });
+
+  test('lets visitors change the colourway', () => {
+    render(
+      <AuthLayout>
+        <p>Form</p>
+      </AuthLayout>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Change theme' })).toBeTruthy();
+  });
 });

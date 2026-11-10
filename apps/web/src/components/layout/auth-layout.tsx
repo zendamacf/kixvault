@@ -1,6 +1,7 @@
 import { CalendarDays, LayoutGrid, Star } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { BrandLockup } from '@/components/layout/brand-lockup';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 const HIGHLIGHTS = [
   { icon: LayoutGrid, text: 'Track what you paid and what each pair is worth' },
@@ -17,7 +18,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="grid min-h-screen grid-rows-[auto_1fr] bg-background lg:grid-cols-2 lg:grid-rows-1">
       <aside className="relative overflow-hidden bg-auth-panel px-4 py-4 text-chrome-foreground lg:flex lg:flex-col lg:gap-24 lg:p-12">
-        <BrandLockup className="h-16 w-auto lg:h-24" />
+        <div className="flex items-start justify-between gap-4">
+          <BrandLockup className="h-16 w-auto lg:h-24" />
+          <ThemeToggle />
+        </div>
 
         <div className="relative z-10 hidden max-w-md space-y-10 lg:mt-auto lg:block">
           <div className="space-y-4">
