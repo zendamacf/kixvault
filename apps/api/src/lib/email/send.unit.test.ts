@@ -33,12 +33,25 @@ describe('email config', () => {
   });
 });
 
+// The logger redacts configured secrets. CI's database password ("kixvault") also appears in the
+// fixture URLs below, so clear secret env vars to keep these assertions about the email itself.
+const SECRET_ENV_VARS = [
+  'DATABASE_URL',
+  'TEST_DATABASE_URL',
+  'REDIS_URL',
+  'KICKSDB_API_KEY',
+  'RESEND_API_KEY',
+  'SENTRY_AUTH_TOKEN',
+];
+const savedSecrets = Object.fromEntries(SECRET_ENV_VARS.map((name) => [name, process.env[name]]));
+
 describe('sendEmail', () => {
   let infoSpy: ReturnType<typeof spyOn>;
   let errorSpy: ReturnType<typeof spyOn>;
   let fetchSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
+    for (const name of SECRET_ENV_VARS) delete process.env[name];
     mockEnv.resendApiKey = undefined;
     mockEnv.isProduction = false;
     infoSpy = spyOn(console, 'info').mockImplementation(() => undefined);
@@ -47,6 +60,10 @@ describe('sendEmail', () => {
   });
 
   afterEach(() => {
+    for (const [name, value] of Object.entries(savedSecrets)) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
     infoSpy.mockRestore();
     errorSpy.mockRestore();
     fetchSpy.mockRestore();
