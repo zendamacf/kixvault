@@ -15,20 +15,29 @@ describe('AuthLayout', () => {
     );
 
     expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeTruthy();
-    expect(screen.getByText('KixVault')).toBeTruthy();
+    expect(screen.getByRole('img', { name: 'KixVault' })).toBeTruthy();
     expect(screen.getByText('Built for sneaker collectors.')).toBeTruthy();
     expect(screen.getByRole('main')).toBeTruthy();
   });
 
-  test('draws the decorative sneaker without exposing it to screen readers', () => {
-    const { container } = render(
+  test('lists what the app does', () => {
+    render(
       <AuthLayout>
         <p>Form</p>
       </AuthLayout>,
     );
 
-    const decorative = container.querySelectorAll('svg[aria-hidden="true"]');
+    expect(screen.getAllByRole('listitem')).toHaveLength(3);
+    expect(screen.getByText(/grails list/)).toBeTruthy();
+  });
 
-    expect(decorative.length).toBeGreaterThanOrEqual(2);
+  test('lets visitors change the colourway', () => {
+    render(
+      <AuthLayout>
+        <p>Form</p>
+      </AuthLayout>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Change theme' })).toBeTruthy();
   });
 });

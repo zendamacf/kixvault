@@ -1,5 +1,5 @@
 /**
- * The KixVault sneaker drawing, shared by BrandMark and ShoeSilhouette.
+ * The KixVault sneaker drawing, used by ShoeSilhouette.
  * public/favicon.svg is a static file and cannot import this, so sneaker-art.unit.test.ts
  * checks that the favicon still contains the same shapes and colours.
  */

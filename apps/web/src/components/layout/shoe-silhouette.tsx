@@ -7,7 +7,7 @@ type ShoeSilhouetteProps = {
 
 /**
  * Flat low-top sneaker profile in the current text color, for muted placeholders such as empty
- * states. Same shape as BrandMark (see sneaker-art.ts), minus the colours.
+ * states. Shape lives in sneaker-art.ts, which public/favicon.svg mirrors.
  */
 export function ShoeSilhouette({ className }: ShoeSilhouetteProps) {
   return (

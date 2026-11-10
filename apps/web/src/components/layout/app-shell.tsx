@@ -5,7 +5,7 @@ import { Footprints, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { AppFooter } from '@/components/layout/app-footer';
 import { AuthLayout } from '@/components/layout/auth-layout';
-import { BrandMark } from '@/components/layout/brand-mark';
+import { BrandLockup } from '@/components/layout/brand-lockup';
 import { MobileMenu } from '@/components/layout/mobile-menu';
 import { UserMenu } from '@/components/layout/user-menu';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
@@ -64,10 +64,7 @@ export function AppShell() {
               className="group flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label={`${APP_NAME} home`}
             >
-              <BrandMark />
-              <span className="hidden font-heading text-xl font-extrabold tracking-tight sm:inline">
-                {APP_NAME}
-              </span>
+              <BrandLockup className="h-9 w-auto" />
             </Link>
             {user ? (
               <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
