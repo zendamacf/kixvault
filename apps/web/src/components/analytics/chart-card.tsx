@@ -20,7 +20,7 @@ export function ChartCard({
   footnote,
 }: ChartCardProps) {
   return (
-    <section className="space-y-3 rounded-2xl bg-card p-4 ring-1 ring-border sm:p-5">
+    <section className="min-w-0 space-y-3 rounded-2xl bg-card p-4 ring-1 ring-border sm:p-5">
       <div className="space-y-0.5">
         <h2 className="font-heading text-lg font-semibold tracking-tight">{title}</h2>
         <p className="text-sm text-muted-foreground">{description}</p>

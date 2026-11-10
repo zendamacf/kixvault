@@ -31,7 +31,7 @@ function AnalyticsPage() {
       ) : null}
 
       {isLoading ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Skeleton className="h-80 w-full rounded-2xl lg:col-span-2" />
           <Skeleton className="h-72 w-full rounded-2xl" />
           <Skeleton className="h-72 w-full rounded-2xl" />
@@ -39,8 +39,8 @@ function AnalyticsPage() {
       ) : null}
 
       {analytics ? (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="min-w-0 lg:col-span-2">
             <ChartCard
               title="Collection value"
               description="Combined market value of your pairs, week by week."
