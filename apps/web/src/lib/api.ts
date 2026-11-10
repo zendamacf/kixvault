@@ -1,11 +1,17 @@
 import type { AppType } from '@kixvault/api/app';
 import { hc } from 'hono/client';
+import { getActiveLocale } from '@/i18n';
 
 export const api = hc<AppType>('/', {
   fetch: (input: RequestInfo | URL, init?: RequestInit) =>
     fetch(input, {
       ...init,
       credentials: 'include',
+      // The browser would send its own language here. Send the app's, so emails match the UI.
+      headers: {
+        ...Object.fromEntries(new Headers(init?.headers)),
+        'Accept-Language': getActiveLocale(),
+      },
     }),
 });
 

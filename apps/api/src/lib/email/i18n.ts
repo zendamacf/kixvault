@@ -37,3 +37,32 @@ export function resolveEmailLocale(locale: string | null | undefined): EmailLoca
 export function getEmailT(locale?: string | null): TFunction {
   return instance.getFixedT(resolveEmailLocale(locale));
 }
+
+/**
+ * Picks the best supported locale from an `Accept-Language` header, honoring q-values and
+ * matching on the primary language subtag (`fr-CA` matches `fr`). Falls back to the default.
+ */
+export function negotiateLocale(header: string | null | undefined): EmailLocale {
+  const candidates = (header ?? '')
+    .split(',')
+    .map((part, index) => {
+      const [tag = '', ...params] = part.trim().split(';');
+      const q = params.map((param) => param.trim()).find((param) => param.startsWith('q='));
+      const quality = q ? Number(q.slice(2)) : 1;
+
+      return { tag: tag.trim().toLowerCase().split('-')[0] ?? '', quality, index };
+    })
+    .filter((candidate) => candidate.tag && candidate.quality > 0)
+    // Higher quality first; header order breaks ties.
+    .sort((a, b) => b.quality - a.quality || a.index - b.index);
+
+  for (const { tag } of candidates) {
+    const match = supportedEmailLocales.find((supported) => supported === tag);
+
+    if (match) {
+      return match;
+    }
+  }
+
+  return defaultEmailLocale;
+}

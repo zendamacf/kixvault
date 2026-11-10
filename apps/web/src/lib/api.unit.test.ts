@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'bun:test';
-import { ApiError, parseApiError, toApiError } from './api';
+import { afterEach, describe, expect, spyOn, test } from 'bun:test';
+import { ApiError, api, parseApiError, toApiError } from './api';
 
 describe('parseApiError', () => {
   test('returns the API error message when present', async () => {
@@ -40,5 +40,23 @@ describe('toApiError', () => {
 
     expect(error.message).toBe('Failed to log in');
     expect(error.code).toBeUndefined();
+  });
+});
+
+describe('api client', () => {
+  const fetchSpy = spyOn(globalThis, 'fetch');
+
+  afterEach(() => {
+    fetchSpy.mockReset();
+  });
+
+  test('sends the app language, not the browser language', async () => {
+    fetchSpy.mockResolvedValue(new Response('{}', { status: 200 }));
+
+    await api.api.auth['forgot-password'].$post({ json: { email: 'a@example.com' } });
+
+    const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
+    expect(new Headers(init.headers).get('Accept-Language')).toBe('en');
+    expect(new Headers(init.headers).get('Content-Type')).toContain('application/json');
   });
 });

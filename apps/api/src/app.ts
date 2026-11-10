@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { env } from './lib/env';
 import { redactDeep } from './lib/redact';
 import { globalApiRateLimit } from './middleware/global-rate-limit';
+import { localeMiddleware } from './middleware/locale';
 import { requestLogMiddleware } from './middleware/request-log';
 import { auditRoutes } from './routes/audit';
 import { authRoutes } from './routes/auth';
@@ -33,6 +34,7 @@ const withSentry = env.isProduction
 
 export const app = withSentry
   .use(requestLogMiddleware)
+  .use(localeMiddleware)
   .get('/api/health', (c) => c.json({ status: 'ok', app: APP_NAME }))
   .use('/api/*', async (c, next) => {
     if (c.req.path === '/api/health') {

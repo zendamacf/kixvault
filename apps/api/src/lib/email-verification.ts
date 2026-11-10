@@ -24,10 +24,15 @@ export function buildVerifyUrl(token: string): string {
 }
 
 /** Sends the verification email. Never throws: the user can ask for another link. */
-export function sendVerificationEmail(to: string, token: string): Promise<boolean> {
+export function sendVerificationEmail(
+  to: string,
+  token: string,
+  locale?: string,
+): Promise<boolean> {
   return sendEmail('verifyEmail', to, {
     verifyUrl: buildVerifyUrl(token),
     expiresInHours: VERIFICATION_TOKEN_TTL_HOURS,
+    locale,
   });
 }
 
