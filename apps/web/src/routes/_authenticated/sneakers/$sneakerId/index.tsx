@@ -288,7 +288,10 @@ function SneakerDetailPage() {
         {priceHistoryLoading ? (
           <Skeleton className="h-24 w-full rounded-2xl" />
         ) : (
-          <PriceHistory history={priceHistoryData?.history ?? []} />
+          <PriceHistory
+            history={priceHistoryData?.history ?? []}
+            purchasePrice={sneaker.purchasePrice}
+          />
         )}
       </section>
 

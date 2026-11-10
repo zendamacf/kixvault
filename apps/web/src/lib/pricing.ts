@@ -36,3 +36,8 @@ export function getMarketValueDisclaimer(condition: SneakerCondition | string): 
 
   return null;
 }
+
+/** Returns price snapshots sorted oldest-first for charting (the API returns newest-first). */
+export function sortSnapshotsAscending<T extends { snapshotDate: string }>(history: T[]): T[] {
+  return [...history].sort((a, b) => a.snapshotDate.localeCompare(b.snapshotDate));
+}

@@ -16,7 +16,7 @@ Full-page fallbacks for route errors and unknown URLs.
 
 ## [sneakers](./sneakers)
 
-Sneaker display tiles, catalog search, and add/edit forms.
+Sneaker display tiles, catalog search, add/edit forms, and the price history.
 
 ## [wishlist](./wishlist)
 
