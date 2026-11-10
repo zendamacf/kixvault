@@ -35,6 +35,7 @@ import {
   FORGOT_PASSWORD_MAX_PER_EMAIL,
   FORGOT_PASSWORD_WINDOW_MS,
   forgotPasswordRateLimit,
+  resendVerificationRateLimit,
   resetPasswordRateLimit,
 } from '../middleware/auth-rate-limit';
 import { sessionMiddleware } from '../middleware/session';
@@ -147,7 +148,7 @@ export const authRoutes = new Hono<ApiEnv>()
   })
   .post(
     '/resend-verification',
-    authRateLimit,
+    resendVerificationRateLimit,
     zValidator('json', resendVerificationSchema),
     async (c) => {
       if (!isEmailEnabled()) {
@@ -155,7 +156,13 @@ export const authRoutes = new Hono<ApiEnv>()
       }
 
       const { email } = c.req.valid('json');
-      const token = await createVerificationToken(email);
+      // Per-address cap, answered like any other request so it does not reveal the account.
+      const decision = await getRateLimitStore().consume(
+        `auth:resend-verification:email:${email}`,
+        FORGOT_PASSWORD_MAX_PER_EMAIL,
+        FORGOT_PASSWORD_WINDOW_MS,
+      );
+      const token = decision.allowed ? await createVerificationToken(email) : null;
 
       if (token) {
         // Not awaited, so response time does not show whether the account exists.
