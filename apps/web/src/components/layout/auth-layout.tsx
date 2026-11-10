@@ -1,4 +1,4 @@
-import { CalendarDays, LayoutGrid, Star } from 'lucide-react';
+import { CalendarDays, ChartColumn, LayoutGrid, Star } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { BrandLockup } from '@/components/layout/brand-lockup';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
@@ -7,6 +7,7 @@ const HIGHLIGHTS = [
   { icon: LayoutGrid, text: 'Track what you paid and what each pair is worth' },
   { icon: Star, text: 'Keep a grails list of the pairs you are chasing' },
   { icon: CalendarDays, text: 'Log every wear and see what actually gets worn' },
+  { icon: ChartColumn, text: 'Chart your collection value, wears, and price history' },
 ] as const;
 
 type AuthLayoutProps = {

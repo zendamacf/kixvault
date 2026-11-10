@@ -27,8 +27,9 @@ describe('AuthLayout', () => {
       </AuthLayout>,
     );
 
-    expect(screen.getAllByRole('listitem')).toHaveLength(3);
+    expect(screen.getAllByRole('listitem')).toHaveLength(4);
     expect(screen.getByText(/grails list/)).toBeTruthy();
+    expect(screen.getByText(/Chart your collection value/)).toBeTruthy();
   });
 
   test('lets visitors change the colourway', () => {

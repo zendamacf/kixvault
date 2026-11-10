@@ -52,6 +52,7 @@ describe('MobileMenu', () => {
     expect(screen.getByRole('link', { name: 'Collection' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Grails' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Wears' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Analytics' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Activity' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Colourway' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Log out' })).toBeTruthy();

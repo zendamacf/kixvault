@@ -99,6 +99,19 @@ export const statsQueryOptions = queryOptions({
   },
 });
 
+export const analyticsQueryOptions = queryOptions({
+  queryKey: ['stats', 'analytics'],
+  queryFn: async () => {
+    const response = await api.api.stats.analytics.$get();
+
+    if (!response.ok) {
+      throw new Error('Failed to load analytics');
+    }
+
+    return response.json();
+  },
+});
+
 export function sneakersQueryOptions(filters: {
   search?: string;
   condition?: SneakerCondition;

@@ -1,6 +1,7 @@
-import { sneakers } from '@kixvault/db';
-import { eq } from 'drizzle-orm';
+import { priceSnapshots, sneakers, sneakerWears } from '@kixvault/db';
+import { eq, inArray } from 'drizzle-orm';
 import { Hono } from 'hono';
+import { buildAnalytics } from '../lib/analytics';
 import { computeCollectionMarketStats } from '../lib/collection-stats';
 import { db } from '../lib/db';
 import { getMarketPricesForSneakers } from '../lib/pricing';
@@ -35,4 +36,47 @@ export const statsRoutes = new Hono<ApiEnv>()
         totalGainLoss,
       },
     });
+  })
+  .get('/analytics', async (c) => {
+    const userId = c.get('user')?.id ?? '';
+
+    const rows = await db.select().from(sneakers).where(eq(sneakers.userId, userId));
+
+    const skus = [
+      ...new Set(rows.flatMap((row) => (row.catalogSource && row.sku ? [row.sku] : []))),
+    ];
+    const snapshotRows =
+      skus.length > 0
+        ? await db.select().from(priceSnapshots).where(inArray(priceSnapshots.sku, skus))
+        : [];
+
+    const wearRows = await db
+      .select({ sneakerId: sneakerWears.sneakerId, wornOn: sneakerWears.wornOn })
+      .from(sneakerWears)
+      .where(eq(sneakerWears.userId, userId));
+
+    const analytics = buildAnalytics({
+      sneakers: rows.map((row) => ({
+        id: row.id,
+        brand: row.brand,
+        model: row.model,
+        nickname: row.nickname,
+        condition: row.condition,
+        size: row.size,
+        sku: row.sku,
+        catalogSource: row.catalogSource,
+        purchaseDate: row.purchaseDate ? row.purchaseDate.toISOString().slice(0, 10) : null,
+      })),
+      snapshots: snapshotRows.map((row) => ({
+        catalogSource: row.catalogSource,
+        sku: row.sku,
+        size: row.size,
+        snapshotDate: row.snapshotDate.toISOString().slice(0, 10),
+        price: row.price,
+      })),
+      wears: wearRows,
+      now: new Date(),
+    });
+
+    return c.json({ analytics });
   });

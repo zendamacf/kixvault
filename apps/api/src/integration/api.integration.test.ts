@@ -398,6 +398,19 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(stats.stats.count).toBe(1);
     expect(stats.stats.totalSpend).toBe(150);
 
+    const analyticsResponse = await app.request('/api/stats/analytics', {
+      headers: { Cookie: cookie },
+    });
+
+    expect(analyticsResponse.status).toBe(200);
+
+    const analytics = (await analyticsResponse.json()) as {
+      analytics: { totalPairs: number; wearsByMonth: unknown[]; brands: { count: number }[] };
+    };
+    expect(analytics.analytics.totalPairs).toBe(1);
+    expect(analytics.analytics.wearsByMonth).toHaveLength(12);
+    expect(analytics.analytics.brands[0]?.count).toBe(1);
+
     const deleteResponse = await app.request(`/api/sneakers/${created.sneaker.id}`, {
       method: 'DELETE',
       headers: { Cookie: cookie },
