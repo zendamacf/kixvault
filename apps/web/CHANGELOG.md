@@ -1,5 +1,16 @@
 # @kixvault/web
 
+## 0.5.0
+
+### Minor Changes
+
+- 23a3d75: Show confetti when you add a sneaker. The effect is bigger when a grail moves to your collection.
+
+### Patch Changes
+
+- Updated dependencies [8e25f62]
+  - @kixvault/api@0.4.0
+
 ## 0.4.1
 
 ### Patch Changes
