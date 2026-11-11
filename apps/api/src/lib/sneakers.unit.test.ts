@@ -125,6 +125,7 @@ describe('formatSneaker', () => {
       pricedAt: null,
       gainLoss: null,
       wearCount: 0,
+      costPerWear: null,
       lastWornOn: null,
       suggestedCondition: null,
       departureType: null,
@@ -264,6 +265,14 @@ describe('formatSneaker wear fields', () => {
     expect(formatted.wearCount).toBe(15);
     expect(formatted.lastWornOn).toBe('2026-11-01');
     expect(formatted.suggestedCondition).toBe('worn');
+  });
+
+  test('includes cost per wear for pairs in the vault', () => {
+    const formatted = formatSneaker(createSneakerRow({ purchasePrice: '150.00' }), {
+      wearStats: { wearCount: 4, lastWornOn: '2026-11-01' },
+    });
+
+    expect(formatted.costPerWear).toBe(37.5);
   });
 });
 

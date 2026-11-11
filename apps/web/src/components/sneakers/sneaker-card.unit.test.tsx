@@ -47,6 +47,7 @@ const sneaker: Sneaker = {
   pricedAt: null,
   gainLoss: null,
   wearCount: 0,
+  costPerWear: null,
   lastWornOn: null,
   suggestedCondition: null,
   departureType: null,

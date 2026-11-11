@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'bun:test';
-import { formatCondition, formatCurrency, formatDate, getCatalogSourceLabel } from './utils';
+import {
+  formatCondition,
+  formatCurrency,
+  formatCurrencyPrecise,
+  formatDate,
+  getCatalogSourceLabel,
+} from './utils';
 
 describe('formatCurrency', () => {
   test('formats USD values without cents', () => {
@@ -9,6 +15,14 @@ describe('formatCurrency', () => {
   test('returns an em dash for empty values', () => {
     expect(formatCurrency(null)).toBe('—');
     expect(formatCurrency(undefined)).toBe('—');
+  });
+});
+
+describe('formatCurrencyPrecise', () => {
+  test('always shows cents', () => {
+    expect(formatCurrencyPrecise(12.5)).toBe('$12.50');
+    expect(formatCurrencyPrecise(0)).toBe('$0.00');
+    expect(formatCurrencyPrecise(null)).toBe('—');
   });
 });
 

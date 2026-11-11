@@ -41,6 +41,7 @@ function retiredSneaker(overrides: Partial<Sneaker> = {}): Sneaker {
     pricedAt: null,
     gainLoss: null,
     wearCount: 2,
+    costPerWear: null,
     lastWornOn: null,
     suggestedCondition: null,
     departureType: 'sold',

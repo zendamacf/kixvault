@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { BrandChart } from '@/components/analytics/brand-chart';
 import { ChartCard } from '@/components/analytics/chart-card';
 import { ConditionChart } from '@/components/analytics/condition-chart';
+import { CostPerWearCard } from '@/components/analytics/cost-per-wear-card';
 import { MostWornList } from '@/components/analytics/most-worn-list';
 import { PortfolioValueChart } from '@/components/analytics/portfolio-value-chart';
 import { RealizedGains } from '@/components/analytics/realized-gains';
@@ -91,6 +92,15 @@ function AnalyticsPage() {
             isEmpty={analytics.mostWorn.length === 0}
           >
             <MostWornList entries={analytics.mostWorn} />
+          </ChartCard>
+
+          <ChartCard
+            title={t('analytics.costPerWear.title')}
+            description={t('analytics.costPerWear.description')}
+            emptyMessage={t('analytics.costPerWear.empty')}
+            isEmpty={analytics.costPerWear.best.length === 0}
+          >
+            <CostPerWearCard summary={analytics.costPerWear} />
           </ChartCard>
 
           <ChartCard

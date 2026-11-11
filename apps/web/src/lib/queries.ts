@@ -34,6 +34,8 @@ export type Sneaker = {
   pricedAt: string | null;
   gainLoss: number | null;
   wearCount: number;
+  /** Purchase price divided by wears. Null when unknown, never worn, or retired. */
+  costPerWear: number | null;
   lastWornOn: string | null;
   suggestedCondition: SneakerCondition | null;
   /** Set when the pair left the vault. Null means it is still in the collection. */
