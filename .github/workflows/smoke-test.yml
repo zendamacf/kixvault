@@ -34,6 +34,16 @@ jobs:
       - name: Build API image
         run: docker build -f apps/api/Dockerfile -t kixvault-api-smoke .
 
+      - name: Log image size
+        run: |
+          bytes=$(docker image inspect kixvault-api-smoke --format '{{.Size}}')
+          gz=$(docker save kixvault-api-smoke | gzip -c | wc -c)
+          {
+            echo '### Docker image size (kixvault-api-smoke)'
+            echo "- Uncompressed: $((bytes / 1000000)) MB"
+            echo "- Compressed (approx.): $((gz / 1000000)) MB"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Wait for Postgres
         run: |
           for i in $(seq 1 30); do
@@ -78,6 +88,10 @@ jobs:
           docker logs api-smoke
           exit 1
 
+      - name: Smoke test sharp native module
+        run: |
+          docker exec -w /app/apps/api api-smoke bun -e "const sharp=(await import('sharp')).default; await sharp({create:{width:2,height:2,channels:3,background:'#fff'}}).webp().toBuffer()"
+
   web:
     name: Smoke / web
     runs-on: ubuntu-latest
@@ -86,6 +100,16 @@ jobs:
 
       - name: Build web image
         run: docker build -f apps/web/Dockerfile -t kixvault-web-smoke .
+
+      - name: Log image size
+        run: |
+          bytes=$(docker image inspect kixvault-web-smoke --format '{{.Size}}')
+          gz=$(docker save kixvault-web-smoke | gzip -c | wc -c)
+          {
+            echo '### Docker image size (kixvault-web-smoke)'
+            echo "- Uncompressed: $((bytes / 1000000)) MB"
+            echo "- Compressed (approx.): $((gz / 1000000)) MB"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Start web container
         run: |
