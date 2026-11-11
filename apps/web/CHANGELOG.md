@@ -1,5 +1,22 @@
 # @kixvault/web
 
+## 0.6.0
+
+### Minor Changes
+
+- 707b41e: Show cost per wear on the sneaker page and the Analytics page.
+- f1ccdeb: Add a Remove from vault action. You can retire a pair as sold, donated, gifted, traded, lost, or other, and keep its history. You can still delete a pair for good. Add a History page to see and restore retired pairs. Add a Realized gains card to Analytics.
+
+### Patch Changes
+
+- Updated dependencies [707b41e]
+- Updated dependencies [707b41e]
+- Updated dependencies [f1ccdeb]
+- Updated dependencies [f1ccdeb]
+- Updated dependencies [02e6eb9]
+  - @kixvault/api@0.5.0
+  - @kixvault/shared@0.3.0
+
 ## 0.5.0
 
 ### Minor Changes
