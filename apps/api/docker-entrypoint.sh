@@ -17,7 +17,7 @@ await sql.end();
 done
 
 echo "Running migrations..."
-bun run --cwd packages/db db:migrate
+bun packages/db/scripts/migrate.ts
 
 echo "Starting API..."
 exec bun --cwd apps/api dist/index.js

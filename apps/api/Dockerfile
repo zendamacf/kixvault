@@ -36,20 +36,33 @@ RUN --mount=type=secret,id=sentry_auth_token \
     SENTRY_COMMIT_SHA=$SENTRY_COMMIT_SHA SENTRY_REPO=$SENTRY_REPO \
     bun run --cwd apps/api build:release
 
-FROM oven/bun:1.3.13
+FROM oven/bun:1.3.13-alpine AS prod-deps
 
 WORKDIR /app
 
-COPY --from=build /app/packages/db packages/db
-COPY --from=build /app/packages/shared packages/shared
+COPY package.json bun.lock ./
+COPY apps/api/package.json apps/api/
+COPY apps/web/package.json apps/web/
+COPY packages/db/package.json packages/db/
+COPY packages/shared/package.json packages/shared/
+
+RUN bun install --frozen-lockfile --production --filter '@kixvault/api'
+
+COPY packages/shared packages/shared
+COPY packages/db packages/db
+
+FROM oven/bun:1.3.13-alpine
+
+WORKDIR /app
+
+COPY --from=prod-deps /app/packages packages
+COPY --from=prod-deps /app/node_modules node_modules
+COPY --from=prod-deps /app/apps/api/node_modules apps/api/node_modules
 COPY --from=build /app/apps/api/dist apps/api/dist
-COPY --from=build /app/apps/api/node_modules apps/api/node_modules
-COPY --from=build /app/node_modules node_modules
 COPY --from=build /app/package.json package.json
 COPY --from=build /app/apps/api/package.json apps/api/package.json
 
-COPY apps/api/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY --chmod=755 apps/api/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 ARG SENTRY_RELEASE
 ENV SENTRY_RELEASE=${SENTRY_RELEASE}
