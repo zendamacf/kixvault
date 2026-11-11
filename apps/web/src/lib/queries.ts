@@ -1,4 +1,9 @@
-import type { SneakerCondition, WishlistPriority } from '@kixvault/shared';
+import type {
+  DepartureType,
+  SneakerCondition,
+  SneakerStatus,
+  WishlistPriority,
+} from '@kixvault/shared';
 import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import { i18n } from '@/i18n';
 import { api } from './api';
@@ -31,6 +36,13 @@ export type Sneaker = {
   wearCount: number;
   lastWornOn: string | null;
   suggestedCondition: SneakerCondition | null;
+  /** Set when the pair left the vault. Null means it is still in the collection. */
+  departureType: DepartureType | null;
+  departedOn: string | null;
+  salePrice: number | null;
+  departureNotes: string | null;
+  /** Sale price minus purchase price. Only for sold pairs with both prices known. */
+  realizedGainLoss: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -116,6 +128,9 @@ export const analyticsQueryOptions = queryOptions({
 export function sneakersQueryOptions(filters: {
   search?: string;
   condition?: SneakerCondition;
+  /** Active pairs by default. */
+  status?: SneakerStatus;
+  departureType?: DepartureType;
   sort?: string;
   order?: string;
 }) {
@@ -128,9 +143,15 @@ export function sneakersQueryOptions(filters: {
         query: {
           search: filters.search || undefined,
           condition: filters.condition,
+          status: filters.status,
+          departureType: filters.departureType,
           sort:
-            (filters.sort as 'created_at' | 'purchase_date' | 'purchase_price' | 'brand') ??
-            'created_at',
+            (filters.sort as
+              | 'created_at'
+              | 'purchase_date'
+              | 'purchase_price'
+              | 'brand'
+              | 'departed_on') ?? 'created_at',
           order: (filters.order as 'asc' | 'desc') ?? 'desc',
         },
       });

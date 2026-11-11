@@ -32,6 +32,7 @@ export function AppShell() {
   const isGrailsRoute = pathname.startsWith('/grails');
   const isWearsRoute = pathname.startsWith('/wears');
   const isAnalyticsRoute = pathname.startsWith('/analytics');
+  const isHistoryRoute = pathname.startsWith('/history');
   const isCollectionRoute = pathname === '/' || pathname.startsWith('/sneakers');
 
   if (isAuthRoute) {
@@ -85,6 +86,9 @@ export function AppShell() {
                 </Link>
                 <Link to="/analytics" className={navLinkClass(isAnalyticsRoute)}>
                   {t('layout.nav.analytics')}
+                </Link>
+                <Link to="/history" className={navLinkClass(isHistoryRoute)}>
+                  {t('layout.nav.history')}
                 </Link>
               </nav>
             ) : null}

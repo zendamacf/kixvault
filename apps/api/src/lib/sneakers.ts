@@ -1,7 +1,13 @@
 import { sneakers as sneakersTable } from '@kixvault/db';
-import type { CatalogSource, UpdateSneakerInput } from '@kixvault/shared';
+import type {
+  CatalogSource,
+  DepartureType,
+  RetireSneakerInput,
+  SneakerStatus,
+  UpdateSneakerInput,
+} from '@kixvault/shared';
 import { buildCatalogUrl, suggestCondition } from '@kixvault/shared';
-import { or, type SQL, sql } from 'drizzle-orm';
+import { isNotNull, isNull, or, type SQL, sql } from 'drizzle-orm';
 import {
   computeGainLoss,
   getMarketPriceForSneaker,
@@ -146,6 +152,57 @@ export function buildSneakerSearchCondition(search: string): SQL | undefined {
   );
 }
 
+/** Active pairs have no departure type. Retired pairs have left the vault but keep their history. */
+export function buildStatusCondition(status: SneakerStatus): SQL | undefined {
+  if (status === 'active') {
+    return isNull(sneakersTable.departureType);
+  }
+
+  if (status === 'retired') {
+    return isNotNull(sneakersTable.departureType);
+  }
+
+  return undefined;
+}
+
+export function isRetired(row: Pick<SneakerRow, 'departureType'>): boolean {
+  return row.departureType !== null;
+}
+
+export function buildRetireUpdate(
+  input: RetireSneakerInput,
+): Partial<typeof sneakersTable.$inferInsert> {
+  return {
+    departureType: input.departureType,
+    departedOn: parsePurchaseDate(input.departedOn),
+    salePrice: input.salePrice != null ? input.salePrice.toString() : null,
+    departureNotes: input.notes || null,
+  };
+}
+
+export function buildRestoreUpdate(): Partial<typeof sneakersTable.$inferInsert> {
+  return {
+    departureType: null,
+    departedOn: null,
+    salePrice: null,
+    departureNotes: null,
+  };
+}
+
+/**
+ * Sale price minus purchase price for a sold pair. Null for other departures and when either
+ * price is unknown. Kept apart from the unrealized gain on pairs still in the vault.
+ */
+export function computeRealizedGainLoss(
+  row: Pick<SneakerRow, 'departureType' | 'salePrice' | 'purchasePrice'>,
+): number | null {
+  if (row.departureType !== 'sold' || row.salePrice == null || row.purchasePrice == null) {
+    return null;
+  }
+
+  return Math.round((Number(row.salePrice) - Number(row.purchasePrice)) * 100) / 100;
+}
+
 export function parseSneakerId(id: string): string | null {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(id) ? id : null;
@@ -216,7 +273,12 @@ export function formatSneaker(
     gainLoss,
     wearCount,
     lastWornOn: options.wearStats?.lastWornOn ?? null,
-    suggestedCondition: suggestCondition(row.condition, wearCount),
+    suggestedCondition: isRetired(row) ? null : suggestCondition(row.condition, wearCount),
+    departureType: row.departureType as DepartureType | null,
+    departedOn: formatPurchaseDate(row.departedOn),
+    salePrice: row.salePrice != null ? Number(row.salePrice) : null,
+    departureNotes: row.departureNotes,
+    realizedGainLoss: computeRealizedGainLoss(row),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

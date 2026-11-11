@@ -6,6 +6,7 @@ import { ChartCard } from '@/components/analytics/chart-card';
 import { ConditionChart } from '@/components/analytics/condition-chart';
 import { MostWornList } from '@/components/analytics/most-worn-list';
 import { PortfolioValueChart } from '@/components/analytics/portfolio-value-chart';
+import { RealizedGains } from '@/components/analytics/realized-gains';
 import { WearsChart } from '@/components/analytics/wears-chart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { analyticsQueryOptions } from '@/lib/queries';
@@ -60,6 +61,17 @@ function AnalyticsPage() {
               }
             >
               <PortfolioValueChart data={analytics.portfolioValue} />
+            </ChartCard>
+          </div>
+
+          <div className="min-w-0 lg:col-span-2">
+            <ChartCard
+              title={t('analytics.realized.title')}
+              description={t('analytics.realized.description')}
+              emptyMessage={t('analytics.realized.empty')}
+              isEmpty={analytics.realized.soldCount === 0}
+            >
+              <RealizedGains realized={analytics.realized} />
             </ChartCard>
           </div>
 

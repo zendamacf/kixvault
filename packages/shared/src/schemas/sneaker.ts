@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { sneakerConditions } from '../types';
+import { departureTypes, sneakerConditions } from '../types';
 import { catalogSources } from './catalog';
+import { isWearDateAllowed } from './wear';
 
 export const sneakerImageUrlSchema = z.string().trim().url().max(2000);
 
@@ -57,14 +58,62 @@ export const createSneakerFromCatalogSchema = z.object({
   notes: z.string().trim().max(2000).optional().nullable(),
 });
 
+/** Departure types that can carry a sale price. */
+export const departureTypesWithSalePrice = ['sold', 'traded'] as const;
+
+export function departureAllowsSalePrice(type: (typeof departureTypes)[number]): boolean {
+  return (departureTypesWithSalePrice as readonly string[]).includes(type);
+}
+
+const requiredDateField = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD')
+  .refine((value) => !Number.isNaN(Date.parse(`${value}T00:00:00Z`)), 'Invalid date')
+  .refine((value) => isWearDateAllowed(value), 'Date cannot be in the future');
+
+export const retireSneakerSchema = z
+  .object({
+    departureType: z.enum(departureTypes),
+    departedOn: requiredDateField,
+    salePrice: optionalNumericField,
+    notes: z.string().trim().max(2000).optional().nullable(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.departureType === 'sold' && value.salePrice == null) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['salePrice'],
+        message: 'Sale price is required for sold pairs',
+      });
+    }
+
+    if (value.salePrice != null && !departureAllowsSalePrice(value.departureType)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['salePrice'],
+        message: 'Sale price is only allowed for sold and traded pairs',
+      });
+    }
+  });
+
+export const sneakerStatuses = ['active', 'retired', 'all'] as const;
+
 export const listSneakersQuerySchema = z.object({
   search: z.string().trim().min(1).max(100).optional(),
   condition: z.enum(sneakerConditions).optional(),
-  sort: z.enum(['created_at', 'purchase_date', 'purchase_price', 'brand']).default('created_at'),
+  /** Active pairs by default. Retired pairs have left the vault but keep their history. */
+  status: z.enum(sneakerStatuses).default('active'),
+  departureType: z.enum(departureTypes).optional(),
+  sort: z
+    .enum(['created_at', 'purchase_date', 'purchase_price', 'brand', 'departed_on'])
+    .default('created_at'),
   order: z.enum(['asc', 'desc']).default('desc'),
 });
 
 export type CreateSneakerInput = z.infer<typeof createSneakerSchema>;
 export type CreateSneakerFromCatalogInput = z.infer<typeof createSneakerFromCatalogSchema>;
+export type RetireSneakerInput = z.infer<typeof retireSneakerSchema>;
+export type SneakerStatus = (typeof sneakerStatuses)[number];
 export type UpdateSneakerInput = z.infer<typeof updateSneakerSchema>;
 export type ListSneakersQuery = z.infer<typeof listSneakersQuerySchema>;

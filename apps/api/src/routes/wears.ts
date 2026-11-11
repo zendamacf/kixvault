@@ -7,7 +7,7 @@ import { formatSneakerAuditMetadata, recordAuditEvent } from '../lib/audit';
 import { getRequestClientIp } from '../lib/client-ip';
 import { db } from '../lib/db';
 import { formatPrimaryImage, getPrimaryImagesForSneakerIds } from '../lib/sneaker-images';
-import { formatSneakerWithPricing, parseSneakerId } from '../lib/sneakers';
+import { formatSneakerWithPricing, isRetired, parseSneakerId } from '../lib/sneakers';
 import { logWear, removeWear, todayUtc } from '../lib/wears';
 import { requireAuth, sessionMiddleware } from '../middleware/session';
 import type { ApiEnv } from '../types';
@@ -90,6 +90,10 @@ export const wearRoutes = new Hono<ApiEnv>()
 
     if (!existing) {
       return c.json({ error: 'Sneaker not found' }, 404);
+    }
+
+    if (isRetired(existing)) {
+      return c.json({ error: 'Retired pairs cannot be worn' }, 409);
     }
 
     const result = await logWear(userId, existing, wornOn);

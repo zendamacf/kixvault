@@ -8,6 +8,8 @@ export const UmamiEvents = {
   sneakerCreate: 'sneaker_create',
   sneakerUpdate: 'sneaker_update',
   sneakerDelete: 'sneaker_delete',
+  sneakerRetire: 'sneaker_retire',
+  sneakerRestore: 'sneaker_restore',
 } as const;
 
 export type UmamiEventData = Record<string, string | number | boolean>;

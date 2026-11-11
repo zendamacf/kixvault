@@ -1,5 +1,5 @@
 import { priceSnapshots, sneakers, sneakerWears } from '@kixvault/db';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { buildAnalytics } from '../lib/analytics';
 import { computeCollectionMarketStats } from '../lib/collection-stats';
@@ -17,7 +17,7 @@ export const statsRoutes = new Hono<ApiEnv>()
     const rows = await db
       .select()
       .from(sneakers)
-      .where(eq(sneakers.userId, user?.id ?? ''));
+      .where(and(eq(sneakers.userId, user?.id ?? ''), isNull(sneakers.departureType)));
 
     const count = rows.length;
     const totalSpend = rows.reduce(
@@ -66,6 +66,10 @@ export const statsRoutes = new Hono<ApiEnv>()
         sku: row.sku,
         catalogSource: row.catalogSource,
         purchaseDate: row.purchaseDate ? row.purchaseDate.toISOString().slice(0, 10) : null,
+        purchasePrice: row.purchasePrice,
+        departureType: row.departureType,
+        departedOn: row.departedOn ? row.departedOn.toISOString().slice(0, 10) : null,
+        salePrice: row.salePrice,
       })),
       snapshots: snapshotRows.map((row) => ({
         catalogSource: row.catalogSource,

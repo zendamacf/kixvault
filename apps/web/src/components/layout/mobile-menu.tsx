@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import {
+  Archive,
   CalendarDays,
   ChartColumn,
   ChevronDown,
@@ -67,6 +68,12 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
       label: t('layout.nav.analytics'),
       icon: ChartColumn,
       active: pathname.startsWith('/analytics'),
+    },
+    {
+      to: '/history',
+      label: t('layout.nav.history'),
+      icon: Archive,
+      active: pathname.startsWith('/history'),
     },
   ] as const;
 
