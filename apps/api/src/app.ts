@@ -35,6 +35,7 @@ const withSentry = env.isProduction
 export const app = withSentry
   .use(requestLogMiddleware)
   .use(localeMiddleware)
+  .get('/health', (c) => c.text('ok'))
   .get('/api/health', (c) => c.json({ status: 'ok', app: APP_NAME }))
   .use('/api/*', async (c, next) => {
     if (c.req.path === '/api/health') {

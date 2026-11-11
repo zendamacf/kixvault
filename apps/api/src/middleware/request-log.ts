@@ -3,7 +3,7 @@ import { isRequestLoggingEnabled, parseLogLevel } from '../lib/log-level';
 import { logger } from '../lib/logger';
 import type { ApiEnv } from '../types';
 
-const HEALTH_CHECK_PATH = '/api/health';
+const HEALTH_CHECK_PATHS = new Set(['/health', '/api/health']);
 
 export const requestLogMiddleware = createMiddleware<ApiEnv>(async (c, next) => {
   const requestId = c.req.header('X-Request-Id') ?? crypto.randomUUID();
@@ -12,7 +12,7 @@ export const requestLogMiddleware = createMiddleware<ApiEnv>(async (c, next) => 
 
   const shouldLog =
     isRequestLoggingEnabled(parseLogLevel(process.env.LOG_LEVEL)) &&
-    c.req.path !== HEALTH_CHECK_PATH;
+    !HEALTH_CHECK_PATHS.has(c.req.path);
 
   const start = shouldLog ? performance.now() : 0;
 
