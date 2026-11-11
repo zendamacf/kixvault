@@ -54,3 +54,7 @@ Read `apps/web/README.md` before UI work. Key points:
 - Biome handles lint and formatting (`biome.json`); don't add ESLint/Prettier.
 - Releases use Changesets (`bun run changeset`); user-facing changes to a package need a changeset. `main` is released via the `Release` workflow, and Dependabot PRs get changesets automatically.
 - Activity-log behavior (what is recorded, 90-day window, no personal fields in the timeline) is documented in `docs/activity-log.md`; keep audit events free of notes and other personal data.
+
+## Commit format
+
+Conventional Commits, as seen in recent history: `type(scope): lowercase imperative summary (#PR)`, for example `feat(web): add price history chart with chart/table toggle (#137)`. Types in use: `feat`, `fix`, `chore` (`chore(deps): ...` for dependency bumps, `chore(docker): ...`), `docs`. Scope is the area (`web`, `api`, `auth`, `docker`, ...) and is optional. Reference the PR number in parentheses at the end. `Version Packages (#N)` is the Changesets release PR. Older history has unprefixed titles; new commits must use a type.
