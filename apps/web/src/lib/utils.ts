@@ -7,6 +7,20 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Currency with cents, for per-wear figures that are often under a dollar or two. */
+export function formatCurrencyPrecise(value: number | null | undefined) {
+  if (value == null) {
+    return i18n.t('common.emptyValue');
+  }
+
+  return new Intl.NumberFormat(getActiveLocale(), {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 export function formatCurrency(value: number | null | undefined) {
   if (value == null) {
     return i18n.t('common.emptyValue');

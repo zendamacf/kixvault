@@ -2,6 +2,8 @@ import type {
   Analytics,
   BrandBreakdownEntry,
   ConditionBreakdownEntry,
+  CostPerWearEntry,
+  CostPerWearSummary,
   DepartureType,
   MostWornEntry,
   PortfolioValuePoint,
@@ -11,6 +13,7 @@ import type {
   WearsByMonthPoint,
 } from '@kixvault/shared';
 import { sneakerConditions } from '@kixvault/shared';
+import { computeCostPerWear } from './cost-per-wear';
 
 export type AnalyticsSneaker = {
   id: string;
@@ -185,6 +188,55 @@ export function buildMostWorn(
   return entries.slice(0, limit);
 }
 
+const COST_PER_WEAR_LIMIT = 5;
+
+/**
+ * Best and worst cost per wear among pairs with a known price and at least one wear.
+ * Pass active pairs only.
+ */
+export function buildCostPerWear(
+  wears: AnalyticsWear[],
+  sneakers: AnalyticsSneaker[],
+  limit = COST_PER_WEAR_LIMIT,
+): CostPerWearSummary {
+  const counts = new Map<string, number>();
+  for (const wear of wears) {
+    counts.set(wear.sneakerId, (counts.get(wear.sneakerId) ?? 0) + 1);
+  }
+
+  const entries: CostPerWearEntry[] = [];
+  let totalPaid = 0;
+  let totalWears = 0;
+  for (const sneaker of sneakers) {
+    const wearCount = counts.get(sneaker.id) ?? 0;
+    const price = computeCostPerWear(sneaker.purchasePrice, wearCount);
+    if (price == null) {
+      continue;
+    }
+    const purchasePrice = Number(sneaker.purchasePrice);
+    totalPaid += purchasePrice;
+    totalWears += wearCount;
+    entries.push({
+      sneakerId: sneaker.id,
+      name: sneakerDisplayName(sneaker),
+      wearCount,
+      purchasePrice,
+      costPerWear: price,
+    });
+  }
+
+  const byName = (a: CostPerWearEntry, b: CostPerWearEntry) => a.name.localeCompare(b.name);
+  return {
+    average: totalWears > 0 ? Math.round((totalPaid / totalWears) * 100) / 100 : null,
+    best: [...entries]
+      .sort((a, b) => a.costPerWear - b.costPerWear || byName(a, b))
+      .slice(0, limit),
+    worst: [...entries]
+      .sort((a, b) => b.costPerWear - a.costPerWear || byName(a, b))
+      .slice(0, limit),
+  };
+}
+
 /** Pairs per brand, largest first. Brands past `limit` are grouped into "Other". */
 export function buildBrandBreakdown(
   sneakers: AnalyticsSneaker[],
@@ -275,5 +327,6 @@ export function buildAnalytics(input: {
     brands: buildBrandBreakdown(sneakers),
     conditions: buildConditionBreakdown(sneakers),
     realized: buildRealized(allSneakers),
+    costPerWear: buildCostPerWear(wears, sneakers),
   };
 }

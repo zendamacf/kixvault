@@ -48,6 +48,23 @@ export const realizedSchema = z.object({
   sales: z.array(realizedSaleSchema),
 });
 
+export const costPerWearEntrySchema = z.object({
+  sneakerId: z.string(),
+  name: z.string(),
+  wearCount: z.number(),
+  purchasePrice: z.number(),
+  costPerWear: z.number(),
+});
+
+export const costPerWearSchema = z.object({
+  /** Total paid divided by total wears across the ranked pairs. Null when there are none. */
+  average: z.number().nullable(),
+  /** Pairs with the lowest cost per wear first. */
+  best: z.array(costPerWearEntrySchema),
+  /** Pairs with the highest cost per wear first. */
+  worst: z.array(costPerWearEntrySchema),
+});
+
 export const analyticsSchema = z.object({
   portfolioValue: z.array(portfolioValuePointSchema),
   /** Pairs that can appear in the portfolio chart (catalog-linked). */
@@ -58,6 +75,7 @@ export const analyticsSchema = z.object({
   brands: z.array(brandBreakdownEntrySchema),
   conditions: z.array(conditionBreakdownEntrySchema),
   realized: realizedSchema,
+  costPerWear: costPerWearSchema,
 });
 
 export type PortfolioValuePoint = z.infer<typeof portfolioValuePointSchema>;
@@ -67,4 +85,6 @@ export type BrandBreakdownEntry = z.infer<typeof brandBreakdownEntrySchema>;
 export type ConditionBreakdownEntry = z.infer<typeof conditionBreakdownEntrySchema>;
 export type RealizedSale = z.infer<typeof realizedSaleSchema>;
 export type RealizedSummary = z.infer<typeof realizedSchema>;
+export type CostPerWearEntry = z.infer<typeof costPerWearEntrySchema>;
+export type CostPerWearSummary = z.infer<typeof costPerWearSchema>;
 export type Analytics = z.infer<typeof analyticsSchema>;

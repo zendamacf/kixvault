@@ -316,6 +316,14 @@
       "description": "Your top pairs of all time.",
       "empty": "No wears logged yet."
     },
+    "costPerWear": {
+      "title": "Cost per wear",
+      "description": "What each pair has cost you per wear, for pairs with a price.",
+      "empty": "Add a purchase price and log a wear to see this.",
+      "average": "Average across pairs: {{value}}",
+      "best": "Best value",
+      "worst": "Highest cost"
+    },
     "byBrand": {
       "title": "By brand",
       "description": "Pairs per brand.",
@@ -389,11 +397,13 @@
         "condition": "Condition",
         "worn": "Worn",
         "paid": "Paid",
+        "costPerWear": "Cost per wear",
         "purchased": "Purchased",
         "released": "Released",
         "added": "Added to vault"
       },
       "neverWorn": "Never",
+      "costPerWearNeedsWear": "Log a wear to see it",
       "wornTimes_one": "{{count}} time",
       "wornTimes_other": "{{count}} times",
       "wornTimesLast_one": "{{count}} time, last {{date}}",

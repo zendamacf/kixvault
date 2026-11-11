@@ -8,6 +8,7 @@ import type {
 } from '@kixvault/shared';
 import { buildCatalogUrl, suggestCondition } from '@kixvault/shared';
 import { isNotNull, isNull, or, type SQL, sql } from 'drizzle-orm';
+import { computeCostPerWear } from './cost-per-wear';
 import {
   computeGainLoss,
   getMarketPriceForSneaker,
@@ -272,6 +273,7 @@ export function formatSneaker(
     pricedAt,
     gainLoss,
     wearCount,
+    costPerWear: isRetired(row) ? null : computeCostPerWear(row.purchasePrice, wearCount),
     lastWornOn: options.wearStats?.lastWornOn ?? null,
     suggestedCondition: isRetired(row) ? null : suggestCondition(row.condition, wearCount),
     departureType: row.departureType as DepartureType | null,

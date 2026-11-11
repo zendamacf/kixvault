@@ -33,6 +33,7 @@ import {
   cn,
   formatCondition,
   formatCurrency,
+  formatCurrencyPrecise,
   formatDate,
   getCatalogSourceLabel,
 } from '@/lib/utils';
@@ -145,6 +146,17 @@ function SneakerDetailPage() {
     },
     ...(sneaker.purchasePrice != null
       ? [{ label: t('sneakers.detail.facts.paid'), value: formatCurrency(sneaker.purchasePrice) }]
+      : []),
+    ...(!isRetired && sneaker.purchasePrice != null
+      ? [
+          {
+            label: t('sneakers.detail.facts.costPerWear'),
+            value:
+              sneaker.costPerWear != null
+                ? formatCurrencyPrecise(sneaker.costPerWear)
+                : t('sneakers.detail.costPerWearNeedsWear'),
+          },
+        ]
       : []),
     ...(sneaker.purchaseDate
       ? [

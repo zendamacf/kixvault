@@ -5,6 +5,7 @@ import {
   buildAnalytics,
   buildBrandBreakdown,
   buildConditionBreakdown,
+  buildCostPerWear,
   buildMostWorn,
   buildPortfolioValue,
   buildRealized,
@@ -130,6 +131,57 @@ describe('buildMostWorn', () => {
       { sneakerId: 'b', name: 'Chicago', count: 2 },
       { sneakerId: 'a', name: 'Zeta', count: 1 },
     ]);
+  });
+});
+
+describe('buildCostPerWear', () => {
+  const sneakers = [
+    sneaker({ id: 'a', model: 'Alpha', purchasePrice: '100' }),
+    sneaker({ id: 'b', model: 'Beta', purchasePrice: '90' }),
+    sneaker({ id: 'c', model: 'Gamma', purchasePrice: null }),
+    sneaker({ id: 'd', model: 'Delta', purchasePrice: '50' }),
+  ];
+  const wears = [
+    { sneakerId: 'a', wornOn: '2026-11-01' },
+    { sneakerId: 'b', wornOn: '2026-11-01' },
+    { sneakerId: 'b', wornOn: '2026-11-02' },
+    { sneakerId: 'b', wornOn: '2026-11-03' },
+    { sneakerId: 'c', wornOn: '2026-11-01' },
+  ];
+
+  test('ranks pairs with a price and wears, lowest first for best', () => {
+    const result = buildCostPerWear(wears, sneakers, 5);
+
+    expect(result.best.map((entry) => [entry.sneakerId, entry.costPerWear])).toEqual([
+      ['b', 30],
+      ['a', 100],
+    ]);
+    expect(result.worst.map((entry) => entry.sneakerId)).toEqual(['a', 'b']);
+  });
+
+  test('averages total paid over total wears', () => {
+    expect(buildCostPerWear(wears, sneakers).average).toBe(47.5);
+  });
+
+  test('returns empty lists when nothing qualifies', () => {
+    expect(buildCostPerWear([], sneakers)).toEqual({ average: null, best: [], worst: [] });
+  });
+
+  test('is included in buildAnalytics for active pairs only', () => {
+    const retired = sneaker({
+      id: 'r',
+      purchasePrice: '10',
+      departureType: 'sold',
+      departedOn: '2026-10-01',
+    });
+    const result = buildAnalytics({
+      sneakers: [...sneakers, retired],
+      snapshots: [],
+      wears: [...wears, { sneakerId: 'r', wornOn: '2026-09-01' }],
+      now: new Date('2026-11-11T00:00:00Z'),
+    });
+
+    expect(result.costPerWear.best.map((entry) => entry.sneakerId)).toEqual(['b', 'a']);
   });
 });
 
