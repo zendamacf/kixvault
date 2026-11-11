@@ -12,10 +12,14 @@ mock.module('./env', () => ({
 }));
 
 const {
+  buildRestoreUpdate,
+  buildRetireUpdate,
   buildSneakerSearchCondition,
   buildSneakerUpdate,
+  computeRealizedGainLoss,
   formatSneaker,
   getCatalogLinkedModelFieldViolations,
+  isRetired,
   parsePurchaseDate,
   parseSneakerId,
 } = await import('./sneakers');
@@ -42,6 +46,10 @@ function createSneakerRow(overrides: Partial<SneakerRow> = {}): SneakerRow {
     nickname: 'Anniversary Red',
     releaseDate: new Date('2015-04-25T00:00:00.000Z'),
     description: 'The original Air Max with visible Air cushioning.',
+    departureType: null,
+    departedOn: null,
+    salePrice: null,
+    departureNotes: null,
     primaryImageId: null,
     searchVector: "'air':1 'max':2 'nike':3",
     createdAt: new Date('2024-01-01T00:00:00.000Z'),
@@ -119,6 +127,11 @@ describe('formatSneaker', () => {
       wearCount: 0,
       lastWornOn: null,
       suggestedCondition: null,
+      departureType: null,
+      departedOn: null,
+      salePrice: null,
+      departureNotes: null,
+      realizedGainLoss: null,
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-02T00:00:00.000Z',
     });
@@ -251,5 +264,112 @@ describe('formatSneaker wear fields', () => {
     expect(formatted.wearCount).toBe(15);
     expect(formatted.lastWornOn).toBe('2026-11-01');
     expect(formatted.suggestedCondition).toBe('worn');
+  });
+});
+
+describe('retiring pairs', () => {
+  test('isRetired is true only when a departure type is set', () => {
+    expect(isRetired(createSneakerRow())).toBe(false);
+    expect(isRetired(createSneakerRow({ departureType: 'gifted' }))).toBe(true);
+  });
+
+  test('buildRetireUpdate maps the input to departure columns', () => {
+    expect(
+      buildRetireUpdate({
+        departureType: 'sold',
+        departedOn: '2025-03-01',
+        salePrice: 250.5,
+        notes: 'Sold on eBay',
+      }),
+    ).toEqual({
+      departureType: 'sold',
+      departedOn: new Date('2025-03-01T00:00:00.000Z'),
+      salePrice: '250.5',
+      departureNotes: 'Sold on eBay',
+    });
+  });
+
+  test('buildRetireUpdate keeps a zero sale price and drops empty notes', () => {
+    expect(
+      buildRetireUpdate({
+        departureType: 'sold',
+        departedOn: '2025-03-01',
+        salePrice: 0,
+        notes: '',
+      }),
+    ).toMatchObject({ salePrice: '0', departureNotes: null });
+    expect(buildRetireUpdate({ departureType: 'lost', departedOn: '2025-03-01' })).toMatchObject({
+      salePrice: null,
+      departureNotes: null,
+    });
+  });
+
+  test('buildRestoreUpdate clears every departure column', () => {
+    expect(buildRestoreUpdate()).toEqual({
+      departureType: null,
+      departedOn: null,
+      salePrice: null,
+      departureNotes: null,
+    });
+  });
+
+  test('computeRealizedGainLoss is sale price minus purchase price for sold pairs', () => {
+    expect(
+      computeRealizedGainLoss({
+        departureType: 'sold',
+        salePrice: '250.00',
+        purchasePrice: '180.00',
+      }),
+    ).toBe(70);
+    expect(
+      computeRealizedGainLoss({
+        departureType: 'sold',
+        salePrice: '150.10',
+        purchasePrice: '180.00',
+      }),
+    ).toBe(-29.9);
+  });
+
+  test('computeRealizedGainLoss is null for other departures and unknown prices', () => {
+    expect(
+      computeRealizedGainLoss({
+        departureType: 'traded',
+        salePrice: '250.00',
+        purchasePrice: '180.00',
+      }),
+    ).toBeNull();
+    expect(
+      computeRealizedGainLoss({ departureType: 'sold', salePrice: '250.00', purchasePrice: null }),
+    ).toBeNull();
+    expect(
+      computeRealizedGainLoss({ departureType: null, salePrice: null, purchasePrice: '180.00' }),
+    ).toBeNull();
+  });
+
+  test('formatSneaker exposes departure fields and stops suggesting a condition', () => {
+    const active = formatSneaker(createSneakerRow({ condition: 'lightly_worn' }), {
+      wearStats: { wearCount: 20, lastWornOn: '2025-01-01' },
+    });
+    const retired = formatSneaker(
+      createSneakerRow({
+        condition: 'lightly_worn',
+        departureType: 'sold',
+        departedOn: new Date('2025-03-01T00:00:00.000Z'),
+        salePrice: '250.00',
+        departureNotes: 'Sold on eBay',
+      }),
+      { wearStats: { wearCount: 20, lastWornOn: '2025-01-01' } },
+    );
+
+    expect(active.departureType).toBeNull();
+    expect(active.suggestedCondition).toBe('worn');
+    expect(retired).toMatchObject({
+      departureType: 'sold',
+      departedOn: '2025-03-01',
+      salePrice: 250,
+      departureNotes: 'Sold on eBay',
+      realizedGainLoss: 70,
+      suggestedCondition: null,
+    });
   });
 });

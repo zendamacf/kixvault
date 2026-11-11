@@ -2,8 +2,11 @@ import type {
   Analytics,
   BrandBreakdownEntry,
   ConditionBreakdownEntry,
+  DepartureType,
   MostWornEntry,
   PortfolioValuePoint,
+  RealizedSale,
+  RealizedSummary,
   SneakerCondition,
   WearsByMonthPoint,
 } from '@kixvault/shared';
@@ -19,6 +22,12 @@ export type AnalyticsSneaker = {
   sku: string | null;
   catalogSource: string | null;
   purchaseDate: string | null;
+  purchasePrice?: string | null;
+  /** Set when the pair left the vault. */
+  departureType?: DepartureType | null;
+  /** `YYYY-MM-DD` */
+  departedOn?: string | null;
+  salePrice?: string | null;
 };
 
 export type AnalyticsSnapshot = {
@@ -57,6 +66,7 @@ function sneakerKey(sneaker: AnalyticsSneaker): string | null {
  *
  * Each pair uses its most recent snapshot on or before the date (so a missed snapshot does not
  * drop the pair out of the total), and only counts from its purchase date when one is set.
+ * A retired pair stops counting after its departure date, so earlier points keep its value.
  * Pairs without a catalog link, or without any snapshot yet, are skipped.
  */
 export function buildPortfolioValue(
@@ -79,7 +89,9 @@ export function buildPortfolioValue(
   const tracked = sneakers.flatMap((sneaker) => {
     const key = sneakerKey(sneaker);
     const history = key ? byPair.get(key) : undefined;
-    return history ? [{ history, ownedFrom: sneaker.purchaseDate }] : [];
+    return history
+      ? [{ history, ownedFrom: sneaker.purchaseDate, ownedUntil: sneaker.departedOn ?? null }]
+      : [];
   });
 
   const dates = [...new Set(tracked.flatMap((item) => item.history.map((entry) => entry.date)))];
@@ -93,6 +105,10 @@ export function buildPortfolioValue(
 
     for (const item of tracked) {
       if (item.ownedFrom && item.ownedFrom > date) {
+        continue;
+      }
+
+      if (item.ownedUntil && item.ownedUntil < date) {
         continue;
       }
 
@@ -203,21 +219,61 @@ export function buildConditionBreakdown(sneakers: AnalyticsSneaker[]): Condition
     .filter((entry) => entry.count > 0);
 }
 
+/**
+ * Realized gain or loss on sold pairs, kept apart from the unrealized gain on pairs still owned.
+ * A sold pair without a purchase price is listed but left out of the total.
+ */
+export function buildRealized(sneakers: AnalyticsSneaker[]): RealizedSummary {
+  const sales: RealizedSale[] = [];
+
+  for (const sneaker of sneakers) {
+    if (sneaker.departureType !== 'sold' || sneaker.salePrice == null || !sneaker.departedOn) {
+      continue;
+    }
+
+    const salePrice = Number(sneaker.salePrice);
+    const purchasePrice = sneaker.purchasePrice != null ? Number(sneaker.purchasePrice) : null;
+
+    sales.push({
+      sneakerId: sneaker.id,
+      name: sneakerDisplayName(sneaker),
+      departedOn: sneaker.departedOn,
+      salePrice,
+      purchasePrice,
+      gainLoss: purchasePrice !== null ? Math.round((salePrice - purchasePrice) * 100) / 100 : null,
+    });
+  }
+
+  sales.sort((a, b) => b.departedOn.localeCompare(a.departedOn) || a.name.localeCompare(b.name));
+
+  const withGain = sales.filter((sale) => sale.gainLoss !== null);
+  const totalGainLoss =
+    withGain.length > 0
+      ? Math.round(withGain.reduce((sum, sale) => sum + (sale.gainLoss ?? 0), 0) * 100) / 100
+      : null;
+
+  return { totalGainLoss, soldCount: sales.length, sales };
+}
+
 export function buildAnalytics(input: {
   sneakers: AnalyticsSneaker[];
   snapshots: AnalyticsSnapshot[];
   wears: AnalyticsWear[];
   now: Date;
 }): Analytics {
-  const { sneakers, snapshots, wears, now } = input;
+  const { sneakers: allSneakers, snapshots, wears, now } = input;
+  // Retired pairs only shape the value history and the realized figures. Everything else
+  // describes the collection as it is today.
+  const sneakers = allSneakers.filter((sneaker) => !sneaker.departureType);
 
   return {
-    portfolioValue: buildPortfolioValue(sneakers, snapshots),
+    portfolioValue: buildPortfolioValue(allSneakers, snapshots),
     trackedPairs: sneakers.filter((sneaker) => sneakerKey(sneaker) !== null).length,
     totalPairs: sneakers.length,
     wearsByMonth: buildWearsByMonth(wears, now),
     mostWorn: buildMostWorn(wears, sneakers),
     brands: buildBrandBreakdown(sneakers),
     conditions: buildConditionBreakdown(sneakers),
+    realized: buildRealized(allSneakers),
   };
 }

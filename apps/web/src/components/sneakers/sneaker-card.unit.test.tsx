@@ -49,6 +49,11 @@ const sneaker: Sneaker = {
   wearCount: 0,
   lastWornOn: null,
   suggestedCondition: null,
+  departureType: null,
+  departedOn: null,
+  salePrice: null,
+  departureNotes: null,
+  realizedGainLoss: null,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-02T00:00:00.000Z',
 };

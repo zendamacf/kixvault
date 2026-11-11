@@ -134,6 +134,13 @@
       "when": 1785800000000,
       "tag": "0018_password_reset",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794400342508,
+      "tag": "0019_retire_sneakers",
+      "breakpoints": true
     }
   ]
 }

@@ -88,6 +88,30 @@ describe('formatEventDetail', () => {
     ).toEqual({ pair: 'Nike Dunk Low', note: null });
   });
 
+  test('notes how a retired pair left the vault', () => {
+    expect(
+      formatEventDetail(
+        event({
+          action: 'sneaker.retired',
+          createdAt,
+          metadata: { brand: 'Nike', model: 'Dunk Low', departureType: 'sold' },
+        }),
+      ),
+    ).toEqual({ pair: 'Nike Dunk Low', note: 'Sold' });
+  });
+
+  test('has no note for a restored pair', () => {
+    expect(
+      formatEventDetail(
+        event({
+          action: 'sneaker.restored',
+          createdAt,
+          metadata: { brand: 'Nike', model: 'Dunk Low' },
+        }),
+      ),
+    ).toEqual({ pair: 'Nike Dunk Low', note: null });
+  });
+
   test('notes when a grail was removed after copping it', () => {
     expect(
       formatEventDetail(

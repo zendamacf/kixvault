@@ -11,6 +11,8 @@ export const auditActions = [
   'sneaker.created_from_grail',
   'sneaker.updated',
   'sneaker.deleted',
+  'sneaker.retired',
+  'sneaker.restored',
   'sneaker.worn',
   'sneaker.wear_removed',
 ] as const;

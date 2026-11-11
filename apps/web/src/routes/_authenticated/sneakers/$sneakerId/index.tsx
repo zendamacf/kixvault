@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Footprints, Pencil, Trash2 } from 'lucide-react';
+import { Archive, ArchiveRestore, Footprints, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { BackLink } from '@/components/layout/back-link';
 import { PriceHistory } from '@/components/sneakers/price-history';
+import { RemoveFromVaultDialog } from '@/components/sneakers/remove-from-vault-dialog';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import {
   AlertDialog,
@@ -22,8 +23,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WearSuggestion } from '@/components/wears/wear-suggestion';
 import { api, parseApiError } from '@/lib/api';
+import { formatDepartureDate } from '@/lib/departure';
 import { getMarketValueDisclaimer } from '@/lib/pricing';
 import { sneakerPriceHistoryQueryOptions, sneakerQueryOptions } from '@/lib/queries';
+import { useRestoreSneaker } from '@/lib/retire-actions';
 import { trackUmamiEvent } from '@/lib/umami';
 import { UmamiEvents } from '@/lib/umami-events';
 import {
@@ -38,13 +41,14 @@ import { useLogWear } from '@/lib/wear-actions';
 /** Pages that link to a sneaker and want the back link to return to them. */
 const backTargets = {
   analytics: { to: '/analytics', labelKey: 'common.backToAnalytics' },
+  history: { to: '/history', labelKey: 'common.backToHistory' },
   wears: { to: '/wears', labelKey: 'common.backToWears' },
   collection: { to: '/', labelKey: 'common.backToCollection' },
 } as const;
 
 export const Route = createFileRoute('/_authenticated/sneakers/$sneakerId/')({
   validateSearch: z.object({
-    from: z.enum(['analytics', 'wears']).optional().catch(undefined),
+    from: z.enum(['analytics', 'wears', 'history']).optional().catch(undefined),
   }),
   component: SneakerDetailPage,
 });
@@ -59,6 +63,7 @@ function SneakerDetailPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const { data, isLoading, error } = useQuery(sneakerQueryOptions(sneakerId));
   const logWear = useLogWear();
+  const restoreSneaker = useRestoreSneaker();
   const { data: priceHistoryData, isLoading: priceHistoryLoading } = useQuery({
     ...sneakerPriceHistoryQueryOptions(sneakerId),
     enabled: Boolean(data?.sneaker),
@@ -119,6 +124,9 @@ function SneakerDetailPage() {
   const hasMarketPrice = sneaker.currentMarketPrice != null;
   const disclaimer = getMarketValueDisclaimer(sneaker.condition);
   const gainLoss = sneaker.gainLoss;
+  const departureType = sneaker.departureType;
+  const isRetired = departureType !== null;
+  const realizedGainLoss = sneaker.realizedGainLoss;
 
   const facts: { label: string; value: string }[] = [
     { label: t('sneakers.detail.facts.size'), value: String(sneaker.size) },
@@ -195,14 +203,25 @@ function SneakerDetailPage() {
           </header>
 
           <div className="flex flex-wrap gap-2">
-            <Button
-              size="lg"
-              disabled={logWear.isPending}
-              onClick={() => logWear.mutate({ sneakerId, label: title })}
-            >
-              <Footprints aria-hidden />
-              {t('sneakers.detail.woreToday')}
-            </Button>
+            {isRetired ? (
+              <Button
+                size="lg"
+                disabled={restoreSneaker.isPending}
+                onClick={() => restoreSneaker.mutate({ sneakerId, label: title })}
+              >
+                <ArchiveRestore aria-hidden />
+                {t('sneakers.detail.restore')}
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                disabled={logWear.isPending}
+                onClick={() => logWear.mutate({ sneakerId, label: title })}
+              >
+                <Footprints aria-hidden />
+                {t('sneakers.detail.woreToday')}
+              </Button>
+            )}
             <Button
               variant="outline"
               size="lg"
@@ -211,37 +230,53 @@ function SneakerDetailPage() {
               <Pencil aria-hidden />
               {t('common.edit')}
             </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="lg" disabled={deleteMutation.isPending}>
-                  <Trash2 aria-hidden />
-                  {t('common.delete')}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t('sneakers.detail.deleteTitle')}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t('sneakers.detail.deleteDescription')}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                  <AlertDialogAction
-                    variant="destructive"
-                    onClick={() => {
-                      setActionError(null);
-                      deleteMutation.mutate();
-                    }}
-                  >
+            {isRetired ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="lg" disabled={deleteMutation.isPending}>
+                    <Trash2 aria-hidden />
                     {t('common.delete')}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t('sneakers.detail.deleteTitle')}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t('sneakers.detail.deleteDescription')}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction
+                      variant="destructive"
+                      onClick={() => {
+                        setActionError(null);
+                        deleteMutation.mutate();
+                      }}
+                    >
+                      {t('sneakers.detail.deleteConfirm')}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+              <RemoveFromVaultDialog
+                sneakerId={sneakerId}
+                name={title}
+                onDelete={() => {
+                  setActionError(null);
+                  deleteMutation.mutate();
+                }}
+              >
+                <Button variant="outline" size="lg" disabled={deleteMutation.isPending}>
+                  <Archive aria-hidden />
+                  {t('sneakers.detail.removeFromVault')}
+                </Button>
+              </RemoveFromVaultDialog>
+            )}
           </div>
 
-          {sneaker.suggestedCondition ? (
+          {!isRetired && sneaker.suggestedCondition ? (
             <WearSuggestion
               sneakerId={sneaker.id}
               wearCount={sneaker.wearCount}
@@ -249,32 +284,47 @@ function SneakerDetailPage() {
             />
           ) : null}
 
-          <section aria-label={t('sneakers.detail.marketValueLabel')} className="space-y-2">
-            {hasMarketPrice ? (
+          {isRetired && departureType ? (
+            <section aria-label={t('sneakers.detail.departureLabel')} className="space-y-2">
               <p className="font-heading text-3xl leading-[1.15] tracking-tight text-muted-foreground">
                 <Trans
-                  i18nKey="sneakers.detail.worth"
-                  values={{ value: formatCurrency(sneaker.currentMarketPrice) }}
+                  i18nKey={
+                    departureType === 'traded' && sneaker.salePrice != null
+                      ? 'sneakers.detail.departed.tradedValued'
+                      : `sneakers.detail.departed.${departureType}`
+                  }
+                  values={{
+                    date: formatDepartureDate(sneaker.departedOn),
+                    price: formatCurrency(sneaker.salePrice),
+                  }}
                   components={{ strong: <strong className="font-semibold text-foreground" /> }}
                 />
-                {gainLoss != null && sneaker.purchasePrice != null ? (
+                {realizedGainLoss != null && sneaker.purchasePrice != null ? (
                   <>
                     {' '}
                     <Trans
                       i18nKey="sneakers.detail.gain"
                       values={{
                         change:
-                          gainLoss === 0
+                          realizedGainLoss === 0
                             ? t('sneakers.detail.breakEven')
-                            : t(gainLoss > 0 ? 'sneakers.detail.up' : 'sneakers.detail.down', {
-                                amount: formatCurrency(Math.abs(gainLoss)),
-                              }),
+                            : t(
+                                realizedGainLoss > 0
+                                  ? 'sneakers.detail.up'
+                                  : 'sneakers.detail.down',
+                                {
+                                  amount: formatCurrency(Math.abs(realizedGainLoss)),
+                                },
+                              ),
                         paid: formatCurrency(sneaker.purchasePrice),
                       }}
                       components={{
                         tone: (
                           <span
-                            className={cn(gainLoss > 0 && 'text-gain', gainLoss < 0 && 'text-loss')}
+                            className={cn(
+                              realizedGainLoss > 0 && 'text-gain',
+                              realizedGainLoss < 0 && 'text-loss',
+                            )}
                           />
                         ),
                       }}
@@ -282,18 +332,59 @@ function SneakerDetailPage() {
                   </>
                 ) : null}
               </p>
-            ) : (
-              <p className="text-lg text-muted-foreground">{t('sneakers.detail.noMarketValue')}</p>
-            )}
-            {hasMarketPrice && disclaimer ? (
-              <p className="text-sm text-muted-foreground">{disclaimer}</p>
-            ) : null}
-            {sneaker.pricedAt ? (
-              <p className="text-sm text-muted-foreground">
-                {t('sneakers.detail.priceUpdated', { date: formatDate(sneaker.pricedAt) })}
-              </p>
-            ) : null}
-          </section>
+            </section>
+          ) : (
+            <section aria-label={t('sneakers.detail.marketValueLabel')} className="space-y-2">
+              {hasMarketPrice ? (
+                <p className="font-heading text-3xl leading-[1.15] tracking-tight text-muted-foreground">
+                  <Trans
+                    i18nKey="sneakers.detail.worth"
+                    values={{ value: formatCurrency(sneaker.currentMarketPrice) }}
+                    components={{ strong: <strong className="font-semibold text-foreground" /> }}
+                  />
+                  {gainLoss != null && sneaker.purchasePrice != null ? (
+                    <>
+                      {' '}
+                      <Trans
+                        i18nKey="sneakers.detail.gain"
+                        values={{
+                          change:
+                            gainLoss === 0
+                              ? t('sneakers.detail.breakEven')
+                              : t(gainLoss > 0 ? 'sneakers.detail.up' : 'sneakers.detail.down', {
+                                  amount: formatCurrency(Math.abs(gainLoss)),
+                                }),
+                          paid: formatCurrency(sneaker.purchasePrice),
+                        }}
+                        components={{
+                          tone: (
+                            <span
+                              className={cn(
+                                gainLoss > 0 && 'text-gain',
+                                gainLoss < 0 && 'text-loss',
+                              )}
+                            />
+                          ),
+                        }}
+                      />
+                    </>
+                  ) : null}
+                </p>
+              ) : (
+                <p className="text-lg text-muted-foreground">
+                  {t('sneakers.detail.noMarketValue')}
+                </p>
+              )}
+              {hasMarketPrice && disclaimer ? (
+                <p className="text-sm text-muted-foreground">{disclaimer}</p>
+              ) : null}
+              {sneaker.pricedAt ? (
+                <p className="text-sm text-muted-foreground">
+                  {t('sneakers.detail.priceUpdated', { date: formatDate(sneaker.pricedAt) })}
+                </p>
+              ) : null}
+            </section>
+          )}
 
           <dl className="divide-y divide-border rounded-2xl bg-card ring-1 ring-border">
             {facts.map((fact) => (
@@ -308,6 +399,15 @@ function SneakerDetailPage() {
             <section className="space-y-1">
               <h2 className="font-heading text-lg font-semibold">{t('sneakers.detail.notes')}</h2>
               <p className="whitespace-pre-line text-muted-foreground">{sneaker.notes}</p>
+            </section>
+          ) : null}
+
+          {sneaker.departureNotes ? (
+            <section className="space-y-1">
+              <h2 className="font-heading text-lg font-semibold">
+                {t('sneakers.detail.departureNotes')}
+              </h2>
+              <p className="whitespace-pre-line text-muted-foreground">{sneaker.departureNotes}</p>
             </section>
           ) : null}
 

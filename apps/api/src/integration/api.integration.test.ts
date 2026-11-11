@@ -1234,4 +1234,324 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
       expect(actions).toContain('sneaker.wear_removed');
     });
   });
+
+  describe('retiring pairs', () => {
+    type RetireSneaker = {
+      id: string;
+      departureType: string | null;
+      departedOn: string | null;
+      salePrice: number | null;
+      departureNotes: string | null;
+      realizedGainLoss: number | null;
+      wearCount: number;
+    };
+
+    async function createSneaker(cookie: string, overrides: Record<string, unknown> = {}) {
+      const response = await app.request('/api/sneakers/custom', {
+        method: 'POST',
+        headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand: 'Nike',
+          model: 'Dunk Low',
+          size: 10,
+          condition: 'worn',
+          purchasePrice: 180,
+          ...overrides,
+        }),
+      });
+      const body = (await response.json()) as { sneaker: RetireSneaker };
+      return body.sneaker;
+    }
+
+    function retire(cookie: string, sneakerId: string, body: Record<string, unknown>) {
+      return app.request(`/api/sneakers/${sneakerId}/retire`, {
+        method: 'POST',
+        headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    }
+
+    function restore(cookie: string, sneakerId: string) {
+      return app.request(`/api/sneakers/${sneakerId}/restore`, {
+        method: 'POST',
+        headers: { Cookie: cookie },
+      });
+    }
+
+    async function list(cookie: string, query = '') {
+      const response = await app.request(`/api/sneakers${query}`, { headers: { Cookie: cookie } });
+      const body = (await response.json()) as { sneakers: RetireSneaker[] };
+      return body.sneakers;
+    }
+
+    test('retires a sold pair and reports the realized gain', async () => {
+      const { cookie } = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie);
+
+      const response = await retire(cookie, sneaker.id, {
+        departureType: 'sold',
+        departedOn: '2025-03-01',
+        salePrice: 250,
+        notes: 'Sold on eBay',
+      });
+      const body = (await response.json()) as { sneaker: RetireSneaker };
+
+      expect(response.status).toBe(200);
+      expect(body.sneaker).toMatchObject({
+        departureType: 'sold',
+        departedOn: '2025-03-01',
+        salePrice: 250,
+        departureNotes: 'Sold on eBay',
+        realizedGainLoss: 70,
+      });
+    });
+
+    test('requires a sale price for sold pairs and refuses one for gifted pairs', async () => {
+      const { cookie } = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie);
+
+      const missingPrice = await retire(cookie, sneaker.id, {
+        departureType: 'sold',
+        departedOn: '2025-03-01',
+      });
+      const giftedWithPrice = await retire(cookie, sneaker.id, {
+        departureType: 'gifted',
+        departedOn: '2025-03-01',
+        salePrice: 50,
+      });
+      const donatedWithPrice = await retire(cookie, sneaker.id, {
+        departureType: 'donated',
+        departedOn: '2025-03-01',
+        salePrice: 50,
+      });
+
+      expect(missingPrice.status).toBe(400);
+      expect(giftedWithPrice.status).toBe(400);
+      expect(donatedWithPrice.status).toBe(400);
+      expect((await list(cookie))[0]?.departureType).toBeNull();
+    });
+
+    test('accepts each departure type', async () => {
+      const { cookie } = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+
+      for (const departureType of ['sold', 'donated', 'gifted', 'traded', 'lost', 'other']) {
+        const sneaker = await createSneaker(cookie);
+        const response = await retire(cookie, sneaker.id, {
+          departureType,
+          departedOn: '2025-03-01',
+          ...(departureType === 'sold' || departureType === 'traded' ? { salePrice: 100 } : {}),
+        });
+
+        expect(response.status).toBe(200);
+      }
+    });
+
+    test('lists active pairs by default and retired pairs on request', async () => {
+      const { cookie } = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      const keeper = await createSneaker(cookie, { model: 'Keeper' });
+      const sold = await createSneaker(cookie, { model: 'Sold pair' });
+      const gifted = await createSneaker(cookie, { model: 'Gifted pair' });
+      await retire(cookie, sold.id, {
+        departureType: 'sold',
+        departedOn: '2025-03-01',
+        salePrice: 250,
+      });
+      await retire(cookie, gifted.id, { departureType: 'gifted', departedOn: '2025-04-01' });
+
+      expect((await list(cookie)).map((row) => row.id)).toEqual([keeper.id]);
+      expect(
+        (await list(cookie, '?status=retired&sort=departed_on&order=desc')).map((row) => row.id),
+      ).toEqual([gifted.id, sold.id]);
+      expect(
+        (await list(cookie, '?status=retired&departureType=sold')).map((row) => row.id),
+      ).toEqual([sold.id]);
+      expect((await list(cookie, '?status=all')).map((row) => row.id).sort()).toEqual(
+        [keeper.id, sold.id, gifted.id].sort(),
+      );
+      expect(await list(cookie, '?search=Gifted')).toEqual([]);
+    });
+
+    test('leaves retired pairs out of the collection summary', async () => {
+      const { cookie } = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      await createSneaker(cookie, { purchasePrice: 100 });
+      const sold = await createSneaker(cookie, { purchasePrice: 300 });
+      await retire(cookie, sold.id, {
+        departureType: 'sold',
+        departedOn: '2025-03-01',
+        salePrice: 350,
+      });
+
+      const response = await app.request('/api/stats', { headers: { Cookie: cookie } });
+      const body = (await response.json()) as {
+        stats: { count: number; totalSpend: number };
+      };
+
+      expect(body.stats.count).toBe(1);
+      expect(body.stats.totalSpend).toBe(100);
+    });
+
+    test('refuses new wears on retired pairs and keeps the old ones', async () => {
+      const { cookie } = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie);
+      await app.request(`/api/wears/${sneaker.id}`, {
+        method: 'POST',
+        headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wornOn: '2025-02-01' }),
+      });
+      await retire(cookie, sneaker.id, { departureType: 'gifted', departedOn: '2025-03-01' });
+
+      const wearResponse = await app.request(`/api/wears/${sneaker.id}`, {
+        method: 'POST',
+        headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wornOn: '2025-03-02' }),
+      });
+      const calendarResponse = await app.request('/api/wears?from=2025-02-01&to=2025-03-31', {
+        headers: { Cookie: cookie },
+      });
+      const calendar = (await calendarResponse.json()) as { wears: Array<{ wornOn: string }> };
+      const detailResponse = await app.request(`/api/sneakers/${sneaker.id}`, {
+        headers: { Cookie: cookie },
+      });
+      const detail = (await detailResponse.json()) as { sneaker: RetireSneaker };
+
+      expect(wearResponse.status).toBe(409);
+      expect(calendar.wears.map((wear) => wear.wornOn)).toEqual(['2025-02-01']);
+      expect(detail.sneaker.wearCount).toBe(1);
+    });
+
+    test('restores a retired pair and clears the departure fields', async () => {
+      const { cookie } = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie);
+      await retire(cookie, sneaker.id, {
+        departureType: 'sold',
+        departedOn: '2025-03-01',
+        salePrice: 250,
+        notes: 'Sold on eBay',
+      });
+
+      const response = await restore(cookie, sneaker.id);
+      const body = (await response.json()) as { sneaker: RetireSneaker };
+
+      expect(response.status).toBe(200);
+      expect(body.sneaker).toMatchObject({
+        departureType: null,
+        departedOn: null,
+        salePrice: null,
+        departureNotes: null,
+        realizedGainLoss: null,
+      });
+      expect((await list(cookie)).map((row) => row.id)).toEqual([sneaker.id]);
+    });
+
+    test('returns 409 when retiring a retired pair or restoring an active one', async () => {
+      const { cookie } = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie);
+
+      expect((await restore(cookie, sneaker.id)).status).toBe(409);
+
+      await retire(cookie, sneaker.id, { departureType: 'lost', departedOn: '2025-03-01' });
+
+      expect(
+        (await retire(cookie, sneaker.id, { departureType: 'lost', departedOn: '2025-03-02' }))
+          .status,
+      ).toBe(409);
+    });
+
+    test('does not let users retire or restore another user’s pair', async () => {
+      const owner = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      const other = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(owner.cookie);
+
+      const retireResponse = await retire(other.cookie, sneaker.id, {
+        departureType: 'gifted',
+        departedOn: '2025-03-01',
+      });
+      await retire(owner.cookie, sneaker.id, { departureType: 'gifted', departedOn: '2025-03-01' });
+      const restoreResponse = await restore(other.cookie, sneaker.id);
+
+      expect(retireResponse.status).toBe(404);
+      expect(restoreResponse.status).toBe(404);
+      expect((await list(owner.cookie, '?status=retired')).map((row) => row.id)).toEqual([
+        sneaker.id,
+      ]);
+    });
+
+    test('requires authentication', async () => {
+      const id = '11111111-1111-4111-8111-111111111111';
+      const retireResponse = await app.request(`/api/sneakers/${id}/retire`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ departureType: 'lost', departedOn: '2025-03-01' }),
+      });
+      const restoreResponse = await app.request(`/api/sneakers/${id}/restore`, { method: 'POST' });
+
+      expect(retireResponse.status).toBe(401);
+      expect(restoreResponse.status).toBe(401);
+    });
+
+    test('records audit events without the sale price or notes', async () => {
+      const { cookie } = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie);
+      await retire(cookie, sneaker.id, {
+        departureType: 'sold',
+        departedOn: '2025-03-01',
+        salePrice: 250,
+        notes: 'Private note',
+      });
+      await restore(cookie, sneaker.id);
+
+      const response = await app.request('/api/audit', { headers: { Cookie: cookie } });
+      const body = (await response.json()) as {
+        events: Array<{ action: string; metadata: Record<string, unknown> | null }>;
+      };
+      const retired = body.events.find((event) => event.action === 'sneaker.retired');
+      const restored = body.events.find((event) => event.action === 'sneaker.restored');
+
+      expect(retired?.metadata).toEqual({
+        brand: 'Nike',
+        model: 'Dunk Low',
+        departureType: 'sold',
+      });
+      expect(restored?.metadata).toEqual({ brand: 'Nike', model: 'Dunk Low' });
+      expect(JSON.stringify(body.events)).not.toContain('Private note');
+      expect(JSON.stringify(body.events)).not.toContain('250');
+    });
+
+    test('reports realized gains separately in analytics and drops retired pairs from counts', async () => {
+      const { cookie } = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      await createSneaker(cookie);
+      const sold = await createSneaker(cookie, { model: 'Sold pair', purchasePrice: 200 });
+      await retire(cookie, sold.id, {
+        departureType: 'sold',
+        departedOn: '2025-03-01',
+        salePrice: 260,
+      });
+
+      const response = await app.request('/api/stats/analytics', { headers: { Cookie: cookie } });
+      const body = (await response.json()) as {
+        analytics: {
+          totalPairs: number;
+          realized: { totalGainLoss: number | null; soldCount: number };
+        };
+      };
+
+      expect(body.analytics.totalPairs).toBe(1);
+      expect(body.analytics.realized.soldCount).toBe(1);
+      expect(body.analytics.realized.totalGainLoss).toBe(60);
+    });
+
+    test('still deletes a retired pair permanently', async () => {
+      const { cookie } = await registerTestUser(app, `retire-${crypto.randomUUID()}@example.com`);
+      const sneaker = await createSneaker(cookie);
+      await retire(cookie, sneaker.id, { departureType: 'lost', departedOn: '2025-03-01' });
+
+      const response = await app.request(`/api/sneakers/${sneaker.id}`, {
+        method: 'DELETE',
+        headers: { Cookie: cookie },
+      });
+
+      expect(response.status).toBe(200);
+      expect(await list(cookie, '?status=all')).toEqual([]);
+    });
+  });
 });

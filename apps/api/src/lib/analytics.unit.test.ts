@@ -7,6 +7,7 @@ import {
   buildConditionBreakdown,
   buildMostWorn,
   buildPortfolioValue,
+  buildRealized,
   buildWearsByMonth,
 } from './analytics';
 
@@ -175,5 +176,112 @@ describe('buildAnalytics', () => {
     expect(result.trackedPairs).toBe(1);
     expect(result.totalPairs).toBe(2);
     expect(result.wearsByMonth).toHaveLength(12);
+  });
+});
+
+describe('retired pairs', () => {
+  test('portfolio value keeps a pair up to its departure date and drops it after', () => {
+    const sneakers = [
+      sneaker({ departureType: 'sold', departedOn: '2026-07-08' }),
+      sneaker({ id: 's2', sku: 'SKU-2' }),
+    ];
+    const snapshots = [
+      snapshot('2026-07-01', '100.00'),
+      snapshot('2026-07-08', '110.00'),
+      snapshot('2026-07-15', '120.00'),
+      snapshot('2026-07-01', '200.00', { sku: 'SKU-2' }),
+      snapshot('2026-07-15', '210.00', { sku: 'SKU-2' }),
+    ];
+
+    expect(buildPortfolioValue(sneakers, snapshots)).toEqual([
+      { date: '2026-07-01', value: 300, pairs: 2 },
+      { date: '2026-07-08', value: 310, pairs: 2 },
+      { date: '2026-07-15', value: 210, pairs: 1 },
+    ]);
+  });
+
+  test('buildRealized totals sold pairs and leaves other departures out', () => {
+    const result = buildRealized([
+      sneaker({
+        id: 'a',
+        model: 'Dunk',
+        departureType: 'sold',
+        departedOn: '2026-03-01',
+        salePrice: '250.00',
+        purchasePrice: '180.00',
+      }),
+      sneaker({
+        id: 'b',
+        model: 'Jordan 1',
+        departureType: 'sold',
+        departedOn: '2026-05-01',
+        salePrice: '150.00',
+        purchasePrice: '200.00',
+      }),
+      sneaker({ id: 'c', departureType: 'gifted', departedOn: '2026-06-01' }),
+      sneaker({
+        id: 'd',
+        departureType: 'traded',
+        departedOn: '2026-06-02',
+        salePrice: '90.00',
+        purchasePrice: '60.00',
+      }),
+      sneaker({ id: 'e' }),
+    ]);
+
+    expect(result.soldCount).toBe(2);
+    expect(result.totalGainLoss).toBe(20);
+    expect(result.sales.map((sale) => [sale.name, sale.gainLoss])).toEqual([
+      ['Jordan 1', -50],
+      ['Dunk', 70],
+    ]);
+  });
+
+  test('buildRealized lists a sold pair with no purchase price but skips it in the total', () => {
+    const result = buildRealized([
+      sneaker({ id: 'a', departureType: 'sold', departedOn: '2026-03-01', salePrice: '250.00' }),
+    ]);
+
+    expect(result.soldCount).toBe(1);
+    expect(result.sales[0]).toMatchObject({ purchasePrice: null, gainLoss: null });
+    expect(result.totalGainLoss).toBeNull();
+  });
+
+  test('buildRealized is empty when nothing was sold', () => {
+    expect(buildRealized([sneaker()])).toEqual({ totalGainLoss: null, soldCount: 0, sales: [] });
+  });
+
+  test('buildAnalytics counts only active pairs outside the value history and realized figures', () => {
+    const analytics = buildAnalytics({
+      sneakers: [
+        sneaker({ id: 'a', brand: 'Nike' }),
+        sneaker({
+          id: 'b',
+          brand: 'Adidas',
+          sku: 'SKU-2',
+          departureType: 'sold',
+          departedOn: '2026-07-08',
+          salePrice: '300.00',
+          purchasePrice: '250.00',
+        }),
+      ],
+      snapshots: [
+        snapshot('2026-07-01', '100.00'),
+        snapshot('2026-07-01', '280.00', { sku: 'SKU-2' }),
+      ],
+      wears: [
+        { sneakerId: 'a', wornOn: '2026-07-02' },
+        { sneakerId: 'b', wornOn: '2026-07-03' },
+      ],
+      now: new Date('2026-07-10T00:00:00Z'),
+    });
+
+    expect(analytics.totalPairs).toBe(1);
+    expect(analytics.trackedPairs).toBe(1);
+    expect(analytics.brands).toEqual([{ label: 'Nike', count: 1 }]);
+    expect(analytics.mostWorn.map((entry) => entry.sneakerId)).toEqual(['a']);
+    expect(analytics.portfolioValue).toEqual([{ date: '2026-07-01', value: 380, pairs: 2 }]);
+    expect(analytics.wearsByMonth.at(-1)).toEqual({ month: '2026-07', count: 2 });
+    expect(analytics.realized.totalGainLoss).toBe(50);
   });
 });

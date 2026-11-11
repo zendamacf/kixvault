@@ -35,7 +35,8 @@
     "brand": "Brand",
     "model": "Model",
     "colorway": "Colorway",
-    "priority": "Priority"
+    "priority": "Priority",
+    "backToHistory": "Back to history"
   },
   "verifyEmail": {
     "verifyingTitle": "Confirming your email",
@@ -94,7 +95,8 @@
       "grails": "Grails",
       "wears": "Wears",
       "analytics": "Analytics",
-      "activity": "Activity"
+      "activity": "Activity",
+      "history": "History"
     },
     "footer": {
       "github": "{{appName}} on GitHub",
@@ -163,7 +165,9 @@
     "createSneaker": "Failed to create sneaker",
     "updateSneaker": "Failed to update sneaker",
     "deleteSneaker": "Failed to delete sneaker",
-    "updateCondition": "Failed to update condition"
+    "updateCondition": "Failed to update condition",
+    "retireSneaker": "Failed to retire pair",
+    "restoreSneaker": "Failed to restore pair"
   },
   "condition": {
     "deadstock": "Deadstock",
@@ -191,7 +195,9 @@
       "sneaker_updated": "Updated a pair",
       "sneaker_deleted": "Removed a pair",
       "sneaker_worn": "Logged a wear",
-      "sneaker_wear_removed": "Removed a wear"
+      "sneaker_wear_removed": "Removed a wear",
+      "sneaker_retired": "Retired a pair",
+      "sneaker_restored": "Restored a pair"
     },
     "grailsRemoved_one": "Removed from Grails",
     "grailsRemoved_other": "Removed {{count}} grails from your list"
@@ -319,6 +325,22 @@
       "title": "By condition",
       "description": "How worn your pairs are.",
       "empty": "Add sneakers to see their condition."
+    },
+    "realized": {
+      "title": "Realized gains",
+      "description": "What you made on pairs you sold. Unrealized value stays in the chart above.",
+      "empty": "Sell a pair and its realized gain or loss appears here.",
+      "up": "Up {{amount}}",
+      "down": "Down {{amount}}",
+      "breakEven": "Break-even",
+      "total_one": "<tone>{{change}}</tone> from <strong>{{count}}</strong> sold pair.",
+      "total_other": "<tone>{{change}}</tone> from <strong>{{count}}</strong> sold pairs.",
+      "totalUnknown_one": "<strong>{{count}}</strong> sold pair, with no purchase price to compare.",
+      "totalUnknown_other": "<strong>{{count}}</strong> sold pairs, with no purchase price to compare.",
+      "listLabel": "Sold pairs",
+      "rowDetail": "Sold {{date}} for {{sold}}, paid {{paid}}",
+      "rowDetailNoCost": "Sold {{date}} for {{sold}}",
+      "noCost": "Paid price unknown"
     }
   },
   "wearsPage": {
@@ -352,8 +374,8 @@
       "noColorway": "No colorway listed",
       "viewOn": "View on {{source}}",
       "woreToday": "Wore today",
-      "deleteTitle": "Delete this pair?",
-      "deleteDescription": "This will permanently remove it from your collection. This action cannot be undone.",
+      "deleteTitle": "Delete this pair permanently?",
+      "deleteDescription": "This erases the pair, its wears, and its price record. It cannot be undone. Retire it instead to keep them.",
       "marketValueLabel": "Market value",
       "worth": "Worth <strong>{{value}}</strong> today.",
       "gain": "<tone>{{change}}</tone> on the {{paid}} you paid.",
@@ -378,7 +400,21 @@
       "wornTimesLast_other": "{{count}} times, last {{date}}",
       "notes": "Notes",
       "about": "About this pair",
-      "priceHistory": "Price history"
+      "priceHistory": "Price history",
+      "removeFromVault": "Remove from vault",
+      "restore": "Restore",
+      "deleteConfirm": "Delete permanently",
+      "departureNotes": "Departure notes",
+      "departed": {
+        "sold": "Sold on {{date}} for <strong>{{price}}</strong>.",
+        "traded": "Traded on {{date}}.",
+        "tradedValued": "Traded on {{date}}, valued at <strong>{{price}}</strong>.",
+        "donated": "Donated on {{date}}.",
+        "gifted": "Gifted on {{date}}.",
+        "lost": "Lost on {{date}}.",
+        "other": "Left the vault on {{date}}."
+      },
+      "departureLabel": "Departure"
     },
     "notFound": "Sneaker not found"
   },
@@ -488,6 +524,82 @@
       "low": "Low",
       "medium": "Medium",
       "high": "High"
+    }
+  },
+  "departure": {
+    "types": {
+      "sold": "Sold",
+      "donated": "Donated",
+      "gifted": "Gifted",
+      "traded": "Traded",
+      "lost": "Lost",
+      "other": "Other"
+    }
+  },
+  "removeDialog": {
+    "title": "Remove from vault",
+    "description": "Choose how {{name}} leaves your collection.",
+    "retireTitle": "Retire",
+    "retireDescription": "Keep its wears, images, and value history. The pair moves to History.",
+    "deleteTitle": "Delete",
+    "deleteDescription": "Erase the pair and everything attached to it. Use this for typos and duplicates.",
+    "permanent": "Permanent",
+    "confirmTitle": "Delete this pair permanently?",
+    "confirmDescription": "This erases {{name}}, its wears, and its price record. It cannot be undone. Retire it instead to keep them.",
+    "confirmAction": "Delete permanently",
+    "back": "Back"
+  },
+  "retire": {
+    "title": "Retire this pair",
+    "description": "{{name}} leaves your collection and moves to History.",
+    "typeLegend": "What happened to it?",
+    "dateLabel": "Date",
+    "salePriceSold": "Sale price",
+    "salePriceTraded": "Trade value (optional)",
+    "notesLabel": "Notes (optional)",
+    "notesPlaceholder": "Who has them now, or where they went",
+    "submit": "Retire pair",
+    "submitting": "Retiring…",
+    "back": "Back",
+    "errors": {
+      "date": "Pick the date it left the vault.",
+      "dateFuture": "The date cannot be in the future.",
+      "salePrice": "Enter the sale price.",
+      "salePriceInvalid": "Enter a price of 0 or more."
+    },
+    "toast": {
+      "retired": "Retired {{label}}.",
+      "undo": "Undo",
+      "restored": "Restored {{label}} to your vault."
+    }
+  },
+  "history": {
+    "pageTitle": "History",
+    "summaryLabel": "History summary",
+    "pairs_one": "<figure>{{count}}</figure> pair has left the vault",
+    "pairs_other": "<figure>{{count}}</figure> pairs have left the vault",
+    "soldFor": ", <figure>{{count}}</figure> sold for <figure>{{value}}</figure>.",
+    "noSales": ".",
+    "realizedUp": "Up <strong>{{amount}}</strong> on what you paid.",
+    "realizedDown": "Down <strong>{{amount}}</strong> on what you paid.",
+    "realizedEven": "Break-even on what you paid.",
+    "tagline": "Pairs you sell, give away, or lose are kept here with their history.",
+    "listLabel": "Retired pairs",
+    "filterLegend": "Filter by how the pair left",
+    "allTypes": "All",
+    "departedOn": "{{type}} {{date}}",
+    "tradeValue": "{{value}} value",
+    "restore": "Restore",
+    "restoring": "Restoring…",
+    "restoreLabel": "Restore {{name}}",
+    "empty": {
+      "title": "No history yet",
+      "description": "When a pair leaves the vault, retire it to keep a record of where it went.",
+      "action": "Go to your collection"
+    },
+    "noMatches": {
+      "title": "No pairs left that way",
+      "description": "Try another type, or reset the filter."
     }
   }
 }

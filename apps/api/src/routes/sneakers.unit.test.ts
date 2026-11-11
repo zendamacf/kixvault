@@ -207,4 +207,48 @@ describe('sneaker routes', () => {
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({ error: 'Invalid sneaker id' });
   });
+
+  test('POST /:id/retire returns 400 for invalid ids', async () => {
+    const response = await sneakerRoutes.request('/not-a-uuid/retire', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ departureType: 'gifted', departedOn: '2025-03-01' }),
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: 'Invalid sneaker id' });
+  });
+
+  test('POST /:id/retire returns 400 when a sold pair has no sale price', async () => {
+    const response = await sneakerRoutes.request('/11111111-1111-4111-8111-111111111111/retire', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ departureType: 'sold', departedOn: '2025-03-01' }),
+    });
+
+    expect(response.status).toBe(400);
+  });
+
+  test('POST /:id/retire returns 400 when a gifted pair has a sale price', async () => {
+    const response = await sneakerRoutes.request('/11111111-1111-4111-8111-111111111111/retire', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ departureType: 'gifted', departedOn: '2025-03-01', salePrice: 50 }),
+    });
+
+    expect(response.status).toBe(400);
+  });
+
+  test('POST /:id/restore returns 400 for invalid ids', async () => {
+    const response = await sneakerRoutes.request('/not-a-uuid/restore', { method: 'POST' });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: 'Invalid sneaker id' });
+  });
+
+  test('GET / rejects an unknown status', async () => {
+    const response = await sneakerRoutes.request('/?status=archived');
+
+    expect(response.status).toBe(400);
+  });
 });

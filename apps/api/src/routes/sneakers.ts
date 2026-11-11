@@ -4,9 +4,10 @@ import {
   createSneakerFromCatalogSchema,
   createSneakerSchema,
   listSneakersQuerySchema,
+  retireSneakerSchema,
   updateSneakerSchema,
 } from '@kixvault/shared';
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull, isNull } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import {
@@ -28,11 +29,15 @@ import {
 import { replaceSneakerGallery360Images } from '../lib/sneaker-gallery-360-images';
 import { getPrimaryImagesForSneakerIds, replaceSneakerPrimaryImage } from '../lib/sneaker-images';
 import {
+  buildRestoreUpdate,
+  buildRetireUpdate,
   buildSneakerSearchCondition,
   buildSneakerUpdate,
+  buildStatusCondition,
   formatSneakersWithPricing,
   formatSneakerWithPricing,
   getCatalogLinkedModelFieldViolations,
+  isRetired,
   parsePurchaseDate,
   parseSneakerId,
 } from '../lib/sneakers';
@@ -60,11 +65,22 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       filters.push(eq(sneakers.condition, query.condition));
     }
 
+    const statusCondition = buildStatusCondition(query.status);
+
+    if (statusCondition) {
+      filters.push(statusCondition);
+    }
+
+    if (query.departureType) {
+      filters.push(eq(sneakers.departureType, query.departureType));
+    }
+
     const sortColumn = {
       created_at: sneakers.createdAt,
       purchase_date: sneakers.purchaseDate,
       purchase_price: sneakers.purchasePrice,
       brand: sneakers.brand,
+      departed_on: sneakers.departedOn,
     }[query.sort];
 
     const orderBy = query.order === 'asc' ? asc(sortColumn) : desc(sortColumn);
@@ -332,6 +348,105 @@ export const sneakerRoutes = new Hono<ApiEnv>()
     await recordAuditEvent({
       userId: user?.id ?? '',
       action: 'sneaker.updated',
+      resourceType: 'sneaker',
+      resourceId: row.id,
+      metadata: formatSneakerAuditMetadata(row),
+      ip: getRequestClientIp(c),
+    });
+
+    return c.json({ sneaker: await formatSneakerWithPricing(row) });
+  })
+  .post('/:id/retire', zValidator('json', retireSneakerSchema), async (c) => {
+    const user = c.get('user');
+    const id = parseSneakerId(c.req.param('id'));
+    const input = c.req.valid('json');
+
+    if (!id) {
+      return c.json({ error: 'Invalid sneaker id' }, 400);
+    }
+
+    const [existing] = await db
+      .select()
+      .from(sneakers)
+      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? '')));
+
+    if (!existing) {
+      return c.json({ error: 'Sneaker not found' }, 404);
+    }
+
+    if (isRetired(existing)) {
+      return c.json({ error: 'Sneaker is already retired' }, 409);
+    }
+
+    // The null check keeps two quick retire requests from both succeeding.
+    const [row] = await db
+      .update(sneakers)
+      .set(buildRetireUpdate(input))
+      .where(
+        and(
+          eq(sneakers.id, id),
+          eq(sneakers.userId, user?.id ?? ''),
+          isNull(sneakers.departureType),
+        ),
+      )
+      .returning();
+
+    if (!row) {
+      return c.json({ error: 'Sneaker is already retired' }, 409);
+    }
+
+    // The sale price and notes stay out of the audit log on purpose.
+    await recordAuditEvent({
+      userId: user?.id ?? '',
+      action: 'sneaker.retired',
+      resourceType: 'sneaker',
+      resourceId: row.id,
+      metadata: { ...formatSneakerAuditMetadata(row), departureType: input.departureType },
+      ip: getRequestClientIp(c),
+    });
+
+    return c.json({ sneaker: await formatSneakerWithPricing(row) });
+  })
+  .post('/:id/restore', async (c) => {
+    const user = c.get('user');
+    const id = parseSneakerId(c.req.param('id'));
+
+    if (!id) {
+      return c.json({ error: 'Invalid sneaker id' }, 400);
+    }
+
+    const [existing] = await db
+      .select()
+      .from(sneakers)
+      .where(and(eq(sneakers.id, id), eq(sneakers.userId, user?.id ?? '')));
+
+    if (!existing) {
+      return c.json({ error: 'Sneaker not found' }, 404);
+    }
+
+    if (!isRetired(existing)) {
+      return c.json({ error: 'Sneaker is not retired' }, 409);
+    }
+
+    const [row] = await db
+      .update(sneakers)
+      .set(buildRestoreUpdate())
+      .where(
+        and(
+          eq(sneakers.id, id),
+          eq(sneakers.userId, user?.id ?? ''),
+          isNotNull(sneakers.departureType),
+        ),
+      )
+      .returning();
+
+    if (!row) {
+      return c.json({ error: 'Sneaker is not retired' }, 409);
+    }
+
+    await recordAuditEvent({
+      userId: user?.id ?? '',
+      action: 'sneaker.restored',
       resourceType: 'sneaker',
       resourceId: row.id,
       metadata: formatSneakerAuditMetadata(row),

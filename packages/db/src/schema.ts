@@ -22,6 +22,11 @@ export type SneakerCondition = (typeof sneakerConditions)[number];
 
 export const sneakerConditionEnum = pgEnum('sneaker_condition', sneakerConditions);
 
+export const departureTypes = ['sold', 'donated', 'gifted', 'traded', 'lost', 'other'] as const;
+export type DepartureType = (typeof departureTypes)[number];
+
+export const departureTypeEnum = pgEnum('departure_type', departureTypes);
+
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
@@ -92,6 +97,12 @@ export const sneakers = pgTable(
     nickname: text('nickname'),
     releaseDate: date('release_date', { mode: 'date' }),
     description: text('description'),
+    /** Set when the pair left the vault. Null means the pair is still in the collection. */
+    departureType: departureTypeEnum('departure_type'),
+    departedOn: date('departed_on', { mode: 'date' }),
+    /** Only for sold and traded pairs. */
+    salePrice: numeric('sale_price', { precision: 10, scale: 2 }),
+    departureNotes: text('departure_notes'),
     searchVector: tsvector('search_vector')
       .notNull()
       .generatedAlwaysAs(
@@ -115,6 +126,7 @@ export const sneakers = pgTable(
   (table) => [
     index('sneakers_search_vector_idx').using('gin', table.searchVector),
     unique('sneakers_primary_image_id_unique').on(table.primaryImageId),
+    index('sneakers_user_id_departure_type_idx').on(table.userId, table.departureType),
   ],
 );
 

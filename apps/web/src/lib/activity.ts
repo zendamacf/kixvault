@@ -28,6 +28,15 @@ export function formatEventDetail(event: AuditEvent): { pair: string | null; not
     };
   }
 
+  if (event.action === 'sneaker.retired') {
+    const departureType = event.metadata?.departureType;
+
+    return {
+      pair,
+      note: typeof departureType === 'string' ? i18n.t(`departure.types.${departureType}`) : null,
+    };
+  }
+
   return { pair, note: null };
 }
 
