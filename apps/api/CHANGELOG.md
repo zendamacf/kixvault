@@ -1,5 +1,11 @@
 # @kixvault/api
 
+## 0.4.0
+
+### Minor Changes
+
+- 8e25f62: Add a `/health` endpoint for monitoring. It returns status 200 and the text "ok".
+
 ## 0.3.0
 
 ### Minor Changes
