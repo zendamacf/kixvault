@@ -1,5 +1,12 @@
 # @kixvault/shared
 
+## 0.3.0
+
+### Minor Changes
+
+- 707b41e: Add cost per wear to the analytics schema.
+- f1ccdeb: Add the retire schema and the departure types. A sold pair must have a sale price. Gifted and donated pairs cannot have one. Add the `status` and `departureType` options to the sneaker list query. Add the realized gain to the analytics schema. Add the audit actions `sneaker.retired` and `sneaker.restored`.
+
 ## 0.2.0
 
 ### Minor Changes

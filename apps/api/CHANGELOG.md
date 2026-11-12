@@ -1,5 +1,22 @@
 # @kixvault/api
 
+## 0.5.0
+
+### Minor Changes
+
+- 707b41e: Add cost per wear to sneakers and analytics.
+- f1ccdeb: Add `POST /api/sneakers/:id/retire` and `POST /api/sneakers/:id/restore`. The sneaker list returns active pairs by default. Use `status=retired` or `status=all` to see retired pairs. Retired pairs cannot get new wears. They are not in the collection summary or the analytics counts. The collection value chart stops counting a pair after its departure date. Analytics now show the realized gain or loss of sold pairs.
+
+### Patch Changes
+
+- 02e6eb9: Make the API Docker image smaller. Use the Alpine base image. Install only production dependencies. Run migrations with a script instead of drizzle-kit.
+- Updated dependencies [707b41e]
+- Updated dependencies [f1ccdeb]
+- Updated dependencies [f1ccdeb]
+- Updated dependencies [02e6eb9]
+  - @kixvault/shared@0.3.0
+  - @kixvault/db@0.4.0
+
 ## 0.4.0
 
 ### Minor Changes
