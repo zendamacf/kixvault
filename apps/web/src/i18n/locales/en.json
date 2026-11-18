@@ -262,12 +262,27 @@
     "searchLabel": "Search your collection",
     "searchPlaceholder": "Search brand, model, colorway, SKU",
     "conditionLegend": "Condition",
-    "allConditions": "All",
+    "allConditions": "All conditions",
     "reset": "Reset",
     "exportCsv": "Export CSV",
     "exporting": "Exporting…",
     "exportFailed": "Could not export your collection. Try again in a moment.",
     "sortLabel": "Sort pairs",
+    "view": {
+      "label": "View",
+      "grid": "Grid",
+      "list": "List"
+    },
+    "table": {
+      "pair": "Pair",
+      "size": "Size",
+      "condition": "Condition",
+      "paid": "Paid",
+      "value": "Value",
+      "gain": "Gain",
+      "wears": "Wears",
+      "added": "Added"
+    },
     "pairCount_one": "{{count}} pair",
     "pairCount_other": "{{count}} pairs",
     "sort": {
@@ -371,7 +386,9 @@
     "ratesUpdated": "Exchange rates updated {{date}}.",
     "ratesUnavailable": "Exchange rates are not available yet, so only US dollars can be used.",
     "saved": "Currency updated.",
-    "saveError": "Could not update your currency."
+    "saveError": "Could not update your currency.",
+    "exportTitle": "Export your collection",
+    "exportDescription": "Download the pairs in your vault as a CSV file you can open in a spreadsheet."
   },
   "activityPage": {
     "back": "Back to collection",

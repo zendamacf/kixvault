@@ -1,9 +1,12 @@
 import { ToggleGroup } from 'radix-ui';
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 type SegmentedControlOption<T extends string> = {
   value: T;
   label: string;
+  /** Shown instead of the label, which then only names the option for assistive tech. */
+  icon?: ReactNode;
 };
 
 type SegmentedControlProps<T extends string> = {
@@ -42,9 +45,14 @@ export function SegmentedControl<T extends string>({
         <ToggleGroup.Item
           key={option.value}
           value={option.value}
-          className="h-9 flex-1 rounded-full px-4 text-sm font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 data-[state=on]:bg-foreground data-[state=on]:text-background sm:flex-none"
+          aria-label={option.icon ? option.label : undefined}
+          title={option.icon ? option.label : undefined}
+          className={cn(
+            'h-9 flex-1 rounded-full text-sm font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 data-[state=on]:bg-foreground data-[state=on]:text-background sm:flex-none',
+            option.icon ? 'flex items-center justify-center px-3' : 'px-4',
+          )}
         >
-          {option.label}
+          {option.icon ?? option.label}
         </ToggleGroup.Item>
       ))}
     </ToggleGroup.Root>

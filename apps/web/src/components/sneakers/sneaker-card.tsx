@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { SneakerThumbnail } from '@/components/sneakers/sneaker-thumbnail';
 import type { Sneaker } from '@/lib/queries';
-import { cn, formatCondition, formatCurrency, formatDate, formatGainLoss } from '@/lib/utils';
+import { cn, formatCurrency, formatDate, formatGainLoss } from '@/lib/utils';
 
 type SneakerCardProps = {
   sneaker: Sneaker;
@@ -17,14 +17,20 @@ export function SneakerCard({ sneaker, sortField }: SneakerCardProps) {
   const subtitle = sneaker.nickname
     ? `"${sneaker.nickname}"`
     : sneaker.colorway || t('common.noColorway');
-  // One secondary detail beside the price paid: the sorted-by date, else the wear count.
+  const hasMarketPrice = sneaker.currentMarketPrice != null;
+  const paid = t('sneakerCard.paid', { value: formatCurrency(sneaker.purchasePrice) });
+  // One secondary detail on the right: the value the list is sorted by, else the wear count.
+  // Without a market price "Paid" already fills the left side, so it is not repeated.
   const extra =
     sortField === 'created_at'
       ? t('sneakerCard.added', { date: formatDate(sneaker.createdAt) })
-      : sneaker.wearCount > 0 || sortField === 'wear_count'
-        ? t('common.wearCount', { count: sneaker.wearCount })
-        : null;
-  const hasMarketPrice = sneaker.currentMarketPrice != null;
+      : sortField === 'purchase_price'
+        ? hasMarketPrice
+          ? paid
+          : null
+        : sneaker.wearCount > 0 || sortField === 'wear_count'
+          ? t('common.wearCount', { count: sneaker.wearCount })
+          : null;
 
   return (
     <Link
@@ -32,54 +38,42 @@ export function SneakerCard({ sneaker, sortField }: SneakerCardProps) {
       params={{ sneakerId: sneaker.id }}
       className="group block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
     >
-      <div className="relative rounded-2xl bg-card ring-1 ring-border transition-shadow group-hover:ring-2 group-hover:ring-foreground/25">
+      <div className="rounded-2xl bg-card ring-1 ring-border transition-shadow group-hover:ring-2 group-hover:ring-foreground/25">
         <SneakerThumbnail
           imageUrl={sneaker.primaryImage?.url ?? null}
           alt={title}
           className="aspect-[5/4] w-full rounded-none p-5"
         />
-        <span className="absolute top-3 left-3 rounded-full bg-background/85 px-2.5 py-1 text-xs font-medium text-foreground backdrop-blur-sm">
-          {formatCondition(sneaker.condition)}
-        </span>
-        <span className="absolute top-3 right-3 rounded-full bg-background/85 px-2.5 py-1 text-xs font-medium text-foreground backdrop-blur-sm">
-          {t('common.size', { size: sneaker.size })}
-        </span>
       </div>
 
       <div className="mt-3 space-y-0.5 px-1">
-        <h2 className="line-clamp-2 font-heading text-base leading-snug font-semibold">
+        <h2 className="truncate font-heading text-base leading-snug font-semibold">
           <span className="font-normal text-muted-foreground">{sneaker.brand}</span> {sneaker.model}
         </h2>
         <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
-        {hasMarketPrice ? (
-          <p className="flex items-baseline gap-2 pt-2">
-            <span className="font-heading text-xl leading-none font-semibold tracking-tight">
-              {formatCurrency(sneaker.currentMarketPrice)}
-            </span>
-            {sneaker.gainLoss != null ? (
-              <span
-                className={cn(
-                  'text-sm font-medium',
-                  sneaker.gainLoss > 0 && 'text-gain',
-                  sneaker.gainLoss < 0 && 'text-loss',
-                  sneaker.gainLoss === 0 && 'text-muted-foreground',
-                )}
-              >
-                {formatGainLoss(sneaker.gainLoss)}
+        <div className="flex items-baseline justify-between gap-3 pt-2 whitespace-nowrap">
+          {hasMarketPrice ? (
+            <p className="flex items-baseline gap-2">
+              <span className="font-heading text-xl leading-none font-semibold tracking-tight">
+                {formatCurrency(sneaker.currentMarketPrice)}
               </span>
-            ) : null}
-          </p>
-        ) : null}
-        <div
-          className={cn(
-            'flex items-baseline justify-between gap-3 text-sm whitespace-nowrap text-muted-foreground',
-            hasMarketPrice ? 'pt-1' : 'pt-2',
+              {sneaker.gainLoss != null ? (
+                <span
+                  className={cn(
+                    'text-sm font-medium',
+                    sneaker.gainLoss > 0 && 'text-gain',
+                    sneaker.gainLoss < 0 && 'text-loss',
+                    sneaker.gainLoss === 0 && 'text-muted-foreground',
+                  )}
+                >
+                  {formatGainLoss(sneaker.gainLoss)}
+                </span>
+              ) : null}
+            </p>
+          ) : (
+            <p className="text-sm font-medium">{paid}</p>
           )}
-        >
-          <p className={cn(!hasMarketPrice && 'font-medium text-foreground')}>
-            {t('sneakerCard.paid', { value: formatCurrency(sneaker.purchasePrice) })}
-          </p>
-          {extra ? <p>{extra}</p> : null}
+          {extra ? <p className="text-sm font-medium">{extra}</p> : null}
         </div>
       </div>
     </Link>
