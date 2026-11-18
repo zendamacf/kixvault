@@ -30,12 +30,12 @@ const DEFAULT_SORT = 'created_at:desc';
 const SORT_OPTIONS = [
   'created_at:desc',
   'created_at:asc',
-  'purchase_date:desc',
-  'purchase_date:asc',
   'purchase_price:desc',
   'purchase_price:asc',
   'brand:asc',
   'brand:desc',
+  'wear_count:desc',
+  'wear_count:asc',
 ] as const;
 
 type SneakerConditionFilter = SneakerCondition | '';
@@ -194,7 +194,7 @@ function CollectionPage() {
           <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
             {sneakers.map((sneaker) => (
               <li key={sneaker.id}>
-                <SneakerCard sneaker={sneaker} />
+                <SneakerCard sneaker={sneaker} sortField={sortKey.split(':')[0]} />
               </li>
             ))}
           </ul>

@@ -106,7 +106,7 @@ export const listSneakersQuerySchema = z.object({
   status: z.enum(sneakerStatuses).default('active'),
   departureType: z.enum(departureTypes).optional(),
   sort: z
-    .enum(['created_at', 'purchase_date', 'purchase_price', 'brand', 'departed_on'])
+    .enum(['created_at', 'purchase_date', 'purchase_price', 'brand', 'departed_on', 'wear_count'])
     .default('created_at'),
   order: z.enum(['asc', 'desc']).default('desc'),
 });
