@@ -2,4 +2,6 @@
 "@kixvault/api": minor
 ---
 
-Add one `jobs` entrypoint that runs the scheduler and the image worker in one container. Use `apps/api/dist/jobs/run-jobs.js` in place of the `scheduler` and `image-worker` containers. The old entrypoints still work, but they are deprecated.
+Add one `jobs` container that runs the scheduler and the image worker. Use the `apps/api/dist/jobs/run-jobs.js` entrypoint.
+
+Breaking: the `run-scheduler.js` and `run-image-worker.js` entrypoints are removed. Replace the `scheduler` and `image-worker` services with one `jobs` service. See `docs/deployment.md`.
