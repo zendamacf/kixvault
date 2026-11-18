@@ -51,9 +51,9 @@ export function SneakerCard({ sneaker, sortField }: SneakerCardProps) {
           <span className="font-normal text-muted-foreground">{sneaker.brand}</span> {sneaker.model}
         </h2>
         <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
-        <div className="flex items-baseline justify-between gap-3 pt-2 whitespace-nowrap">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 pt-2">
           {hasMarketPrice ? (
-            <p className="flex items-baseline gap-2">
+            <p className="flex items-baseline gap-2 whitespace-nowrap">
               <span className="font-heading text-xl leading-none font-semibold tracking-tight">
                 {formatCurrency(sneaker.currentMarketPrice)}
               </span>
@@ -71,9 +71,9 @@ export function SneakerCard({ sneaker, sortField }: SneakerCardProps) {
               ) : null}
             </p>
           ) : (
-            <p className="text-sm font-medium">{paid}</p>
+            <p className="text-sm font-medium whitespace-nowrap">{paid}</p>
           )}
-          {extra ? <p className="text-sm font-medium">{extra}</p> : null}
+          {extra ? <p className="min-w-0 truncate text-sm font-medium">{extra}</p> : null}
         </div>
       </div>
     </Link>

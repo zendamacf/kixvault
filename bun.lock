@@ -12,7 +12,7 @@
     },
     "apps/api": {
       "name": "@kixvault/api",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "dependencies": {
         "@hono/zod-validator": "^0.9.1",
         "@kicksdb/sdk": "^1.0.13",
@@ -38,7 +38,7 @@
     },
     "apps/web": {
       "name": "@kixvault/web",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@fontsource-variable/bricolage-grotesque": "^5.3.0",
         "@fontsource-variable/geist": "^5.3.0",
@@ -85,7 +85,7 @@
     },
     "packages/db": {
       "name": "@kixvault/db",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "dependencies": {
         "drizzle-orm": "^0.45.3",
         "postgres": "^3.4.7",
@@ -97,7 +97,7 @@
     },
     "packages/shared": {
       "name": "@kixvault/shared",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "zod": "^4.6.1",
       },
