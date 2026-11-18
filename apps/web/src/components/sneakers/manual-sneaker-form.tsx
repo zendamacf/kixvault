@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { i18n } from '@/i18n';
+import { inputAmountToUsd, usdToInputAmount } from '@/lib/currency';
 
 const manualSneakerFormSchema = createSneakerSchema.extend({
   size: z
@@ -64,7 +65,10 @@ export function ManualSneakerForm({
       purchaseDate: '',
       notes: '',
       ...defaultValues,
-      purchasePrice: defaultValues?.purchasePrice ?? undefined,
+      purchasePrice:
+        defaultValues?.purchasePrice != null
+          ? usdToInputAmount(defaultValues.purchasePrice)
+          : undefined,
       nickname: defaultValues?.nickname ?? '',
     },
   });
@@ -80,7 +84,10 @@ export function ManualSneakerForm({
           nickname: values.nickname?.trim() || null,
           size: values.size,
           condition: values.condition,
-          purchasePrice: values.purchasePrice ?? null,
+          purchasePrice:
+            values.purchasePrice != null
+              ? inputAmountToUsd(values.purchasePrice, defaultValues?.purchasePrice)
+              : null,
           purchaseDate: values.purchaseDate || null,
           notes: values.notes || null,
           sku: null,

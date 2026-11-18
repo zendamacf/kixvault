@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { SneakerCollectionFields } from '@/components/sneakers/sneaker-collection-fields';
 import { Button } from '@/components/ui/button';
 import { i18n } from '@/i18n';
+import { inputAmountToUsd } from '@/lib/currency';
 
 const formSchema = moveWishlistToCollectionSchema.omit({ size: true }).extend({
   size: z
@@ -66,7 +67,8 @@ export function MoveToCollectionForm({
         await onSubmit({
           size: values.size,
           condition: values.condition,
-          purchasePrice: values.purchasePrice ?? null,
+          purchasePrice:
+            values.purchasePrice != null ? inputAmountToUsd(values.purchasePrice) : null,
           purchaseDate: values.purchaseDate || null,
           notes: values.notes || null,
         });

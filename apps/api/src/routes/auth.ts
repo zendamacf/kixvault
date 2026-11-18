@@ -267,6 +267,7 @@ export const authRoutes = new Hono<ApiEnv>()
       user: {
         id: user.id,
         email: user.email,
+        currency: user.currency,
       },
     });
   });

@@ -9,10 +9,13 @@ afterEach(() => {
 });
 
 describe('redaction', () => {
-  it.each(['RESEND_API_KEY', 'KICKSDB_API_KEY', 'SENTRY_AUTH_TOKEN'])('redacts %s', (name) => {
-    process.env[name] = 'super-secret-value-123';
-    expect(redactSecrets('oops super-secret-value-123 here')).toBe('oops [REDACTED] here');
-  });
+  it.each(['RESEND_API_KEY', 'KICKSDB_API_KEY', 'SENTRY_AUTH_TOKEN', 'OPENEXCHANGERATES_APP_ID'])(
+    'redacts %s',
+    (name) => {
+      process.env[name] = 'super-secret-value-123';
+      expect(redactSecrets('oops super-secret-value-123 here')).toBe('oops [REDACTED] here');
+    },
+  );
 
   it('redacts DATABASE_URL and its password on their own', () => {
     process.env.DATABASE_URL = 'postgresql://kix:hunter2hunter2@db:5432/kix';

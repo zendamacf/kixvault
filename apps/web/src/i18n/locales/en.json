@@ -96,7 +96,8 @@
       "wears": "Wears",
       "analytics": "Analytics",
       "activity": "Activity",
-      "history": "History"
+      "history": "History",
+      "settings": "Settings"
     },
     "footer": {
       "github": "{{appName}} on GitHub",
@@ -139,6 +140,7 @@
   "errors": {
     "logIn": "Failed to log in",
     "logOut": "Failed to log out",
+    "loadExchangeRates": "Failed to load exchange rates",
     "createAccount": "Failed to create account",
     "catalogSearch": "Catalog search failed",
     "loadCatalogProduct": "Failed to load catalog product",
@@ -355,6 +357,18 @@
     "title": "Wear calendar",
     "description": "Every pair you have worn, day by day."
   },
+  "settingsPage": {
+    "back": "Back to collection",
+    "title": "Settings",
+    "description": "Preferences for your account.",
+    "currencyTitle": "Currency",
+    "currencyDescription": "Prices are shown and entered in this currency. Your data is stored in US dollars and converted using daily exchange rates.",
+    "currencyLabel": "Display currency",
+    "ratesUpdated": "Exchange rates updated {{date}}.",
+    "ratesUnavailable": "Exchange rates are not available yet, so only US dollars can be used.",
+    "saved": "Currency updated.",
+    "saveError": "Could not update your currency."
+  },
   "activityPage": {
     "back": "Back to collection",
     "title": "Activity",
@@ -470,6 +484,7 @@
     "sizePlaceholder": "10",
     "condition": "Condition",
     "purchasePrice": "Purchase price",
+    "purchasePriceIn": "Purchase price ({{currency}})",
     "purchasePricePlaceholder": "180",
     "purchaseDate": "Purchase date (optional)",
     "notesPlaceholder": "Where you bought them, lace swap, etc."
@@ -564,8 +579,8 @@
     "description": "{{name}} leaves your collection and moves to History.",
     "typeLegend": "What happened to it?",
     "dateLabel": "Date",
-    "salePriceSold": "Sale price",
-    "salePriceTraded": "Trade value (optional)",
+    "salePriceSoldIn": "Sale price ({{currency}})",
+    "salePriceTradedIn": "Trade value, {{currency}} (optional)",
     "notesLabel": "Notes (optional)",
     "notesPlaceholder": "Who has them now, or where they went",
     "submit": "Retire pair",

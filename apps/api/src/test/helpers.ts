@@ -1,7 +1,15 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as schema from '@kixvault/db';
-import { auditEvents, sessions, sneakers, sneakerWears, users, wishlistItems } from '@kixvault/db';
+import {
+  auditEvents,
+  exchangeRates,
+  sessions,
+  sneakers,
+  sneakerWears,
+  users,
+  wishlistItems,
+} from '@kixvault/db';
 import { sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
@@ -62,7 +70,7 @@ export async function resetDatabase(databaseUrl: string) {
 
   try {
     await db.execute(
-      sql`TRUNCATE TABLE ${auditEvents}, ${wishlistItems}, ${sneakerWears}, ${sneakers}, ${sessions}, ${users} RESTART IDENTITY CASCADE`,
+      sql`TRUNCATE TABLE ${auditEvents}, ${wishlistItems}, ${exchangeRates}, ${sneakerWears}, ${sneakers}, ${sessions}, ${users} RESTART IDENTITY CASCADE`,
     );
   } finally {
     await client.end({ timeout: 5 });

@@ -38,7 +38,7 @@ bun run --cwd apps/web dev            # :5173, proxies /api to the API
 
 **API (`apps/api/src`).** `routes/` are thin Hono routers mounted under `/api/*`; `lib/` holds the logic (pricing, catalog, images, auth via Lucia with httpOnly session cookies, audit log, email); `middleware/` has request logging, locale, session and rate limiting (Redis-backed store in `lib/rate-limit-store.ts` when `REDIS_URL` is set). `lib/env.ts` is the single place env vars are read. All sneaker routes require a session. Sentry is only enabled when `NODE_ENV=production`, and events are scrubbed through `lib/redact.ts`.
 
-**Background processes share the API image/codebase** but run as separate entrypoints in `src/jobs/`, not in the web server: `run-scheduler.ts` (croner, weekly catalog price refresh via the KicksDB SDK) and `run-image-worker.ts` (downloads sneaker images, converts to WebP with sharp, stores them on a volume; served by `/api/images`). Only the `api` container runs migrations on startup. See `docs/deployment.md` for the compose layout.
+**Background processes share the API image/codebase** but run as separate entrypoints in `src/jobs/`, not in the web server: `run-scheduler.ts` (croner: weekly catalog price refresh via the KicksDB SDK, daily exchange-rate refresh from Open Exchange Rates) and `run-image-worker.ts` (downloads sneaker images, converts to WebP with sharp, stores them on a volume; served by `/api/images`). Only the `api` container runs migrations on startup. See `docs/deployment.md` for the compose layout.
 
 **Database (`packages/db`).** `src/schema.ts` is the Drizzle schema; migrations in `drizzle/` are generated with `db:generate` and applied with `db:migrate` — never hand-edit generated SQL/snapshots. The API imports the client/schema from `@kixvault/db`.
 
@@ -48,6 +48,8 @@ Read `apps/web/README.md` before UI work. Key points:
 - **i18n:** all user-facing copy goes through i18next (`src/i18n/locales/en.json`, US spelling); never concatenate translated fragments. `i18n.unit.test.ts` fails if a literal `t('key')` is missing from `en.json`. Emails have their own catalog at `apps/api/src/lib/email/locales/`.
 - **Themes:** each colorway theme is registered in `src/components/theme/themes.ts` plus a `[data-theme]` token block in `src/index.css`; tests check they agree. Don't use the accent for small text; money uses `text-gain`/`text-loss`.
 - `biome-a11y.unit.test.ts` enforces accessibility lint rules.
+
+**Currency.** All stored money is USD. Users pick a display currency (`users.currency`); the web app converts at the edge (`apps/web/src/lib/currency.ts`, used by `formatCurrency` and all money inputs) using `exchange_rates`, served by `GET /api/settings/exchange-rates`. The API and its math stay USD-only.
 
 ## Conventions
 

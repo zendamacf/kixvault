@@ -27,7 +27,7 @@ describe('AppShell', () => {
       defaultOptions: { queries: { retry: false } },
     });
     client.setQueryData(sessionQueryOptions.queryKey, {
-      user: { id: 'user-1', email: 'collector@example.com' },
+      user: { id: 'user-1', email: 'collector@example.com', currency: 'USD' },
     });
 
     render(
@@ -47,7 +47,7 @@ describe('AppShell', () => {
       defaultOptions: { queries: { retry: false } },
     });
     client.setQueryData(sessionQueryOptions.queryKey, {
-      user: { id: 'user-1', email: 'collector@example.com' },
+      user: { id: 'user-1', email: 'collector@example.com', currency: 'USD' },
     });
 
     render(

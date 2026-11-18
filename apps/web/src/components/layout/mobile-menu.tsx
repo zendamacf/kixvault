@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   Palette,
+  Settings,
   Star,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -169,6 +170,13 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
             <Link to="/activity" className={itemClass}>
               <History className="size-4 text-muted-foreground" aria-hidden />
               {t('layout.nav.activity')}
+            </Link>
+          </SheetClose>
+
+          <SheetClose asChild>
+            <Link to="/settings" className={itemClass}>
+              <Settings className="size-4 text-muted-foreground" aria-hidden />
+              {t('layout.nav.settings')}
             </Link>
           </SheetClose>
         </nav>

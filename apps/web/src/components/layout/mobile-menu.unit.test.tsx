@@ -31,7 +31,10 @@ function renderMenu(pathname = '/wears') {
 
   render(
     <QueryClientProvider client={client}>
-      <MobileMenu user={{ id: 'user-1', email: 'collector@example.com' }} pathname={pathname} />
+      <MobileMenu
+        user={{ id: 'user-1', email: 'collector@example.com', currency: 'USD' }}
+        pathname={pathname}
+      />
     </QueryClientProvider>,
   );
 }

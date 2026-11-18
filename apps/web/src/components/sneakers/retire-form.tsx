@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { currencyInputStep, getActiveCurrency } from '@/lib/currency';
 import {
   departureAllowsSalePrice,
   departureTypes,
@@ -108,15 +109,15 @@ export function RetireForm({ sneakerId, label, onBack, onRetired }: RetireFormPr
           <div className="space-y-2">
             <Label htmlFor="retire-price">
               {values.departureType === 'sold'
-                ? t('retire.salePriceSold')
-                : t('retire.salePriceTraded')}
+                ? t('retire.salePriceSoldIn', { currency: getActiveCurrency().code })
+                : t('retire.salePriceTradedIn', { currency: getActiveCurrency().code })}
             </Label>
             <Input
               id="retire-price"
               type="number"
               inputMode="decimal"
               min="0"
-              step="0.01"
+              step={currencyInputStep()}
               value={values.salePrice}
               aria-invalid={errors.salePrice ? true : undefined}
               aria-describedby={errors.salePrice ? 'retire-price-error' : undefined}

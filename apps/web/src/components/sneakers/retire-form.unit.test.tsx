@@ -57,17 +57,17 @@ describe('RetireForm', () => {
   test('asks for a sale price only when the pair was sold or traded', () => {
     renderForm();
 
-    expect(screen.getByLabelText('Sale price')).toBeTruthy();
+    expect(screen.getByLabelText('Sale price (USD)')).toBeTruthy();
 
     fireEvent.click(screen.getByLabelText('Traded'));
-    expect(screen.getByLabelText('Trade value (optional)')).toBeTruthy();
+    expect(screen.getByLabelText('Trade value, USD (optional)')).toBeTruthy();
 
     fireEvent.click(screen.getByLabelText('Gifted'));
-    expect(screen.queryByLabelText('Sale price')).toBeNull();
-    expect(screen.queryByLabelText('Trade value (optional)')).toBeNull();
+    expect(screen.queryByLabelText('Sale price (USD)')).toBeNull();
+    expect(screen.queryByLabelText('Trade value, USD (optional)')).toBeNull();
 
     fireEvent.click(screen.getByLabelText('Donated'));
-    expect(screen.queryByLabelText('Sale price')).toBeNull();
+    expect(screen.queryByLabelText('Sale price (USD)')).toBeNull();
   });
 
   test('blocks a sold pair without a sale price and sends nothing', async () => {
@@ -85,7 +85,7 @@ describe('RetireForm', () => {
     const onRetired = mock(() => {});
     renderForm({ onRetired });
 
-    fireEvent.change(screen.getByLabelText('Sale price'), { target: { value: '250' } });
+    fireEvent.change(screen.getByLabelText('Sale price (USD)'), { target: { value: '250' } });
     fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2026-03-01' } });
     fireEvent.change(screen.getByLabelText('Notes (optional)'), { target: { value: 'eBay' } });
     fireEvent.click(screen.getByRole('button', { name: 'Retire pair' }));
@@ -102,7 +102,7 @@ describe('RetireForm', () => {
     renderForm({ onRetired });
 
     fireEvent.click(screen.getByLabelText('Sold'));
-    fireEvent.change(screen.getByLabelText('Sale price'), { target: { value: '99' } });
+    fireEvent.change(screen.getByLabelText('Sale price (USD)'), { target: { value: '99' } });
     fireEvent.click(screen.getByLabelText('Gifted'));
     fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2026-03-01' } });
     fireEvent.click(screen.getByRole('button', { name: 'Retire pair' }));

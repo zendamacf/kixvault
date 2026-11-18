@@ -49,7 +49,7 @@ describe('RemoveFromVaultDialog', () => {
     fireEvent.click(await screen.findByRole('button', { name: /^Retire/ }));
 
     expect(await screen.findByText('Retire this pair')).toBeTruthy();
-    expect(screen.getByLabelText('Sale price')).toBeTruthy();
+    expect(screen.getByLabelText('Sale price (USD)')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
 

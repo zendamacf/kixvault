@@ -52,6 +52,7 @@ export type Sneaker = {
 export type AuthUser = {
   id: string;
   email: string;
+  currency: string;
 };
 
 export type WishlistItem = {
@@ -81,6 +82,20 @@ export const sessionQueryOptions = queryOptions({
 
     if (!response.ok) {
       throw new Error(i18n.t('errors.loadSession'));
+    }
+
+    return response.json();
+  },
+});
+
+export const exchangeRatesQueryOptions = queryOptions({
+  queryKey: ['settings', 'exchange-rates'],
+  staleTime: 60 * 60 * 1000,
+  queryFn: async () => {
+    const response = await api.api.settings['exchange-rates'].$get();
+
+    if (!response.ok) {
+      throw new Error(i18n.t('errors.loadExchangeRates'));
     }
 
     return response.json();
