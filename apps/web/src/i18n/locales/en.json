@@ -199,7 +199,8 @@
       "sneaker_worn": "Logged a wear",
       "sneaker_wear_removed": "Removed a wear",
       "sneaker_retired": "Retired a pair",
-      "sneaker_restored": "Restored a pair"
+      "sneaker_restored": "Restored a pair",
+      "sneakers_export": "Exported your collection"
     },
     "grailsRemoved_one": "Removed from Grails",
     "grailsRemoved_other": "Removed {{count}} grails from your list"
@@ -263,6 +264,9 @@
     "conditionLegend": "Condition",
     "allConditions": "All",
     "reset": "Reset",
+    "exportCsv": "Export CSV",
+    "exporting": "Exporting…",
+    "exportFailed": "Could not export your collection. Try again in a moment.",
     "sortLabel": "Sort pairs",
     "pairCount_one": "{{count}} pair",
     "pairCount_other": "{{count}} pairs",

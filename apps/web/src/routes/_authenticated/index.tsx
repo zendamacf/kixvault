@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CollectionSummary } from '@/components/collection/collection-summary';
 import { EmptyState } from '@/components/collection/empty-state';
+import { ExportCsvButton } from '@/components/collection/export-csv-button';
 import { SneakerGridSkeleton } from '@/components/collection/sneaker-grid-skeleton';
 import { SneakerCard } from '@/components/sneakers/sneaker-card';
 import { Button } from '@/components/ui/button';
@@ -145,6 +146,7 @@ function CollectionPage() {
                 {t('collection.reset')}
               </Button>
             ) : null}
+            <ExportCsvButton disabled={totalCount === 0} />
             <Label htmlFor="sort-filter" className="sr-only">
               {t('collection.sortLabel')}
             </Label>

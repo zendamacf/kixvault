@@ -12,5 +12,6 @@ Events older than **90 days** are not returned in the activity feed. Stored rows
 - Adding, updating, or removing sneakers (brand and model names only in the timeline; notes and other personal fields are not copied into the log)
 - Retiring a pair (the way it left the vault, such as sold or gifted) and restoring it. The sale price, date, and notes are not copied into the log
 - Logging or removing a wear
+- Exporting the collection to CSV (only that an export happened, never the contents)
 
 IP addresses may be stored server-side for security but are not shown in the activity page.

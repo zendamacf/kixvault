@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import {
   Archive,
   ArchiveRestore,
+  Download,
   Footprints,
   KeyRound,
   LogIn,
@@ -42,6 +43,7 @@ const actionIcons: Record<AuditAction, LucideIcon> = {
   'sneaker.restored': ArchiveRestore,
   'sneaker.worn': Footprints,
   'sneaker.wear_removed': Trash2,
+  'sneakers.export': Download,
 };
 
 function ActivityPage() {
