@@ -273,12 +273,12 @@
     "sort": {
       "created_at_desc": "Recently added",
       "created_at_asc": "Oldest added",
-      "purchase_date_desc": "Newest purchase",
-      "purchase_date_asc": "Oldest purchase",
       "purchase_price_desc": "Price paid, high to low",
       "purchase_price_asc": "Price paid, low to high",
       "brand_asc": "Brand, A to Z",
-      "brand_desc": "Brand, Z to A"
+      "brand_desc": "Brand, Z to A",
+      "wear_count_desc": "Most worn",
+      "wear_count_asc": "Least worn"
     },
     "empty": {
       "title": "Your vault is empty",
@@ -513,7 +513,8 @@
     "paid": "{{value}} paid"
   },
   "sneakerCard": {
-    "paid": "Paid {{value}}"
+    "paid": "Paid {{value}}",
+    "added": "Added {{date}}"
   },
   "quickLog": {
     "headingToday": "What are you wearing today?",

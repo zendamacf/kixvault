@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator';
-import { sneakers } from '@kixvault/db';
+import { sneakers, sneakerWears } from '@kixvault/db';
 import {
   createSneakerFromCatalogSchema,
   createSneakerSchema,
@@ -8,7 +8,7 @@ import {
   retireSneakerSchema,
   updateSneakerSchema,
 } from '@kixvault/shared';
-import { and, asc, desc, eq, isNotNull, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { stream } from 'hono/streaming';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
@@ -85,6 +85,7 @@ export const sneakerRoutes = new Hono<ApiEnv>()
       purchase_price: sneakers.purchasePrice,
       brand: sneakers.brand,
       departed_on: sneakers.departedOn,
+      wear_count: sql`(select count(*) from ${sneakerWears} where ${sneakerWears.sneakerId} = ${sneakers.id})`,
     }[query.sort];
 
     const orderBy = query.order === 'asc' ? asc(sortColumn) : desc(sortColumn);

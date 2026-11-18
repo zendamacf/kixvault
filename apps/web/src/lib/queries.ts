@@ -168,7 +168,8 @@ export function sneakersQueryOptions(filters: {
               | 'purchase_date'
               | 'purchase_price'
               | 'brand'
-              | 'departed_on') ?? 'created_at',
+              | 'departed_on'
+              | 'wear_count') ?? 'created_at',
           order: (filters.order as 'asc' | 'desc') ?? 'desc',
         },
       });
