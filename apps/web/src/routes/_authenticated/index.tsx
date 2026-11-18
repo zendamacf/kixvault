@@ -1,17 +1,18 @@
 import { type SneakerCondition, sneakerConditions } from '@kixvault/shared';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { Search } from 'lucide-react';
+import { LayoutGrid, List, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CollectionSummary } from '@/components/collection/collection-summary';
 import { EmptyState } from '@/components/collection/empty-state';
-import { ExportCsvButton } from '@/components/collection/export-csv-button';
 import { SneakerGridSkeleton } from '@/components/collection/sneaker-grid-skeleton';
+import { SneakerTable, SneakerTableSkeleton } from '@/components/collection/sneaker-table';
 import { SneakerCard } from '@/components/sneakers/sneaker-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import {
   Select,
   SelectContent,
@@ -21,7 +22,7 @@ import {
 } from '@/components/ui/select';
 import { useDebouncedValue } from '@/lib/hooks';
 import { type Sneaker, sneakersQueryOptions, statsQueryOptions } from '@/lib/queries';
-import { cn, formatCondition } from '@/lib/utils';
+import { formatCondition } from '@/lib/utils';
 
 const DEBOUNCE_DELAY = 300;
 
@@ -38,6 +39,21 @@ const SORT_OPTIONS = [
   'wear_count:asc',
 ] as const;
 
+/** Select items cannot have an empty value, so "no filter" gets a sentinel. */
+const ALL_CONDITIONS = 'all';
+
+const VIEW_STORAGE_KEY = 'kixvault:collection-view';
+
+type CollectionView = 'grid' | 'list';
+
+function readStoredView(): CollectionView {
+  try {
+    return window.localStorage.getItem(VIEW_STORAGE_KEY) === 'list' ? 'list' : 'grid';
+  } catch {
+    return 'grid';
+  }
+}
+
 type SneakerConditionFilter = SneakerCondition | '';
 
 export const Route = createFileRoute('/_authenticated/')({
@@ -49,6 +65,7 @@ function CollectionPage() {
   const [search, setSearch] = useState('');
   const [condition, setCondition] = useState<SneakerConditionFilter>('');
   const [sortKey, setSortKey] = useState<string>(DEFAULT_SORT);
+  const [view, setView] = useState<CollectionView>(readStoredView);
 
   const debouncedSearch = useDebouncedValue(search.trim(), DEBOUNCE_DELAY);
 
@@ -72,14 +89,24 @@ function CollectionPage() {
   const sneakers = (sneakersData?.sneakers ?? []) as Sneaker[];
   const totalCount = statsData?.stats.count ?? 0;
 
+  function changeView(next: CollectionView) {
+    setView(next);
+
+    try {
+      window.localStorage.setItem(VIEW_STORAGE_KEY, next);
+    } catch {
+      // Storage can be unavailable. The view then resets to the grid on the next visit.
+    }
+  }
+
   function clearFilters() {
     setSearch('');
     setCondition('');
     setSortKey(DEFAULT_SORT);
   }
 
-  const conditionChips: { value: SneakerConditionFilter; label: string }[] = [
-    { value: '', label: t('collection.allConditions') },
+  const conditionOptions: { value: string; label: string }[] = [
+    { value: ALL_CONDITIONS, label: t('collection.allConditions') },
     ...sneakerConditions.map((value) => ({ value, label: formatCondition(value) })),
   ];
 
@@ -116,29 +143,28 @@ function CollectionPage() {
             />
           </div>
 
-          <fieldset className="-mx-4 flex min-w-0 gap-1.5 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0 lg:pb-0">
-            <legend className="sr-only">{t('collection.conditionLegend')}</legend>
-            {conditionChips.map((chip) => {
-              const active = condition === chip.value;
-
-              return (
-                <button
-                  key={chip.value || 'all'}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => setCondition(chip.value)}
-                  className={cn(
-                    'h-9 shrink-0 rounded-full border px-3.5 text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-                    active
-                      ? 'border-foreground bg-foreground text-background'
-                      : 'border-input bg-card text-foreground hover:bg-muted',
-                  )}
-                >
-                  {chip.label}
-                </button>
-              );
-            })}
-          </fieldset>
+          <div className="lg:w-48">
+            <Label htmlFor="condition-filter" className="sr-only">
+              {t('collection.conditionLegend')}
+            </Label>
+            <Select
+              value={condition || ALL_CONDITIONS}
+              onValueChange={(value) =>
+                setCondition(value === ALL_CONDITIONS ? '' : (value as SneakerCondition))
+              }
+            >
+              <SelectTrigger id="condition-filter" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {conditionOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="flex items-center gap-2 lg:ml-auto">
             {hasCustomView ? (
@@ -146,7 +172,24 @@ function CollectionPage() {
                 {t('collection.reset')}
               </Button>
             ) : null}
-            <ExportCsvButton disabled={totalCount === 0} />
+            <SegmentedControl
+              label={t('collection.view.label')}
+              value={view}
+              onChange={changeView}
+              className="w-auto"
+              options={[
+                {
+                  value: 'grid',
+                  label: t('collection.view.grid'),
+                  icon: <LayoutGrid className="size-4" aria-hidden />,
+                },
+                {
+                  value: 'list',
+                  label: t('collection.view.list'),
+                  icon: <List className="size-4" aria-hidden />,
+                },
+              ]}
+            />
             <Label htmlFor="sort-filter" className="sr-only">
               {t('collection.sortLabel')}
             </Label>
@@ -171,7 +214,8 @@ function CollectionPage() {
 
         {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
 
-        {isLoading ? <SneakerGridSkeleton /> : null}
+        {isLoading && view === 'grid' ? <SneakerGridSkeleton /> : null}
+        {isLoading && view === 'list' ? <SneakerTableSkeleton /> : null}
 
         {!isLoading && sneakers.length === 0 && totalCount === 0 ? (
           <EmptyState
@@ -190,7 +234,11 @@ function CollectionPage() {
           />
         ) : null}
 
-        {!isLoading && sneakers.length > 0 ? (
+        {!isLoading && sneakers.length > 0 && view === 'list' ? (
+          <SneakerTable sneakers={sneakers} sortField={sortKey.split(':')[0]} />
+        ) : null}
+
+        {!isLoading && sneakers.length > 0 && view === 'grid' ? (
           <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
             {sneakers.map((sneaker) => (
               <li key={sneaker.id}>

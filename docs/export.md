@@ -1,6 +1,6 @@
 # CSV export
 
-**Export CSV** on the collection page downloads the pairs currently in your vault as a CSV file. The same file is available from `GET /api/sneakers/export?format=csv` (needs a session).
+**Export CSV** on the settings page downloads the pairs currently in your vault as a CSV file. The same file is available from `GET /api/sneakers/export?format=csv` (needs a session).
 
 - Only your own pairs, oldest first (by the date they were added). Retired pairs, grails, wears and images are not included.
 - UTF-8 with a byte order mark so Excel reads non-ASCII text correctly. Lines end in CRLF.

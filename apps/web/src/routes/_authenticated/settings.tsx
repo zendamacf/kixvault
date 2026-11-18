@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { ExportCsvButton } from '@/components/collection/export-csv-button';
 import { BackLink } from '@/components/layout/back-link';
 import { Label } from '@/components/ui/label';
 import {
@@ -13,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { api, parseApiError } from '@/lib/api';
-import { exchangeRatesQueryOptions, sessionQueryOptions } from '@/lib/queries';
+import { exchangeRatesQueryOptions, sessionQueryOptions, statsQueryOptions } from '@/lib/queries';
 import { formatDate } from '@/lib/utils';
 
 export const Route = createFileRoute('/_authenticated/settings')({
@@ -25,6 +26,7 @@ function SettingsPage() {
   const queryClient = useQueryClient();
   const { data: session } = useQuery(sessionQueryOptions);
   const { data: rates } = useQuery(exchangeRatesQueryOptions);
+  const { data: stats } = useQuery(statsQueryOptions);
   const currency = session?.user?.currency ?? 'USD';
   const available = SUPPORTED_CURRENCIES.filter((code) => code === 'USD' || rates?.rates[code]);
   const displayNames = new Intl.DisplayNames(i18n.language, { type: 'currency' });
@@ -89,6 +91,17 @@ function SettingsPage() {
             ? t('settingsPage.ratesUpdated', { date: formatDate(rates.updatedAt) })
             : t('settingsPage.ratesUnavailable')}
         </p>
+      </section>
+
+      <section className="space-y-4 rounded-2xl bg-card p-5 ring-1 ring-border sm:p-6">
+        <div className="space-y-1">
+          <h2 className="font-heading text-2xl font-semibold tracking-tight">
+            {t('settingsPage.exportTitle')}
+          </h2>
+          <p className="text-sm text-muted-foreground">{t('settingsPage.exportDescription')}</p>
+        </div>
+
+        <ExportCsvButton disabled={stats?.stats.count === 0} />
       </section>
     </div>
   );

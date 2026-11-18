@@ -65,9 +65,22 @@ describe('SneakerCard', () => {
 
     expect(screen.getByRole('heading').textContent).toBe('Nike Air Max 1');
     expect(screen.getByText('Anniversary Red')).toBeTruthy();
-    expect(screen.getByText('Size 10')).toBeTruthy();
-    expect(screen.getByText('Deadstock')).toBeTruthy();
+    // Without a market price, what was paid stands in for the value.
     expect(screen.getByText('Paid $180')).toBeTruthy();
+    expect(screen.queryByText('Size 10')).toBeNull();
+  });
+
+  test('shows the value the list is sorted by', () => {
+    const priced = { ...sneaker, currentMarketPrice: 220, gainLoss: 40, wearCount: 3 };
+    const { rerender } = render(<SneakerCard sneaker={priced} sortField="wear_count" />);
+
+    expect(screen.getByText('3 wears')).toBeTruthy();
+
+    rerender(<SneakerCard sneaker={priced} sortField="purchase_price" />);
+    expect(screen.getByText('Paid $180')).toBeTruthy();
+
+    rerender(<SneakerCard sneaker={priced} sortField="created_at" />);
+    expect(screen.getByText(/^Added /)).toBeTruthy();
   });
 
   test('renders market value when available', () => {
