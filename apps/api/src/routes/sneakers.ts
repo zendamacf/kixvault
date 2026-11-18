@@ -3,12 +3,14 @@ import { sneakers } from '@kixvault/db';
 import {
   createSneakerFromCatalogSchema,
   createSneakerSchema,
+  exportSneakersQuerySchema,
   listSneakersQuerySchema,
   retireSneakerSchema,
   updateSneakerSchema,
 } from '@kixvault/shared';
 import { and, asc, desc, eq, isNotNull, isNull } from 'drizzle-orm';
 import { Hono } from 'hono';
+import { stream } from 'hono/streaming';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import {
   formatSneakerAuditMetadata,
@@ -26,6 +28,7 @@ import {
   matchVariantPrice,
   storeMarketPriceAndSnapshot,
 } from '../lib/pricing';
+import { formatExportFilename, streamSneakerExport } from '../lib/sneaker-export';
 import { replaceSneakerGallery360Images } from '../lib/sneaker-gallery-360-images';
 import { getPrimaryImagesForSneakerIds, replaceSneakerPrimaryImage } from '../lib/sneaker-images';
 import {
@@ -43,6 +46,7 @@ import {
 } from '../lib/sneakers';
 import { clearMatchingWishlistItemsForSneaker } from '../lib/wishlist-match';
 import { catalogFromCatalogRateLimit } from '../middleware/catalog-rate-limit';
+import { sneakerExportRateLimit } from '../middleware/export-rate-limit';
 import { requireAuth, sessionMiddleware } from '../middleware/session';
 import type { ApiEnv } from '../types';
 
@@ -93,6 +97,34 @@ export const sneakerRoutes = new Hono<ApiEnv>()
 
     return c.json({ sneakers: await formatSneakersWithPricing(rows) });
   })
+  .get(
+    '/export',
+    sneakerExportRateLimit,
+    zValidator('query', exportSneakersQuerySchema),
+    async (c) => {
+      const userId = c.get('user')?.id ?? '';
+
+      // No sneaker data in the event: it only records that an export happened.
+      await recordAuditEvent({
+        userId,
+        action: 'sneakers.export',
+        metadata: { format: c.req.valid('query').format },
+        ip: getRequestClientIp(c),
+      });
+
+      c.header('Content-Type', 'text/csv; charset=utf-8');
+      c.header('Content-Disposition', `attachment; filename="${formatExportFilename()}"`);
+      c.header('Cache-Control', 'no-store');
+
+      return stream(c, async (out) => {
+        const encoder = new TextEncoder();
+
+        for await (const chunk of streamSneakerExport(userId)) {
+          await out.write(encoder.encode(chunk));
+        }
+      });
+    },
+  )
   .post(
     '/from-catalog',
     catalogFromCatalogRateLimit,

@@ -12,7 +12,7 @@
     },
     "apps/api": {
       "name": "@kixvault/api",
-      "version": "0.3.0",
+      "version": "0.5.0",
       "dependencies": {
         "@hono/zod-validator": "^0.9.1",
         "@kicksdb/sdk": "^1.0.13",
@@ -22,6 +22,7 @@
         "@sentry/bun": "^11.2.0",
         "@sentry/hono": "^11.2.0",
         "croner": "^10.0.1",
+        "csv-stringify": "^6.9.0",
         "drizzle-orm": "^0.45.3",
         "hono": "^4.13.7",
         "i18next": "^26.4.2",
@@ -37,7 +38,7 @@
     },
     "apps/web": {
       "name": "@kixvault/web",
-      "version": "0.4.1",
+      "version": "0.6.0",
       "dependencies": {
         "@fontsource-variable/bricolage-grotesque": "^5.3.0",
         "@fontsource-variable/geist": "^5.3.0",
@@ -84,7 +85,7 @@
     },
     "packages/db": {
       "name": "@kixvault/db",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "drizzle-orm": "^0.45.3",
         "postgres": "^3.4.7",
@@ -96,7 +97,7 @@
     },
     "packages/shared": {
       "name": "@kixvault/shared",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "dependencies": {
         "zod": "^4.6.1",
       },
@@ -908,6 +909,8 @@
     "cssesc": ["cssesc@3.0.0", "", { "bin": { "cssesc": "bin/cssesc" } }, "sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg=="],
 
     "csstype": ["csstype@3.2.3", "", {}, "sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ=="],
+
+    "csv-stringify": ["csv-stringify@6.9.0", "", {}, "sha512-6b3e29CILFfSQ2nDRuZMRROzQOpPuJ+s8zPB5H7eK5ncXBbFOyVuRLU5Sx/zAUmVri3Ly49GyC8NEme4SVSAbA=="],
 
     "d3-array": ["d3-array@3.2.5", "", { "dependencies": { "internmap": "1 - 2" } }, "sha512-Th8qGXoBalmWsstpkuhmBuTsBQIFqYOJtjlBvNVvBfJ8E3uYusBUwUR8HU20U0qKKQkgCvKyR1YjiozWadk5QA=="],
 

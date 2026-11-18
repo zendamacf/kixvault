@@ -15,6 +15,7 @@ export const auditActions = [
   'sneaker.restored',
   'sneaker.worn',
   'sneaker.wear_removed',
+  'sneakers.export',
 ] as const;
 
 export type AuditAction = (typeof auditActions)[number];

@@ -42,6 +42,7 @@
     "@sentry/bun": "^11.2.0",
     "@sentry/hono": "^11.2.0",
     "croner": "^10.0.1",
+    "csv-stringify": "^6.9.0",
     "drizzle-orm": "^0.45.3",
     "hono": "^4.13.7",
     "i18next": "^26.4.2",

@@ -111,6 +111,12 @@ export const listSneakersQuerySchema = z.object({
   order: z.enum(['asc', 'desc']).default('desc'),
 });
 
+export const sneakerExportFormats = ['csv'] as const;
+
+export const exportSneakersQuerySchema = z.object({
+  format: z.enum(sneakerExportFormats).default('csv'),
+});
+
 export type CreateSneakerInput = z.infer<typeof createSneakerSchema>;
 export type CreateSneakerFromCatalogInput = z.infer<typeof createSneakerFromCatalogSchema>;
 export type RetireSneakerInput = z.infer<typeof retireSneakerSchema>;

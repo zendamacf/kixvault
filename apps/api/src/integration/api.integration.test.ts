@@ -1591,4 +1591,112 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
       expect(await list(cookie, '?status=all')).toEqual([]);
     });
   });
+
+  describe('CSV export', () => {
+    const HEADER =
+      'brand,model,colorway,nickname,sku,size,condition,purchase_price,purchase_date,release_date,market_value,market_value_currency,wear_count,last_worn,notes,added_at';
+
+    function createSneaker(cookie: string, body: Record<string, unknown>) {
+      return app.request('/api/sneakers/custom', {
+        method: 'POST',
+        headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ size: 10, condition: 'worn', ...body }),
+      });
+    }
+
+    /** `Response.text()` drops a leading BOM, so read the bytes and keep it. */
+    async function readCsv(response: Response) {
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const hasBom = bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf;
+
+      return { hasBom, text: new TextDecoder('utf-8', { ignoreBOM: true }).decode(bytes) };
+    }
+
+    function exportCsv(cookie?: string) {
+      return app.request('/api/sneakers/export?format=csv', {
+        headers: cookie ? { Cookie: cookie } : {},
+      });
+    }
+
+    test('requires a session', async () => {
+      const response = await exportCsv();
+
+      expect(response.status).toBe(401);
+    });
+
+    test('returns only the header row for an empty collection', async () => {
+      const { cookie } = await registerTestUser(app, `export-${crypto.randomUUID()}@example.com`);
+
+      const response = await exportCsv(cookie);
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get('content-type')).toBe('text/csv; charset=utf-8');
+      expect(response.headers.get('content-disposition')).toMatch(
+        /^attachment; filename="kixvault-export-\d{4}-\d{2}-\d{2}\.csv"$/,
+      );
+      expect(await readCsv(response)).toEqual({ hasBom: true, text: `\uFEFF${HEADER}\r\n` });
+    });
+
+    test('exports only the signed-in user pairs, oldest first, with safe escaping', async () => {
+      const owner = await registerTestUser(app, `export-${crypto.randomUUID()}@example.com`);
+      const other = await registerTestUser(app, `export-${crypto.randomUUID()}@example.com`);
+
+      await createSneaker(owner.cookie, {
+        brand: 'Nike',
+        model: 'Dunk Low',
+        colorway: 'Panda, "classic"',
+        purchasePrice: 180,
+        purchaseDate: '2025-02-01',
+        notes: '=HYPERLINK("http://evil.example")',
+      });
+      const second = (await (
+        await createSneaker(owner.cookie, { brand: 'Adidas', model: 'Samba 東京', size: 9.5 })
+      ).json()) as { sneaker: { id: string } };
+      await createSneaker(other.cookie, { brand: 'Puma', model: 'Suede' });
+      await app.request(`/api/wears/${second.sneaker.id}`, {
+        method: 'POST',
+        headers: { Cookie: owner.cookie, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wornOn: '2025-03-01' }),
+      });
+
+      const { text } = await readCsv(await exportCsv(owner.cookie));
+      const lines = text.replace('\uFEFF', '').split('\r\n');
+
+      expect(lines[0]).toBe(HEADER);
+      expect(lines).toHaveLength(4);
+      expect(lines[1]).toStartWith(
+        'Nike,Dunk Low,"Panda, ""classic""",,,10,worn,180,2025-02-01,,,USD,0,,',
+      );
+      expect(lines[1]).toContain("'=HYPERLINK");
+      expect(lines[2]).toStartWith('Adidas,Samba 東京,,,,9.5,worn,,,,,USD,1,2025-03-01,,');
+      expect(lines[3]).toBe('');
+      expect(text).not.toContain('Puma');
+      expect(text).not.toContain('null');
+    });
+
+    test('leaves retired pairs out and records an audit event without sneaker data', async () => {
+      const { cookie } = await registerTestUser(app, `export-${crypto.randomUUID()}@example.com`);
+      const created = (await (
+        await createSneaker(cookie, { brand: 'Nike', model: 'Dunk Low' })
+      ).json()) as { sneaker: { id: string } };
+      await app.request(`/api/sneakers/${created.sneaker.id}/retire`, {
+        method: 'POST',
+        headers: { Cookie: cookie, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ departureType: 'gifted', departedOn: '2025-03-01' }),
+      });
+
+      const { text } = await readCsv(await exportCsv(cookie));
+      expect(text).toBe(`\uFEFF${HEADER}\r\n`);
+
+      const audit = (await (
+        await app.request('/api/audit', { headers: { Cookie: cookie } })
+      ).json()) as {
+        events: Array<{ action: string; resourceId: string | null; metadata: unknown }>;
+      };
+      const event = audit.events.find((e) => e.action === 'sneakers.export');
+      expect(event).toBeDefined();
+      expect(event?.resourceId).toBeNull();
+      expect(event?.metadata).toEqual({ format: 'csv' });
+    });
+  });
 });
