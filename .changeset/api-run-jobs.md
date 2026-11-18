@@ -1,5 +1,5 @@
 ---
-"@kixvault/api": minor
+"@kixvault/api": major
 ---
 
 Add one `jobs` container that runs the scheduler and the image worker. Use the `apps/api/dist/jobs/run-jobs.js` entrypoint.
