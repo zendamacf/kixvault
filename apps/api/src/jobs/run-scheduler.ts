@@ -1,4 +1,4 @@
-// Standalone entrypoint, for deployments that run the scheduler in its own container.
+// Deprecated: kept so older deployments keep working. Use run-jobs.ts instead.
 import { startScheduler } from './scheduler';
 
 startScheduler();

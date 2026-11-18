@@ -24,8 +24,6 @@ export const env = {
   imagePublicBasePath: process.env.IMAGE_PUBLIC_BASE_PATH ?? '/api/images',
   maxImageWidth: Number(process.env.IMAGE_MAX_WIDTH) || 1024,
   imageWorkerPollMs: Number(process.env.IMAGE_WORKER_POLL_MS) || 30_000,
-  /** Run the scheduler and image worker inside the API process. Set to false when they run in their own containers. */
-  runJobs: process.env.RUN_JOBS !== 'false',
 } as const;
 
 export function requireDatabaseUrl(): string {
