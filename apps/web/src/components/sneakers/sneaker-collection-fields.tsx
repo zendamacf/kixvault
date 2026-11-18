@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { currencyInputStep, getActiveCurrency } from '@/lib/currency';
 import { formatCondition } from '@/lib/utils';
 
 type CollectionFieldValues = {
@@ -74,11 +75,13 @@ export function SneakerCollectionFields({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="purchasePrice">{t('sneakerForm.purchasePrice')}</Label>
+          <Label htmlFor="purchasePrice">
+            {t('sneakerForm.purchasePriceIn', { currency: getActiveCurrency().code })}
+          </Label>
           <Input
             id="purchasePrice"
             type="number"
-            step="1"
+            step={currencyInputStep()}
             placeholder={t('sneakerForm.purchasePricePlaceholder')}
             {...register('purchasePrice', {
               setValueAs: (value) => (value === '' ? undefined : Number(value)),

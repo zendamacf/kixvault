@@ -1,5 +1,6 @@
 import type { SneakerCondition, VariantPrice } from '@kixvault/shared';
 import { useTranslation } from 'react-i18next';
+import { inputAmountToUsd } from '@/lib/currency';
 import { getMarketValueDisclaimer, matchVariantPrice } from '@/lib/pricing';
 import { cn, formatCurrency, formatGainLoss } from '@/lib/utils';
 
@@ -74,7 +75,9 @@ export function CatalogMarketPricePreview({
   }
 
   const gainLoss =
-    purchasePrice != null && !Number.isNaN(purchasePrice) ? matched.price - purchasePrice : null;
+    purchasePrice != null && !Number.isNaN(purchasePrice)
+      ? matched.price - inputAmountToUsd(purchasePrice)
+      : null;
 
   return (
     <div className="rounded-2xl bg-card p-4 ring-1 ring-border">

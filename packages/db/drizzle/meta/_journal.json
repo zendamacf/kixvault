@@ -141,6 +141,13 @@
       "when": 1794400342508,
       "tag": "0019_retire_sneakers",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794500000000,
+      "tag": "0020_multi_currency",
+      "breakpoints": true
     }
   ]
 }

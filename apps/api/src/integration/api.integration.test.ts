@@ -89,6 +89,43 @@ describe.skipIf(!testDatabaseUrl)('API integration', () => {
     expect(body.user.email).toBe(email);
   });
 
+  test('settings: currency defaults to USD, needs a stored rate, then persists', async () => {
+    const { cookie } = await registerTestUser(app, `currency-${crypto.randomUUID()}@example.com`);
+    const headers = { Cookie: cookie, 'Content-Type': 'application/json' };
+    const patch = (currency: string) =>
+      app.request('/api/settings', {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ currency }),
+      });
+    const me = async () =>
+      (
+        (await (await app.request('/api/auth/me', { headers })).json()) as {
+          user: { currency: string };
+        }
+      ).user.currency;
+
+    expect(await me()).toBe('USD');
+    expect((await patch('EUR')).status).toBe(422);
+
+    const { upsertRates } = await import('../lib/exchange-rates');
+    await upsertRates({ EUR: 0.9 });
+
+    expect((await patch('EUR')).status).toBe(200);
+    expect(await me()).toBe('EUR');
+
+    const rates = (await (
+      await app.request('/api/settings/exchange-rates', { headers })
+    ).json()) as {
+      rates: Record<string, number>;
+      updatedAt: string | null;
+    };
+    expect(rates.rates).toEqual({ USD: 1, EUR: 0.9 });
+    expect(rates.updatedAt).not.toBeNull();
+
+    expect((await patch('XXX')).status).toBe(400);
+  });
+
   test('POST /api/auth/register rejects duplicate emails', async () => {
     const email = `duplicate-${crypto.randomUUID()}@example.com`;
     await registerTestUser(app, email);

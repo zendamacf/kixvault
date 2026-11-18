@@ -13,6 +13,7 @@ import { CatalogMarketPricePreview } from '@/components/sneakers/market-value';
 import { SneakerCollectionFields } from '@/components/sneakers/sneaker-collection-fields';
 import { Button } from '@/components/ui/button';
 import { i18n } from '@/i18n';
+import { inputAmountToUsd, usdToInputAmount } from '@/lib/currency';
 
 const collectionSneakerFormSchema = createSneakerFromCatalogSchema
   .omit({ catalogSource: true, catalogId: true })
@@ -71,7 +72,10 @@ export function CollectionSneakerForm({
       purchaseDate: '',
       notes: '',
       ...defaultValues,
-      purchasePrice: defaultValues?.purchasePrice ?? undefined,
+      purchasePrice:
+        defaultValues?.purchasePrice != null
+          ? usdToInputAmount(defaultValues.purchasePrice)
+          : undefined,
     },
   });
 
@@ -86,7 +90,10 @@ export function CollectionSneakerForm({
         await onSubmit({
           size: values.size,
           condition: values.condition,
-          purchasePrice: values.purchasePrice ?? null,
+          purchasePrice:
+            values.purchasePrice != null
+              ? inputAmountToUsd(values.purchasePrice, defaultValues?.purchasePrice)
+              : null,
           purchaseDate: values.purchaseDate || null,
           notes: values.notes || null,
         });

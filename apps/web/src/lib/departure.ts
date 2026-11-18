@@ -5,6 +5,7 @@ import {
   type RetireSneakerInput,
 } from '@kixvault/shared';
 import { i18n } from '@/i18n';
+import { inputAmountToUsd } from '@/lib/currency';
 import { formatDate } from '@/lib/utils';
 import { parseIsoDate } from '@/lib/wears';
 
@@ -63,7 +64,9 @@ export function validateRetireForm(
     input: {
       departureType: values.departureType,
       departedOn: values.departedOn,
-      ...(allowsPrice && priceText !== '' ? { salePrice: Number(priceText) } : {}),
+      ...(allowsPrice && priceText !== ''
+        ? { salePrice: inputAmountToUsd(Number(priceText)) }
+        : {}),
       ...(notes ? { notes } : {}),
     },
   };

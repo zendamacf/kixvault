@@ -1,4 +1,5 @@
-import { describe, expect, test } from 'bun:test';
+import { afterEach, describe, expect, test } from 'bun:test';
+import { setActiveCurrency } from './currency';
 import {
   formatCondition,
   formatCurrency,
@@ -6,6 +7,23 @@ import {
   formatDate,
   getCatalogSourceLabel,
 } from './utils';
+
+afterEach(() => setActiveCurrency('USD', 1));
+
+describe('formatCurrency in another currency', () => {
+  test('converts from USD and uses the active currency', () => {
+    setActiveCurrency('EUR', 0.9);
+
+    expect(formatCurrency(200)).toBe('€180');
+    expect(formatCurrencyPrecise(2)).toBe('€1.80');
+  });
+
+  test('respects zero-decimal currencies', () => {
+    setActiveCurrency('JPY', 150);
+
+    expect(formatCurrencyPrecise(2)).toBe('¥300');
+  });
+});
 
 describe('formatCurrency', () => {
   test('formats USD values without cents', () => {

@@ -10,6 +10,7 @@ import { auditRoutes } from './routes/audit';
 import { authRoutes } from './routes/auth';
 import { catalogRoutes } from './routes/catalog';
 import { imageRoutes } from './routes/images';
+import { settingsRoutes } from './routes/settings';
 import { sneakerRoutes } from './routes/sneakers';
 import { statsRoutes } from './routes/stats';
 import { wearRoutes } from './routes/wears';
@@ -48,6 +49,7 @@ export const app = withSentry
   .route('/api/auth', authRoutes)
   .route('/api/catalog', catalogRoutes)
   .route('/api/images', imageRoutes)
+  .route('/api/settings', settingsRoutes)
   .route('/api/sneakers', sneakerRoutes)
   .route('/api/stats', statsRoutes)
   .route('/api/wears', wearRoutes)

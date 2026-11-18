@@ -31,6 +31,8 @@ export const users = pgTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
+  /** Display currency (ISO 4217). Stored amounts are always USD. */
+  currency: text('currency').notNull().default('USD'),
   /** Null until the owner proves they control the address by following an emailed link. */
   emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true, mode: 'date' }),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
@@ -403,4 +405,11 @@ export const pricingRefreshRuns = pgTable('pricing_refresh_runs', {
   completedAt: timestamp('completed_at', { withTimezone: true, mode: 'date' }),
   status: pricingRefreshStatusEnum('status').notNull(),
   productsRefreshed: integer('products_refreshed'),
+});
+
+/** Units of `currency` per 1 USD, refreshed daily from Open Exchange Rates. */
+export const exchangeRates = pgTable('exchange_rates', {
+  currency: text('currency').primaryKey(),
+  rate: numeric('rate', { precision: 18, scale: 8 }).notNull(),
+  fetchedAt: timestamp('fetched_at', { withTimezone: true, mode: 'date' }).notNull(),
 });

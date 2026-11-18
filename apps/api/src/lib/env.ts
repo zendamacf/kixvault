@@ -17,6 +17,8 @@ export const env = {
     'https://ae34349ec1f0ef631fa6878064cfa57d@o4509541345591296.ingest.de.sentry.io/4511732877164624',
   sentryRelease: process.env.SENTRY_RELEASE,
   jobSchedule: process.env.JOB_SCHEDULE ?? '0 3 * * 0',
+  openExchangeRatesAppId: process.env.OPENEXCHANGERATES_APP_ID?.trim() || undefined,
+  exchangeRatesSchedule: process.env.EXCHANGE_RATES_SCHEDULE ?? '0 4 * * *',
   pricingRefreshDelayMs: Number(process.env.PRICING_REFRESH_DELAY_MS) || 500,
   imageStoragePath: process.env.IMAGE_STORAGE_PATH ?? './data/images',
   imagePublicBasePath: process.env.IMAGE_PUBLIC_BASE_PATH ?? '/api/images',

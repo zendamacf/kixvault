@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { History, LogOut } from 'lucide-react';
+import { History, LogOut, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   DropdownMenu,
@@ -55,6 +55,12 @@ export function UserMenu({ user }: UserMenuProps) {
           <Link to="/activity" className="cursor-pointer">
             <History className="size-4" />
             {t('layout.nav.activity')}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/settings" className="cursor-pointer">
+            <Settings className="size-4" />
+            {t('layout.nav.settings')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

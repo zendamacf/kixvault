@@ -69,6 +69,8 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
       KICKSDB_API_KEY: ${KICKSDB_API_KEY}
       JOB_SCHEDULE: ${JOB_SCHEDULE:-0 3 * * 0}
+      OPENEXCHANGERATES_APP_ID: ${OPENEXCHANGERATES_APP_ID:-}
+      EXCHANGE_RATES_SCHEDULE: ${EXCHANGE_RATES_SCHEDULE:-0 4 * * *}
       PRICING_REFRESH_DELAY_MS: ${PRICING_REFRESH_DELAY_MS:-500}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
@@ -140,6 +142,8 @@ LOG_LEVEL=info
 
 # Scheduler (optional — weekly catalog price refresh)
 JOB_SCHEDULE=0 3 * * 0
+# Optional: enables non-USD display currencies (free plan is enough)
+OPENEXCHANGERATES_APP_ID=
 PRICING_REFRESH_DELAY_MS=500
 
 # Local sneaker image storage (Docker volume mounted at /data/images)
@@ -179,6 +183,12 @@ Set `UMAMI_WEBSITE_ID` and `UMAMI_DOMAIN` on the `web` service to enable [Umami]
 The `scheduler` service reuses the API image and runs the weekly pricing refresh job via `croner`. It does not run database migrations — only the `api` service does that on startup.
 
 Default schedule: Sunday 03:00 UTC (`JOB_SCHEDULE=0 3 * * 0`).
+
+### Exchange rates and display currency
+
+Amounts are always stored in USD. Users can pick a display currency in Settings, and the web app converts using rates stored in the `exchange_rates` table. The `scheduler` refreshes them daily from [Open Exchange Rates](https://openexchangerates.org) (default 04:00 UTC, `EXCHANGE_RATES_SCHEDULE`) and once at startup when the table is empty or older than a day. The free plan is enough (USD base, about 30 requests a month).
+
+Set `OPENEXCHANGERATES_APP_ID` on the `scheduler` service. Without it no rates are stored and only USD can be selected.
 
 Run a one-off refresh manually:
 

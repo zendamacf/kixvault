@@ -2,12 +2,13 @@ import type { SneakerCondition } from '@kixvault/shared';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { getActiveLocale, i18n } from '@/i18n';
+import { currencyFractionDigits, getActiveCurrency, usdToDisplay } from './currency';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Currency with cents, for per-wear figures that are often under a dollar or two. */
+/** Amounts are USD; they are shown in the user's currency. Cents, for per-wear figures. */
 export function formatCurrencyPrecise(value: number | null | undefined) {
   if (value == null) {
     return i18n.t('common.emptyValue');
@@ -15,10 +16,10 @@ export function formatCurrencyPrecise(value: number | null | undefined) {
 
   return new Intl.NumberFormat(getActiveLocale(), {
     style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+    currency: getActiveCurrency().code,
+    minimumFractionDigits: currencyFractionDigits(),
+    maximumFractionDigits: currencyFractionDigits(),
+  }).format(usdToDisplay(value));
 }
 
 export function formatCurrency(value: number | null | undefined) {
@@ -28,9 +29,9 @@ export function formatCurrency(value: number | null | undefined) {
 
   return new Intl.NumberFormat(getActiveLocale(), {
     style: 'currency',
-    currency: 'USD',
+    currency: getActiveCurrency().code,
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(usdToDisplay(value));
 }
 
 export function formatGainLoss(value: number | null | undefined) {
