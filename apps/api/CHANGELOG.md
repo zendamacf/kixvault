@@ -1,5 +1,22 @@
 # @kixvault/api
 
+## 0.6.0
+
+### Minor Changes
+
+- 3500aba: Add `GET /api/sneakers/export` to download the collection as a CSV file.
+- d0effbe: Add a per-user display currency setting and a daily Open Exchange Rates refresh.
+- 5b10426: Sort the collection by number of wears (most or least worn).
+
+### Patch Changes
+
+- Updated dependencies [3500aba]
+- Updated dependencies [d0effbe]
+- Updated dependencies [d0effbe]
+- Updated dependencies [5b10426]
+  - @kixvault/shared@0.4.0
+  - @kixvault/db@0.5.0
+
 ## 0.5.0
 
 ### Minor Changes

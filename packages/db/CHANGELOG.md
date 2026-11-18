@@ -1,5 +1,11 @@
 # @kixvault/db
 
+## 0.5.0
+
+### Minor Changes
+
+- d0effbe: Add `users.currency` and the `exchange_rates` table.
+
 ## 0.4.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # @kixvault/shared
 
+## 0.4.0
+
+### Minor Changes
+
+- 3500aba: Add the `sneakers.export` audit action and the export query schema.
+- d0effbe: Add supported currencies and settings schemas.
+- 5b10426: Sort the collection by number of wears (most or least worn).
+
 ## 0.3.0
 
 ### Minor Changes

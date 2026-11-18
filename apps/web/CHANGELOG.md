@@ -1,5 +1,25 @@
 # @kixvault/web
 
+## 0.7.0
+
+### Minor Changes
+
+- 2e8d2fc: Add a grid/list view toggle to the collection and simplify the grid cards.
+- 3500aba: Add an Export CSV button to the settings page.
+- d0effbe: Show and enter prices in the currency chosen in the new Settings page.
+- 5b10426: Sort the collection by number of wears (most or least worn).
+
+### Patch Changes
+
+- Updated dependencies [3500aba]
+- Updated dependencies [3500aba]
+- Updated dependencies [d0effbe]
+- Updated dependencies [d0effbe]
+- Updated dependencies [5b10426]
+- Updated dependencies [5b10426]
+  - @kixvault/api@0.6.0
+  - @kixvault/shared@0.4.0
+
 ## 0.6.0
 
 ### Minor Changes
