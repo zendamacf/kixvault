@@ -32,6 +32,21 @@ export const THEMES: readonly ThemeDefinition[] = [
     swatches: ['hsl(0 0% 96%)', 'hsl(0 0% 6%)'],
   },
   {
+    id: 'pine-green',
+    mode: 'light',
+    swatches: ['hsl(0 0% 96%)', 'hsl(0 0% 7%)', 'hsl(152 55% 28%)'],
+  },
+  {
+    id: 'court-purple',
+    mode: 'light',
+    swatches: ['hsl(270 15% 95%)', 'hsl(0 0% 7%)', 'hsl(268 55% 45%)'],
+  },
+  {
+    id: 'infrared',
+    mode: 'light',
+    swatches: ['hsl(0 0% 96%)', 'hsl(220 8% 16%)', 'hsl(352 100% 58%)'],
+  },
+  {
     id: 'bred',
     mode: 'dark',
     swatches: ['hsl(0 0% 6%)', 'hsl(354 85% 50%)'],
@@ -45,6 +60,11 @@ export const THEMES: readonly ThemeDefinition[] = [
     id: 'mocha',
     mode: 'dark',
     swatches: ['hsl(25 25% 9%)', 'hsl(22 30% 6%)', 'hsl(28 45% 55%)'],
+  },
+  {
+    id: 'thunder',
+    mode: 'dark',
+    swatches: ['hsl(0 0% 6%)', 'hsl(48 100% 52%)'],
   },
 ];
 

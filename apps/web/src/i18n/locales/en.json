@@ -132,9 +132,13 @@
       "chicago": "Chicago",
       "unc": "UNC",
       "panda": "Panda",
+      "pine-green": "Pine Green",
+      "court-purple": "Court Purple",
+      "infrared": "Infrared",
       "bred": "Bred",
       "royal": "Royal",
-      "mocha": "Mocha"
+      "mocha": "Mocha",
+      "thunder": "Thunder"
     }
   },
   "errors": {
