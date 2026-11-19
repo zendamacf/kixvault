@@ -62,7 +62,7 @@ services:
       redis:
         condition: service_healthy
 
-  scheduler:
+  jobs:
     image: ghcr.io/zendamacf/kixvault-api:${API_VERSION:-latest}
     restart: unless-stopped
     environment:
@@ -72,21 +72,6 @@ services:
       OPENEXCHANGERATES_APP_ID: ${OPENEXCHANGERATES_APP_ID:-}
       EXCHANGE_RATES_SCHEDULE: ${EXCHANGE_RATES_SCHEDULE:-0 4 * * *}
       PRICING_REFRESH_DELAY_MS: ${PRICING_REFRESH_DELAY_MS:-500}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-      NODE_ENV: production
-      IMAGE_STORAGE_PATH: /data/images
-    volumes:
-      - kixvault_images:/data/images
-    entrypoint: ["bun", "apps/api/dist/jobs/run-scheduler.js"]
-    depends_on:
-      db:
-        condition: service_healthy
-
-  image-worker:
-    image: ghcr.io/zendamacf/kixvault-api:${API_VERSION:-latest}
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-kixvault}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kixvault}
       IMAGE_STORAGE_PATH: /data/images
       IMAGE_PUBLIC_BASE_PATH: /api/images
       IMAGE_MAX_WIDTH: ${IMAGE_MAX_WIDTH:-1024}
@@ -95,7 +80,7 @@ services:
       NODE_ENV: production
     volumes:
       - kixvault_images:/data/images
-    entrypoint: ["bun", "apps/api/dist/jobs/run-image-worker.js"]
+    entrypoint: ["bun", "apps/api/dist/jobs/run-jobs.js"]
     depends_on:
       db:
         condition: service_healthy
@@ -178,27 +163,32 @@ When `RESEND_API_KEY` is empty, emails are written to the API log instead of bei
 
 Set `UMAMI_WEBSITE_ID` and `UMAMI_DOMAIN` on the `web` service to enable [Umami](https://umami.is/docs) pageviews and product events. Use `UMAMI_SCRIPT_URL` only if your tracker is not at `{UMAMI_DOMAIN}/script.js`. Omit these variables to disable analytics.
 
-## Scheduler
+## Background jobs
 
-The `scheduler` service reuses the API image and runs the weekly pricing refresh job via `croner`. It does not run database migrations — only the `api` service does that on startup.
+The `jobs` service uses the API image and runs the background jobs in one process, separate from the API:
 
-Default schedule: Sunday 03:00 UTC (`JOB_SCHEDULE=0 3 * * 0`).
+- **Scheduler:** the weekly pricing refresh, via `croner`. Default schedule: Sunday 03:00 UTC (`JOB_SCHEDULE=0 3 * * 0`). It also refreshes exchange rates (see below).
+- **Image worker:** see [Image worker](#image-worker).
+
+It does not run database migrations. Only the `api` service does that on startup. Run one `jobs` container only, or the jobs run more than once.
+
+Locally, run `bun run --cwd apps/api dev:jobs`.
 
 ### Exchange rates and display currency
 
-Amounts are always stored in USD. Users can pick a display currency in Settings, and the web app converts using rates stored in the `exchange_rates` table. The `scheduler` refreshes them daily from [Open Exchange Rates](https://openexchangerates.org) (default 04:00 UTC, `EXCHANGE_RATES_SCHEDULE`) and once at startup when the table is empty or older than a day. The free plan is enough (USD base, about 30 requests a month).
+Amounts are always stored in USD. Users can pick a display currency in Settings, and the web app converts using rates stored in the `exchange_rates` table. The `jobs` service refreshes them daily from [Open Exchange Rates](https://openexchangerates.org) (default 04:00 UTC, `EXCHANGE_RATES_SCHEDULE`) and once at startup when the table is empty or older than a day. The free plan is enough (USD base, about 30 requests a month).
 
-Set `OPENEXCHANGERATES_APP_ID` on the `scheduler` service. Without it no rates are stored and only USD can be selected.
+Set `OPENEXCHANGERATES_APP_ID` on the `jobs` service. Without it no rates are stored and only USD can be selected.
 
 Run a one-off refresh manually:
 
 ```sh
-docker compose run --rm --entrypoint bun scheduler apps/api/dist/jobs/pricing-refresh.js
+docker compose run --rm --entrypoint bun jobs apps/api/dist/jobs/pricing-refresh.js
 ```
 
 ## Image worker
 
-The `image-worker` service downloads pending sneaker images, converts them to WebP with sharp, and stores them on the `kixvault_images` Docker volume. This keeps image fetching outside request paths and retries failed downloads.
+The image worker in the `jobs` service downloads pending sneaker images, converts them to WebP with sharp, and stores them on the `kixvault_images` Docker volume. This keeps image fetching outside request paths and retries failed downloads.
 
 Run a one-off image backfill manually:
 
