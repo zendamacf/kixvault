@@ -1,5 +1,15 @@
 # @kixvault/web
 
+## 0.8.0
+
+### Minor Changes
+
+- 904db88: Add four colorway themes: Pine Green, Court Purple, Infrared and Thunder.
+
+### Patch Changes
+
+- f838bdb: Fix the sort detail on sneaker cards. On narrow screens, it now moves to a new line and does not go into the next card.
+
 ## 0.7.0
 
 ### Minor Changes
