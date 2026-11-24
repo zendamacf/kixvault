@@ -1,5 +1,6 @@
 import { APP_NAME } from '@kixvault/shared';
 import { useTranslation } from 'react-i18next';
+import { AboutDialog } from './about-dialog';
 
 const GITHUB_URL = 'https://github.com/zendamacf/kixvault';
 
@@ -19,6 +20,7 @@ export function AppFooter() {
         >
           {t('layout.footer.github', { appName: APP_NAME })}
         </a>
+        <AboutDialog />
         {version ? <span>{t('layout.footer.version', { version })}</span> : null}
       </div>
     </footer>

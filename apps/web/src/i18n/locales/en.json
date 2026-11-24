@@ -101,7 +101,8 @@
     },
     "footer": {
       "github": "{{appName}} on GitHub",
-      "version": "v{{version}}"
+      "version": "v{{version}}",
+      "about": "About"
     },
     "auth": {
       "headline": "Every pair, what you paid, and what it is worth.",
@@ -123,6 +124,13 @@
       "trigger": "Account menu",
       "account": "Account",
       "logOut": "Log out"
+    },
+    "about": {
+      "title": "About {{appName}}",
+      "description": "A tracker for your sneaker collection and the pairs you are chasing.",
+      "disclaimerHeading": "Disclaimer",
+      "stockx": "{{appName}} is an independent project. It is not affiliated with, endorsed by or sponsored by StockX. Sneaker catalog data, prices and images are sourced from StockX.",
+      "trademarks": "All brand names, sneaker names and images belong to their owners."
     }
   },
   "theme": {
