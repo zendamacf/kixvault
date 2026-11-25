@@ -23,6 +23,7 @@ export const env = {
   imageStoragePath: process.env.IMAGE_STORAGE_PATH ?? './data/images',
   imagePublicBasePath: process.env.IMAGE_PUBLIC_BASE_PATH ?? '/api/images',
   maxImageWidth: Number(process.env.IMAGE_MAX_WIDTH) || 1024,
+  imageWorkerPollMs: Number(process.env.IMAGE_WORKER_POLL_MS) || 30_000,
 } as const;
 
 export function requireDatabaseUrl(): string {
