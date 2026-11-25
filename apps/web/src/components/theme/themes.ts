@@ -1,78 +1,31 @@
+/** Light or dark appearance. Independent of the colorway: every colorway has both. */
 export type ThemeMode = 'light' | 'dark';
 
+/** What the user picks: a fixed mode, or follow the operating system. */
+export type ModePreference = ThemeMode | 'system';
+
 export type ThemeDefinition = {
-  /** Value of the `data-theme` attribute; must match a block in `index.css`. */
+  /** Value of the `data-theme` attribute; must match light and dark token blocks in `index.css`. */
   id: string;
-  /** Whether the theme has a dark stage. Drives the `dark:` variant and toast styling. */
-  mode: ThemeMode;
-  /** Preview colors for the picker, drawn as equal bands. Two for two-tone colorways, otherwise three (stage, chrome, accent). */
-  swatches: [string, string] | [string, string, string];
 };
 
-/** Sneaker colorway themes. Add a matching `[data-theme]` block in `index.css` for each. */
+/** Sneaker colorways. Add a `[data-theme]` block and a `.dark[data-theme]` block in `index.css` for each. */
 export const THEMES: readonly ThemeDefinition[] = [
-  {
-    id: 'shattered-backboard',
-    mode: 'light',
-    swatches: ['hsl(75 6% 91%)', 'hsl(220 14% 8%)', 'hsl(16 100% 58%)'],
-  },
-  {
-    id: 'chicago',
-    mode: 'light',
-    swatches: ['hsl(40 20% 95%)', 'hsl(0 0% 7%)', 'hsl(354 85% 45%)'],
-  },
-  {
-    id: 'unc',
-    mode: 'light',
-    swatches: ['hsl(210 30% 95%)', 'hsl(218 50% 12%)', 'hsl(205 80% 62%)'],
-  },
-  {
-    id: 'panda',
-    mode: 'light',
-    swatches: ['hsl(0 0% 96%)', 'hsl(0 0% 6%)'],
-  },
-  {
-    id: 'pine-green',
-    mode: 'light',
-    swatches: ['hsl(0 0% 96%)', 'hsl(0 0% 7%)', 'hsl(152 55% 28%)'],
-  },
-  {
-    id: 'court-purple',
-    mode: 'light',
-    swatches: ['hsl(270 15% 95%)', 'hsl(0 0% 7%)', 'hsl(268 55% 45%)'],
-  },
-  {
-    id: 'infrared',
-    mode: 'light',
-    swatches: ['hsl(0 0% 96%)', 'hsl(220 8% 16%)', 'hsl(352 100% 58%)'],
-  },
-  {
-    id: 'bred',
-    mode: 'dark',
-    swatches: ['hsl(0 0% 6%)', 'hsl(354 85% 50%)'],
-  },
-  {
-    id: 'royal',
-    mode: 'dark',
-    swatches: ['hsl(226 40% 8%)', 'hsl(226 50% 5%)', 'hsl(222 90% 62%)'],
-  },
-  {
-    id: 'mocha',
-    mode: 'dark',
-    swatches: ['hsl(25 25% 9%)', 'hsl(22 30% 6%)', 'hsl(28 45% 55%)'],
-  },
-  {
-    id: 'thunder',
-    mode: 'dark',
-    swatches: ['hsl(0 0% 6%)', 'hsl(48 100% 52%)'],
-  },
+  { id: 'shattered-backboard' },
+  { id: 'chicago' },
+  { id: 'unc' },
+  { id: 'panda' },
+  { id: 'pine-green' },
+  { id: 'court-purple' },
+  { id: 'infrared' },
+  { id: 'bred' },
+  { id: 'royal' },
+  { id: 'mocha' },
+  { id: 'thunder' },
 ];
 
 export const DEFAULT_THEME = 'shattered-backboard';
 
 export const THEME_IDS = THEMES.map((theme) => theme.id);
 
-/** Light or dark mode of a theme id; unknown ids fall back to light. */
-export function themeMode(id: string | undefined): ThemeMode {
-  return THEMES.find((theme) => theme.id === id)?.mode ?? 'light';
-}
+export const MODE_PREFERENCES: readonly ModePreference[] = ['system', 'light', 'dark'];
