@@ -15,7 +15,9 @@ import {
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DEFAULT_THEME, THEME_IDS, THEMES } from '@/components/theme/themes';
+import { useMode } from '@/components/theme/mode';
+import { ThemeSwatch } from '@/components/theme/theme-swatch';
+import { DEFAULT_THEME, MODE_PREFERENCES, THEME_IDS, THEMES } from '@/components/theme/themes';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -41,6 +43,7 @@ const itemClass =
 export function MobileMenu({ user, pathname }: MobileMenuProps) {
   const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
+  const { mode, setMode } = useMode();
   const logout = useLogout();
   const [colorwayOpen, setColorwayOpen] = useState(false);
   const activeTheme = theme && THEME_IDS.includes(theme) ? theme : DEFAULT_THEME;
@@ -136,34 +139,46 @@ export function MobileMenu({ user, pathname }: MobileMenuProps) {
             />
           </button>
           {colorwayOpen ? (
-            <fieldset
-              id="mobile-menu-colorway"
-              className="m-0 min-w-0 space-y-1 border-0 p-0 pb-1 pl-4"
-            >
-              <legend className="sr-only">{t('layout.mobileMenu.colorway')}</legend>
-              {THEMES.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  aria-pressed={item.id === activeTheme}
-                  onClick={() => setTheme(item.id)}
-                  className={cn(
-                    'flex w-full flex-col gap-1.5 rounded-lg px-3 py-2 text-left text-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
-                    item.id === activeTheme && 'bg-muted font-medium',
-                  )}
-                >
-                  {t(`theme.names.${item.id}`)}
-                  <span
-                    aria-hidden="true"
-                    className="flex h-1.5 overflow-hidden rounded-full ring-1 ring-foreground/25"
+            <>
+              <fieldset className="m-0 flex min-w-0 gap-1 border-0 p-0 pb-1 pl-4">
+                <legend className="sr-only">{t('theme.mode.label')}</legend>
+                {MODE_PREFERENCES.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    aria-pressed={item === mode}
+                    onClick={() => setMode(item)}
+                    className={cn(
+                      'flex-1 rounded-lg px-2 py-1.5 text-center text-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
+                      item === mode && 'bg-muted font-medium',
+                    )}
                   >
-                    {item.swatches.map((color) => (
-                      <span key={color} className="flex-1" style={{ backgroundColor: color }} />
-                    ))}
-                  </span>
-                </button>
-              ))}
-            </fieldset>
+                    {t(`theme.mode.${item}`)}
+                  </button>
+                ))}
+              </fieldset>
+              <fieldset
+                id="mobile-menu-colorway"
+                className="m-0 min-w-0 space-y-1 border-0 p-0 pb-1 pl-4"
+              >
+                <legend className="sr-only">{t('layout.mobileMenu.colorway')}</legend>
+                {THEMES.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={item.id === activeTheme}
+                    onClick={() => setTheme(item.id)}
+                    className={cn(
+                      'flex w-full flex-col gap-1.5 rounded-lg px-3 py-2 text-left text-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
+                      item.id === activeTheme && 'bg-muted font-medium',
+                    )}
+                  >
+                    {t(`theme.names.${item.id}`)}
+                    <ThemeSwatch id={item.id} />
+                  </button>
+                ))}
+              </fieldset>
+            </>
           ) : null}
 
           <SheetClose asChild>

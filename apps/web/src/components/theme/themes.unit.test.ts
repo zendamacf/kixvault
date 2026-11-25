@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { DEFAULT_THEME, THEME_IDS, THEMES, themeMode } from './themes';
+import { DEFAULT_THEME, THEME_IDS, THEMES } from './themes';
 
 const css = readFileSync(join(import.meta.dir, '../../index.css'), 'utf8');
 
@@ -11,25 +11,20 @@ describe('themes', () => {
     expect(THEME_IDS).toContain(DEFAULT_THEME);
   });
 
-  test('themeMode reports the mode and falls back to light', () => {
-    expect(themeMode('bred')).toBe('dark');
-    expect(themeMode('chicago')).toBe('light');
-    expect(themeMode('system')).toBe('light');
-    expect(themeMode(undefined)).toBe('light');
-  });
-
-  test('every theme has a token block in index.css with the matching color-scheme', () => {
+  test('every theme has a light and a dark token block with the matching color-scheme', () => {
     for (const theme of THEMES) {
-      const match = css.match(new RegExp(`\\[data-theme=["']${theme.id}["']\\]\\s*\\{([^}]*)\\}`));
-      expect(match, theme.id).toBeTruthy();
-      expect(match?.[1]).toContain(`color-scheme: ${theme.mode};`);
+      const light = css.match(
+        new RegExp(`(?:^|\\n|, ?)\\[data-theme="${theme.id}"\\]\\s*\\{([^}]*)\\}`),
+      )?.[1];
+      const dark = css.match(
+        new RegExp(`\\.dark\\[data-theme="${theme.id}"\\]\\s*\\{([^}]*)\\}`),
+      )?.[1];
+      expect(light, `${theme.id} light`).toContain('color-scheme: light;');
+      expect(dark, `${theme.id} dark`).toContain('color-scheme: dark;');
     }
   });
 
-  test('the dark variant lists exactly the dark themes', () => {
-    const variant = css.match(/@custom-variant dark \(([^;]*)\);/)?.[1] ?? '';
-    const listed = [...variant.matchAll(/\[data-theme=["']([^"']+)["']\]/g)].map((m) => m[1]);
-    const dark = THEMES.filter((theme) => theme.mode === 'dark').map((theme) => theme.id);
-    expect(listed.sort()).toEqual(dark.sort());
+  test('the dark variant keys off the dark class', () => {
+    expect(css).toMatch(/@custom-variant dark \(&:is\(\.dark \*\)\);/);
   });
 });

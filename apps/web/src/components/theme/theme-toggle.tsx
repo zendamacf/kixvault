@@ -5,16 +5,21 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { DEFAULT_THEME, THEME_IDS, THEMES } from './themes';
+import { useMode } from './mode';
+import { ThemeSwatch } from './theme-swatch';
+import { DEFAULT_THEME, MODE_PREFERENCES, type ModePreference, THEME_IDS, THEMES } from './themes';
 
-/** Sneaker colorway picker for the app header. */
+/** Light/dark mode and sneaker colorway picker for the app header. */
 export function ThemeToggle() {
   const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
+  const { mode, setMode } = useMode();
   const active = theme && THEME_IDS.includes(theme) ? theme : DEFAULT_THEME;
 
   return (
@@ -30,6 +35,19 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-48">
+        <DropdownMenuLabel>{t('theme.mode.label')}</DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          value={mode}
+          onValueChange={(value) => setMode(value as ModePreference)}
+        >
+          {MODE_PREFERENCES.map((item) => (
+            <DropdownMenuRadioItem key={item} value={item}>
+              {t(`theme.mode.${item}`)}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel>{t('layout.mobileMenu.colorway')}</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={active}
           onValueChange={setTheme}
@@ -39,14 +57,7 @@ export function ThemeToggle() {
             <DropdownMenuRadioItem key={item.id} value={item.id} className="py-2">
               <span className="flex min-w-0 flex-1 flex-col gap-1.5">
                 {t(`theme.names.${item.id}`)}
-                <span
-                  aria-hidden="true"
-                  className="flex h-1.5 overflow-hidden rounded-full ring-1 ring-foreground/25"
-                >
-                  {item.swatches.map((color) => (
-                    <span key={color} className="flex-1" style={{ backgroundColor: color }} />
-                  ))}
-                </span>
+                <ThemeSwatch id={item.id} />
               </span>
             </DropdownMenuRadioItem>
           ))}

@@ -135,6 +135,12 @@
   },
   "theme": {
     "change": "Change theme",
+    "mode": {
+      "label": "Mode",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
     "names": {
       "shattered-backboard": "Shattered Backboard",
       "chicago": "Chicago",

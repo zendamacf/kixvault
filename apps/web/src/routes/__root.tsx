@@ -4,6 +4,7 @@ import { ThemeProvider } from 'next-themes';
 import { UmamiAnalytics } from '@/components/analytics/umami-analytics';
 import { RouteErrorFallback } from '@/components/errors/route-error-fallback';
 import { AppShell } from '@/components/layout/app-shell';
+import { ModeProvider } from '@/components/theme/mode';
 import { ThemeFavicon } from '@/components/theme/theme-favicon';
 import { DEFAULT_THEME, THEME_IDS } from '@/components/theme/themes';
 import { Toaster } from '@/components/ui/sonner';
@@ -29,12 +30,14 @@ function RootComponent() {
       enableColorScheme={false}
       storageKey="kixvault-colorway"
     >
-      <ThemeFavicon />
-      <QueryClientProvider client={queryClient}>
-        <UmamiAnalytics />
-        <AppShell />
-        <Toaster />
-      </QueryClientProvider>
+      <ModeProvider>
+        <ThemeFavicon />
+        <QueryClientProvider client={queryClient}>
+          <UmamiAnalytics />
+          <AppShell />
+          <Toaster />
+        </QueryClientProvider>
+      </ModeProvider>
     </ThemeProvider>
   );
 }
