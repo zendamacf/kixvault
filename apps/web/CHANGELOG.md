@@ -1,5 +1,18 @@
 # @kixvault/web
 
+## 0.8.0
+
+### Minor Changes
+
+- cd4be96: Add an About dialog to the footer. It has a disclaimer that KixVault is not affiliated with StockX.
+- 904db88: Add four colorway themes: Pine Green, Court Purple, Infrared and Thunder.
+
+### Patch Changes
+
+- f838bdb: Fix the sort detail on sneaker cards. On narrow screens, it now moves to a new line and does not go into the next card.
+- Updated dependencies [aebef39]
+  - @kixvault/api@1.0.0
+
 ## 0.7.0
 
 ### Minor Changes
