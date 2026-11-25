@@ -1,5 +1,11 @@
 # @kixvault/web
 
+## 0.9.0
+
+### Minor Changes
+
+- 334949a: Separate light/dark mode from the colorway: every colorway now has a light and a dark palette, and a new Mode setting (System, Light, Dark) sits in the theme menu.
+
 ## 0.8.0
 
 ### Minor Changes
